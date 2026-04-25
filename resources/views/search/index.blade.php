@@ -462,7 +462,8 @@
                                 <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($item->shop->main_image)) }}" type="image/webp">
                                 <img src="{{ asset('storage/' . $item->shop->main_image) }}"
                                      alt="{{ $item->shop->name }}"
-                                     loading="lazy"
+                                     width="640" height="360"
+                                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                                      class="w-full aspect-video object-cover">
                             </picture>
                         @else
@@ -528,7 +529,8 @@
                                 <source srcset="{{ asset('storage/' . $cardImgWebp) }}" type="image/webp">
                                 <img src="{{ asset('storage/' . $cardImg) }}"
                                      alt="{{ $item->title }}"
-                                     loading="lazy"
+                                     width="640" height="360"
+                                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                                      class="w-full aspect-video object-cover">
                             </picture>
                         @else

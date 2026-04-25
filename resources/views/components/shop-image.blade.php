@@ -2,6 +2,6 @@
 @if($src)
 <picture>
     <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($src)) }}" type="image/webp">
-    <img src="{{ asset('storage/' . $src) }}" alt="{{ $alt }}" {{ $attributes->merge(['class' => $class, 'loading' => 'lazy']) }}>
+    <img src="{{ asset('storage/' . $src) }}" alt="{{ $alt }}" {{ $attributes->merge(['class' => $class, 'loading' => 'lazy', 'width' => '640', 'height' => '360']) }}>
 </picture>
 @endif

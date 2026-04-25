@@ -38,7 +38,12 @@
         '@context'           => 'https://schema.org',
         '@type'              => 'JobPosting',
         'title'              => $job->title,
-        'description'        => $job->description ?? $job->title,
+        'description'        => implode(' ', array_filter([
+            $job->description ?? $job->title,
+            $job->is_daily_pay     ? '日払いOK。'     : '',
+            $job->is_inexperienced ? '未経験歓迎。'   : '',
+            $job->working_hours    ? '勤務時間：' . $job->working_hours . '。' : '',
+        ])),
         'datePosted'         => ($job->published_at ?? $job->created_at)->toIso8601String(),
         'hiringOrganization' => [
             '@type' => 'Organization',
@@ -106,16 +111,16 @@
 
 <div class="{{ $c['bar'] }} text-white py-3">
     <div class="max-w-4xl mx-auto px-4 text-sm">
-        <a href="{{ route('top') }}/" class="opacity-70 hover:opacity-100">ナイトワーク</a>
+        <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $c['genderLabel'] }}</a>
+        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $c['genderLabel'] }}</a>
         @if($job->prefecture)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.prefecture', ['gender' => $c['genderRoute'], 'pref_slug' => $job->prefecture->slug]) }}/" class="opacity-70 hover:opacity-100">{{ $job->prefecture->name }}</a>
+        <a href="{{ route('search.prefecture', ['gender' => $c['genderRoute'], 'pref_slug' => $job->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $job->prefecture->name }}</a>
         @endif
         @if($job->area)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->area->slug, 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $job->area->name }}</a>
+        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->area->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $job->area->name }}</a>
         @endif
         <span class="mx-2 opacity-40">›</span>
         <span class="opacity-90">{{ $job->shop->name }}</span>
@@ -129,6 +134,7 @@
         @if($job->image_path)
             <img src="{{ asset('storage/' . $job->image_path) }}"
                  alt="{{ $job->title }}"
+                 width="640" height="360"
                  class="w-full aspect-video object-cover"
                  fetchpriority="high" loading="eager">
         @elseif($job->shop->main_image)

@@ -13,6 +13,7 @@ use App\Models\KeywordNormalization;
 use App\Models\SearchPageView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class SearchController extends Controller
 {
@@ -218,6 +219,18 @@ class SearchController extends Controller
 
     private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
     {
+        $page = request()->input('page', 1);
+        $cacheKey = 'search:' . md5(implode('|', [
+            $gender, $area, $keyword, $useSlug, $filterKeyword,
+            $wageType, $wageMin, $allYouCanDrink, $hasKaraoke,
+            $hasPrivateRoom, $discountFirstSet, $prefSlug, $page,
+        ]));
+
+        return Cache::remember($cacheKey, 300, function () use (
+            $gender, $area, $keyword, $useSlug, $filterKeyword,
+            $wageType, $wageMin, $allYouCanDrink, $hasKaraoke,
+            $hasPrivateRoom, $discountFirstSet, $prefSlug
+        ) {
         // 「新宿駅」→「新宿」のように末尾の「駅」を除いた語も駅名検索に使う
         $stationArea = preg_replace('/駅$/u', '', $area);
 
@@ -331,6 +344,7 @@ class SearchController extends Controller
         }
 
         return $query;
+        }); // Cache::remember
     }
 
     /** LP統計バー用の集計（noindexページでは呼ばない） */

@@ -81,8 +81,8 @@
                 @endauth
             </nav>
             {{-- スマホ用ハンバーガー --}}
-            <button class="md:hidden text-gray-300 hover:text-white" x-data @click="$dispatch('toggle-menu')">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="md:hidden text-gray-300 hover:text-white" aria-label="メニューを開く" x-data @click="$dispatch('toggle-menu')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>

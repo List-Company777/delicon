@@ -124,16 +124,16 @@
 {{-- ヘッダーバー --}}
 <div class="bg-business-700 text-white py-3">
     <div class="max-w-4xl mx-auto px-4 text-sm">
-        <a href="{{ route('top') }}/" class="opacity-70 hover:opacity-100">ナイトワーク</a>
+        <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">夜遊び</a>
+        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">夜遊び</a>
         @if($shop->prefecture)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.prefecture', ['gender' => 'business', 'pref_slug' => $shop->prefecture->slug]) }}/" class="opacity-70 hover:opacity-100">{{ $shop->prefecture->name }}</a>
+        <a href="{{ route('search.prefecture', ['gender' => 'business', 'pref_slug' => $shop->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->prefecture->name }}</a>
         @endif
         @if($shop->area)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $shop->area->name }}</a>
+        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->area->name }}</a>
         @endif
         <span class="mx-2 opacity-40">›</span>
         <span class="opacity-90">{{ $shop->name }}</span>
