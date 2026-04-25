@@ -61,6 +61,9 @@ Route::view('/advertiser/', 'legal.advertiser')->name('advertiser');
 Route::view('/company/',    'legal.company')->name('company');
 Route::view('/tokutei/',    'legal.tokutei')->name('tokutei');
 
+// 代理店パートナー募集（noindex）
+Route::view('/agency/', 'agency.index')->name('agency');
+
 // お問い合わせ（一般）
 Route::get('/inquiry/',  [\App\Http\Controllers\InquiryController::class, 'show'])->name('inquiry');
 Route::post('/inquiry/', [\App\Http\Controllers\InquiryController::class, 'send'])->name('inquiry.send');
