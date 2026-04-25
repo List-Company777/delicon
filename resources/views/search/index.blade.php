@@ -463,7 +463,7 @@
                                 <img src="{{ asset('storage/' . $item->shop->main_image) }}"
                                      alt="{{ $item->shop->name }}"
                                      width="640" height="360"
-                                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
+                                     @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
                                      class="w-full aspect-video object-cover">
                             </picture>
                         @else
@@ -530,7 +530,7 @@
                                 <img src="{{ asset('storage/' . $cardImg) }}"
                                      alt="{{ $item->title }}"
                                      width="640" height="360"
-                                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
+                                     @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
                                      class="w-full aspect-video object-cover">
                             </picture>
                         @else
@@ -562,8 +562,14 @@
                                     {{ $item->jobType->name }}
                                 </span>
                             @endif
+                            @if($item->working_hours)
+                                <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $item->working_hours }}
+                                </p>
+                            @endif
                             @if($item->area)
-                                <p class="text-xs text-gray-400 mt-2">📍 {{ $item->area->name }}</p>
+                                <p class="text-xs text-gray-400 mt-1">📍 {{ $item->area->name }}</p>
                             @endif
                         </div>
                     </a>
