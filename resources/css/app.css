@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Noto Sans JP', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* 営業リスト：ティール  ベース:#B0D0D3 / メイン:#F8F7F9 / アクセント:#1A535C */
+    --color-business-50:  #F3F8F9;
+    --color-business-100: #D9ECED;
+    --color-business-200: #C3E2E5;
+    --color-business-300: #B0D0D3;
+    --color-business-400: #7AB8BD;
+    --color-business-500: #4A8A90;
+    --color-business-600: #2E6E75;
+    --color-business-700: #1A535C;
+    --color-business-800: #133F47;
+    --color-business-900: #0C2B30;
+
+    /* 男性向け：ダークネイビー + ティール  ベース:#0B132B / メイン:#1C2541 / アクセント:#4ECDC4 */
+    --color-male-50:  #EAF9F8;
+    --color-male-100: #C6EEEC;
+    --color-male-200: #9EE3E0;
+    --color-male-300: #4ECDC4;
+    --color-male-400: #38AFAC;
+    --color-male-500: #2E8A88;
+    --color-male-600: #1C2541;
+    --color-male-700: #141B33;
+    --color-male-800: #0B132B;
+    --color-male-900: #060B18;
+
+    /* 女性向け：ローズピンク  ベース:#FFD4D8 / メイン:#F6E8EA / アクセント:#E66A8C */
+    --color-female-50:  #F6E8EA;
+    --color-female-100: #FFD4D8;
+    --color-female-200: #F2B8C4;
+    --color-female-300: #EB9CB0;
+    --color-female-400: #E8849F;
+    --color-female-500: #E66A8C;
+    --color-female-600: #D44E75;
+    --color-female-700: #B83460;
+    --color-female-800: #8E1F49;
+    --color-female-900: #641233;
+}

@@ -1,0 +1,69 @@
+@extends('layouts.app')
+@section('title', 'メイン画像の管理')
+@section('content')
+<div class="bg-business-700 text-white py-4">
+    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <h1 class="font-bold">店舗管理</h1>
+        <form action="{{ route('logout') }}" method="POST">@csrf<button class="text-sm opacity-70 hover:opacity-100">ログアウト</button></form>
+    </div>
+</div>
+
+@include('manage._nav')
+
+<div class="max-w-4xl mx-auto px-4 pb-12">
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
+    @endif
+
+    <h2 class="text-lg font-bold text-gray-800 mb-2">メイン画像</h2>
+    <p class="text-sm text-gray-500 mb-4">店舗詳細ページの上部に表示されます。また、各求人に画像がセットされている場合はそちらが優先して使用されます。</p>
+
+    {{-- ランキング説明バナー --}}
+    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <p class="text-sm font-bold text-amber-800 mb-1">📸 画像を登録すると検索順位が上がります</p>
+        <p class="text-xs text-amber-700 leading-relaxed">
+            画像がなくてもお店は検索結果に表示されますが、<strong>メイン画像を登録した店舗が優先的に上位表示</strong>されます。<br>
+            また、求人カードにも店舗画像が使われるため、クリック率の向上にもつながります。
+        </p>
+    </div>
+
+    {{-- 現在の画像 --}}
+    @if($shop->main_image)
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <p class="text-sm font-bold text-gray-600 mb-3">現在の画像</p>
+            <x-shop-image :src="$shop->main_image" :alt="$shop->name" class="w-full max-h-72 object-contain rounded-lg bg-gray-100" />
+            <form action="{{ route('manage.shop.image.destroy') }}" method="POST" class="mt-4 text-right"
+                  onsubmit="return confirm('画像を削除しますか？')">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-sm text-red-500 hover:text-red-700">画像を削除する</button>
+            </form>
+        </div>
+    @endif
+
+    {{-- アップロードフォーム --}}
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <p class="text-sm font-bold text-gray-600 mb-1">{{ $shop->main_image ? '画像を差し替える' : '画像をアップロードする' }}</p>
+        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 leading-relaxed">
+            <p class="font-bold mb-1">入稿推奨サイズ：1280 × 720px（16:9）</p>
+            <p>・形式：JPEG / PNG / WebP</p>
+            <p>・ファイルサイズ：5MB 以下</p>
+            <p>・アップロード時に WebP 形式も自動生成されます</p>
+            <p>・画像はアスペクト比を保ったまま表示されます。被写体は中央に配置してください</p>
+        </div>
+        <form action="{{ route('manage.shop.image.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <label class="inline-block cursor-pointer mb-3">
+                <span class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 transition">
+                    📁 ファイルを選択
+                </span>
+                <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required class="hidden"
+                       onchange="this.parentElement.querySelector('span').textContent = this.files[0]?.name ?? 'ファイルを選択'">
+            </label>
+            @error('image')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
+            <button type="submit" class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-6 py-2 rounded-lg transition">
+                アップロード
+            </button>
+        </form>
+    </div>
+</div>
+@endsection
