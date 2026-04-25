@@ -4,7 +4,7 @@
         <div class="flex-1 text-center md:text-left">
             <p class="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-1">For Shop Owners</p>
             <p class="text-white text-xl md:text-2xl font-bold leading-snug mb-2">
-                お店の掲載、<span class="text-yellow-300">無料</span>ではじめませんか？
+                <span class="text-yellow-300">月間利用者急増中！</span>お店の掲載、完全無料で。
             </p>
             <p class="text-gray-300 text-sm leading-relaxed">
                 ナイトワークリストへの基本掲載は<strong class="text-white">完全無料</strong>。<br>
