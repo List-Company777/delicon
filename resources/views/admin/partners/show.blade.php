@@ -16,14 +16,33 @@
     {{-- サマリー --}}
     @php $now = now(); @endphp
     @if($partner->isManagement())
-    <div class="grid grid-cols-3 gap-4">
+    @php
+        $nextTierCount  = (intdiv($managedActiveCount, 100) + 1) * 100;
+        $toNextTier     = $nextTierCount - $managedActiveCount;
+        $isOverridden   = $partner->commission_rate_override !== null;
+        $calcRatePct    = number_format($calculatedRate * 100, 2);
+        $effectRatePct  = number_format($effectiveRate * 100, 2);
+    @endphp
+    <div class="grid grid-cols-4 gap-4">
         <div class="bg-white rounded-xl shadow-sm p-5">
             <p class="text-xs text-gray-400 mb-1">種別</p>
             <p class="text-lg font-bold text-purple-700">管理代行代理店</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 mb-1">割引率</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $partner->commissionRatePercent() }}%</p>
+            <p class="text-xs text-gray-400 mb-1">掲載中店舗数</p>
+            <p class="text-2xl font-bold text-gray-800">{{ number_format($managedActiveCount) }}<span class="text-sm font-normal text-gray-400 ml-1">件</span></p>
+            @if(!$isOverridden && $calculatedRate < 0.30)
+                <p class="text-xs text-gray-400 mt-1">次のティアまであと {{ $toNextTier }} 件</p>
+            @endif
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+            <p class="text-xs text-gray-400 mb-1">適用割引率</p>
+            <p class="text-2xl font-bold text-gray-800">{{ $effectRatePct }}%</p>
+            @if($isOverridden)
+                <p class="text-xs text-orange-500 mt-1">オーバーライド中（自動: {{ $calcRatePct }}%）</p>
+            @else
+                <p class="text-xs text-gray-400 mt-1">自動計算</p>
+            @endif
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
             <p class="text-xs text-gray-400 mb-1">当月請求額（税込）</p>
@@ -171,7 +190,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @php
                         $recentApps = $partner->planApplications()->with('shop')->orderByDesc('created_at')->limit(50)->get();
-                        $discount = (float) $partner->commission_rate;
+                        $discount = $effectiveRate;
                     @endphp
                     @forelse($recentApps as $app)
                     @php

@@ -122,6 +122,42 @@
     {{-- フッター --}}
     <footer class="bg-gray-900 text-gray-400 mt-16">
         <div class="max-w-6xl mx-auto px-4 py-10">
+
+            {{-- グループサイト --}}
+            <div class="mb-8">
+                <h3 class="text-white font-bold text-sm mb-3">グループサイト</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <a href="https://up-stage.info/" target="_blank" rel="noopener" class="block group">
+                        <picture>
+                            <img src="{{ asset('images/group/upstage-banner.svg') }}" alt="アップステージ"
+                                 class="w-full rounded opacity-80 group-hover:opacity-100 transition-opacity"
+                                 width="970" height="250"
+                                 loading="lazy" decoding="async" fetchpriority="low">
+                        </picture>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">アップステージ</span>
+                    </a>
+                    <a href="https://genbars.jp/" target="_blank" rel="noopener" class="block group">
+                        <picture>
+                            <img src="{{ asset('images/group/genbars-banner.svg') }}" alt="ゲンバーズ"
+                                 class="w-full rounded opacity-80 group-hover:opacity-100 transition-opacity"
+                                 width="970" height="250"
+                                 loading="lazy" decoding="async" fetchpriority="low">
+                        </picture>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">ゲンバーズ</span>
+                    </a>
+                    <a href="https://cabacrown.net/" target="_blank" rel="noopener" class="block group">
+                        <picture>
+                            <img src="{{ asset('images/group/kyabakurun-banner.svg') }}" alt="キャバクラウン"
+                                 class="w-full rounded opacity-80 group-hover:opacity-100 transition-opacity"
+                                 width="970" height="250"
+                                 loading="lazy" decoding="async" fetchpriority="low">
+                        </picture>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">キャバクラウン</span>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mb-8"></div>
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 text-sm">
                 <div>
                     <p class="text-white font-bold mb-3">夜遊びリスト</p>

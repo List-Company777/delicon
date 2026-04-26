@@ -20,11 +20,31 @@
     @endif
 
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-bold text-gray-800">紹介店舗一覧（{{ $shops->count() }}件）</h2>
-        <div class="text-sm text-gray-500">
-            手数料率：<span class="font-bold text-gray-800">{{ $partner->commissionRatePercent() }}%</span>
+        <div>
+            <h2 class="text-lg font-bold text-gray-800">
+                {{ $partner->isManagement() ? '管理店舗一覧' : '紹介店舗一覧' }}
+            </h2>
+            <p class="text-sm text-gray-500 mt-0.5">
+                管理件数 <span class="font-bold text-gray-700">{{ $totalCount }}</span> 件
+                <span class="mx-1 text-gray-300">：</span>
+                非公開 <span class="font-bold text-gray-500">{{ $nonPublicCount }}</span> 件
+            </p>
+        </div>
+        <div class="text-sm text-gray-500 text-right">
+            @if($partner->isManagement())
+                <p>マージン率：<span class="font-bold text-gray-800">{{ $partner->commissionRatePercent() }}%</span></p>
+                <p class="text-xs text-gray-400 mt-0.5">掲載中 {{ $activeCount }} 件をもとに算出</p>
+            @else
+                <p>手数料率：<span class="font-bold text-gray-800">{{ $partner->commissionRatePercent() }}%</span></p>
+            @endif
         </div>
     </div>
+
+    @if($partner->isManagement() && $nonPublicCount > 0)
+    <div class="mb-5 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-3 rounded-lg">
+        ※ 重複・閉店店舗は件数に含まれません。速やかに整理をお願いします。
+    </div>
+    @endif
 
     @if($shops->isEmpty())
         <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
@@ -78,6 +98,85 @@
             </tbody>
         </table>
     </div>
+
+    @if($partner->isManagement() && $rankings->isNotEmpty())
+    {{-- 推定掲載順位 --}}
+    <div class="mt-8">
+        <div class="flex items-baseline justify-between mb-3">
+            <h3 class="text-base font-bold text-gray-700">推定掲載順位</h3>
+            <p class="text-xs text-gray-400">入札単価・予算残高をもとにリアルタイム算出（参考値）</p>
+        </div>
+        <div class="overflow-x-auto">
+        <table class="w-full text-sm bg-white rounded-xl shadow-sm overflow-hidden">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">店舗名</th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">業種 / エリア</th>
+                    <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">都道府県<br><span class="font-normal text-xs">全体</span></th>
+                    <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">小エリア<br><span class="font-normal text-xs">全体</span></th>
+                    <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">小エリア<br><span class="font-normal text-xs">業種別</span></th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">参考：同業種エリア上位<br><span class="font-normal text-xs">（有効入札単価）</span></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach($shops->where('status', 'active') as $shop)
+                @php $r = $rankings[$shop->id] ?? null; @endphp
+                @if($r)
+                @php
+                    $rankClass = function(int $rank): string {
+                        if ($rank <= 3)  return 'bg-green-100 text-green-700';
+                        if ($rank <= 10) return 'text-yellow-700 bg-yellow-50';
+                        return 'text-gray-500 bg-gray-100';
+                    };
+                @endphp
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                        <p class="font-medium text-gray-800">{{ $shop->name }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">有効スコア：{{ number_format($r['score']) }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-500">
+                        <p>{{ $shop->genre?->name ?? '—' }}</p>
+                        <p class="text-gray-400">{{ $shop->area?->name ?? '—' }}（{{ $shop->area?->prefecture?->name ?? '—' }}）</p>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $rankClass($r['pref_rank']) }}">
+                            {{ $r['pref_rank'] }}
+                        </span>
+                        <p class="text-xs text-gray-400 mt-0.5">/ {{ $r['pref_total'] }}店舗</p>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $rankClass($r['area_rank']) }}">
+                            {{ $r['area_rank'] }}
+                        </span>
+                        <p class="text-xs text-gray-400 mt-0.5">/ {{ $r['area_total'] }}店舗</p>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $rankClass($r['genre_area_rank']) }}">
+                            {{ $r['genre_area_rank'] }}
+                        </span>
+                        <p class="text-xs text-gray-400 mt-0.5">/ {{ $r['genre_area_total'] }}店舗</p>
+                    </td>
+                    <td class="px-4 py-3">
+                        @forelse($r['top_scores'] as $i => $topScore)
+                        <span class="inline-block text-xs mr-2">
+                            <span class="text-gray-400">{{ $i + 1 }}位</span>
+                            <span class="font-bold {{ $i === 0 ? 'text-gray-700' : 'text-gray-500' }}">
+                                ¥{{ number_format($topScore) }}
+                            </span>
+                        </span>
+                        @empty
+                        <span class="text-xs text-gray-400">データなし</span>
+                        @endforelse
+                    </td>
+                </tr>
+                @endif
+                @endforeach
+            </tbody>
+        </table>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">※ 掲載順位は店舗スコアをもとに算出した参考値です。予算が不足すると順位が大幅に下落します。職種検索での実際の表示位置は競合店の求人掲載数によって前後する場合があります。</p>
+    </div>
+    @endif
 
     <div class="mt-4 p-4 bg-gray-50 rounded-lg text-xs text-gray-500">
         <p class="font-medium text-gray-600 mb-1">紹介URL</p>

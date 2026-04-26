@@ -5,22 +5,30 @@ namespace App\Http\Controllers\Manage;
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class PartnerPortalController extends Controller
 {
-    /** 紹介店舗一覧 */
+    /** 店舗一覧 */
     public function index()
     {
         $partner = auth()->user()->partner;
         abort_if(! $partner, 403);
 
         $shops = Shop::where('partner_id', $partner->id)
-            ->with(['genre', 'area', 'detail'])
+            ->with(['genre', 'area.prefecture', 'detail'])
             ->orderByDesc('bid_price')
             ->orderBy('name')
             ->get();
 
-        return view('manage.partner.index', compact('partner', 'shops'));
+        $totalCount     = $shops->count();
+        $activeCount    = $shops->where('status', 'active')->count();
+        $nonPublicCount = $totalCount - $activeCount;
+        $rankings       = $partner->isManagement() ? $this->computeShopRankings($shops) : collect();
+
+        return view('manage.partner.index', compact(
+            'partner', 'shops', 'totalCount', 'activeCount', 'nonPublicCount', 'rankings'
+        ));
     }
 
     /** 代理操作開始 */
@@ -46,4 +54,79 @@ class PartnerPortalController extends Controller
         return redirect()->route('manage.partner.index');
     }
 
+    /**
+     * 各店舗の推定掲載順位を算出。
+     * 順位スコア = budget_balance >= bid_price なら bid_price、画像あり→15、なし→5。
+     * 関連エリア・都道府県のアクティブ店舗を一括取得して PHP 側でランク計算する。
+     */
+    private function computeShopRankings(Collection $shops): Collection
+    {
+        if ($shops->isEmpty()) return collect();
+
+        $areaIds = $shops->pluck('area_id')->filter()->unique();
+        $prefIds = $shops->map(fn($s) => $s->area?->prefecture_id)->filter()->unique();
+
+        // エリア内アクティブ店舗を一括取得
+        $areaShops = Shop::whereIn('area_id', $areaIds)
+            ->where('status', 'active')
+            ->select('id', 'bid_price', 'budget_balance', 'main_image', 'area_id', 'genre_id')
+            ->get();
+
+        // 都道府県内アクティブ店舗を一括取得
+        $prefShops = Shop::whereHas('area', fn($q) => $q->whereIn('prefecture_id', $prefIds))
+            ->where('status', 'active')
+            ->with('area:id,prefecture_id')
+            ->select('id', 'bid_price', 'budget_balance', 'main_image', 'area_id', 'genre_id')
+            ->get();
+
+        // スコアを事前計算してキャッシュ
+        $areaScores = $areaShops->mapWithKeys(fn($s) => [$s->id => $this->shopScore($s)]);
+        $prefScores = $prefShops->mapWithKeys(fn($s) => [$s->id => $this->shopScore($s)]);
+
+        return $shops->mapWithKeys(function ($shop) use ($areaShops, $prefShops, $areaScores, $prefScores) {
+            $score   = $this->shopScore($shop);
+            $areaId  = $shop->area_id;
+            $prefId  = $shop->area?->prefecture_id;
+            $genreId = $shop->genre_id;
+
+            // 小エリア × 全体
+            $inArea    = $areaShops->where('area_id', $areaId);
+            $areaRank  = $inArea->filter(fn($s) => ($areaScores[$s->id] ?? 0) > $score)->count() + 1;
+            $areaTotal = $inArea->count();
+
+            // 都道府県 × 全体
+            $inPref    = $prefShops->filter(fn($s) => $s->area?->prefecture_id === $prefId);
+            $prefRank  = $inPref->filter(fn($s) => ($prefScores[$s->id] ?? 0) > $score)->count() + 1;
+            $prefTotal = $inPref->count();
+
+            // 業種 × 小エリア
+            $inGenreArea        = $inArea->where('genre_id', $genreId);
+            $genreAreaRank      = $inGenreArea->filter(fn($s) => ($areaScores[$s->id] ?? 0) > $score)->count() + 1;
+            $genreAreaTotal     = $inGenreArea->count();
+            $topGenreAreaScores = $inGenreArea
+                ->map(fn($s) => $areaScores[$s->id] ?? 0)
+                ->sortDesc()
+                ->take(3)
+                ->values();
+
+            return [$shop->id => [
+                'score'             => $score,
+                'area_rank'         => $areaRank,
+                'area_total'        => $areaTotal,
+                'pref_rank'         => $prefRank,
+                'pref_total'        => $prefTotal,
+                'genre_area_rank'   => $genreAreaRank,
+                'genre_area_total'  => $genreAreaTotal,
+                'top_scores'        => $topGenreAreaScores,
+            ]];
+        });
+    }
+
+    private function shopScore(Shop $shop): int
+    {
+        if ((int) $shop->budget_balance >= (int) $shop->bid_price && (int) $shop->bid_price > 0) {
+            return (int) $shop->bid_price;
+        }
+        return $shop->main_image ? 15 : 5;
+    }
 }

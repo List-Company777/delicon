@@ -63,7 +63,14 @@ class PartnerController extends Controller
         $totalPending = $partner->pendingAmount();
         $totalPaid    = (int) $partner->commissions()->where('status', 'paid')->sum('commission_amount');
 
-        return view('admin.partners.show', compact('partner', 'shops', 'commissions', 'totalPending', 'totalPaid'));
+        $managedActiveCount = $partner->isManagement() ? $shops->where('status', 'active')->count() : 0;
+        $calculatedRate     = $partner->isManagement() ? $partner->calculatedManagementRate() : 0.0;
+        $effectiveRate      = $partner->effectiveCommissionRate();
+
+        return view('admin.partners.show', compact(
+            'partner', 'shops', 'commissions', 'totalPending', 'totalPaid',
+            'managedActiveCount', 'calculatedRate', 'effectiveRate'
+        ));
     }
 
     /** 手数料を支払済みにまとめてマーク */
@@ -148,7 +155,7 @@ class PartnerController extends Controller
             ->orderBy('approved_at')
             ->get();
 
-        $discount = (float) $partner->commission_rate;
+        $discount = $partner->effectiveCommissionRate();
         $filename = sprintf('請求明細_%s_%04d%02d.csv', $partner->company_name, $year, $month);
 
         $rows   = [];
@@ -192,18 +199,27 @@ class PartnerController extends Controller
 
     private function validated(Request $request, ?int $ignoreId = null): array
     {
-        return $request->validate([
-            'type'            => ['required', 'in:referral,management'],
-            'company_name'    => ['required', 'string', 'max:100'],
-            'contact_name'    => ['nullable', 'string', 'max:50'],
-            'email'           => ['required', 'email', 'max:255', 'unique:partners,email' . ($ignoreId ? ",{$ignoreId}" : '')],
-            'tel'             => ['nullable', 'string', 'max:20'],
-            'referral_code'   => ['nullable', 'string', 'max:20', 'alpha_num', 'unique:partners,referral_code' . ($ignoreId ? ",{$ignoreId}" : '')],
-            'commission_rate' => ['required', 'numeric', 'min:0', 'max:1'],
-            'bank_info'       => ['nullable', 'string', 'max:500'],
-            'invoice_number'  => ['nullable', 'string', 'max:20', 'regex:/^T\d{13}$/'],
-            'status'          => ['required', 'in:active,inactive'],
-            'notes'           => ['nullable', 'string', 'max:1000'],
+        $isManagement = $request->type === 'management';
+
+        $data = $request->validate([
+            'type'                     => ['required', 'in:referral,management'],
+            'company_name'             => ['required', 'string', 'max:100'],
+            'contact_name'             => ['nullable', 'string', 'max:50'],
+            'email'                    => ['required', 'email', 'max:255', 'unique:partners,email' . ($ignoreId ? ",{$ignoreId}" : '')],
+            'tel'                      => ['nullable', 'string', 'max:20'],
+            'referral_code'            => ['nullable', 'string', 'max:20', 'alpha_num', 'unique:partners,referral_code' . ($ignoreId ? ",{$ignoreId}" : '')],
+            'commission_rate'          => $isManagement ? ['nullable', 'numeric', 'min:0', 'max:1'] : ['required', 'numeric', 'min:0', 'max:1'],
+            'commission_rate_override' => $isManagement ? ['nullable', 'numeric', 'min:0', 'max:1'] : [],
+            'bank_info'                => ['nullable', 'string', 'max:500'],
+            'invoice_number'           => ['nullable', 'string', 'max:20', 'regex:/^T\d{13}$/'],
+            'status'                   => ['required', 'in:active,inactive'],
+            'notes'                    => ['nullable', 'string', 'max:1000'],
         ]);
+
+        if ($isManagement && !isset($data['commission_rate'])) {
+            $data['commission_rate'] = 0;
+        }
+
+        return $data;
     }
 }

@@ -83,21 +83,55 @@
                     @error('referral_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>
+            @php
+                $calcRatePercent = ($partner && $partner->isManagement())
+                    ? number_format($partner->calculatedManagementRate() * 100, 2)
+                    : '20.00';
+                $overrideDecimal = ($partner && $partner->isManagement() && $partner->commission_rate_override !== null)
+                    ? old('commission_rate_override', (float) $partner->commission_rate_override)
+                    : old('commission_rate_override', '');
+            @endphp
             <tr class="border-b border-gray-100" x-data="{ type: '{{ old('type', $partner?->type ?? 'referral') }}' }" @change.window="type = document.querySelector('input[name=type]:checked')?.value ?? type">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">
                     <span x-text="type === 'management' ? '割引率' : '手数料率'">手数料率</span>
-                    <span class="text-red-400">*</span>
+                    <span class="text-red-400" x-show="type !== 'management'">*</span>
                 </th>
                 <td class="px-4 py-3">
-                    <div class="flex items-center gap-2">
-                        <input type="number" name="commission_rate" step="0.0001" min="0" max="1"
-                               value="{{ old('commission_rate', $partner ? (float)$partner->commission_rate : 0.1) }}"
-                               class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('commission_rate') border-red-400 @enderror">
-                        <span class="text-xs text-gray-400">（0.1 = 10%、0.2 = 20%）</span>
+                    {{-- 紹介代理店：手動入力 --}}
+                    <div x-show="type === 'referral'">
+                        <div class="flex items-center gap-2">
+                            <input type="number" name="commission_rate" step="0.0001" min="0" max="1"
+                                   value="{{ old('commission_rate', $partner && $partner->isReferral() ? (float)$partner->commission_rate : 0.1) }}"
+                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('commission_rate') border-red-400 @enderror">
+                            <span class="text-xs text-gray-400">（0.1 = 10%、0.2 = 20%）</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">紹介代理店：当社が支払う手数料率</p>
+                        @error('commission_rate')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
-                    <p class="text-xs text-gray-400 mt-1" x-show="type === 'referral'">紹介代理店：当社が支払う手数料率</p>
-                    <p class="text-xs text-gray-400 mt-1" x-show="type === 'management'">管理代行代理店：申請金額からの割引率（例：0.2 → 80%請求）</p>
-                    @error('commission_rate')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+
+                    {{-- 管理代行代理店：自動計算 + オーバーライド --}}
+                    <div x-show="type === 'management'" class="space-y-3">
+                        <div class="bg-gray-50 rounded-lg px-4 py-3 text-sm">
+                            <p class="text-xs text-gray-400 mb-1">自動計算レート（掲載中店舗数をもとに算出）</p>
+                            <p class="text-lg font-bold text-gray-800">{{ $calcRatePercent }}%</p>
+                            <p class="text-xs text-gray-400 mt-1">ベース 20%・掲載中100店舗ごとに +1%・上限 30%</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">オーバーライド（任意）</p>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="commission_rate_override" step="0.0001" min="0" max="1"
+                                       value="{{ $overrideDecimal }}"
+                                       placeholder="空欄で自動計算を使用"
+                                       class="w-44 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('commission_rate_override') border-red-400 @enderror">
+                                <span class="text-xs text-gray-400">（0.25 = 25%）</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">入力した場合はその値を固定。空欄に戻すと自動計算に戻ります。</p>
+                            @error('commission_rate_override')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded px-3 py-2 text-xs text-yellow-800">
+                            ※ 重複・閉店・非公開店舗はカウントの対象になりません。
+                        </div>
+                    </div>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">

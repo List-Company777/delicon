@@ -251,9 +251,40 @@
             <div class="bg-white rounded-xl shadow-sm p-6 border-2 border-purple-200">
                 <div class="text-center mb-4">
                     <span class="inline-block bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">管理代行代理店</span>
-                    <div class="text-3xl font-bold text-purple-700 mt-2">20<span class="text-base font-normal">%</span></div>
-                    <div class="text-xs text-gray-500">マージン</div>
+                    <div class="flex items-end justify-center gap-1 mt-2">
+                        <span class="text-3xl font-bold text-purple-700">20</span>
+                        <span class="text-base font-normal text-purple-700">%</span>
+                        <span class="text-gray-300 text-lg mx-1">→</span>
+                        <span class="text-3xl font-bold text-purple-500">30</span>
+                        <span class="text-base font-normal text-purple-500">%</span>
+                    </div>
+                    <div class="text-xs text-gray-500">マージン（スライド制）</div>
                 </div>
+
+                {{-- スライド制ティア --}}
+                <div class="mb-4 bg-purple-50 rounded-lg p-3">
+                    <p class="text-xs font-bold text-purple-800 mb-2 text-center">管理店舗数に応じてマージンアップ</p>
+                    <div class="grid grid-cols-4 gap-1 text-center text-xs">
+                        <div class="bg-white rounded px-1 py-2">
+                            <div class="font-bold text-purple-700">20%</div>
+                            <div class="text-gray-400 text-[10px] mt-0.5">スタート</div>
+                        </div>
+                        <div class="bg-white rounded px-1 py-2">
+                            <div class="font-bold text-purple-600">22%</div>
+                            <div class="text-gray-400 text-[10px] mt-0.5">200店舗</div>
+                        </div>
+                        <div class="bg-white rounded px-1 py-2">
+                            <div class="font-bold text-purple-600">25%</div>
+                            <div class="text-gray-400 text-[10px] mt-0.5">500店舗</div>
+                        </div>
+                        <div class="bg-white rounded px-1 py-2 ring-1 ring-purple-300">
+                            <div class="font-bold text-purple-800">30%</div>
+                            <div class="text-gray-400 text-[10px] mt-0.5">1,000店舗</div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-purple-600 mt-2 text-center">100店舗ごとに +1% ・ 上限 30%</p>
+                </div>
+
                 <div class="space-y-2 text-xs text-gray-600 leading-relaxed">
                     <p class="font-medium text-gray-700">お金の流れ</p>
                     <div class="flex items-center gap-2 flex-wrap">
@@ -261,7 +292,7 @@
                         <span>→</span>
                         <span class="bg-purple-100 rounded px-2 py-1">代理店（集金）</span>
                         <span>→</span>
-                        <span class="bg-gray-100 rounded px-2 py-1">夜ビズ（80%）</span>
+                        <span class="bg-gray-100 rounded px-2 py-1">夜ビズ（70〜80%）</span>
                     </div>
                     <p class="text-gray-500 pt-2">店舗への登録案内、売上回収、アカウント管理をお任せします。クライアントの満足度向上の観点から、情報充実義務を負っていただきます。</p>
                     <p class="text-gray-400 text-xs">※ 管理が不適当と判断した場合、紹介代理店への振替可能性あり</p>
@@ -298,6 +329,14 @@
                     <div>
                         <span class="font-medium text-gray-800">スタッフ求人の管理</span>
                         <p class="text-gray-500 text-xs mt-0.5">男性向け求人情報の作成・更新・応募対応</p>
+                    </div>
+                </li>
+            </ul>
+                <li class="flex items-start gap-3">
+                    <span class="mt-0.5 w-5 h-5 rounded-full bg-purple-100 text-purple-700 text-xs flex items-center justify-center font-bold flex-shrink-0">4</span>
+                    <div>
+                        <span class="font-medium text-gray-800">閉店店舗の削除</span>
+                        <p class="text-gray-500 text-xs mt-0.5">閉店が確認された店舗のアカウントは速やかに閉鎖すること。閉店店舗は管理件数のカウント対象外となります。</p>
                     </div>
                 </li>
             </ul>
@@ -390,6 +429,7 @@
                 <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> 集客・求人を同時に強化できる</li>
                 <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> 先に動けば、エリアの主導権を持てる</li>
                 <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> 継続収益モデルを作れる</li>
+                <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> 管理店舗が増えるほどマージンが上がる（20% → 最大30%）</li>
             </ul>
         </div>
     </section>
