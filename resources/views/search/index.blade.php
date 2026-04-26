@@ -275,6 +275,16 @@
                     ['slug' => 'mikeiken', 'label' => '未経験歓迎'],
                     ['slug' => 'hibarai',  'label' => '日払いOK'],
                 ];
+                // アルバイトタグ用URL（wage_type=hourly + employment_type=PART_TIMEをまとめてON/OFF）
+                $isArubaitoActive = $arubaito ?? false;
+                $currentQs = request()->query();
+                if ($isArubaitoActive) {
+                    unset($currentQs['arubaito']);
+                    $arubaitoUrl = url()->current() . ($currentQs ? '?' . http_build_query($currentQs) : '');
+                } else {
+                    $currentQs['arubaito'] = 1;
+                    $arubaitoUrl = url()->current() . '?' . http_build_query($currentQs);
+                }
             @endphp
             <div class="flex flex-wrap gap-2 mt-3">
                 @foreach($quickTags as $tag)
@@ -304,6 +314,14 @@
                         @if($isActive)✓ @endif{{ $tag['label'] }}
                     </a>
                 @endforeach
+                {{-- アルバイト（時給 × PART_TIME）タグ --}}
+                <a href="{{ $arubaitoUrl }}"
+                   class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
+                          {{ $isArubaitoActive
+                              ? $c['btn'] . ' text-white border-transparent'
+                              : 'bg-white ' . $c['text'] . ' border-gray-300 hover:border-current' }}">
+                    @if($isArubaitoActive)✓ @endifアルバイト
+                </a>
             </div>
             @endif
 
@@ -436,6 +454,12 @@
             <div class="bg-white border border-gray-100 rounded-xl px-4 py-3 text-center">
                 <p class="text-lg font-bold {{ $c['text'] }}">{{ number_format($lpStats['daily_count']) }}件</p>
                 <p class="text-xs text-gray-500 mt-1">日払いOK</p>
+            </div>
+            @endif
+            @if(!empty($lpStats['part_time_count']) && $lpStats['part_time_count'] > 0)
+            <div class="bg-white border border-gray-100 rounded-xl px-4 py-3 text-center">
+                <p class="text-lg font-bold {{ $c['text'] }}">{{ number_format($lpStats['part_time_count']) }}件</p>
+                <p class="text-xs text-gray-500 mt-1">アルバイト</p>
             </div>
             @endif
         @endif

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
+use App\Models\JobType;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PartnerPortalController extends Controller
 {
@@ -83,7 +85,24 @@ class PartnerPortalController extends Controller
         $areaScores = $areaShops->mapWithKeys(fn($s) => [$s->id => $this->shopScore($s)]);
         $prefScores = $prefShops->mapWithKeys(fn($s) => [$s->id => $this->shopScore($s)]);
 
-        return $shops->mapWithKeys(function ($shop) use ($areaShops, $prefShops, $areaScores, $prefScores) {
+        // 職種マップを一括取得（管理店舗 + エリア + 都道府県の全アクティブ求人）
+        $allShopIds = $shops->pluck('id')
+            ->merge($areaShops->pluck('id'))
+            ->merge($prefShops->pluck('id'))
+            ->unique();
+
+        $jobMap = DB::table('jobs')
+            ->whereIn('shop_id', $allShopIds)
+            ->where('status', 'active')
+            ->select('shop_id', 'job_type_id')
+            ->distinct()
+            ->get()
+            ->groupBy('shop_id')
+            ->map(fn($items) => $items->pluck('job_type_id')->values()->toArray());
+
+        $jobTypeNames = JobType::pluck('name', 'id');
+
+        return $shops->mapWithKeys(function ($shop) use ($areaShops, $prefShops, $areaScores, $prefScores, $jobMap, $jobTypeNames) {
             $score   = $this->shopScore($shop);
             $areaId  = $shop->area_id;
             $prefId  = $shop->area?->prefecture_id;
@@ -109,6 +128,28 @@ class PartnerPortalController extends Controller
                 ->take(3)
                 ->values();
 
+            // 職種 × エリア / 都道府県
+            $myJobTypeIds = $jobMap[$shop->id] ?? [];
+            $jobTypeRanks = [];
+
+            foreach ($myJobTypeIds as $jtId) {
+                $areaWithJt  = $inArea->filter(fn($s) => in_array($jtId, $jobMap[$s->id] ?? []));
+                $jtAreaRank  = $areaWithJt->filter(fn($s) => ($areaScores[$s->id] ?? 0) > $score)->count() + 1;
+                $jtAreaTotal = $areaWithJt->count();
+
+                $prefWithJt  = $inPref->filter(fn($s) => in_array($jtId, $jobMap[$s->id] ?? []));
+                $jtPrefRank  = $prefWithJt->filter(fn($s) => ($prefScores[$s->id] ?? 0) > $score)->count() + 1;
+                $jtPrefTotal = $prefWithJt->count();
+
+                $jobTypeRanks[$jtId] = [
+                    'name'       => $jobTypeNames[$jtId] ?? "職種{$jtId}",
+                    'area_rank'  => $jtAreaRank,
+                    'area_total' => $jtAreaTotal,
+                    'pref_rank'  => $jtPrefRank,
+                    'pref_total' => $jtPrefTotal,
+                ];
+            }
+
             return [$shop->id => [
                 'score'             => $score,
                 'area_rank'         => $areaRank,
@@ -118,6 +159,7 @@ class PartnerPortalController extends Controller
                 'genre_area_rank'   => $genreAreaRank,
                 'genre_area_total'  => $genreAreaTotal,
                 'top_scores'        => $topGenreAreaScores,
+                'job_type_ranks'    => $jobTypeRanks,
             ]];
         });
     }

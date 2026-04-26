@@ -244,6 +244,9 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::put('/articles/{article}/',              [\App\Http\Controllers\Admin\ArticleController::class, 'update'])->name('articles.update');
     Route::delete('/articles/{article}/',           [\App\Http\Controllers\Admin\ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::get('/articles/{article}/preview/',      [\App\Http\Controllers\Admin\ArticleController::class, 'preview'])->name('articles.preview');
+    // 検索PV分析
+    Route::get('/search-page-views/', [\App\Http\Controllers\Admin\SearchPageViewController::class, 'index'])->name('search-page-views.index');
+
     // 記事テーマ管理
     Route::post('/article-topics/',                    [\App\Http\Controllers\Admin\ArticleTopicController::class, 'store'])->name('article-topics.store');
     Route::post('/article-topics/suggest/',            [\App\Http\Controllers\Admin\ArticleTopicController::class, 'suggest'])->name('article-topics.suggest');

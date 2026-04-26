@@ -24,9 +24,10 @@ class SearchController extends Controller
         $keyword  = $request->input('keyword') ?? '';
         $wageType = $request->input('wage_type') ?? '';
         $wageMin  = (int) $request->input('wage_min', 0);
+        $arubaito = $request->boolean('arubaito');
 
         // 条件なしの場合はディレクトリLPへリダイレクト
-        if (!$area && !$keyword && !$wageType && !$wageMin) {
+        if (!$area && !$keyword && !$wageType && !$wageMin && !$arubaito) {
             return redirect()->route('search.directory', [
                 'gender'    => $gender,
                 'area_slug' => 'all',
@@ -35,7 +36,7 @@ class SearchController extends Controller
         }
 
         // 正規化チェック：正規化済みのURLがあればリダイレクト（詳細条件がある場合はスキップ）
-        if (($area || $keyword) && !$wageType && !$wageMin) {
+        if (($area || $keyword) && !$wageType && !$wageMin && !$arubaito) {
             $norm = KeywordNormalization::where('keyword', trim($area . ' ' . $keyword))
                 ->where('gender', $gender)
                 ->where('is_active', true)
@@ -88,9 +89,9 @@ class SearchController extends Controller
         $discountFirstSet  = $request->boolean('discount_first_set');
 
         // 結果取得
-        $results = $this->getResults($gender, $area, $keyword, wageType: $wageType, wageMin: $wageMin, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $results = $this->getResults($gender, $area, $keyword, wageType: $wageType, wageMin: $wageMin, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
-        return view('search.index', compact('gender', 'area', 'keyword', 'wageType', 'wageMin', 'results', 'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet'));
+        return view('search.index', compact('gender', 'area', 'keyword', 'wageType', 'wageMin', 'arubaito', 'results', 'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet'));
     }
 
     // 都道府県LP
@@ -98,12 +99,13 @@ class SearchController extends Controller
     {
         $prefModel = Prefecture::where('slug', $pref_slug)->firstOrFail();
 
+        $arubaito         = $request->boolean('arubaito');
         $allYouCanDrink   = $request->boolean('all_you_can_drink');
         $hasKaraoke       = $request->boolean('has_karaoke');
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
         if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
@@ -126,7 +128,7 @@ class SearchController extends Controller
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName',
-            'area', 'keyword', 'wageType', 'wageMin',
+            'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'isPrefPage',
             'noindex', 'lpStats', 'lpRelated'
         ));
@@ -145,14 +147,15 @@ class SearchController extends Controller
         $areaName    = $areaModel?->name    ?? '';
         $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? '';
 
-        $wageType       = '';
-        $wageMin        = 0;
+        $wageType         = '';
+        $wageMin          = 0;
+        $arubaito         = $request->boolean('arubaito');
         $allYouCanDrink   = $request->boolean('all_you_can_drink');
         $hasKaraoke       = $request->boolean('has_karaoke');
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, $area, $keyword, useSlug: true, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $results = $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
         if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
@@ -165,7 +168,7 @@ class SearchController extends Controller
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName',
-            'area', 'keyword', 'wageType', 'wageMin',
+            'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated'
         ));
@@ -191,14 +194,15 @@ class SearchController extends Controller
         $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? '';
         $filterName  = $filterType->name;
 
-        $wageType       = '';
-        $wageMin        = 0;
+        $wageType         = '';
+        $wageMin          = 0;
+        $arubaito         = $request->boolean('arubaito');
         $allYouCanDrink   = $request->boolean('all_you_can_drink');
         $hasKaraoke       = $request->boolean('has_karaoke');
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterType->keyword_filter, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterType->keyword_filter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
         if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
@@ -211,24 +215,24 @@ class SearchController extends Controller
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'filter_slug', 'results',
             'areaName', 'jobTypeName', 'filterName',
-            'area', 'keyword', 'wageType', 'wageMin',
+            'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated'
         ));
     }
 
-    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
+    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
     {
         $page = request()->input('page', 1);
         $cacheKey = 'search:' . md5(implode('|', [
             $gender, $area, $keyword, $useSlug, $filterKeyword,
-            $wageType, $wageMin, $allYouCanDrink, $hasKaraoke,
+            $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug, $page,
         ]));
 
         return Cache::remember($cacheKey, 300, function () use (
             $gender, $area, $keyword, $useSlug, $filterKeyword,
-            $wageType, $wageMin, $allYouCanDrink, $hasKaraoke,
+            $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug
         ) {
         // 「新宿駅」→「新宿」のように末尾の「駅」を除いた語も駅名検索に使う
@@ -333,6 +337,9 @@ class SearchController extends Controller
                 ->when($wageType && $wageMin > 0, fn($q) =>
                     $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin)
                 )
+                ->when($arubaito, fn($q) =>
+                    $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME')
+                )
                 ->orderByDesc(fn($q) =>
                     $q->selectRaw('CASE
                         WHEN budget_balance >= bid_price THEN bid_price
@@ -384,14 +391,18 @@ class SearchController extends Controller
                 ROUND(AVG(CASE WHEN wage_type = "hourly"  AND hourly_wage_min > 0 THEN hourly_wage_min END)) as avg_hourly,
                 SUM(CASE WHEN wage_type = "monthly" AND hourly_wage_min > 0 THEN 1 ELSE 0 END) as monthly_count,
                 ROUND(AVG(CASE WHEN wage_type = "monthly" AND hourly_wage_min > 0 THEN hourly_wage_min END)) as avg_monthly,
-                SUM(CASE WHEN wage_type = "daily" THEN 1 ELSE 0 END) as daily_count
+                SUM(CASE WHEN wage_type = "daily" THEN 1 ELSE 0 END) as daily_count,
+                SUM(CASE WHEN wage_type = "hourly" AND employment_type = "PART_TIME" THEN 1 ELSE 0 END) as part_time_count
             ')
             ->first();
 
         $hourlyCount  = (int) ($agg?->hourly_count  ?? 0);
         $monthlyCount = (int) ($agg?->monthly_count ?? 0);
 
-        $stats = ['daily_count' => (int) ($agg?->daily_count ?? 0)];
+        $stats = [
+            'daily_count'     => (int) ($agg?->daily_count     ?? 0),
+            'part_time_count' => (int) ($agg?->part_time_count ?? 0),
+        ];
 
         // 時給：female/male 共通、5件以上あれば表示
         if ($hourlyCount >= 5) {

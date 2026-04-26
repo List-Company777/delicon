@@ -115,6 +115,7 @@
                     <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">都道府県<br><span class="font-normal text-xs">全体</span></th>
                     <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">小エリア<br><span class="font-normal text-xs">全体</span></th>
                     <th class="text-center px-4 py-3 text-gray-500 font-medium whitespace-nowrap">小エリア<br><span class="font-normal text-xs">業種別</span></th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">職種別順位<br><span class="font-normal text-xs">エリア / 都道府県</span></th>
                     <th class="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">参考：同業種エリア上位<br><span class="font-normal text-xs">（有効入札単価）</span></th>
                 </tr>
             </thead>
@@ -155,6 +156,23 @@
                             {{ $r['genre_area_rank'] }}
                         </span>
                         <p class="text-xs text-gray-400 mt-0.5">/ {{ $r['genre_area_total'] }}店舗</p>
+                    </td>
+                    <td class="px-4 py-3">
+                        @forelse($r['job_type_ranks'] as $jtRank)
+                        <div class="flex items-center gap-1.5 mb-1 last:mb-0">
+                            <span class="text-xs text-gray-500 w-20 truncate">{{ $jtRank['name'] }}</span>
+                            <span class="inline-block px-1.5 py-0 rounded text-xs font-bold {{ $rankClass($jtRank['area_rank']) }}">
+                                {{ $jtRank['area_rank'] }}
+                            </span>
+                            <span class="text-xs text-gray-300">/</span>
+                            <span class="inline-block px-1.5 py-0 rounded text-xs font-bold {{ $rankClass($jtRank['pref_rank']) }}">
+                                {{ $jtRank['pref_rank'] }}
+                            </span>
+                            <span class="text-xs text-gray-400">/ {{ $jtRank['area_total'] }}・{{ $jtRank['pref_total'] }}</span>
+                        </div>
+                        @empty
+                        <span class="text-xs text-gray-400">求人なし</span>
+                        @endforelse
                     </td>
                     <td class="px-4 py-3">
                         @forelse($r['top_scores'] as $i => $topScore)

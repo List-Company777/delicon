@@ -62,6 +62,10 @@
                        class="{{ request()->routeIs('admin.articles.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         コラム
                     </a>
+                    <a href="{{ route('admin.search-page-views.index') }}"
+                       class="{{ request()->routeIs('admin.search-page-views.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
+                        PV分析
+                    </a>
                 </nav>
             </div>
             <div class="flex items-center gap-3 text-sm">
