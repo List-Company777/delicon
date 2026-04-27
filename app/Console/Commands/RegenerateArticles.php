@@ -13,7 +13,8 @@ class RegenerateArticles extends Command
     protected $signature = 'articles:regenerate
                             {--gender= : female/male/business/shop（指定時はそのgenderのみ）}
                             {--dry-run : DBに保存せず内容を表示するだけ}
-                            {--limit= : 処理件数の上限（省略時は全件）}';
+                            {--limit= : 処理件数の上限（省略時は全件）}
+                            {--max-chars= : 本文（タグ除去後）がこの文字数以上の記事はスキップ}';
 
     protected $description = '下書き記事（is_published=false）をSonnetで再生成して上書きする';
 
@@ -36,10 +37,17 @@ class RegenerateArticles extends Command
         $articles = $query->orderBy('id')->get();
         $this->info("対象: {$articles->count()} 件");
 
+        $maxChars = $this->option('max-chars') !== null ? (int) $this->option('max-chars') : null;
+
         $updated = 0;
         foreach ($articles as $i => $article) {
             $num = $i + 1;
             $this->info("[{$num}/{$articles->count()}] {$article->title} ({$article->gender})");
+
+            if ($maxChars !== null && mb_strlen(strip_tags($article->body ?? '')) >= $maxChars) {
+                $this->line("  スキップ（{$maxChars}文字以上）");
+                continue;
+            }
 
             $text = $this->callClaude($apiKey, $this->buildPrompt($article->title, $article->gender));
             if (!$text) {

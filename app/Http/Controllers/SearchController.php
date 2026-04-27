@@ -129,7 +129,7 @@ class SearchController extends Controller
         $wageMin     = 0;
         $isPrefPage  = true;
 
-        $lpStats          = $noindex ? null : $this->computeLpStats($gender, null, null, $prefSlug);
+        $lpStats          = $noindex ? null : $this->computeLpStats($gender, null, null, $pref_slug);
         $lpRelated        = $this->computeRelatedLinks($gender, null, $pref_slug, 'all', $prefModel);
         $relatedArticles  = $this->computeRelatedArticles($gender);
 
@@ -146,14 +146,17 @@ class SearchController extends Controller
     public function directory(Request $request, string $gender, string $area_slug, string $job_slug)
     {
         $areaModel    = $area_slug !== 'all' ? Area::where('slug', $area_slug)->first() : null;
+        $prefOnlyModel = (!$areaModel && $area_slug !== 'all') ? Prefecture::where('slug', $area_slug)->first() : null;
         $jobTypeModel = $job_slug  !== 'all' ? JobType::where('slug', $job_slug)->first()  : null;
         $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Genre::where('slug', $job_slug)->first() : null;
 
-        $area    = $area_slug === 'all' ? '' : $area_slug;
+        $area    = ($areaModel && $area_slug !== 'all') ? $area_slug : '';
         $keyword = $job_slug  === 'all' ? '' : $job_slug;
 
-        $areaName    = $areaModel?->name    ?? '';
+        $areaName    = $areaModel?->name ?? $prefOnlyModel?->name ?? '';
         $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? '';
+        $prefModel   = $areaModel?->prefecture;
+        $isPrefPage  = (bool) $prefOnlyModel;
 
         $wageType         = '';
         $wageMin          = 0;
@@ -163,20 +166,22 @@ class SearchController extends Controller
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $results = $prefOnlyModel
+            ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet)
+            : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
         if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
-        $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
+        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel, $prefOnlyModel ? $area_slug : '');
+        $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug, $prefOnlyModel);
         $relatedArticles = $this->computeRelatedArticles($gender);
 
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
-            'areaName', 'jobTypeName',
+            'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
@@ -202,6 +207,7 @@ class SearchController extends Controller
         $areaName    = $areaModel?->name    ?? '';
         $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? '';
         $filterName  = $filterType->name;
+        $prefModel   = $areaModel?->prefecture;
 
         $wageType         = '';
         $wageMin          = 0;
@@ -224,7 +230,7 @@ class SearchController extends Controller
 
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'filter_slug', 'results',
-            'areaName', 'jobTypeName', 'filterName',
+            'areaName', 'jobTypeName', 'filterName', 'prefModel',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated', 'relatedArticles'

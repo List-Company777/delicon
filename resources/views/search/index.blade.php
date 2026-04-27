@@ -55,7 +55,7 @@
         if ($hasArea && $hasJob) {
             $pageDesc = "{$displayArea}の{$displayJob}求人を掲載中。時給・日払い・未経験歓迎など条件で絞り込めます。女性向けナイトワーク求人サイト{$site}。";
         } elseif ($hasArea) {
-            $pageDesc = "{$displayArea}の女性ナイトワーク求人を掲載中。キャバクラ・ガールズバー・ラウンジなど多数掲載。エリア・職種から簡単検索。{$site}。";
+            $pageDesc = "{$displayArea}の女性ナイトワークを掲載中。キャバクラ・ガールズバー・ラウンジなど多数掲載。エリア・職種から簡単検索。{$site}。";
         } elseif ($hasJob) {
             $pageDesc = "{$displayJob}の求人を全国から検索。時給・日払い・未経験歓迎の女性向けナイトワーク求人。{$site}。";
         } else {
@@ -65,7 +65,7 @@
         if ($hasArea && $hasJob) {
             $pageDesc = "{$displayArea}の{$displayJob}求人を掲載中。未経験歓迎・日払いOKの男性向けナイトワーク求人。{$site}。";
         } elseif ($hasArea) {
-            $pageDesc = "{$displayArea}の男性ナイトワーク求人を掲載中。ホスト・バーテンダー・ボーイなど多数掲載。エリア・職種から簡単検索。{$site}。";
+            $pageDesc = "{$displayArea}の男性ナイトワークを掲載中。ホスト・バーテンダー・ボーイなど多数掲載。エリア・職種から簡単検索。{$site}。";
         } elseif ($hasJob) {
             $pageDesc = "{$displayJob}の求人を全国から検索。未経験歓迎・日払いOKの男性向けナイトワーク求人。{$site}。";
         } else {
@@ -152,9 +152,12 @@
     if ($gender === 'business') {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => url('/business/all/all/')];
     } elseif ($gender === 'female') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク求人', 'item' => url('/female/all/all/')];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => url('/female/all/all/')];
     } else {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク求人', 'item' => url('/male/all/all/')];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク', 'item' => url('/male/all/all/')];
+    }
+    if (isset($prefModel) && $prefModel && empty($isPrefPage)) {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => url("/{$gender}/{$prefModel->slug}/all/")];
     }
     if ($displayArea) {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => isset($area_slug) ? url("/{$gender}/{$area_slug}/all/") : null];
