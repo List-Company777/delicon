@@ -85,13 +85,16 @@ class ArticleController extends Controller
 
     public function update(Request $request, Article $article)
     {
+        $wasDraft = !$article->is_published;
         $validated = $this->validated($request, $article);
 
         $article->update($validated);
         $article->categories()->sync($request->input('category_ids', []));
         $article->tags()->sync($this->resolveTags($request->input('tag_names', '')));
 
-        return redirect()->route('admin.articles.index')
+        $tab = $wasDraft ? 'draft' : 'published';
+
+        return redirect()->route('admin.articles.index', ['atab' => $tab])
             ->with('success', '記事を更新しました。');
     }
 

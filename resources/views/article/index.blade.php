@@ -83,7 +83,11 @@
                 <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">{{ $article->lead }}</p>
                 @endif
                 <p class="text-xs text-gray-400 mt-3">
-                    {{ $article->published_at?->format('Y年n月j日') }}
+                    @if($article->updated_at_manual && $article->updated_at_manual->gt($article->published_at))
+                        <span class="text-amber-500">更新 {{ $article->updated_at_manual->format('Y/n/j') }}</span>
+                    @else
+                        {{ $article->published_at?->format('Y年n月j日') }}
+                    @endif
                 </p>
             </div>
         </a>

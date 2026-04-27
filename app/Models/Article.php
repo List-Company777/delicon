@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Article extends Model
 {
     protected $fillable = [
-        'slug', 'title', 'lead', 'body', 'hero_image',
+        'slug', 'title', 'lead', 'body', 'faq', 'hero_image',
         'gender', 'is_published', 'published_at', 'updated_at_manual',
     ];
 
@@ -17,6 +17,7 @@ class Article extends Model
         'is_published'      => 'boolean',
         'published_at'      => 'datetime',
         'updated_at_manual' => 'date',
+        'faq'               => 'array',
     ];
 
     public function video(): \Illuminate\Database\Eloquent\Relations\HasOne

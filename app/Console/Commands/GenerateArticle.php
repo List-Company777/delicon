@@ -77,7 +77,7 @@ class GenerateArticle extends Command
                 continue;
             }
 
-            ['slug' => $slugHint, 'title' => $title, 'lead' => $lead, 'body' => $body] = $this->parseArticle($text, $topicTitle);
+            ['slug' => $slugHint, 'title' => $title, 'lead' => $lead, 'body' => $body, 'faq' => $faq] = $this->parseArticle($text, $topicTitle);
 
             if ($this->option('dry-run')) {
                 $this->line("  TITLE: {$title}");
@@ -93,6 +93,7 @@ class GenerateArticle extends Command
                 'title'        => $title,
                 'lead'         => $lead,
                 'body'         => $body,
+                'faq'          => $faq,
                 'gender'       => $gender,
                 'is_published' => false,
             ]);
@@ -161,6 +162,7 @@ class GenerateArticle extends Command
 - 本文（タグ除去後）は2000〜4000文字
 - 最後に「まとめ」のh2で締める
 - 風俗・性的なサービスには一切触れない（健全な求人・夜遊び情報のみ）
+- 本文の最後に読者がよく疑問に思う3〜5件のQ&Aを作成する
 
 ## 出力形式（厳守）
 以下のタグ形式のみ出力すること。タグの外に説明文を書かないこと。
@@ -171,6 +173,9 @@ class GenerateArticle extends Command
 <BODY>
 本文HTML（h2・h3・p・ul・ol タグのみ使用。HTMLの属性値はダブルクォートを使ってよい）
 </BODY>
+<FAQ>
+[{"q":"質問1","a":"回答1"},{"q":"質問2","a":"回答2"},{"q":"質問3","a":"回答3"}]
+</FAQ>
 PROMPT;
     }
 
@@ -182,7 +187,7 @@ PROMPT;
                 'anthropic-version' => '2023-06-01',
                 'content-type'      => 'application/json',
             ])->timeout(120)->post('https://api.anthropic.com/v1/messages', [
-                'model'      => 'claude-haiku-4-5-20251001',
+                'model'      => 'claude-sonnet-4-6',
                 'max_tokens' => 8192,
                 'messages'   => [
                     ['role' => 'user', 'content' => $prompt],
@@ -208,12 +213,20 @@ PROMPT;
         $lead  = $this->extractTag($text, 'LEAD');
         $body  = $this->extractTag($text, 'BODY');
 
+        $faqRaw = $this->extractTag($text, 'FAQ');
+        $faq    = null;
+        if ($faqRaw) {
+            $decoded = json_decode($faqRaw, true);
+            $faq = is_array($decoded) ? $decoded : null;
+        }
+
         if ($title && $body) {
             return [
                 'slug'  => $slug,
                 'title' => $title,
                 'lead'  => $lead,
                 'body'  => $body,
+                'faq'   => $faq,
             ];
         }
 
@@ -223,6 +236,7 @@ PROMPT;
             'title' => $fallbackTitle,
             'lead'  => '',
             'body'  => '',
+            'faq'   => null,
         ];
     }
 

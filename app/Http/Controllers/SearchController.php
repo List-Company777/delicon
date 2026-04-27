@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
+use App\Models\Article;
 use App\Models\Genre;
 use App\Models\Job;
 use App\Models\JobType;
@@ -25,6 +26,12 @@ class SearchController extends Controller
         $wageType = $request->input('wage_type') ?? '';
         $wageMin  = (int) $request->input('wage_min', 0);
         $arubaito = $request->boolean('arubaito');
+
+        // 空文字パラメータが含まれる場合は正規URLへ301リダイレクト（重複URL防止）
+        if (collect($request->query())->contains(fn($v) => $v === '')) {
+            $clean = array_filter($request->query(), fn($v) => $v !== '');
+            return redirect()->away(url('/search/') . ($clean ? '?' . http_build_query($clean) : ''), 301);
+        }
 
         // 条件なしの場合はディレクトリLPへリダイレクト
         if (!$area && !$keyword && !$wageType && !$wageMin && !$arubaito) {
@@ -122,15 +129,16 @@ class SearchController extends Controller
         $wageMin     = 0;
         $isPrefPage  = true;
 
-        $lpStats   = $noindex ? null : $this->computeLpStats($gender, null, null, $prefSlug);
-        $lpRelated = $this->computeRelatedLinks($gender, null, $pref_slug, 'all', $prefModel);
+        $lpStats          = $noindex ? null : $this->computeLpStats($gender, null, null, $prefSlug);
+        $lpRelated        = $this->computeRelatedLinks($gender, null, $pref_slug, 'all', $prefModel);
+        $relatedArticles  = $this->computeRelatedArticles($gender);
 
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'isPrefPage',
-            'noindex', 'lpStats', 'lpRelated'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
         ));
     }
 
@@ -162,15 +170,16 @@ class SearchController extends Controller
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats   = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
-        $lpRelated = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
+        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
+        $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
+        $relatedArticles = $this->computeRelatedArticles($gender);
 
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'lpStats', 'lpRelated'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
         ));
     }
 
@@ -209,15 +218,16 @@ class SearchController extends Controller
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats   = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
-        $lpRelated = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
+        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
+        $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
+        $relatedArticles = $this->computeRelatedArticles($gender);
 
         return view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'filter_slug', 'results',
             'areaName', 'jobTypeName', 'filterName',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'lpStats', 'lpRelated'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
         ));
     }
 
@@ -518,6 +528,17 @@ class SearchController extends Controller
         }
 
         return ['areas' => $relatedAreas, 'types' => $relatedTypes];
+    }
+
+    private function computeRelatedArticles(string $gender): \Illuminate\Database\Eloquent\Collection
+    {
+        $articleGender = $gender === 'business' ? 'business' : $gender;
+
+        return Article::published()
+            ->where('gender', $articleGender)
+            ->latest('published_at')
+            ->limit(3)
+            ->get(['id', 'slug', 'title', 'lead', 'hero_image', 'published_at']);
     }
 
     /**

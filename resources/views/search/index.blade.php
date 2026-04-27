@@ -420,26 +420,34 @@
 
     {{-- LP導入文（ディレクトリURLのみ表示） --}}
     @if($isLp && !$results->isEmpty())
-    <div class="bg-white border border-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-600 leading-relaxed">
+    <div class="bg-white border border-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-600 leading-relaxed space-y-2">
         @if($gender === 'business')
             @if($displayArea && $displayJob)
                 <p>{{ $displayArea }}の{{ $displayJob }}を{{ number_format($results->total()) }}店舗掲載中。営業時間・料金・アクセスなど店舗情報をまとめてチェックできます。</p>
+                <p>飲み放題・カラオケ・個室・初回割引などの条件でも絞り込めます。{{ $displayArea }}でお気に入りの{{ $displayJob }}を見つけてください。</p>
             @elseif($displayArea)
                 <p>{{ $displayArea }}エリアの夜遊びスポット・ナイト系店舗情報を{{ number_format($results->total()) }}件掲載中。キャバクラ・クラブ・バーなど{{ $displayArea }}の夜遊び情報をまとめてチェックできます。</p>
+                <p>飲み放題・カラオケ・個室・初回割引などの条件で絞り込みが可能。{{ $displayArea }}で今夜の夜遊び先を探してみましょう。</p>
             @elseif($displayJob)
                 <p>{{ $displayJob }}の店舗情報を{{ number_format($results->total()) }}件掲載中。全国の{{ $displayJob }}をエリアから探せます。営業時間・料金もまとめて確認できます。</p>
+                <p>エリアや設備・サービスから絞り込んで、あなたの目的に合った{{ $displayJob }}を見つけましょう。</p>
             @else
                 <p>全国の夜遊びスポット・ナイト系店舗情報を{{ number_format($results->total()) }}件掲載中。エリア・業種から絞り込んで夜遊び場所を探しましょう。</p>
+                <p>キャバクラ・ガールズバー・クラブ・バーなど多彩な業態を掲載。飲み放題・カラオケ・個室ありの店舗も一覧で確認できます。</p>
             @endif
         @else
             @if($displayArea && $displayJob)
                 <p>{{ $displayArea }}で{{ $displayJob }}として働きたい方向けの{{ $c['label'] }}求人を{{ number_format($results->total()) }}件掲載しています。日払い・週払い・未経験歓迎など、さまざまな条件の求人を掲載中です。</p>
+                <p>時給・勤務日数・経験の有無など細かい条件でも絞り込めます。{{ $displayArea }}の{{ $displayJob }}求人をまとめて比較してみましょう。</p>
             @elseif($displayArea)
                 <p>{{ $displayArea }}エリアの{{ $c['label'] }}求人を{{ number_format($results->total()) }}件掲載しています。{{ $gender === 'male' ? '黒服・ボーイ・フロアスタッフなど' : 'キャバクラ・ガールズバー・ラウンジなど' }}、{{ $displayArea }}のナイトワーク求人情報をまとめてチェックできます。</p>
+                <p>{{ $gender === 'male' ? '経験・未経験問わず幅広い職種を掲載。日払い・週払い・高時給の求人も揃っています。' : '未経験歓迎・日払いOK・高時給など条件から絞り込めます。まずは気軽に体験入店から始める方も歓迎している店舗が多数掲載中です。' }}</p>
             @elseif($displayJob)
                 <p>{{ $displayJob }}の{{ $c['label'] }}求人を{{ number_format($results->total()) }}件掲載しています。未経験歓迎・高収入・日払いOKなど、さまざまな{{ $displayJob }}求人をエリアから探せます。</p>
+                <p>エリア・時給・勤務形態などの条件から絞り込んで、あなたのライフスタイルに合った{{ $displayJob }}の仕事を見つけましょう。</p>
             @else
                 <p>{{ $c['label'] }}の求人情報を{{ number_format($results->total()) }}件掲載しています。エリア・職種・条件から絞り込んで、あなたに合ったナイトワーク求人を見つけてください。</p>
+                <p>日払い・週払い・未経験歓迎・高時給など多彩な条件の求人を掲載。気になる求人への応募もナイトワークリストから簡単に行えます。</p>
             @endif
         @endif
     </div>
@@ -669,6 +677,37 @@
         <div class="mt-8">
             {{ $results->appends(request()->query())->links() }}
         </div>
+    @endif
+
+    {{-- 関連コラム（LPのみ・1ページ目・記事あり） --}}
+    @if($isLp && $currentPage === 1 && isset($relatedArticles) && $relatedArticles->isNotEmpty())
+    <div class="mt-10">
+        <p class="text-xs font-bold text-gray-400 mb-3">関連コラム・ガイド</p>
+        <div class="space-y-3">
+            @foreach($relatedArticles as $ra)
+            <a href="{{ route('article.show', $ra->slug) }}"
+               class="flex items-start gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3 hover:shadow-sm transition">
+                @if($ra->hero_image)
+                <picture class="shrink-0">
+                    <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($ra->hero_image)) }}" type="image/webp">
+                    <img src="{{ asset('storage/' . $ra->hero_image) }}"
+                         alt="{{ $ra->title }}"
+                         width="80" height="56"
+                         loading="lazy" decoding="async"
+                         class="w-20 h-14 object-cover rounded-lg">
+                </picture>
+                @endif
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-bold text-gray-800 leading-snug line-clamp-2">{{ $ra->title }}</p>
+                    @if($ra->lead)
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $ra->lead }}</p>
+                    @endif
+                    <p class="text-xs text-gray-400 mt-1">{{ $ra->published_at?->format('Y年n月j日') }}</p>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
     @endif
 
     {{-- 関連エリア・関連職種リンク（LPのみ） --}}

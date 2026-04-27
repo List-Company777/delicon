@@ -121,6 +121,35 @@
 @endphp
 <script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 <script type="application/ld+json">{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@if(!empty($article->faq))
+@php
+    $faqLd = [
+        '@context'   => 'https://schema.org',
+        '@type'      => 'FAQPage',
+        'mainEntity' => collect($article->faq)->map(fn($item) => [
+            '@type'          => 'Question',
+            'name'           => $item['q'],
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+        ])->values()->all(),
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endif
+@if($article->video?->isDone())
+@php
+    $videoLd = [
+        '@context'     => 'https://schema.org',
+        '@type'        => 'VideoObject',
+        'name'         => $article->title,
+        'description'  => $article->lead ?? '',
+        'uploadDate'   => ($article->video->created_at)->toIso8601String(),
+        'contentUrl'   => asset('storage/' . $article->video->video_path),
+        'thumbnailUrl' => $article->hero_image ? asset('storage/' . $article->hero_image) : asset('android-chrome-192x192.png'),
+        'publisher'    => ['@type' => 'Organization', 'name' => 'ナイトワークリスト'],
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -190,6 +219,36 @@
             {!! $article->body !!}
         </div>
 
+        {{-- FAQ --}}
+        @if(!empty($article->faq))
+        <div class="mt-10 pt-8 border-t border-gray-100" id="faq">
+            <h2 class="text-xl font-bold text-gray-800 mb-5">よくある質問</h2>
+            <dl class="space-y-4">
+                @foreach($article->faq as $item)
+                <div class="bg-gray-50 rounded-xl px-5 py-4">
+                    <dt class="font-bold text-gray-800 text-sm flex items-start gap-2 mb-2">
+                        <span class="shrink-0 font-black text-gray-400">Q.</span>
+                        {{ $item['q'] }}
+                    </dt>
+                    <dd class="text-sm text-gray-600 leading-relaxed flex items-start gap-2">
+                        <span class="shrink-0 font-bold text-gray-400">A.</span>
+                        {{ $item['a'] }}
+                    </dd>
+                </div>
+                @endforeach
+            </dl>
+        </div>
+        @endif
+
+        {{-- 動画 --}}
+        @if($article->video?->isDone())
+        <div class="mb-8 rounded-xl overflow-hidden bg-black">
+            <video controls preload="metadata" class="w-full max-h-[480px]">
+                <source src="{{ asset('storage/' . $article->video->video_path) }}" type="video/mp4">
+            </video>
+        </div>
+        @endif
+
         {{-- タグ --}}
         @if($article->tags->isNotEmpty())
         <div class="flex flex-wrap gap-2 mb-10 pt-6 border-t border-gray-100">
@@ -232,6 +291,21 @@
                class="text-sm text-gray-500 hover:text-gray-700 underline">
                 {{ $genderLabel }}の求人をもっと見る →
             </a>
+        </div>
+    </div>
+    @endif
+
+    {{-- エリアLPクロスリンク --}}
+    @if(!empty($lpLinks))
+    <div class="mt-8 border-t border-gray-100 pt-8">
+        <h2 class="text-sm font-bold text-gray-600 mb-3">エリア別求人を探す</h2>
+        <div class="flex flex-wrap gap-2">
+            @foreach($lpLinks as $link)
+            <a href="{{ $link['url'] }}"
+               class="text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
+                {{ $link['label'] }}
+            </a>
+            @endforeach
         </div>
     </div>
     @endif

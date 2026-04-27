@@ -60,11 +60,17 @@
     }
     if ($detail->image_paths) {
         foreach ($detail->image_paths as $imgPath) {
-            $imageObjects[] = [
+            $imgObj = [
                 '@type'      => 'ImageObject',
                 'url'        => asset('storage/' . $imgPath),
                 'contentUrl' => asset('storage/' . $imgPath),
             ];
+            $imgSize = @getimagesize(storage_path('app/public/' . $imgPath));
+            if ($imgSize) {
+                $imgObj['width']  = $imgSize[0];
+                $imgObj['height'] = $imgSize[1];
+            }
+            $imageObjects[] = $imgObj;
         }
     }
     if (count($imageObjects) === 1) $ld['image'] = $imageObjects[0];
