@@ -87,11 +87,17 @@
                         <div class="flex items-center gap-2">
                             {{-- 承認 --}}
                             <form action="{{ route('admin.plan-applications.approve', $application) }}" method="POST"
-                                  onsubmit="return confirm('承認しますか？\n予算 +{{ number_format($application->amount) }}円 / 入札単価 {{ number_format($application->bid_price_requested) }}円')">
+                                  x-data="{ open: false }" @submit.prevent="open ? $el.submit() : (open = true)">
                                 @csrf
+                                <div x-show="open" class="mb-2 space-y-1" x-cloak>
+                                    <input type="text" name="plan_name"
+                                           placeholder="nightwork-list 広告掲載料 4月1日～"
+                                           class="border border-gray-300 rounded px-2 py-1 text-xs w-56 focus:outline-none">
+                                    <p class="text-xs text-gray-400">品目名（invoy請求書に記載されます）</p>
+                                </div>
                                 <button type="submit"
                                         class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition">
-                                    承認
+                                    <span x-text="open ? '確定' : '承認'">承認</span>
                                 </button>
                             </form>
 

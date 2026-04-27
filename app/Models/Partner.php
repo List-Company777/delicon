@@ -10,7 +10,7 @@ class Partner extends Model
 {
     protected $fillable = [
         'type', 'company_name', 'contact_name', 'email', 'tel',
-        'referral_code', 'commission_rate', 'commission_rate_override', 'bank_info', 'invoice_number', 'status', 'notes',
+        'referral_code', 'commission_rate', 'commission_rate_override', 'bank_info', 'invoice_number', 'invoy_client_code', 'status', 'notes',
     ];
 
     protected $casts = [

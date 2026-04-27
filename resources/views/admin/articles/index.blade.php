@@ -76,19 +76,20 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal">タイトル</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-24">対象</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-24">状態</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-36">公開日</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-56">タイトル</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-16">対象</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-20">状態</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-32">公開日</th>
+                        <th class="text-center px-4 py-3 text-gray-500 font-normal w-32">動画</th>
                         <th class="px-4 py-3 w-32"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($publishedArticles as $article)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <p class="font-medium text-gray-800 truncate max-w-xs">{{ $article->title }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">/article/{{ $article->slug }}/</p>
+                        <td class="px-4 py-3 max-w-0">
+                            <p class="font-medium text-gray-800 truncate">{{ $article->title }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5 truncate">/article/{{ $article->slug }}/</p>
                             @if($article->categories->isNotEmpty())
                             <div class="flex gap-1 mt-1">
                                 @foreach($article->categories as $cat)
@@ -109,6 +110,66 @@
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500">
                             {{ $article->published_at?->format('Y/m/d H:i') ?? '―' }}
+                        </td>
+                        <td class="px-4 py-3 text-center"
+                            x-data="articleVideo({{ $article->id }}, '{{ $article->video?->status ?? 'none' }}', '{{ route('admin.articles.video.download', $article) }}')"
+                            data-caption='@json($article->video?->sns_caption ?? "")'
+                            x-init="init()">
+                            <template x-if="status === 'done'">
+                                <div class="flex flex-col gap-1 items-center">
+                                    <a :href="downloadUrl"
+                                       class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2 py-1 rounded whitespace-nowrap">
+                                        ↓ DL
+                                    </a>
+                                    <button @click="showCaption = true" :disabled="!caption"
+                                            class="text-xs text-emerald-600 hover:text-emerald-800 border border-emerald-200 px-2 py-1 rounded disabled:opacity-30 whitespace-nowrap">
+                                        投稿文
+                                    </button>
+                                    <button @click="generate()" :disabled="loading"
+                                            class="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-2 py-1 rounded disabled:opacity-50 whitespace-nowrap">
+                                        再生成
+                                    </button>
+                                    <button @click="destroy()" :disabled="loading"
+                                            class="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-1 rounded disabled:opacity-50 whitespace-nowrap">
+                                        削除
+                                    </button>
+                                    {{-- 投稿文モーダル --}}
+                                    <div x-show="showCaption" x-cloak
+                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                                         @click.self="showCaption = false">
+                                        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h3 class="text-sm font-semibold text-gray-700">SNS投稿文</h3>
+                                                <button @click="showCaption = false" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+                                            </div>
+                                            <textarea class="w-full text-sm text-gray-800 border border-gray-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                                                      rows="6" x-model="caption" readonly></textarea>
+                                            <div class="mt-3 flex justify-end gap-2">
+                                                <button @click="copyCaption()"
+                                                        class="text-sm bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-1">
+                                                    <span x-text="copied ? 'コピーしました！' : 'コピー'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="status === 'pending' || status === 'processing'">
+                                <span class="text-xs text-amber-600 animate-pulse">生成中…</span>
+                            </template>
+                            <template x-if="status === 'failed'">
+                                <button @click="generate()"
+                                        class="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-1 rounded">
+                                    失敗
+                                </button>
+                            </template>
+                            <template x-if="status === 'none'">
+                                <button @click="generate()" :disabled="loading"
+                                        class="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-2 py-1 rounded disabled:opacity-50">
+                                    <span x-show="!loading">生成</span>
+                                    <span x-show="loading" x-cloak>…</span>
+                                </button>
+                            </template>
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
@@ -156,18 +217,18 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal">タイトル</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-24">対象</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-36">最終更新</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-56">タイトル</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-16">対象</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-normal w-32">最終更新</th>
                         <th class="px-4 py-3 w-32"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($draftArticles as $article)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <p class="font-medium text-gray-800 truncate max-w-xs">{{ $article->title }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">/article/{{ $article->slug }}/</p>
+                        <td class="px-4 py-3 max-w-0">
+                            <p class="font-medium text-gray-800 truncate">{{ $article->title }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5 truncate">/article/{{ $article->slug }}/</p>
                             @if($article->categories->isNotEmpty())
                             <div class="flex gap-1 mt-1">
                                 @foreach($article->categories as $cat)
@@ -384,5 +445,86 @@
     </div>{{-- /プロンプト設定 --}}
 
 </div>{{-- /x-data --}}
+
+@push('scripts')
+<script>
+function articleVideo(articleId, initialStatus, downloadUrl) {
+    return {
+        articleId,
+        status: initialStatus,
+        downloadUrl,
+        caption: '',
+        showCaption: false,
+        copied: false,
+        loading: false,
+        pollTimer: null,
+
+        init() {
+            this.caption = JSON.parse(this.$el.dataset.caption || '""');
+            if (this.status === 'pending' || this.status === 'processing') {
+                this.poll();
+            }
+        },
+
+        async generate() {
+            this.loading = true;
+            try {
+                const res = await fetch(`/admin/articles/${this.articleId}/video/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                this.status = data.status;
+                if (this.status === 'pending' || this.status === 'processing') {
+                    this.poll();
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        poll() {
+            this.pollTimer = setInterval(async () => {
+                const res = await fetch(`/admin/articles/${this.articleId}/video/status/`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await res.json();
+                this.status = data.status;
+                if (data.sns_caption) this.caption = data.sns_caption;
+                if (this.status !== 'pending' && this.status !== 'processing') {
+                    clearInterval(this.pollTimer);
+                }
+            }, 10000);
+        },
+
+        async destroy() {
+            if (!confirm('動画ファイルを削除しますか？')) return;
+            this.loading = true;
+            try {
+                await fetch(`/admin/articles/${this.articleId}/video/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                this.status = 'none';
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async copyCaption() {
+            await navigator.clipboard.writeText(this.caption);
+            this.copied = true;
+            setTimeout(() => { this.copied = false; }, 2000);
+        },
+    };
+}
+</script>
+@endpush
 
 @endsection

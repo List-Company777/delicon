@@ -30,7 +30,7 @@ class PlanApplicationController extends Controller
         return view('admin.plan-applications.index', compact('applications', 'status', 'counts'));
     }
 
-    public function approve(ShopPlanApplication $application)
+    public function approve(Request $request, ShopPlanApplication $application)
     {
         abort_if($application->status !== 'pending', 422, 'すでに処理済みです');
 
@@ -47,6 +47,7 @@ class PlanApplicationController extends Controller
         $application->update([
             'status'      => 'approved',
             'approved_at' => now(),
+            'plan_name'   => $request->input('plan_name') ?: null,
         ]);
 
         // 店舗オーナーへ通知

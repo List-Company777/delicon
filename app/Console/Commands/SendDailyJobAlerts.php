@@ -9,16 +9,17 @@ use Illuminate\Console\Command;
 class SendDailyJobAlerts extends Command
 {
     protected $signature   = 'line:send-daily-job-alerts {--dry-run : 送信せず対象件数だけ表示}';
-    protected $description = '未送信の公開求人に対してLINE求人アラートを一括送信する（毎日15時）';
+    protected $description = '未送信の公開求人（最大3件）を1通にまとめてLINE求人アラートを送信する（3日ごと15時）';
 
     public function handle(): int
     {
-        // active かつ未送信の求人（72時間以内）— 有料店舗を先頭に
         $jobs = Job::join('shops', 'shops.id', '=', 'jobs.shop_id')
             ->where('jobs.status', 'active')
+            ->whereIn('jobs.search_group', ['female', 'male'])
             ->whereNull('jobs.alert_sent_at')
-            ->where('jobs.updated_at', '>=', now()->subHours(72))
             ->orderByRaw('(shops.budget_balance >= shops.bid_price) DESC')
+            ->orderByDesc('jobs.updated_at')
+            ->limit(3)
             ->get(['jobs.id', 'jobs.title']);
 
         if ($jobs->isEmpty()) {
@@ -27,20 +28,19 @@ class SendDailyJobAlerts extends Command
         }
 
         $this->info("送信対象: {$jobs->count()} 件");
+        $jobs->each(fn($j) => $this->line("  [{$j->id}] {$j->title}"));
 
         if ($this->option('dry-run')) {
-            $jobs->each(fn($j) => $this->line("  [{$j->id}] {$j->title}"));
             return self::SUCCESS;
         }
 
-        foreach ($jobs as $job) {
-            // 先に送信済みフラグを立てて二重送信を防ぐ
-            $job->update(['alert_sent_at' => now()]);
-            SendJobAlerts::dispatch($job->id)->onQueue('default');
-            $this->line("  dispatched job_id={$job->id}");
-        }
+        // 先に送信済みフラグを立てて二重送信を防ぐ
+        Job::whereIn('id', $jobs->pluck('id'))->update(['alert_sent_at' => now()]);
 
-        $this->info('完了');
+        // 3件まとめて1回だけdispatch
+        SendJobAlerts::dispatch($jobs->pluck('id')->all())->onQueue('default');
+        $this->info('dispatched');
+
         return self::SUCCESS;
     }
 }

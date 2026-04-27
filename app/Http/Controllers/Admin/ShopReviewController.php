@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\ShopApproved;
 use App\Mail\ShopRejected;
+use App\Models\Partner;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -14,9 +15,11 @@ class ShopReviewController extends Controller
     public function index()
     {
         $status = request('status', 'pending');
+        $keyword = request('keyword', '');
 
         $shops = Shop::with(['genre', 'area', 'users' => fn($q) => $q->wherePivot('role', 'owner')])
             ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($keyword !== '', fn($q) => $q->where('name', 'like', '%' . $keyword . '%'))
             ->orderByRaw("FIELD(status, 'pending', 'inactive', 'active')")
             ->orderByDesc('updated_at')
             ->paginate(30);
@@ -28,7 +31,7 @@ class ShopReviewController extends Controller
             'all'      => Shop::count(),
         ];
 
-        return view('admin.shops.index', compact('shops', 'status', 'counts'));
+        return view('admin.shops.index', compact('shops', 'status', 'counts', 'keyword'));
     }
 
     public function show(int $id)
@@ -42,7 +45,11 @@ class ShopReviewController extends Controller
             'users' => fn($q) => $q->wherePivot('role', 'owner'),
         ])->findOrFail($id);
 
-        return view('admin.shops.show', compact('shop'));
+        $partners = Partner::where('status', 'active')
+            ->orderBy('company_name')
+            ->get(['id', 'company_name', 'type']);
+
+        return view('admin.shops.show', compact('shop', 'partners'));
     }
 
     public function approve(int $id)
@@ -97,5 +104,39 @@ class ShopReviewController extends Controller
         $shop->increment('budget_balance', $request->integer('amount'));
 
         return back()->with('success', number_format($request->integer('amount')) . '円を残高に追加しました（残高: ' . number_format($shop->fresh()->budget_balance) . '円）');
+    }
+
+    public function updatePartner(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'partner_id' => ['nullable', 'exists:partners,id'],
+        ]);
+
+        Shop::findOrFail($id)->update(['partner_id' => $data['partner_id'] ?? null]);
+
+        $msg = ($data['partner_id'] ?? null)
+            ? '代理店を紐づけました。'
+            : '代理店の紐づけを解除しました。';
+
+        return back()->with('success', $msg);
+    }
+
+    public function destroy(int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        $shopName = $shop->name;
+
+        $owners = $shop->users()->wherePivot('role', 'owner')->get();
+
+        $shop->delete(); // cascadeOnDelete で関連レコードも削除
+
+        foreach ($owners as $owner) {
+            if (!$owner->shops()->exists()) {
+                $owner->delete();
+            }
+        }
+
+        return redirect()->route('admin.shops.index')
+            ->with('success', "「{$shopName}」を削除しました。");
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ShopPlanApplication extends Model
 {
     protected $fillable = [
-        'shop_id', 'partner_id', 'amount', 'bid_price_requested', 'status', 'note', 'approved_at',
+        'shop_id', 'partner_id', 'amount', 'bid_price_requested', 'status', 'note', 'approved_at', 'plan_name',
     ];
 
     protected $casts = [

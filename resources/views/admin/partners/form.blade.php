@@ -153,6 +153,16 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">invoy取引先コード</th>
+                <td class="px-4 py-3">
+                    <input type="text" name="invoy_client_code" value="{{ old('invoy_client_code', $partner?->invoy_client_code) }}"
+                           placeholder="0001"
+                           class="w-32 border border-gray-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:border-business-500 @error('invoy_client_code') border-red-400 @enderror">
+                    <p class="text-xs text-gray-400 mt-1">invoyの取引先一覧から確認した4桁コード</p>
+                    @error('invoy_client_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </td>
+            </tr>
+            <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">ステータス</th>
                 <td class="px-4 py-3">
                     <label class="inline-flex items-center gap-2 mr-6">

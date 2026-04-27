@@ -145,9 +145,49 @@
 @endphp
 <script type="application/ld+json">{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endif
+@php
+    // BreadcrumbList
+    $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => url('/')]];
+    $pos = 2;
+    if ($gender === 'business') {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => url('/business/all/all/')];
+    } elseif ($gender === 'female') {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク求人', 'item' => url('/female/all/all/')];
+    } else {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク求人', 'item' => url('/male/all/all/')];
+    }
+    if ($displayArea) {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => isset($area_slug) ? url("/{$gender}/{$area_slug}/all/") : null];
+    }
+    if ($displayJob) {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayJob, 'item' => $canonicalUrl];
+    }
+    $breadcrumbs = array_map(fn($b) => array_filter($b), $breadcrumbs);
+    $ldBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $breadcrumbs];
+@endphp
+<script type="application/ld+json">{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 
 @section('content')
+
+{{-- パンくずリスト --}}
+<nav aria-label="パンくずリスト" class="bg-gray-50 border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 py-2">
+        <ol class="flex flex-wrap items-center gap-1 text-xs text-gray-500">
+            <li><a href="{{ url('/') }}" class="hover:text-gray-700">ホーム</a></li>
+            @foreach(array_slice($breadcrumbs, 1) as $crumb)
+            <li class="flex items-center gap-1">
+                <span class="text-gray-300">›</span>
+                @if(isset($crumb['item']) && $crumb['item'] !== end($breadcrumbs)['item'])
+                <a href="{{ $crumb['item'] }}" class="hover:text-gray-700">{{ $crumb['name'] }}</a>
+                @else
+                <span class="text-gray-700">{{ $crumb['name'] }}</span>
+                @endif
+            </li>
+            @endforeach
+        </ol>
+    </div>
+</nav>
 
 {{-- カラーバー --}}
 <div class="{{ $c['bg'] }} text-white py-4">
@@ -314,7 +354,8 @@
                         @if($isActive)✓ @endif{{ $tag['label'] }}
                     </a>
                 @endforeach
-                {{-- アルバイト（時給 × PART_TIME）タグ --}}
+                {{-- アルバイト（時給 × PART_TIME）タグ：男性のみ --}}
+                @if($gender === 'male')
                 <a href="{{ $arubaitoUrl }}"
                    class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
                           {{ $isArubaitoActive
@@ -322,6 +363,7 @@
                               : 'bg-white ' . $c['text'] . ' border-gray-300 hover:border-current' }}">
                     @if($isArubaitoActive)✓ @endifアルバイト
                 </a>
+                @endif
             </div>
             @endif
 
@@ -403,8 +445,30 @@
     </div>
     @endif
 
+    {{-- LINEアラート告知バナー（female/male・1ページ目のみ） --}}
+    @if($gender !== 'business' && $currentPage === 1)
+    <a href="{{ route('alert.register', ['gender' => $gender]) }}" rel="nofollow"
+       class="flex items-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3.5 mb-5 transition group">
+        <div class="text-2xl shrink-0">🔔</div>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-green-800">新着求人をLINEで受け取る</p>
+            <p class="text-xs text-green-700 mt-0.5">エリア・職種を設定してLINEにお知らせ。無料で登録できます。</p>
+        </div>
+        <div class="text-green-600 shrink-0">›</div>
+    </a>
+    @endif
+
     {{-- LP統計バー（6件以上のインデックスページのみ） --}}
     @if($isLp && !empty($lpStats))
+    @php
+        $statsPrefix = implode('', array_filter([$displayArea, $displayJob]));
+        if ($gender === 'business') {
+            $statsLabel = $statsPrefix ? "{$statsPrefix}の夜遊びスポットの統計データ" : '夜遊びスポットの統計データ';
+        } else {
+            $statsLabel = $statsPrefix ? "{$statsPrefix}の{$c['label']}の統計データ" : "{$c['label']}の統計データ";
+        }
+    @endphp
+    <p class="text-xs font-medium text-gray-400 mb-2">{{ $statsLabel }}</p>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         @if($gender === 'business')
             @if($lpStats['all_you_can_drink'] > 0)
@@ -647,7 +711,7 @@
     @endif
 
     {{-- 求人アラート登録バナー（female/male のLPのみ、business は除外） --}}
-    @if($isLp && $gender !== 'business' && config('services.line.bot_add_friend_url'))
+    @if($isLp && $gender !== 'business')
     <div class="mt-10 bg-green-50 border border-green-200 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div class="flex-1">
             <p class="font-bold text-green-800 text-sm mb-1">新着求人をLINEで受け取る</p>
@@ -661,11 +725,11 @@
                 @endif
             </p>
         </div>
-        <a href="{{ config('services.line.bot_add_friend_url') }}"
-           target="_blank" rel="noopener"
+        <a href="{{ route('alert.register', ['gender' => $gender]) }}"
+           rel="nofollow"
            class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.070 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-            LINE友だち追加
+            求人アラートを登録する
         </a>
     </div>
     @endif

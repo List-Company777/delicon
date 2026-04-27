@@ -8,6 +8,7 @@ use App\Models\JobAlertSession;
 use App\Models\JobType;
 use App\Models\LineMessageLog;
 use App\Models\Shop;
+use App\Models\WebAlertToken;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
@@ -81,11 +82,24 @@ class LineWebhookController extends Controller
             return;
         }
 
+        // Webフォームからのアラート登録トークン
+        if (preg_match('/^ALERT-([A-Za-z0-9]{32})$/', $text, $matches)) {
+            Log::info("LINE ALERT token received from {$userId}: " . $matches[1]);
+            $this->handleWebAlertToken($matches[1], $userId, $replyToken);
+            return;
+        }
+
         // 店舗オーナー用: NW-XXX コード
         if (preg_match('/^NW-(\d+)$/i', $text, $matches)) {
             $this->handleShopCode((int) $matches[1], $userId, $replyToken);
             return;
         }
+
+        // その他のメッセージ
+        $this->reply($replyToken,
+            "求人アラートの登録はサイトの求人一覧ページから行えます。\n\n"
+            . "アラートを解除する場合は「解除」と送信してください。"
+        );
     }
 
     // --------------------------------------------------------
@@ -97,9 +111,10 @@ class LineWebhookController extends Controller
         if (!$replyToken) return;
 
         $this->reply($replyToken,
-            "ナイトワークリスト 通知BOTです。\n\n"
-            . "▼ 求人アラート（求職者の方）\n"
-            . "「登録」と送信して希望条件を設定してください。\n\n"
+            "ナイトワークリスト 通知BOTです！\n\n"
+            . "条件に合う新着求人をLINEでお知らせします。\n\n"
+            . "▼ 求人アラートの登録\n"
+            . "サイトの求人一覧ページ下部の「新着求人をLINEで受け取る」から登録できます。\n\n"
             . "▼ 応募通知設定（店舗オーナーの方）\n"
             . "管理画面に表示されている登録コード（例：NW-123）を送信してください。"
         );
@@ -120,6 +135,7 @@ class LineWebhookController extends Controller
             [
                 ['label' => '👩 女性ナイトワーク', 'text' => '女性'],
                 ['label' => '👨 男性ナイトワーク', 'text' => '男性'],
+                ['label' => '🔄 両方', 'text' => '両方'],
             ]
         );
     }
@@ -131,12 +147,14 @@ class LineWebhookController extends Controller
                 $gender = match($text) {
                     '女性', '女性ナイトワーク', 'female' => 'female',
                     '男性', '男性ナイトワーク', 'male'   => 'male',
+                    '両方', 'both'                       => 'both',
                     default => null,
                 };
                 if (!$gender) {
-                    $this->replyWithQuickReplies($replyToken, "「女性」または「男性」を選択してください。", [
+                    $this->replyWithQuickReplies($replyToken, "「女性」「男性」または「両方」を選択してください。", [
                         ['label' => '👩 女性ナイトワーク', 'text' => '女性'],
                         ['label' => '👨 男性ナイトワーク', 'text' => '男性'],
+                        ['label' => '🔄 両方', 'text' => '両方'],
                     ]);
                     return;
                 }
@@ -164,9 +182,11 @@ class LineWebhookController extends Controller
                     $this->saveAlert($session, null, $replyToken, $userId);
                     return;
                 }
-                $jobType = JobType::where('name', $text)
-                    ->where(fn($q) => $q->where('target_gender', $session->gender)->orWhere('target_gender', 'both'))
-                    ->first();
+                $jobTypeQuery = JobType::where('name', $text);
+                if ($session->gender !== 'both') {
+                    $jobTypeQuery->where(fn($q) => $q->where('target_gender', $session->gender)->orWhere('target_gender', 'both'));
+                }
+                $jobType = $jobTypeQuery->first();
                 if (!$jobType) {
                     $this->sendJobTypeQuickReply($replyToken, $session->gender);
                     return;
@@ -179,7 +199,12 @@ class LineWebhookController extends Controller
     private function saveAlert(JobAlertSession $session, ?int $jobTypeId, string $replyToken, string $userId): void
     {
         $areaName    = $session->area ? $session->area->name : '全国';
-        $genderLabel = $session->gender === 'female' ? '女性ナイトワーク' : '男性ナイトワーク';
+        $genderLabel = match($session->gender) {
+            'female' => '女性ナイトワーク',
+            'male'   => '男性ナイトワーク',
+            'both'   => '両方',
+            default  => $session->gender,
+        };
         $jobTypeName = $jobTypeId ? JobType::find($jobTypeId)?->name : 'なんでも';
 
         JobAlert::updateOrCreate(
@@ -210,10 +235,61 @@ class LineWebhookController extends Controller
         JobAlertSession::where('line_user_id', $userId)->delete();
 
         if ($deleted > 0) {
-            $this->reply($replyToken, "求人アラートを解除しました。\n再登録するには「登録」と送信してください。");
+            $this->reply($replyToken, "求人アラートを解除しました。\n再登録はサイトの求人一覧ページから行えます。");
         } else {
-            $this->reply($replyToken, "登録済みのアラートはありません。\n「登録」と送信すると設定できます。");
+            $this->reply($replyToken, "登録済みのアラートはありません。\nサイトの求人一覧ページから登録できます。");
         }
+    }
+
+    private function handleWebAlertToken(string $token, string $userId, string $replyToken): void
+    {
+        $webToken = WebAlertToken::with(['area', 'jobType'])->where('token', $token)->first();
+
+        if (!$webToken || $webToken->isExpired()) {
+            $this->reply($replyToken, "リンクの有効期限が切れています。\nもう一度サイトから設定してください。");
+            return;
+        }
+
+        $genderLabel = match($webToken->gender) {
+            'female' => '女性ナイトワーク',
+            'male'   => '男性ナイトワーク',
+            'both'   => '両方',
+            default  => $webToken->gender,
+        };
+        $areaName    = $webToken->area?->name ?? '全国';
+        $jobTypeName = $webToken->jobType?->name ?? 'なんでも';
+
+        JobAlert::updateOrCreate(
+            ['line_user_id' => $userId],
+            [
+                'gender'          => $webToken->gender,
+                'area_id'         => $webToken->area_id,
+                'job_type_id'     => $webToken->job_type_id,
+                'daily_pay_ok'    => $webToken->daily_pay_ok,
+                'inexperienced_ok'=> $webToken->inexperienced_ok,
+                'arubaito'        => $webToken->arubaito,
+                'is_active'       => true,
+            ]
+        );
+        $webToken->delete();
+        JobAlertSession::where('line_user_id', $userId)->delete();
+
+        $conditions = array_filter([
+            $webToken->daily_pay_ok     ? '日払いOK' : null,
+            $webToken->inexperienced_ok ? '未経験歓迎' : null,
+            $webToken->arubaito         ? 'アルバイト' : null,
+        ]);
+        $conditionText = $conditions ? "\n条件　　：" . implode('・', $conditions) : '';
+
+        $this->reply($replyToken,
+            "✅ 求人アラートを登録しました！\n\n"
+            . "カテゴリ：{$genderLabel}\n"
+            . "エリア　：{$areaName}\n"
+            . "職種　　：{$jobTypeName}"
+            . $conditionText . "\n\n"
+            . "条件に合う求人が公開されたらお知らせします。\n"
+            . "解除するには「解除」と送信してください。"
+        );
     }
 
     // --------------------------------------------------------
@@ -259,12 +335,11 @@ class LineWebhookController extends Controller
 
     private function sendJobTypeQuickReply(string $replyToken, ?string $gender): void
     {
-        $types = JobType::where(fn($q) =>
-                $q->where('target_gender', $gender)->orWhere('target_gender', 'both')
-            )
-            ->orderBy('sort_order')
-            ->limit(12)
-            ->get(['id', 'name']);
+        $query = JobType::orderBy('sort_order')->limit(12);
+        if ($gender !== 'both') {
+            $query->where(fn($q) => $q->where('target_gender', $gender)->orWhere('target_gender', 'both'));
+        }
+        $types = $query->get(['id', 'name']);
 
         $items = $types->map(fn($j) => ['label' => $j->name, 'text' => $j->name])->toArray();
         $items[] = ['label' => 'なんでも', 'text' => 'なんでも'];
@@ -283,7 +358,7 @@ class LineWebhookController extends Controller
         if (!$token) return;
 
         try {
-            Http::withToken($token)->post('https://api.line.me/v2/bot/message/reply', [
+            $res = Http::withToken($token)->post('https://api.line.me/v2/bot/message/reply', [
                 'replyToken' => $replyToken,
                 'messages'   => [[
                     'type'       => 'text',
@@ -291,6 +366,9 @@ class LineWebhookController extends Controller
                     'quickReply' => ['items' => $quickReplyItems],
                 ]],
             ]);
+            if (!$res->successful()) {
+                Log::error("LINE quickReply 失敗: HTTP " . $res->status() . " - " . $res->body());
+            }
         } catch (\Exception $e) {
             Log::error("LINE quickReply 失敗: " . $e->getMessage());
         }
@@ -302,10 +380,13 @@ class LineWebhookController extends Controller
         if (!$token) return;
 
         try {
-            Http::withToken($token)->post('https://api.line.me/v2/bot/message/reply', [
+            $res = Http::withToken($token)->post('https://api.line.me/v2/bot/message/reply', [
                 'replyToken' => $replyToken,
                 'messages'   => [['type' => 'text', 'text' => $text]],
             ]);
+            if (!$res->successful()) {
+                Log::error("LINE reply 失敗: HTTP " . $res->status() . " - " . $res->body());
+            }
         } catch (\Exception $e) {
             Log::error("LINE reply 失敗: " . $e->getMessage());
         }

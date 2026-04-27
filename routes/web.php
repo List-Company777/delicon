@@ -68,6 +68,11 @@ Route::view('/agency/', 'agency.index')->name('agency');
 Route::get('/inquiry/',  [\App\Http\Controllers\InquiryController::class, 'show'])->name('inquiry');
 Route::post('/inquiry/', [\App\Http\Controllers\InquiryController::class, 'send'])->name('inquiry.send');
 
+// 求人アラート登録（Web）
+Route::get('/alert/',          [\App\Http\Controllers\AlertRegistrationController::class, 'show'])->name('alert.register');
+Route::post('/alert/',         [\App\Http\Controllers\AlertRegistrationController::class, 'store'])->name('alert.store');
+Route::get('/alert/{token}/',  [\App\Http\Controllers\AlertRegistrationController::class, 'complete'])->name('alert.complete');
+
 // 店舗管理（要ログイン）
 use App\Http\Controllers\Manage\ShopInfoController;
 use App\Http\Controllers\Manage\BusinessController;
@@ -84,6 +89,7 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/partner/',                                [\App\Http\Controllers\Manage\PartnerPortalController::class, 'index'])->name('partner.index');
     Route::post('/partner/act-as/{shopId}/',               [\App\Http\Controllers\Manage\PartnerPortalController::class, 'actAs'])->name('partner.actAs')->where('shopId', '[0-9]+');
     Route::post('/partner/stop-acting/',                   [\App\Http\Controllers\Manage\PartnerPortalController::class, 'stopActing'])->name('partner.stopActing');
+    Route::delete('/partner/shops/{shopId}/',              [\App\Http\Controllers\Manage\PartnerPortalController::class, 'destroyShop'])->name('partner.shops.destroy')->where('shopId', '[0-9]+');
 
     // 店舗基本情報
     Route::get('/shop/edit/',            [ShopInfoController::class, 'edit'])->name('shop.edit');
@@ -195,6 +201,8 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::post('/shops/{id}/reject/',             [\App\Http\Controllers\Admin\ShopReviewController::class, 'reject'])->name('shops.reject')->where('id', '[0-9]+');
     Route::patch('/shops/{id}/bid-price/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateBidPrice'])->name('shops.updateBidPrice')->where('id', '[0-9]+');
     Route::post('/shops/{id}/add-budget/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'addBudget'])->name('shops.addBudget')->where('id', '[0-9]+');
+    Route::patch('/shops/{id}/partner/',           [\App\Http\Controllers\Admin\ShopReviewController::class, 'updatePartner'])->name('shops.updatePartner')->where('id', '[0-9]+');
+    Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
 
     // パートナー管理
     Route::get('/partners/',                       [\App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('partners.index');
@@ -209,8 +217,9 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::get('/partners/{partner}/csv/',         [\App\Http\Controllers\Admin\PartnerController::class, 'downloadCsv'])->name('partners.downloadCsv');
 
     // 月次取引明細
-    Route::get('/billing/',     [\App\Http\Controllers\Admin\BillingController::class, 'index'])->name('billing.index');
-    Route::get('/billing/csv/', [\App\Http\Controllers\Admin\BillingController::class, 'downloadCsv'])->name('billing.csv');
+    Route::get('/billing/',           [\App\Http\Controllers\Admin\BillingController::class, 'index'])->name('billing.index');
+    Route::get('/billing/csv/',       [\App\Http\Controllers\Admin\BillingController::class, 'downloadCsv'])->name('billing.csv');
+    Route::get('/billing/invoy-csv/', [\App\Http\Controllers\Admin\BillingController::class, 'downloadInvoy'])->name('billing.invoy-csv');
 
     // 有料プラン申し込み審査
     Route::get('/plan-applications/',                                          [\App\Http\Controllers\Admin\PlanApplicationController::class, 'index'])->name('plan-applications.index');
@@ -244,6 +253,11 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::put('/articles/{article}/',              [\App\Http\Controllers\Admin\ArticleController::class, 'update'])->name('articles.update');
     Route::delete('/articles/{article}/',           [\App\Http\Controllers\Admin\ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::get('/articles/{article}/preview/',      [\App\Http\Controllers\Admin\ArticleController::class, 'preview'])->name('articles.preview');
+    // 記事動画生成
+    Route::post('/articles/{article}/video/',          [\App\Http\Controllers\Admin\ArticleVideoController::class, 'generate'])->name('articles.video.generate');
+    Route::get('/articles/{article}/video/status/',    [\App\Http\Controllers\Admin\ArticleVideoController::class, 'status'])->name('articles.video.status');
+    Route::get('/articles/{article}/video/download/',  [\App\Http\Controllers\Admin\ArticleVideoController::class, 'download'])->name('articles.video.download');
+    Route::delete('/articles/{article}/video/',        [\App\Http\Controllers\Admin\ArticleVideoController::class, 'destroy'])->name('articles.video.destroy');
     // 検索PV分析
     Route::get('/search-page-views/', [\App\Http\Controllers\Admin\SearchPageViewController::class, 'index'])->name('search-page-views.index');
 

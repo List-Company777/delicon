@@ -1,2 +1,25 @@
 User-agent: *
-Disallow: /
+Allow: /
+
+# 管理・認証系
+Disallow: /admin/
+Disallow: /manage/
+Disallow: /login/
+Disallow: /logout/
+Disallow: /password/
+
+# フォーム・トークン系（インデックス不要）
+Disallow: /alert/
+Disallow: /line/
+
+# クリック計測・トラッキング（誤カウント防止）
+Disallow: /click/
+Disallow: /track/
+
+# 応募フロー
+Disallow: /*/apply/
+Disallow: /apply/
+
+Sitemap: https://nightwork-list.com/sitemap.xml
+Sitemap: https://nightwork-list.com/sitemap-detail.xml
+Sitemap: https://nightwork-list.com/sitemap-pages.xml

@@ -400,16 +400,18 @@ class ImportXmlFeed extends Command
 
             if ($feed->is_own_site || $hasOwner) {
                 $shop->update([
-                    'bid_price'     => 30,
-                    'xml_bid_price' => 0,
-                    'xml_enabled'   => false,
+                    'bid_price'       => 30,
+                    'xml_bid_price'   => 0,
+                    'xml_enabled'     => false,
+                    'xml_disabled_at' => now(),
                 ]);
                 $freed++;
             } else {
                 $shop->update([
-                    'status'        => 'inactive',
-                    'xml_bid_price' => 0,
-                    'xml_enabled'   => false,
+                    'status'          => 'inactive',
+                    'xml_bid_price'   => 0,
+                    'xml_enabled'     => false,
+                    'xml_disabled_at' => now(),
                 ]);
                 $hidden++;
             }
@@ -730,17 +732,23 @@ class ImportXmlFeed extends Command
             return;
         }
 
-        // 既にオーナーがいる場合はスキップ
-        if ($shop->users()->wherePivot('role', 'owner')->exists()) {
+        $currentOwner = $shop->users()->wherePivot('role', 'owner')->first();
+
+        // 既にオーナーがいてメールアドレスも同じならスキップ
+        if ($currentOwner && $currentOwner->email === $email) {
             return;
         }
 
         if ($this->dryRun) {
-            $this->line("  [DRY] オーナー自動作成予定: {$email} → {$shop->name}");
+            if ($currentOwner) {
+                $this->line("  [DRY] オーナー付け替え予定: {$shop->name} {$currentOwner->email} → {$email}");
+            } else {
+                $this->line("  [DRY] オーナー自動作成予定: {$email} → {$shop->name}");
+            }
             return;
         }
 
-        $user = User::firstOrCreate(
+        $newOwner = User::firstOrCreate(
             ['email' => $email],
             [
                 'name'              => $shop->name . ' 担当者',
@@ -749,9 +757,13 @@ class ImportXmlFeed extends Command
             ]
         );
 
-        if (!$shop->users()->where('users.id', $user->id)->exists()) {
-            $shop->users()->attach($user->id, ['role' => 'owner']);
-            $this->line("  オーナー紐付け: {$shop->name} → {$email}（" . ($user->wasRecentlyCreated ? '新規作成' : '既存ユーザー') . '）');
+        if ($currentOwner) {
+            $shop->users()->detach($currentOwner->id);
+            $shop->users()->attach($newOwner->id, ['role' => 'owner']);
+            $this->line("  オーナー付け替え: {$shop->name} {$currentOwner->email} → {$email}（" . ($newOwner->wasRecentlyCreated ? '新規作成' : '既存ユーザー') . '）');
+        } else {
+            $shop->users()->attach($newOwner->id, ['role' => 'owner']);
+            $this->line("  オーナー紐付け: {$shop->name} → {$email}（" . ($newOwner->wasRecentlyCreated ? '新規作成' : '既存ユーザー') . '）');
         }
     }
 

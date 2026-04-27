@@ -42,6 +42,7 @@ return [
         'messaging_token'          => env('LINE_MESSAGING_CHANNEL_ACCESS_TOKEN'),
         'messaging_channel_secret' => env('LINE_MESSAGING_CHANNEL_SECRET'),
         'bot_add_friend_url'       => env('LINE_BOT_ADD_FRIEND_URL'),
+        'bot_basic_id'             => env('LINE_BOT_BASIC_ID'),
     ],
 
     'upstage' => [
@@ -50,6 +51,22 @@ return [
 
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
+    ],
+
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+    ],
+
+    'did' => [
+        'key'        => env('DID_API_KEY'),
+        'avatar_url' => env('DID_AVATAR_URL'),
+    ],
+
+    'heygen' => [
+        'key'         => env('HEYGEN_API_KEY'),
+        'avatar_id'   => env('HEYGEN_AVATAR_ID'),
+        'avatar_type' => env('HEYGEN_AVATAR_TYPE', 'talking_photo'),
+        'voice_id'    => env('HEYGEN_VOICE_ID', '289430c137354573a3ab773c91f05094'),
     ],
 
 ];

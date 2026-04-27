@@ -19,6 +19,11 @@ class Article extends Model
         'updated_at_manual' => 'date',
     ];
 
+    public function video(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\ArticleVideo::class)->latestOfMany();
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(ArticleCategory::class, 'article_article_category');

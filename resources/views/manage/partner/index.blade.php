@@ -46,6 +46,16 @@
     </div>
     @endif
 
+    {{-- 店舗名検索 --}}
+    <form method="GET" action="{{ route('manage.partner.index') }}" class="mb-4 flex gap-2">
+        <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
+        <button type="submit" class="px-4 py-2 bg-business-700 text-white text-sm rounded-lg hover:bg-business-600 transition">検索</button>
+        @if($keyword)
+            <a href="{{ route('manage.partner.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
+        @endif
+    </form>
+
     @if($shops->isEmpty())
         <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
             <p class="mb-2">紹介店舗がまだありません</p>
@@ -61,7 +71,7 @@
                     <th class="text-left px-4 py-3 text-gray-500 font-medium">エリア</th>
                     <th class="text-center px-4 py-3 text-gray-500 font-medium">掲載状況</th>
                     <th class="text-right px-4 py-3 text-gray-500 font-medium w-24">入札単価</th>
-                    <th class="px-4 py-3 w-32"></th>
+                    <th class="px-4 py-3 {{ $partner->isManagement() ? 'w-48' : 'w-32' }}"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -85,13 +95,25 @@
                         {{ number_format($shop->bid_price) }}円
                     </td>
                     <td class="px-4 py-3 text-right">
-                        <form action="{{ route('manage.partner.actAs', $shop->id) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="text-xs bg-business-700 hover:bg-business-600 text-white px-3 py-1.5 rounded transition">
-                                管理画面を開く
-                            </button>
-                        </form>
+                        <div class="flex items-center justify-end gap-2">
+                            <form action="{{ route('manage.partner.actAs', $shop->id) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="text-xs bg-business-700 hover:bg-business-600 text-white px-3 py-1.5 rounded transition">
+                                    管理画面を開く
+                                </button>
+                            </form>
+                            @if($partner->isManagement())
+                            <form action="{{ route('manage.partner.shops.destroy', $shop->id) }}" method="POST"
+                                  onsubmit="return confirm('「{{ $shop->name }}」を完全に削除します。\nオーナーアカウントも削除されます。この操作は取り消せません。')">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="text-xs text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded transition">
+                                    削除
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @endforeach

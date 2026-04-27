@@ -17,86 +17,96 @@ class SendJobAlerts implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(private int $jobId) {}
+    public function __construct(private array $jobIds) {}
 
     public function handle(): void
     {
-        $job = Job::with(['shop.area', 'jobType', 'area'])->find($this->jobId);
-        if (!$job || $job->status !== 'active') {
-            return;
-        }
-
-        $searchGroups = match($job->search_group) {
-            'female' => ['female'],
-            'male'   => ['male'],
-            'both'   => ['female', 'male'],
-            default  => [],
-        };
-        if (empty($searchGroups)) return;
-
-        // 求人が属するエリアID（jobs.area_id または shop.area_id）
-        $areaId = $job->area_id ?? $job->shop->area_id ?? null;
-
-        $alerts = JobAlert::where('is_active', true)
-            ->whereIn('gender', $searchGroups)
-            ->where(fn($q) =>
-                // area_id が null（全国）または求人のエリアが一致
-                $q->whereNull('area_id')
-                  ->orWhere('area_id', $areaId)
-            )
-            ->where(fn($q) =>
-                // job_type_id が null（なんでも）または一致
-                $q->whereNull('job_type_id')
-                  ->orWhere('job_type_id', $job->job_type_id)
-            )
+        $jobs = Job::with(['shop.area', 'jobType', 'area'])
+            ->whereIn('id', $this->jobIds)
+            ->where('status', 'active')
             ->get();
 
-        if ($alerts->isEmpty()) return;
+        if ($jobs->isEmpty()) return;
 
-        // 送信前に残枠確認（15通バッファ確保）
         $remaining = LineMessageLog::remainingQuota();
         if ($remaining <= 0) {
-            Log::warning("SendJobAlerts: LINE月間枠不足のためスキップ (job_id={$this->jobId})");
+            Log::warning('SendJobAlerts: LINE月間枠不足のためスキップ');
             return;
         }
 
-        // 店舗オーナーの line_user_id を取得して除外リスト作成
         $ownerLineIds = \App\Models\User::whereNotNull('line_user_id')
             ->whereHas('shops', fn($q) => $q->wherePivot('role', 'owner'))
             ->pluck('line_user_id')
             ->flip()
             ->all();
 
-        $areaName    = $job->area?->name ?? $job->shop->area?->name ?? '';
-        $jobTypeName = $job->jobType?->name ?? '';
-        $shopName    = $job->shop->name ?? '';
-        $url         = route('job.show', $job->id) . '/';
+        $alerts = JobAlert::where('is_active', true)->get();
+        if ($alerts->isEmpty()) return;
 
-        $message = "【ナイトワークリスト】新着求人のお知らせ\n\n"
-            . ($areaName    ? "エリア：{$areaName}\n" : '')
-            . ($jobTypeName ? "職種　：{$jobTypeName}\n" : '')
-            . "店舗　：{$shopName}\n"
-            . "{$job->title}\n\n"
-            . $url
-            . "\n\n▼ アラート解除\n「解除」と送信してください";
-
+        $nums = ['①', '②', '③'];
         $sent = 0;
+
         foreach ($alerts as $alert) {
-            // 枠チェック（ループ内でも毎回確認）
             if ($sent >= $remaining) {
-                Log::warning("SendJobAlerts: 残枠到達のため途中打ち切り (job_id={$this->jobId}, sent={$sent})");
+                Log::warning("SendJobAlerts: 残枠到達のため途中打ち切り (sent={$sent})");
                 break;
             }
 
-            // 店舗オーナーを除外
-            if (isset($ownerLineIds[$alert->line_user_id])) {
-                continue;
-            }
+            if (isset($ownerLineIds[$alert->line_user_id])) continue;
+
+            // このユーザーの希望条件に合致する求人だけ絞り込む
+            $matched = $jobs->filter(function ($job) use ($alert) {
+                // alert.gender='both' は全求人対象、それ以外は求人のsearch_groupと一致するか確認
+                if ($alert->gender !== 'both') {
+                    $acceptable = match($job->search_group) {
+                        'female' => ['female'],
+                        'male'   => ['male'],
+                        'both'   => ['female', 'male'],
+                        default  => [],
+                    };
+                    if (!in_array($alert->gender, $acceptable, true)) return false;
+                }
+
+                $areaId = $job->area_id ?? $job->shop->area_id ?? null;
+                if ($alert->area_id !== null && $alert->area_id !== $areaId) return false;
+
+                if ($alert->job_type_id !== null && $alert->job_type_id !== $job->job_type_id) return false;
+
+                if ($alert->daily_pay_ok && !str_contains($job->title, '日払い')) return false;
+
+                if ($alert->inexperienced_ok && !str_contains($job->title, '未経験')) return false;
+
+                if ($alert->arubaito && !($job->employment_type === 'PART_TIME' && $job->wage_type === 'hourly')) return false;
+
+                return true;
+            })->values();
+
+            if ($matched->isEmpty()) continue;
+
+            $jobLines = $matched->map(function ($job, $index) use ($nums) {
+                $areaName    = $job->area?->name ?? $job->shop->area?->name ?? '';
+                $jobTypeName = $job->jobType?->name ?? '';
+                $shopName    = $job->shop->name ?? '';
+                $url         = route('job.show', $job->id) . '/';
+                $num         = $nums[$index] ?? ($index + 1) . '.';
+
+                $line = $num . ' ';
+                $line .= $areaName ? "{$areaName}" : '';
+                $line .= $jobTypeName ? "｜{$jobTypeName}" : '';
+                $line .= "\n　{$shopName}";
+                $line .= "\n　{$job->title}";
+                $line .= "\n　{$url}";
+                return $line;
+            })->implode("\n\n");
+
+            $message = "【ナイトワークリスト】新着求人のお知らせ\n\n"
+                . $jobLines
+                . "\n\n▼ アラート解除\n「解除」と送信してください";
 
             ShopNotifier::sendLinePush($alert->line_user_id, $message, 'job_alert');
             $sent++;
         }
 
-        Log::info("SendJobAlerts: job_id={$this->jobId} sent={$sent}");
+        Log::info('SendJobAlerts: jobs=[' . implode(',', $this->jobIds) . "] sent={$sent}");
     }
 }

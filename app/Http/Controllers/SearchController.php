@@ -223,14 +223,17 @@ class SearchController extends Controller
 
     private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
     {
-        $page = request()->input('page', 1);
-        $cacheKey = 'search:' . md5(implode('|', [
+        $page    = (int) request()->input('page', 1);
+        $perPage = 20;
+
+        // キャッシュにはIDのみ保存（Eloquentオブジェクトはシリアライズ不可）
+        $idsCacheKey = 'search_ids:' . md5(implode('|', [
             $gender, $area, $keyword, $useSlug, $filterKeyword,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
-            $hasPrivateRoom, $discountFirstSet, $prefSlug, $page,
+            $hasPrivateRoom, $discountFirstSet, $prefSlug,
         ]));
 
-        return Cache::remember($cacheKey, 300, function () use (
+        $allIds = Cache::remember($idsCacheKey, 300, function () use (
             $gender, $area, $keyword, $useSlug, $filterKeyword,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug
@@ -290,7 +293,7 @@ class SearchController extends Controller
                         ELSE 5
                     END')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
                 )
-                ->paginate(20);
+                ->pluck('shop_details.id')->all();
         } else {
             $searchGroups = $gender === 'male'
                 ? ['male', 'both']
@@ -347,11 +350,39 @@ class SearchController extends Controller
                         ELSE 5
                     END')->from('shops')->whereColumn('shops.id', 'jobs.shop_id')
                 )
-                ->paginate(20);
+                ->pluck('jobs.id')->all();
         }
 
         return $query;
         }); // Cache::remember
+
+        // ページ分のIDを切り出してモデルを取得（キャッシュ外）
+        $total   = count($allIds);
+        $pageIds = array_slice($allIds, ($page - 1) * $perPage, $perPage);
+
+        if (empty($pageIds)) {
+            $items = collect();
+        } elseif ($gender === 'business') {
+            $idOrder = implode(',', $pageIds);
+            $items = ShopDetail::with(['shop.area', 'shop.genre'])
+                ->whereIn('id', $pageIds)
+                ->orderByRaw("FIELD(id, {$idOrder})")
+                ->get();
+        } else {
+            $idOrder = implode(',', $pageIds);
+            $items = Job::with(['shop.area', 'jobType', 'area'])
+                ->whereIn('id', $pageIds)
+                ->orderByRaw("FIELD(id, {$idOrder})")
+                ->get();
+        }
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
     }
 
     /** LP統計バー用の集計（noindexページでは呼ばない） */

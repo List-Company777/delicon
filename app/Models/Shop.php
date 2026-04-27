@@ -19,7 +19,7 @@ class Shop extends Model
         'tel', 'line_id',
         'logo_image', 'main_image', 'status', 'bid_price', 'budget_balance', 'partner_id',
         'xml_source', 'xml_id', 'xml_enabled',
-        'xml_bid_price', 'xml_monthly_budget', 'xml_plan_activated_at', 'xml_image_url',
+        'xml_bid_price', 'xml_monthly_budget', 'xml_plan_activated_at', 'xml_disabled_at', 'xml_image_url',
         'line_notify_user_id',
         'alive_check_token', 'alive_check_sent_at', 'alive_confirmed_at',
     ];
@@ -27,6 +27,7 @@ class Shop extends Model
     protected $casts = [
         'xml_enabled'           => 'boolean',
         'xml_plan_activated_at' => 'datetime',
+        'xml_disabled_at'       => 'datetime',
         'alive_check_sent_at'   => 'datetime',
         'alive_confirmed_at'    => 'datetime',
     ];

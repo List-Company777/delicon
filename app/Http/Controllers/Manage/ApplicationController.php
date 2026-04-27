@@ -31,19 +31,31 @@ class ApplicationController extends Controller
         return $shop;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $shop = $this->currentShop();
         if (! $shop) {
             return redirect()->route('manage.dashboard');
         }
 
+        $jobId  = $request->query('job_id', '');
+        $unread = $request->boolean('unread');
+
         $applications = Application::with(['job', 'messages'])
             ->where('shop_id', $shop->id)
+            ->when($jobId !== '', fn($q) => $q->where('job_id', (int) $jobId))
+            ->when($unread, fn($q) => $q->whereHas('messages', fn($mq) =>
+                $mq->where('sender', 'applicant')->whereNull('read_at')
+            ))
             ->latest()
             ->paginate(20);
 
-        return view('manage.applications.index', compact('applications'));
+        $jobs = \App\Models\Job::where('shop_id', $shop->id)
+            ->whereHas('applications')
+            ->orderBy('title')
+            ->get(['id', 'title']);
+
+        return view('manage.applications.index', compact('applications', 'jobs', 'jobId', 'unread'));
     }
 
     public function show(int $id)

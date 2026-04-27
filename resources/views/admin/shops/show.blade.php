@@ -224,9 +224,23 @@
                 @else
                     <p class="text-gray-400">オーナー未登録</p>
                 @endif
-                @if($shop->partner)
-                    <p class="text-xs text-blue-600 mt-3">代理店：{{ $shop->partner->name }}</p>
-                @endif
+                {{-- 代理店紐づけ --}}
+                <div class="mt-4 border-t border-gray-100 pt-3">
+                    <p class="text-xs text-gray-400 mb-2">代理店</p>
+                    <form action="{{ route('admin.shops.updatePartner', $shop->id) }}/" method="POST" class="flex items-center gap-2">
+                        @csrf @method('PATCH')
+                        <select name="partner_id"
+                                class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-business-500 min-w-0">
+                            <option value="">（なし）</option>
+                            @foreach($partners as $p)
+                                <option value="{{ $p->id }}" {{ $shop->partner_id == $p->id ? 'selected' : '' }}>
+                                    [{{ $p->type === 'management' ? '管理代行' : '紹介' }}] {{ $p->company_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="text-xs text-business-700 hover:underline whitespace-nowrap">保存</button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -303,6 +317,18 @@
                        class="text-xs text-blue-500 hover:underline">公開ページを確認 →</a>
                 </div>
                 @endif
+
+                {{-- 削除 --}}
+                <div class="border-t border-gray-100 pt-4">
+                    <form action="{{ route('admin.shops.destroy', $shop->id) }}/" method="POST"
+                          onsubmit="return confirm('「{{ $shop->name }}」を完全に削除します。求人・応募履歴・オーナーアカウントも削除されます。\nこの操作は取り消せません。本当に削除しますか？')">
+                        @csrf @method('DELETE')
+                        <button type="submit"
+                                class="w-full py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-lg border border-red-200 transition">
+                            アカウントを削除
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 

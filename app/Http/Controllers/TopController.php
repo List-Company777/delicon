@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KeywordNormalization;
 use App\Models\SearchKeyword;
+use Illuminate\Support\Facades\DB;
 
 class TopController extends Controller
 {
@@ -34,6 +35,19 @@ class TopController extends Controller
             return $kw;
         });
 
-        return view('top.index', compact('popularKeywords'));
+        // 人気エリア：search_page_views から過去30日のエリア別PV上位6件をgender別に取得
+        $popularAreas = DB::table('search_page_views as v')
+            ->selectRaw('v.gender, v.area_slug, SUM(v.count) as total, a.name as area_name')
+            ->join('areas as a', 'a.slug', '=', 'v.area_slug')
+            ->whereRaw('v.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
+            ->where('v.area_slug', '!=', 'all')
+            ->whereIn('v.gender', ['female', 'male', 'business'])
+            ->groupBy('v.gender', 'v.area_slug', 'a.name')
+            ->orderByDesc('total')
+            ->get()
+            ->groupBy('gender')
+            ->map(fn($rows) => $rows->take(6));
+
+        return view('top.index', compact('popularKeywords', 'popularAreas'));
     }
 }

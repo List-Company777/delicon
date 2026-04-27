@@ -10,7 +10,7 @@ class AdminIpRestrict
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $allowedIps = array_filter(array_map('trim', explode(',', env('ADMIN_ALLOWED_IPS', ''))));
+        $allowedIps = config('admin.allowed_ips', []);
 
         if (!empty($allowedIps) && !in_array($request->ip(), $allowedIps, true)) {
             abort(403);

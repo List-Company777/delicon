@@ -17,7 +17,7 @@ class ArticleController extends Controller
     {
         $articleTab = $request->query('atab', 'published');
 
-        $publishedArticles = Article::with('categories')
+        $publishedArticles = Article::with(['categories', 'video'])
             ->where('is_published', true)
             ->orderByDesc('published_at')
             ->paginate(20, ['*'], 'pub_page')
@@ -147,8 +147,9 @@ class ArticleController extends Controller
     }
 
     /** タグ名カンマ区切り文字列 → TagのIDリスト（なければ作成） */
-    private function resolveTags(string $tagInput): array
+    private function resolveTags(?string $tagInput): array
     {
+        if (!$tagInput) return [];
         $names = array_filter(array_map('trim', explode(',', $tagInput)));
         $ids   = [];
         foreach ($names as $name) {

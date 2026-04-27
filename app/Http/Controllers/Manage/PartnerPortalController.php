@@ -12,13 +12,16 @@ use Illuminate\Support\Facades\DB;
 class PartnerPortalController extends Controller
 {
     /** 店舗一覧 */
-    public function index()
+    public function index(Request $request)
     {
         $partner = auth()->user()->partner;
         abort_if(! $partner, 403);
 
+        $keyword = $request->input('keyword', '');
+
         $shops = Shop::where('partner_id', $partner->id)
             ->with(['genre', 'area.prefecture', 'detail'])
+            ->when($keyword !== '', fn($q) => $q->where('name', 'like', '%' . $keyword . '%'))
             ->orderByDesc('bid_price')
             ->orderBy('name')
             ->get();
@@ -29,7 +32,7 @@ class PartnerPortalController extends Controller
         $rankings       = $partner->isManagement() ? $this->computeShopRankings($shops) : collect();
 
         return view('manage.partner.index', compact(
-            'partner', 'shops', 'totalCount', 'activeCount', 'nonPublicCount', 'rankings'
+            'partner', 'shops', 'totalCount', 'activeCount', 'nonPublicCount', 'rankings', 'keyword'
         ));
     }
 
@@ -54,6 +57,31 @@ class PartnerPortalController extends Controller
     {
         session()->forget('acting_shop_id');
         return redirect()->route('manage.partner.index');
+    }
+
+    /** 店舗アカウント削除（管理代行代理店のみ） */
+    public function destroyShop(int $shopId)
+    {
+        $partner = auth()->user()->partner;
+        abort_if(!$partner || !$partner->isManagement(), 403);
+
+        $shop = Shop::where('id', $shopId)
+            ->where('partner_id', $partner->id)
+            ->firstOrFail();
+
+        $shopName = $shop->name;
+        $owners = $shop->users()->wherePivot('role', 'owner')->get();
+
+        $shop->delete();
+
+        foreach ($owners as $owner) {
+            if (!$owner->shops()->exists()) {
+                $owner->delete();
+            }
+        }
+
+        return redirect()->route('manage.partner.index')
+            ->with('success', "「{$shopName}」のアカウントを削除しました。");
     }
 
     /**

@@ -35,6 +35,7 @@ class ShopsAliveCheck extends Command
     private function inactivateExpired(): void
     {
         $shops = Shop::where('status', 'active')
+            ->where('xml_enabled', false)
             ->whereNotNull('alive_check_sent_at')
             ->where('alive_check_sent_at', '<=', now()->subDays(self::GRACE_DAYS))
             ->where(function ($q) {
@@ -92,8 +93,24 @@ class ShopsAliveCheck extends Command
                 continue;
             }
 
-            // オーナーの最終ログインが INACTIVE_MONTHS 以内なら対象外
-            if ($owner->last_login_at && $owner->last_login_at->gt(now()->subMonths(self::INACTIVE_MONTHS))) {
+            // XML連携が有効な間はアクティブとみなす
+            if ($shop->xml_enabled) {
+                continue;
+            }
+
+            // XML連携で自動作成されてパスワードリセット未実施（一度もログインしていない）は対象外
+            if (! $owner->last_login_at) {
+                continue;
+            }
+
+            // 「実質的なアクティブ日時」= max(最終ログイン日時, XML連携終了日時)
+            // XML終了後に3ヶ月のカウントを開始するため、xml_disabled_at を優先する
+            $effectiveLastActive = $owner->last_login_at;
+            if ($shop->xml_disabled_at && $shop->xml_disabled_at->gt($effectiveLastActive)) {
+                $effectiveLastActive = $shop->xml_disabled_at;
+            }
+
+            if ($effectiveLastActive->gt(now()->subMonths(self::INACTIVE_MONTHS))) {
                 continue;
             }
 

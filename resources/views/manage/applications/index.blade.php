@@ -20,7 +20,31 @@
 
 <div class="max-w-4xl mx-auto px-4 py-8">
 
-    <h2 class="text-lg font-bold text-gray-800 mb-6">応募管理</h2>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h2 class="text-lg font-bold text-gray-800">応募管理</h2>
+        <form method="GET" action="{{ route('manage.applications.index') }}" class="flex flex-wrap gap-2 items-center">
+            @if($jobs->isNotEmpty())
+            <select name="job_id" onchange="this.form.submit()"
+                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500">
+                <option value="">求人：すべて</option>
+                @foreach($jobs as $job)
+                    <option value="{{ $job->id }}" {{ $jobId == $job->id ? 'selected' : '' }}>
+                        {{ Str::limit($job->title, 30) }}
+                    </option>
+                @endforeach
+            </select>
+            @endif
+            <label class="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer select-none">
+                <input type="checkbox" name="unread" value="1" onchange="this.form.submit()"
+                       {{ $unread ? 'checked' : '' }}
+                       class="rounded border-gray-300 text-business-700 focus:ring-business-500">
+                未読のみ
+            </label>
+            @if($jobId || $unread)
+                <a href="{{ route('manage.applications.index') }}" class="text-sm text-gray-400 hover:text-gray-600">クリア</a>
+            @endif
+        </form>
+    </div>
 
     @if($applications->isEmpty())
         <div class="bg-white rounded-xl shadow-sm p-10 text-center text-gray-400">
@@ -68,7 +92,7 @@
         </div>
 
         <div class="mt-6">
-            {{ $applications->links() }}
+            {{ $applications->appends(request()->query())->links() }}
         </div>
     @endif
 </div>

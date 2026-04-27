@@ -30,6 +30,17 @@
     @endforeach
 </div>
 
+{{-- 店舗名検索 --}}
+<form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex gap-2">
+    <input type="hidden" name="status" value="{{ $status }}">
+    <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
+           class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
+    <button type="submit" class="px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">検索</button>
+    @if($keyword)
+        <a href="{{ route('admin.shops.index', ['status' => $status]) }}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
+    @endif
+</form>
+
 @if($shops->isEmpty())
     <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
         <p>該当する店舗はありません</p>

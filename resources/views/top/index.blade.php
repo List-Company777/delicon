@@ -30,7 +30,7 @@
             <div class="rounded-xl p-5 border border-business-700/40 bg-business-700/10">
                 <div class="flex items-center gap-2 mb-4">
                     <span class="w-3 h-3 rounded-full bg-business-300 inline-block"></span>
-                    <h2 class="text-business-300 font-bold text-lg">夜遊びリスト</h2>
+                    <h2 class="text-business-300 font-bold text-lg">夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span></h2>
                 </div>
                 <p class="text-gray-400 text-xs mb-4">夜遊びスポット情報・セット料金を検索</p>
                 <form action="{{ route('search') }}" method="GET">
@@ -110,15 +110,22 @@
         {{-- 夜遊びリスト --}}
         <div>
             <h3 class="text-sm font-bold text-business-700 border-b-2 border-business-300 pb-1 mb-3">
-                夜遊びリスト
+                夜遊びリスト（ナイトスポット情報）
             </h3>
             <div class="flex flex-wrap gap-2">
+                @forelse($popularAreas->get('business', collect()) as $row)
+                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
+                   class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
+                    {{ $row->area_name }}
+                </a>
+                @empty
                 @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'nakasu' => '中洲'] as $slug => $name)
                 <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
                     {{ $name }}
                 </a>
                 @endforeach
+                @endforelse
             </div>
         </div>
 
@@ -128,12 +135,19 @@
                 男性ナイトワーク
             </h3>
             <div class="flex flex-wrap gap-2">
+                @forelse($popularAreas->get('male', collect()) as $row)
+                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
+                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
+                    {{ $row->area_name }}
+                </a>
+                @empty
                 @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
                 <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
                     {{ $name }}
                 </a>
                 @endforeach
+                @endforelse
             </div>
         </div>
 
@@ -143,12 +157,19 @@
                 女性ナイトワーク
             </h3>
             <div class="flex flex-wrap gap-2">
+                @forelse($popularAreas->get('female', collect()) as $row)
+                <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
+                   class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
+                    {{ $row->area_name }}
+                </a>
+                @empty
                 @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
                 <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
                     {{ $name }}
                 </a>
                 @endforeach
+                @endforelse
             </div>
         </div>
 
@@ -180,10 +201,18 @@
         <h2 class="text-sm font-bold text-gray-500 mb-3">よく検索されているキーワード</h2>
         <div class="flex flex-wrap gap-2">
             @foreach($popularKeywords as $kw)
+            @php
+                $kwStyle = match($kw->gender) {
+                    'female'   => 'bg-female-50 border-female-100 text-female-600 hover:bg-female-100',
+                    'male'     => 'bg-male-50 border-male-300 text-male-600 hover:bg-male-100',
+                    'business' => 'bg-business-50 border-business-300 text-business-700 hover:bg-business-100',
+                    default    => 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100',
+                };
+            @endphp
             <a href="{{ $kw->directory_url ?? route('search', ['gender' => $kw->gender, 'keyword' => $kw->keyword]) }}"
-               class="px-3 py-1 bg-white border border-gray-300 text-gray-600 rounded-full text-xs hover:bg-gray-200 transition">
+               class="px-3 py-1 border rounded-full text-xs transition {{ $kwStyle }}">
                 {{ $kw->keyword }}
-                <span class="text-gray-400 ml-1">{{ number_format($kw->search_count) }}</span>
+                <span class="opacity-60 ml-1">{{ number_format($kw->search_count) }}</span>
             </a>
             @endforeach
         </div>

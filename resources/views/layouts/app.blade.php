@@ -34,6 +34,60 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
     @stack('head')
+    <script type="application/ld+json">{!! json_encode([
+        '@context' => 'https://schema.org',
+        '@graph'   => [
+            [
+                '@type'           => 'Organization',
+                '@id'             => url('/') . '#org',
+                'name'            => 'ナイトワークリスト',
+                'url'             => url('/'),
+                'foundingDate'    => '2026',
+                'foundingLocation'=> ['@type' => 'Place', 'name' => '日本'],
+                'logo'            => [
+                    '@type'  => 'ImageObject',
+                    '@id'    => url('/') . '#logo',
+                    'url'    => asset('images/logo.svg'),
+                    'width'  => 600,
+                    'height' => 120,
+                ],
+                'address' => [
+                    '@type'           => 'PostalAddress',
+                    'addressCountry'  => 'JP',
+                    'addressRegion'   => '東京都',
+                    'postalCode'      => '104-0061',
+                    'addressLocality' => '中央区',
+                    'streetAddress'   => '銀座3-10-9 KEC銀座ビル701',
+                ],
+                'contactPoint' => [
+                    '@type'             => 'ContactPoint',
+                    'telephone'         => '+81352066966',
+                    'contactType'       => 'customer service',
+                    'areaServed'        => 'JP',
+                    'availableLanguage' => ['ja'],
+                ],
+                'parentOrganization' => [
+                    '@type' => 'Organization',
+                    'name'  => '株式会社リスト',
+                    'url'   => 'https://list-company.net/',
+                ],
+            ],
+            [
+                '@type'           => 'WebSite',
+                '@id'             => url('/') . '#website',
+                'url'             => url('/'),
+                'name'            => 'ナイトワークリスト',
+                'inLanguage'      => 'ja',
+                'publisher'       => ['@id' => url('/') . '#org'],
+                'isAccessibleForFree' => true,
+                'potentialAction' => [
+                    '@type'       => 'SearchAction',
+                    'target'      => ['@type' => 'EntryPoint', 'urlTemplate' => url('/search/') . '?gender=female&keyword={search_term_string}'],
+                    'query-input' => 'required name=search_term_string',
+                ],
+            ],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE65XYN5VT"></script>
     <script>
@@ -134,7 +188,7 @@
                                  width="970" height="250"
                                  loading="lazy" decoding="async" fetchpriority="low">
                         </picture>
-                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">アップステージ</span>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">男性求人アップステージ</span>
                     </a>
                     <a href="https://genbars.jp/" target="_blank" rel="noopener" class="block group">
                         <picture>
@@ -143,7 +197,7 @@
                                  width="970" height="250"
                                  loading="lazy" decoding="async" fetchpriority="low">
                         </picture>
-                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">ゲンバーズ</span>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">現場求人ゲンバーズ</span>
                     </a>
                     <a href="https://cabacrown.net/" target="_blank" rel="noopener" class="block group">
                         <picture>
@@ -152,7 +206,7 @@
                                  width="970" height="250"
                                  loading="lazy" decoding="async" fetchpriority="low">
                         </picture>
-                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">キャバクラウン</span>
+                        <span class="block text-xs text-center mt-1 text-gray-500 group-hover:text-gray-300 transition-colors">ナイトワークキャバクラウン</span>
                     </a>
                 </div>
             </div>

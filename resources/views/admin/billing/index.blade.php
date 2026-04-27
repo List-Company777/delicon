@@ -4,7 +4,7 @@
 <div class="bg-gray-800 text-white py-4">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">Admin › 月次取引明細</h1>
-        <form method="GET" action="{{ route('admin.billing.index') }}" class="flex items-center gap-2">
+        <form method="GET" action="{{ route('admin.billing.index') }}" class="flex items-center gap-2 flex-wrap">
             <select name="year" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm">
                 @for($y = now()->year; $y >= now()->year - 1; $y--)
                     <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}年</option>
@@ -14,6 +14,15 @@
                 @for($m = 1; $m <= 12; $m++)
                     <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>{{ $m }}月</option>
                 @endfor
+            </select>
+            <select name="partner_id" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm">
+                <option value="">代理店：すべて</option>
+                <option value="direct" {{ $partnerId === 'direct' ? 'selected' : '' }}>直接のみ</option>
+                @foreach($partners as $p)
+                    <option value="{{ $p->id }}" {{ $partnerId == $p->id ? 'selected' : '' }}>
+                        [{{ $p->type === 'management' ? '管理' : '紹介' }}] {{ $p->company_name }}
+                    </option>
+                @endforeach
             </select>
             <button type="submit" class="bg-yellow-400 text-gray-900 text-sm font-bold px-3 py-1 rounded hover:bg-yellow-300 transition">表示</button>
         </form>
@@ -51,10 +60,14 @@
     </div>
 
     {{-- CSVダウンロード --}}
-    <div class="flex justify-end">
-        <a href="{{ route('admin.billing.csv', ['year' => $year, 'month' => $month]) }}"
+    <div class="flex justify-end gap-3">
+        <a href="{{ route('admin.billing.csv', array_filter(['year' => $year, 'month' => $month, 'partner_id' => $partnerId ?: null])) }}"
            class="bg-green-700 hover:bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             CSVダウンロード（{{ $year }}年{{ $month }}月）
+        </a>
+        <a href="{{ route('admin.billing.invoy-csv', ['year' => $year, 'month' => $month]) }}"
+           class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
+            invoy用CSVダウンロード（{{ $year }}年{{ $month }}月）
         </a>
     </div>
 
