@@ -51,11 +51,11 @@
                     <div class="font-bold text-purple-800 text-sm">ナイトワークリスト</div>
                     <div class="text-xs text-gray-500 mt-1">水商売系特化サイト</div>
                 </a>
-                <div class="bg-gray-50 rounded-lg p-4 text-center border border-dashed border-gray-300">
-                    <div class="text-2xl mb-2">🔜</div>
-                    <div class="font-bold text-gray-500 text-sm">風俗リスト</div>
-                    <div class="text-xs text-gray-400 mt-1">風俗系特化サイト（予定）</div>
-                </div>
+                <a href="https://fuzoku-list.com/" target="_blank" rel="noopener" class="bg-pink-50 rounded-lg p-4 text-center block hover:bg-pink-100 transition">
+                    <div class="text-2xl mb-2">🌸</div>
+                    <div class="font-bold text-pink-800 text-sm">風俗リスト</div>
+                    <div class="text-xs text-gray-500 mt-1">風俗系特化サイト</div>
+                </a>
             </div>
         </div>
     </section>

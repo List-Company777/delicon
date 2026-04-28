@@ -62,23 +62,25 @@ class Job extends Model
      */
     public function scopeWithinPlanLimit(Builder $query): Builder
     {
-        return $query->whereRaw('(
-            SELECT COUNT(*) FROM jobs j2
-            WHERE j2.shop_id = jobs.shop_id
-            AND (
-                (jobs.search_group IN ("female", "both") AND j2.search_group IN ("female", "both"))
-                OR
-                (jobs.search_group = "male" AND j2.search_group = "male")
-            )
-            AND j2.id <= jobs.id
-        ) <= (
-            SELECT CASE
-                WHEN s.budget_balance >= s.bid_price THEN
-                    CASE WHEN jobs.search_group IN ("female", "both") THEN 3 ELSE 5 END
-                ELSE 1
-            END
-            FROM shops s WHERE s.id = jobs.shop_id
-        )');
+        // ウィンドウ関数で shop×カテゴリ内の順位を事前計算し JOIN する（コリレーテッドサブクエリ排除）
+        return $query->joinSub(
+            \DB::table('jobs as j2')
+                ->join('shops as s', 's.id', '=', 'j2.shop_id')
+                ->where('j2.status', 'active')
+                ->selectRaw("
+                    j2.id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY j2.shop_id,
+                            CASE WHEN j2.search_group IN ('female','both') THEN 'cast' ELSE 'staff' END
+                        ORDER BY j2.id ASC
+                    ) AS rn,
+                    CASE WHEN s.budget_balance >= s.bid_price THEN
+                        CASE WHEN j2.search_group IN ('female','both') THEN 3 ELSE 5 END
+                    ELSE 1 END AS plan_limit
+                "),
+            'plan_rank',
+            'plan_rank.id', '=', 'jobs.id'
+        )->whereRaw('plan_rank.rn <= plan_rank.plan_limit');
     }
 
     // search_groupをjob_type + gender_overrideから自動計算して保存

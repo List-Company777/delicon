@@ -114,7 +114,7 @@
 @endphp
 @section('canonical', $canonicalUrl)
 @section('title', $pageTitle)
-@if($currentPage > 1 || ($noindex ?? false))
+@if(!$isLp || $currentPage > 1 || ($noindex ?? false))
 @section('robots', 'noindex, follow')
 @endif
 @if($pageDesc)

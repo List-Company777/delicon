@@ -114,8 +114,8 @@ class SearchController extends Controller
 
         $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
-        if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
+        $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $pref_slug, 'all');
 
@@ -133,13 +133,13 @@ class SearchController extends Controller
         $lpRelated        = $this->computeRelatedLinks($gender, null, $pref_slug, 'all', $prefModel);
         $relatedArticles  = $this->computeRelatedArticles($gender);
 
-        return view('search.index', compact(
+        return response()->view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'isPrefPage',
             'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
-        ));
+        ), $status);
     }
 
     // 正規化ディレクトリURL（LP）
@@ -170,8 +170,8 @@ class SearchController extends Controller
             ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet)
             : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
-        if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
+        $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
@@ -179,13 +179,13 @@ class SearchController extends Controller
         $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug, $prefOnlyModel);
         $relatedArticles = $this->computeRelatedArticles($gender);
 
-        return view('search.index', compact(
+        return response()->view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
-        ));
+        ), $status);
     }
 
     // フィルター付きディレクトリURL（LP + クイックタグ絞り込み）
@@ -219,8 +219,8 @@ class SearchController extends Controller
 
         $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterType->keyword_filter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
-        if ($results->total() === 0) abort(404);
         $noindex = $results->total() <= 5;
+        $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
@@ -228,13 +228,13 @@ class SearchController extends Controller
         $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
         $relatedArticles = $this->computeRelatedArticles($gender);
 
-        return view('search.index', compact(
+        return response()->view('search.index', compact(
             'gender', 'area_slug', 'job_slug', 'filter_slug', 'results',
             'areaName', 'jobTypeName', 'filterName', 'prefModel',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
             'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
-        ));
+        ), $status);
     }
 
     private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')

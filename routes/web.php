@@ -11,7 +11,13 @@ use App\Http\Controllers\Manage\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\KeywordController as AdminKeyword;
 use App\Http\Controllers\Admin\MasterController as AdminMaster;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
+
+// サイトマップ（静的ファイルより先にルートで処理）
+Route::get('/sitemap.xml',        [SitemapController::class, 'main']);
+Route::get('/sitemap-detail.xml', [SitemapController::class, 'detail']);
+Route::get('/sitemap-pages.xml',  [SitemapController::class, 'pages']);
 
 // トップページ
 Route::get('/', [TopController::class, 'index'])->name('top');
