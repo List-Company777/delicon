@@ -17,7 +17,7 @@ class ArticleTopic extends Model
         return match ($this->gender) {
             'female'   => '女性',
             'male'     => '男性',
-            'business' => '夜遊び',
+            'yoasobi' => '夜遊び',
             'shop'     => '店舗運営者',
             default    => '共通',
         };
@@ -28,7 +28,7 @@ class ArticleTopic extends Model
         return match ($this->gender) {
             'female'   => 'pink',
             'male'     => 'blue',
-            'business' => 'purple',
+            'yoasobi' => 'purple',
             'shop'     => 'green',
             default    => 'gray',
         };

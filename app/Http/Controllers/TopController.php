@@ -41,7 +41,7 @@ class TopController extends Controller
             ->join('areas as a', 'a.slug', '=', 'v.area_slug')
             ->whereRaw('v.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
             ->where('v.area_slug', '!=', 'all')
-            ->whereIn('v.gender', ['female', 'male', 'business'])
+            ->whereIn('v.gender', ['female', 'male', 'yoasobi'])
             ->groupBy('v.gender', 'v.area_slug', 'a.name')
             ->orderByDesc('total')
             ->get()

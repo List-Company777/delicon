@@ -61,7 +61,7 @@
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">対象</th>
                 <td class="px-4 py-3">
                     <div class="flex gap-6">
-                        @foreach(['shop' => '店舗運営者', 'female' => '女性ナイトワーク', 'male' => '男性ナイトワーク', 'business' => '夜遊び'] as $val => $label)
+                        @foreach(['shop' => '店舗運営者', 'female' => '女性ナイトワーク', 'male' => '男性ナイトワーク', 'yoasobi' => '夜遊び'] as $val => $label)
                         <label class="inline-flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="gender" value="{{ $val }}"
                                    {{ old('gender', $article->gender ?? 'shop') === $val ? 'checked' : '' }}>

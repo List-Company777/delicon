@@ -10,7 +10,7 @@
     $genderBadge = fn($g) => match($g) {
         'female'   => 'bg-pink-100 text-pink-700',
         'male'     => 'bg-blue-100 text-blue-700',
-        'business' => 'bg-purple-100 text-purple-700',
+        'yoasobi' => 'bg-purple-100 text-purple-700',
         'shop'     => 'bg-green-100 text-green-700',
         default    => 'bg-gray-100 text-gray-600',
     };
@@ -99,7 +99,7 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500">
-                            {{ match($article->gender) { 'female' => '女性', 'male' => '男性', 'business' => '夜遊び', 'shop' => '店舗運営者', default => '全般' } }}
+                            {{ match($article->gender) { 'female' => '女性', 'male' => '男性', 'yoasobi' => '夜遊び', 'shop' => '店舗運営者', default => '全般' } }}
                         </td>
                         <td class="px-4 py-3">
                             @if($article->isVisible())
@@ -238,7 +238,7 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500">
-                            {{ match($article->gender) { 'female' => '女性', 'male' => '男性', 'business' => '夜遊び', 'shop' => '店舗運営者', default => '全般' } }}
+                            {{ match($article->gender) { 'female' => '女性', 'male' => '男性', 'yoasobi' => '夜遊び', 'shop' => '店舗運営者', default => '全般' } }}
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500">
                             {{ $article->updated_at->format('Y/m/d H:i') }}
@@ -417,7 +417,7 @@
                 $badgeColor = match($prompt->gender) {
                     'female'   => 'bg-pink-100 text-pink-700',
                     'male'     => 'bg-blue-100 text-blue-700',
-                    'business' => 'bg-purple-100 text-purple-700',
+                    'yoasobi' => 'bg-purple-100 text-purple-700',
                     'shop'     => 'bg-green-100 text-green-700',
                     default    => 'bg-gray-100 text-gray-600',
                 };

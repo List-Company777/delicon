@@ -10,7 +10,7 @@ class KeywordNormalizationSeeder extends Seeder
     public function run(): void
     {
         $now = now();
-        $genders = ['male', 'female', 'business'];
+        $genders = ['male', 'female', 'yoasobi'];
 
         // エリアスラッグ → ID のマップ
         $areaMap = DB::table('areas')->pluck('id', 'slug');

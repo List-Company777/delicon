@@ -11,7 +11,7 @@
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-@if($gender !== 'business')
+@if($gender !== 'yoasobi')
 @foreach($jobTypes as $jt)
   <url>
     <loc>{{ $base }}/{{ $gender }}/all/{{ $jt->slug }}/</loc>

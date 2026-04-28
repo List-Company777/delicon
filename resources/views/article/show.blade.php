@@ -2,25 +2,25 @@
     $genderLabel = match($article->gender) {
         'female'   => '女性ナイトワーク',
         'male'     => '男性ナイトワーク',
-        'business' => '夜遊び',
+        'yoasobi' => '夜遊び',
         'shop'     => '店舗運営',
         default    => 'ナイトワーク',
     };
     $genderColor = match($article->gender) {
         'female'   => 'text-female-600',
         'male'     => 'text-male-600',
-        'business' => 'text-business-700',
+        'yoasobi'  => 'text-business-700',
         'shop'     => 'text-green-700',
         default    => 'text-gray-600',
     };
     $jobBorderColor = match($article->gender) {
         'male'     => 'border-male-200 bg-male-50 hover:bg-male-100',
-        'business' => 'border-business-200 bg-business-50 hover:bg-business-100',
+        'yoasobi'  => 'border-business-200 bg-business-50 hover:bg-business-100',
         default    => 'border-female-100 bg-female-50 hover:bg-female-100',
     };
     $jobTextColor = match($article->gender) {
         'male'     => 'text-male-600',
-        'business' => 'text-business-700',
+        'yoasobi'  => 'text-business-700',
         default    => 'text-female-600',
     };
 @endphp
@@ -119,8 +119,8 @@
         ],
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-<script type="application/ld+json">{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json">{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @if(!empty($article->faq))
 @php
     $faqLd = [
@@ -133,7 +133,7 @@
         ])->values()->all(),
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @if($article->video?->isDone())
 @php
@@ -148,7 +148,7 @@
         'publisher'    => ['@type' => 'Organization', 'name' => 'ナイトワークリスト'],
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @endpush
 
@@ -287,7 +287,7 @@
             @endforeach
         </div>
         <div class="mt-4 text-center">
-            <a href="{{ route('search', ['gender' => in_array($article->gender, ['female','male','business']) ? $article->gender : 'female']) }}"
+            <a href="{{ route('search', ['gender' => in_array($article->gender, ['female','male','yoasobi']) ? $article->gender : 'female']) }}"
                class="text-sm text-gray-500 hover:text-gray-700 underline">
                 {{ $genderLabel }}の求人をもっと見る →
             </a>

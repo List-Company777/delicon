@@ -112,7 +112,7 @@ class KeywordController extends Controller
 
     public function generateCandidates(Request $request)
     {
-        $genders = ['female', 'male', 'business'];
+        $genders = ['female', 'male', 'yoasobi'];
         $registered = 0;
 
         foreach ($genders as $gender) {

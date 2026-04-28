@@ -113,14 +113,14 @@
                 夜遊びリスト（ナイトスポット情報）
             </h3>
             <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('business', collect()) as $row)
-                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
+                @forelse($popularAreas->get('yoasobi', collect()) as $row)
+                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
                     {{ $row->area_name }}
                 </a>
                 @empty
                 @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'nakasu' => '中洲'] as $slug => $name)
-                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
+                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
                     {{ $name }}
                 </a>

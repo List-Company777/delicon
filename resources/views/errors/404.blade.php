@@ -24,7 +24,7 @@
             <span class="block text-2xl mb-1">👨</span>
             <span class="block text-sm font-bold text-blue-700">男性ナイトワーク</span>
         </a>
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
            class="block bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl py-5 transition">
             <span class="block text-2xl mb-1">🍸</span>
             <span class="block text-sm font-bold text-yellow-700">夜遊び情報</span>
@@ -63,7 +63,7 @@
             <p class="text-xs font-bold text-yellow-500 mb-3">🍸 夜遊び情報</p>
             <div class="flex flex-wrap gap-2">
                 @foreach($areas as [$name, $slug])
-                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
+                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs rounded-full transition">{{ $name }}</a>
                 @endforeach
             </div>

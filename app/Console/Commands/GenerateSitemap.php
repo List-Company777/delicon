@@ -23,7 +23,7 @@ class GenerateSitemap extends Command
         $areas       = Area::all()->keyBy('id');
         $jobTypes    = JobType::all()->keyBy('id');
         $prefectures = Prefecture::all();
-        $genders     = ['male', 'female', 'business'];
+        $genders     = ['male', 'female', 'yoasobi'];
 
         // area_slug の選択肢（all を含む）
         $areaSlugs = collect(['all'])->merge($areas->pluck('slug'));
@@ -70,7 +70,7 @@ class GenerateSitemap extends Command
 
     private function countPrefResults(string $gender, string $prefSlug): int
     {
-        if ($gender === 'business') {
+        if ($gender === 'yoasobi') {
             return ShopDetail::where('status', 'active')
                 ->whereHas('shop', fn($s) =>
                     $s->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug))
@@ -88,7 +88,7 @@ class GenerateSitemap extends Command
 
     private function countResults(string $gender, string $areaSlug, string $jobSlug, $areas, $jobTypes): int
     {
-        if ($gender === 'business') {
+        if ($gender === 'yoasobi') {
             $query = ShopDetail::where('status', 'active');
 
             if ($areaSlug !== 'all') {

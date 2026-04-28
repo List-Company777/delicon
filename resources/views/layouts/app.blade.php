@@ -85,7 +85,7 @@
                 ],
             ],
         ],
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE65XYN5VT"></script>
     <script>
@@ -104,7 +104,7 @@
                 ナイトワーク<span class="text-yellow-400">リスト</span>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm">
-                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                    class="text-business-300 hover:text-business-200 font-medium transition">
                     夜遊びリスト
                 </a>
@@ -146,7 +146,7 @@
              x-show="open"
              x-transition
              class="md:hidden bg-gray-800 px-4 pb-4">
-            <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+            <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                class="block py-2 text-business-300 font-medium">夜遊びリスト</a>
             <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                class="block py-2 text-male-300 font-medium">男性ナイトワーク</a>
@@ -214,11 +214,11 @@
                 <div>
                     <p class="text-white font-bold mb-3">夜遊びリスト</p>
                     <ul class="space-y-1">
-                        <li><a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'shinjuku', 'job_slug' => 'all']) }}/"
+                        <li><a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'shinjuku', 'job_slug' => 'all']) }}/"
                                class="hover:text-business-300 transition">新宿の夜遊び情報</a></li>
-                        <li><a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'ikebukuro', 'job_slug' => 'all']) }}/"
+                        <li><a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'ikebukuro', 'job_slug' => 'all']) }}/"
                                class="hover:text-business-300 transition">池袋の夜遊び情報</a></li>
-                        <li><a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'shibuya', 'job_slug' => 'all']) }}/"
+                        <li><a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'shibuya', 'job_slug' => 'all']) }}/"
                                class="hover:text-business-300 transition">渋谷の夜遊び情報</a></li>
                     </ul>
                 </div>

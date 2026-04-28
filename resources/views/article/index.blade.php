@@ -63,7 +63,7 @@
             <div class="h-44 bg-gradient-to-br
                 @if($article->gender === 'female') from-female-100 to-female-50
                 @elseif($article->gender === 'male') from-male-100 to-male-50
-                @elseif($article->gender === 'business') from-business-100 to-business-50
+                @elseif($article->gender === 'yoasobi') from-business-100 to-business-50
                 @elseif($article->gender === 'shop') from-green-100 to-green-50
                 @else from-gray-100 to-gray-50 @endif
                 flex items-center justify-center">

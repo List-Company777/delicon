@@ -35,7 +35,7 @@
             <a href="/" class="btn btn-dark">トップページへ戻る</a>
             <a href="/female/all/all/" class="btn btn-female">👩 女性ナイトワーク</a>
             <a href="/male/all/all/" class="btn btn-male">👨 男性ナイトワーク</a>
-            <a href="/business/all/all/" class="btn btn-biz">🍸 夜遊び情報</a>
+            <a href="/yoasobi/all/all/" class="btn btn-biz">🍸 夜遊び情報</a>
         </div>
     </div>
     <footer>&copy; {{ date('Y') }} ナイトワークリスト</footer>

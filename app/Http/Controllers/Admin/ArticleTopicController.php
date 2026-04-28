@@ -16,7 +16,7 @@ class ArticleTopicController extends Controller
     {
         $request->validate([
             'title'  => 'required|string|max:255',
-            'gender' => 'required|in:female,male,business,shop',
+            'gender' => 'required|in:female,male,yoasobi,shop',
         ]);
 
         ArticleTopic::create([
@@ -63,7 +63,7 @@ class ArticleTopicController extends Controller
             ? $existingTitles->map(fn($t) => '- ' . $t)->implode("\n")
             : '（なし）';
 
-        $promptInstructions = collect(['female', 'male', 'business', 'shop'])
+        $promptInstructions = collect(['female', 'male', 'yoasobi', 'shop'])
             ->map(fn($g) => "- {$g}: " . ($prompts[$g] ?? $g))
             ->implode("\n");
 
@@ -132,7 +132,7 @@ PROMPT;
         foreach ($items as $i => $item) {
             $title  = trim($item['title'] ?? '');
             $gender = $item['gender'] ?? '';
-            if (!$title || !in_array($gender, ['female', 'male', 'business', 'shop'])) continue;
+            if (!$title || !in_array($gender, ['female', 'male', 'yoasobi', 'shop'])) continue;
 
             ArticleTopic::create([
                 'title'      => $title,

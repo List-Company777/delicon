@@ -17,7 +17,7 @@ class SitemapController extends Controller
     public function main()
     {
         $xml = Cache::remember('sitemap_main', 3600, function () {
-            $genders  = ['male', 'female', 'business'];
+            $genders  = ['male', 'female', 'yoasobi'];
             $jobTypes = JobType::whereHas('jobs', fn($q) => $q->where('status', 'active'))
                 ->orderBy('slug')->get(['slug']);
             $genres   = Genre::whereHas('shops', fn($q) => $q->where('status', 'active'))

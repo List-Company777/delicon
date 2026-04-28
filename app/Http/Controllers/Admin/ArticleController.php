@@ -31,7 +31,7 @@ class ArticleController extends Controller
 
         $pendingTopics  = ArticleTopic::pending()->orderBy('id')->get();
         $approvedTopics = ArticleTopic::approved()->orderBy('sort_order')->orderBy('id')->get();
-        $prompts        = ArticleGenerationPrompt::orderByRaw("FIELD(gender,'female','male','business','shop')")->get();
+        $prompts        = ArticleGenerationPrompt::orderByRaw("FIELD(gender,'female','male','yoasobi','shop')")->get();
 
         return view('admin.articles.index', compact(
             'publishedArticles', 'draftArticles', 'articleTab',
@@ -41,7 +41,7 @@ class ArticleController extends Controller
 
     public function updatePrompt(Request $request, string $gender)
     {
-        abort_unless(in_array($gender, ['female', 'male', 'business', 'shop']), 404);
+        abort_unless(in_array($gender, ['female', 'male', 'yoasobi', 'shop']), 404);
 
         $request->validate(['instruction' => ['required', 'string', 'max:1000']]);
 
@@ -112,7 +112,7 @@ class ArticleController extends Controller
         $searchGroups = match($article->gender) {
             'female'   => ['female', 'both'],
             'male'     => ['male', 'both'],
-            'business' => ['both'],
+            'yoasobi' => ['both'],
             'shop'     => ['female', 'male', 'both'],
             default    => ['female', 'male', 'both'],
         };
@@ -134,7 +134,7 @@ class ArticleController extends Controller
             'lead'             => ['nullable', 'string', 'max:500'],
             'body'             => ['nullable', 'string'],
             'hero_image'       => ['nullable', 'string', 'max:500'],
-            'gender'           => ['required', 'in:female,male,business,shop'],
+            'gender'           => ['required', 'in:female,male,yoasobi,shop'],
             'is_published'     => ['boolean'],
             'published_at'     => ['nullable', 'date'],
             'updated_at_manual'=> ['nullable', 'date'],

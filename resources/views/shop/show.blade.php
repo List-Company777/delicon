@@ -103,16 +103,16 @@
     }
 @endphp
 <script type="application/ld+json">
-{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @php
     $bcItems = [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/'],
-        ['@type' => 'ListItem', 'position' => 2, 'name' => '夜遊び',       'item' => route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => '夜遊び',       'item' => route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
     ];
     $bcPos = 3;
-    if ($shop->prefecture) $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $shop->prefecture->name, 'item' => route('search.prefecture', ['gender' => 'business', 'pref_slug' => $shop->prefecture->slug]) . '/'];
-    if ($shop->area)       $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $shop->area->name, 'item' => route('search.directory', ['gender' => 'business', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) . '/'];
+    if ($shop->prefecture) $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $shop->prefecture->name, 'item' => route('search.prefecture', ['gender' => 'yoasobi', 'pref_slug' => $shop->prefecture->slug]) . '/'];
+    if ($shop->area)       $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $shop->area->name, 'item' => route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) . '/'];
     $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos, 'name' => $shop->name, 'item' => route('shop.show', $shop->id) . '/'];
     $breadcrumb = [
         '@context' => 'https://schema.org',
@@ -121,7 +121,7 @@
     ];
 @endphp
 <script type="application/ld+json">
-{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @endpush
 
@@ -132,14 +132,14 @@
     <div class="max-w-4xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">夜遊び</a>
+        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">夜遊び</a>
         @if($shop->prefecture)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.prefecture', ['gender' => 'business', 'pref_slug' => $shop->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->prefecture->name }}</a>
+        <a href="{{ route('search.prefecture', ['gender' => 'yoasobi', 'pref_slug' => $shop->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->prefecture->name }}</a>
         @endif
         @if($shop->area)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->area->name }}</a>
+        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->area->name }}</a>
         @endif
         <span class="mx-2 opacity-40">›</span>
         <span class="opacity-90">{{ $shop->name }}</span>
@@ -201,7 +201,7 @@
                         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">業種</th>
                         <td class="px-4 py-3 text-gray-700">
                             @if($shop->area && $shop->genre->slug)
-                                <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => $shop->area->slug, 'job_slug' => $shop->genre->slug]) }}/"
+                                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => $shop->genre->slug]) }}/"
                                    class="text-business-700 hover:underline">{{ $shop->genre->name }}</a>
                             @else
                                 {{ $shop->genre->name }}
@@ -540,7 +540,7 @@
 
     {{-- 戻るリンク --}}
     <div class="mt-6 text-center">
-        <a href="{{ route('search.directory', ['gender' => 'business', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="text-sm text-gray-400 hover:text-gray-600">
+        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="text-sm text-gray-400 hover:text-gray-600">
             ← 夜遊びスポット一覧に戻る
         </a>
     </div>

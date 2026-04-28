@@ -1,6 +1,6 @@
 @php
     $colorMap = [
-        'business' => ['bg' => 'bg-business-700', 'border' => 'border-business-300', 'text' => 'text-business-700', 'btn' => 'bg-business-700 hover:bg-business-600', 'tag' => 'bg-business-50 border-business-300 text-business-700', 'label' => '夜遊び'],
+        'yoasobi'  => ['bg' => 'bg-business-700', 'border' => 'border-business-300', 'text' => 'text-business-700', 'btn' => 'bg-business-700 hover:bg-business-600', 'tag' => 'bg-business-50 border-business-300 text-business-700', 'label' => '夜遊び'],
         'male'     => ['bg' => 'bg-male-800',     'border' => 'border-male-300',     'text' => 'text-male-600',     'btn' => 'bg-male-600 hover:bg-male-700',     'tag' => 'bg-male-50 border-male-300 text-male-600',     'label' => '男性ナイトワーク'],
         'female'   => ['bg' => 'bg-female-600',   'border' => 'border-female-300',   'text' => 'text-female-500',   'btn' => 'bg-female-600 hover:bg-female-500',   'tag' => 'bg-female-50 border-female-100 text-female-600',   'label' => '女性ナイトワーク'],
     ];
@@ -21,7 +21,7 @@
     $currentPage = request()->input('page', 1);
     $pageSuffix  = $currentPage > 1 ? "（{$currentPage}ページ目）" : '';
 
-    if ($gender === 'business') {
+    if ($gender === 'yoasobi') {
         if ($hasArea && $hasJob) {
             $pageTitle = "{$displayArea}の{$displayJob}" . ($isLp ? '一覧' : '検索結果') . $pageSuffix;
         } elseif ($hasArea) {
@@ -41,7 +41,7 @@
     }
 
     // --- メタdescription ---
-    if ($gender === 'business') {
+    if ($gender === 'yoasobi') {
         if ($hasArea && $hasJob) {
             $pageDesc = "{$displayArea}の{$displayJob}情報を掲載。営業時間・料金・アクセスをまとめてチェック。夜遊びスポットを探すなら{$site}。";
         } elseif ($hasArea) {
@@ -88,7 +88,9 @@
             'has_karaoke'       => ($hasKaraoke ?? false)      ? 1 : null,
             'has_private_room'  => ($hasPrivateRoom ?? false)  ? 1 : null,
         ], fn($v) => $v !== null);
-        $canonicalUrl = $baseUrl . ($extraParams ? '?' . http_build_query($extraParams) : '');
+        // フィルター付きURLのcanonicalはフィルターなしベースURLを指す（重複コンテンツ回避）
+        $canonicalUrl      = $baseUrl;
+        $paginationBaseUrl = $baseUrl . ($extraParams ? '?' . http_build_query($extraParams) : '');
     } else {
         $canonicalParams = array_filter([
             'gender'    => $gender,
@@ -97,19 +99,20 @@
             'wage_type' => $wageType ?? '',
             'wage_min'  => ($wageMin ?? 0) > 0 ? ($wageMin ?? 0) : null,
         ], fn($v) => $v !== null && $v !== '');
-        $canonicalUrl = url('/search/') . ($canonicalParams ? '?' . http_build_query($canonicalParams) : '');
+        $canonicalUrl      = url('/search/') . ($canonicalParams ? '?' . http_build_query($canonicalParams) : '');
+        $paginationBaseUrl = $canonicalUrl;
     }
 
     // rel="prev" / "next" 用URL（page パラメータを追加）
     $prevUrl = $currentPage > 1
-        ? $canonicalUrl . (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . ($currentPage - 1)
+        ? $paginationBaseUrl . (str_contains($paginationBaseUrl, '?') ? '&' : '?') . 'page=' . ($currentPage - 1)
         : null;
     $nextUrl = $results->hasMorePages()
-        ? $canonicalUrl . (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . ($currentPage + 1)
+        ? $paginationBaseUrl . (str_contains($paginationBaseUrl, '?') ? '&' : '?') . 'page=' . ($currentPage + 1)
         : null;
     // page=1 のprevは不要（pageパラメータなし = 1ページ目）
     if ($currentPage === 2) {
-        $prevUrl = $canonicalUrl;
+        $prevUrl = $paginationBaseUrl;
     }
 @endphp
 @section('canonical', $canonicalUrl)
@@ -143,14 +146,14 @@
         'nextPage'     => $nextUrl ?: null,
     ]);
 @endphp
-<script type="application/ld+json">{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @php
     // BreadcrumbList
     $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => url('/')]];
     $pos = 2;
-    if ($gender === 'business') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => url('/business/all/all/')];
+    if ($gender === 'yoasobi') {
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => url('/yoasobi/all/all/')];
     } elseif ($gender === 'female') {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => url('/female/all/all/')];
     } else {
@@ -168,7 +171,7 @@
     $breadcrumbs = array_map(fn($b) => array_filter($b), $breadcrumbs);
     $ldBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $breadcrumbs];
 @endphp
-<script type="application/ld+json">{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endpush
 
 @section('content')
@@ -197,7 +200,7 @@
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-center gap-3">
             <h1 class="text-lg font-bold">
-                @if($gender === 'business')
+                @if($gender === 'yoasobi')
                     @if($displayArea || $displayJob)
                         {{ $displayArea }}{{ $displayJob ? '　' . $displayJob : '' }}の夜遊びスポット情報
                     @else
@@ -218,7 +221,7 @@
                        placeholder="エリア・駅名"
                        class="bg-white/20 border border-white/40 rounded px-3 py-1 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/30 w-32">
                 <input type="text" name="keyword" value="{{ $displayJob }}"
-                       placeholder="{{ $gender === 'business' ? '業種・店名' : '職種・業種' }}"
+                       placeholder="{{ $gender === 'yoasobi' ? '業種・店名' : '職種・業種' }}"
                        class="bg-white/20 border border-white/40 rounded px-3 py-1 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/30 w-32">
                 <button type="submit" class="bg-white/20 hover:bg-white/30 border border-white/40 text-white text-sm px-3 py-1 rounded transition">
                     検索
@@ -249,7 +252,7 @@
                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
                 @if(!($isLp ?? false))
                 <input type="text" name="keyword" value="{{ $keyword ?? '' }}"
-                       placeholder="{{ $gender === 'business' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
+                       placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
                 @else
                 <input type="hidden" name="keyword" value="{{ $jobTypeName ?? '' }}">
@@ -260,7 +263,7 @@
                 </button>
             </div>
             {{-- クイックタグ --}}
-            @if($gender === 'business')
+            @if($gender === 'yoasobi')
             @php
                 $allYouCanDrink   = $allYouCanDrink ?? false;
                 $hasKaraoke       = $hasKaraoke ?? false;
@@ -371,7 +374,7 @@
             @endif
 
             {{-- 詳細条件（時給フィルタ） --}}
-            @if($gender !== 'business')
+            @if($gender !== 'yoasobi')
             <div class="mt-2">
                 <button type="button" @click="detail = !detail"
                         class="text-xs {{ $c['text'] }} hover:opacity-80 flex items-center gap-1">
@@ -424,7 +427,7 @@
     {{-- LP導入文（ディレクトリURLのみ表示） --}}
     @if($isLp && !$results->isEmpty())
     <div class="bg-white border border-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-600 leading-relaxed space-y-2">
-        @if($gender === 'business')
+        @if($gender === 'yoasobi')
             @if($displayArea && $displayJob)
                 <p>{{ $displayArea }}の{{ $displayJob }}を{{ number_format($results->total()) }}店舗掲載中。営業時間・料金・アクセスなど店舗情報をまとめてチェックできます。</p>
                 <p>飲み放題・カラオケ・個室・初回割引などの条件でも絞り込めます。{{ $displayArea }}でお気に入りの{{ $displayJob }}を見つけてください。</p>
@@ -457,7 +460,7 @@
     @endif
 
     {{-- LINEアラート告知バナー（female/male・1ページ目のみ） --}}
-    @if($gender !== 'business' && $currentPage === 1)
+    @if($gender !== 'yoasobi' && $currentPage === 1)
     <a href="{{ route('alert.register', ['gender' => $gender]) }}" rel="nofollow"
        class="flex items-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3.5 mb-5 transition group">
         <div class="text-2xl shrink-0">🔔</div>
@@ -473,7 +476,7 @@
     @if($isLp && !empty($lpStats))
     @php
         $statsPrefix = implode('', array_filter([$displayArea, $displayJob]));
-        if ($gender === 'business') {
+        if ($gender === 'yoasobi') {
             $statsLabel = $statsPrefix ? "{$statsPrefix}の夜遊びスポットの統計データ" : '夜遊びスポットの統計データ';
         } else {
             $statsLabel = $statsPrefix ? "{$statsPrefix}の{$c['label']}の統計データ" : "{$c['label']}の統計データ";
@@ -481,7 +484,7 @@
     @endphp
     <p class="text-xs font-medium text-gray-400 mb-2">{{ $statsLabel }}</p>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        @if($gender === 'business')
+        @if($gender === 'yoasobi')
             @if($lpStats['all_you_can_drink'] > 0)
             <div class="bg-white border border-gray-100 rounded-xl px-4 py-3 text-center">
                 <p class="text-lg font-bold {{ $c['text'] }}">{{ number_format($lpStats['all_you_can_drink']) }}店</p>
@@ -543,7 +546,7 @@
 
     @if($results->isEmpty())
         <div class="text-center py-16 text-gray-400">
-            <p class="text-lg">該当する{{ $gender === 'business' ? '夜遊びスポット' : $c['label'] . '求人' }}が見つかりませんでした</p>
+            <p class="text-lg">該当する{{ $gender === 'yoasobi' ? '夜遊びスポット' : $c['label'] . '求人' }}が見つかりませんでした</p>
             <a href="{{ route('top') }}" class="mt-4 inline-block text-sm {{ $c['text'] }} hover:underline">
                 ← トップに戻る
             </a>
@@ -551,7 +554,7 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($results as $item)
-                @if($gender === 'business')
+                @if($gender === 'yoasobi')
                     {{-- 営業情報カード --}}
                     <a href="{{ url('/track/shop/' . $item->shop->id) . '/' }}"
                        rel="nofollow"
@@ -718,7 +721,7 @@
     @php
         $hasRelatedAreas = isset($lpRelated['areas']) && $lpRelated['areas']->isNotEmpty();
         $hasRelatedTypes = isset($lpRelated['types']) && $lpRelated['types']->isNotEmpty();
-        $typeLabel = $gender === 'business' ? '業種' : '職種';
+        $typeLabel = $gender === 'yoasobi' ? '業種' : '職種';
     @endphp
     @if($hasRelatedAreas || $hasRelatedTypes)
     <div class="mt-10 space-y-4">
@@ -753,7 +756,7 @@
     @endif
 
     {{-- 求人アラート登録バナー（female/male のLPのみ、business は除外） --}}
-    @if($isLp && $gender !== 'business')
+    @if($isLp && $gender !== 'yoasobi')
     <div class="mt-10 bg-green-50 border border-green-200 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div class="flex-1">
             <p class="font-bold text-green-800 text-sm mb-1">新着求人をLINEで受け取る</p>

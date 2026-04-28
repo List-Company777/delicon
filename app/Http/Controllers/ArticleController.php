@@ -38,7 +38,7 @@ class ArticleController extends Controller
         $searchGroups = match($article->gender) {
             'female'   => ['female', 'both'],
             'male'     => ['male', 'both'],
-            'business' => ['both'],
+            'yoasobi' => ['both'],
             default    => ['female', 'male', 'both'],
         };
 
@@ -59,7 +59,7 @@ class ArticleController extends Controller
         $jobSearchGroups = match($gender) {
             'female'   => ['female', 'both'],
             'male'     => ['male', 'both'],
-            'business' => ['female', 'both'],
+            'yoasobi' => ['female', 'both'],
             default    => [],
         };
         if (!$jobSearchGroups) return [];
@@ -73,7 +73,7 @@ class ArticleController extends Controller
             ->map(fn($area) => [
                 'label' => $area->name . 'の求人を見る',
                 'url'   => route('search.directory', [
-                    'gender'    => $gender === 'business' ? 'female' : $gender,
+                    'gender'    => $gender === 'yoasobi' ? 'female' : $gender,
                     'area_slug' => $area->slug,
                     'job_slug'  => 'all',
                 ]) . '/',

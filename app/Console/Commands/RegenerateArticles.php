@@ -89,7 +89,7 @@ class RegenerateArticles extends Command
         $genderNote = $dbPrompt ?: match ($gender) {
             'female'   => '女性向けナイトワーク（キャスト・ガールズバー等）',
             'male'     => '男性向けナイトワーク（ホスト・黒服・ボーイ等）',
-            'business' => '夜遊び・ナイトクラブ・キャバクラ情報（お客様向け）',
+            'yoasobi' => '夜遊び・ナイトクラブ・キャバクラ情報（お客様向け）',
             'shop'     => '夜遊び業態の店舗オーナー・経営者向け',
             default    => 'ナイトワーク全般',
         };

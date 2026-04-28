@@ -2,9 +2,9 @@
 @section('title', '検索PV分析')
 
 @php
-$genderLabel = ['business' => '夜遊び', 'male' => '男性', 'female' => '女性'];
+$genderLabel = ['yoasobi' => '夜遊び', 'male' => '男性', 'female' => '女性'];
 $genderColor = [
-    'business' => 'bg-amber-100 text-amber-700',
+    'yoasobi' => 'bg-amber-100 text-amber-700',
     'male'     => 'bg-blue-100 text-blue-700',
     'female'   => 'bg-pink-100 text-pink-700',
 ];
@@ -34,7 +34,7 @@ $genderColor = [
            class="px-3 py-1 rounded {{ $gender === 'all' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:bg-gray-50' }} transition">
             全体
         </a>
-        @foreach(['business' => '夜遊び', 'male' => '男性', 'female' => '女性'] as $g => $lbl)
+        @foreach(['yoasobi' => '夜遊び', 'male' => '男性', 'female' => '女性'] as $g => $lbl)
         <a href="{{ request()->fullUrlWithQuery(['gender' => $g]) }}"
            class="px-3 py-1 rounded {{ $gender === $g ? 'bg-gray-800 text-white' : 'text-gray-500 hover:bg-gray-50' }} transition">
             {{ $lbl }}

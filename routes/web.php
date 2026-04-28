@@ -25,7 +25,7 @@ Route::get('/', [TopController::class, 'index'])->name('top');
 // 認証（ゲストのみ）
 Route::middleware('guest')->group(function () {
     Route::get('/login/',    [LoginController::class, 'show'])->name('login');
-    Route::post('/login/',   [LoginController::class, 'store'])->middleware('throttle:20,1');
+    Route::post('/login/',   [LoginController::class, 'store'])->middleware('throttle:5,15');
     Route::get('/register/', [RegisterController::class, 'show'])->name('register');
     Route::post('/register/', [RegisterController::class, 'store']);
     // www.up-stage.info連携店舗の引き継ぎ検索（登録フォームのAJAX）
@@ -35,9 +35,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/line/connect/',  [LineAuthController::class, 'connectRedirect'])->middleware('auth')->name('auth.line.connect');
     // パスワードリセット
     Route::get('/forgot-password/',        [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'show'])->name('password.request');
-    Route::post('/forgot-password/',       [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'send'])->name('password.email');
+    Route::post('/forgot-password/',       [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'send'])->middleware('throttle:5,60')->name('password.email');
     Route::get('/reset-password/{token}/', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'show'])->name('password.reset');
-    Route::post('/reset-password/',        [\App\Http\Controllers\Auth\ResetPasswordController::class, 'update'])->name('password.store');
+    Route::post('/reset-password/',        [\App\Http\Controllers\Auth\ResetPasswordController::class, 'update'])->middleware('throttle:5,60')->name('password.store');
 });
 
 // ログアウト
@@ -286,11 +286,15 @@ Route::get('/article/{slug}/',  [\App\Http\Controllers\ArticleController::class,
 Route::get('/track/job/{id}/',  [\App\Http\Controllers\TrackController::class, 'job'])->name('track.job')->where('id', '[0-9]+');
 Route::get('/track/shop/{id}/', [\App\Http\Controllers\TrackController::class, 'shop'])->name('track.shop')->where('id', '[0-9]+');
 
+// /business/* → /yoasobi/* 301リダイレクト（旧URLの念のための保護）
+Route::get('/business/{any}', fn(string $any) => redirect('/yoasobi/' . $any, 301))
+    ->where('any', '.*');
+
 // 検索（都道府県LP）
 // 例: /male/tokyo/ or /female/osaka/
 Route::get('/{gender}/{pref_slug}/', [SearchController::class, 'prefecture'])
     ->where([
-        'gender'    => 'male|female|business',
+        'gender'    => 'male|female|yoasobi',
         'pref_slug' => '[a-z0-9\-]+',
     ])
     ->name('search.prefecture');
@@ -299,7 +303,7 @@ Route::get('/{gender}/{pref_slug}/', [SearchController::class, 'prefecture'])
 // 例: /male/shinjuku/host/ or /female/ikebukuro/all/
 Route::get('/{gender}/{area_slug}/{job_slug}/', [SearchController::class, 'directory'])
     ->where([
-        'gender'    => 'male|female|business',
+        'gender'    => 'male|female|yoasobi',
         'area_slug' => '[a-z0-9\-]+',
         'job_slug'  => '[a-z0-9\-]+',
     ])
@@ -309,7 +313,7 @@ Route::get('/{gender}/{area_slug}/{job_slug}/', [SearchController::class, 'direc
 // 例: /male/shinjuku/all/hibarai/ or /female/all/all/mikeiken/
 Route::get('/{gender}/{area_slug}/{job_slug}/{filter_slug}/', [SearchController::class, 'filteredDirectory'])
     ->where([
-        'gender'      => 'male|female|business',
+        'gender'      => 'male|female|yoasobi',
         'area_slug'   => '[a-z0-9\-]+',
         'job_slug'    => '[a-z0-9\-]+',
         'filter_slug' => '[a-z0-9\-]+',

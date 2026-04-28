@@ -108,7 +108,7 @@
                         <span class="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-full">男性</span>
                     @elseif($kw->gender === 'female')
                         <span class="text-xs px-2 py-0.5 bg-pink-50 text-pink-600 border border-pink-200 rounded-full">女性</span>
-                    @elseif($kw->gender === 'business')
+                    @elseif($kw->gender === 'yoasobi')
                         <span class="text-xs px-2 py-0.5 bg-teal-50 text-teal-600 border border-teal-200 rounded-full">営業</span>
                     @else
                         <span class="text-xs text-gray-400">—</span>

@@ -29,7 +29,7 @@ class GeneratePagesSitemap extends Command
             ->each(function ($article) use ($base, &$urls) {
                 $urls[] = [
                     'loc'        => $base . '/article/' . $article->slug . '/',
-                    'lastmod'    => $article->updated_at->toAtomString(),
+                    'lastmod'    => ($article->updated_at_manual ?? $article->updated_at)->toAtomString(),
                     'changefreq' => 'weekly',
                     'priority'   => '0.7',
                 ];

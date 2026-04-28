@@ -249,7 +249,7 @@ class SearchController extends Controller
             $hasPrivateRoom, $discountFirstSet, $prefSlug,
         ]));
 
-        $allIds = Cache::remember($idsCacheKey, 300, function () use (
+        $allIds = Cache::remember($idsCacheKey, 1800, function () use (
             $gender, $area, $keyword, $useSlug, $filterKeyword,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug
@@ -266,7 +266,7 @@ class SearchController extends Controller
             $keywordFilterValue = $kfType ?: null;
         }
 
-        if ($gender === 'business') {
+        if ($gender === 'yoasobi') {
             $query = ShopDetail::with(['shop.area', 'shop.genre'])
                 ->where('status', 'active')
                 ->when($prefSlug, fn($q) => $q->whereHas('shop', fn($s) =>
@@ -378,7 +378,7 @@ class SearchController extends Controller
 
         if (empty($pageIds)) {
             $items = collect();
-        } elseif ($gender === 'business') {
+        } elseif ($gender === 'yoasobi') {
             $idOrder = implode(',', $pageIds);
             $items = ShopDetail::with(['shop.area', 'shop.genre'])
                 ->whereIn('id', $pageIds)
@@ -404,7 +404,15 @@ class SearchController extends Controller
     /** LP統計バー用の集計（noindexページでは呼ばない） */
     private function computeLpStats(string $gender, ?Area $areaModel, mixed $typeModel, string $prefSlug = ''): array
     {
-        if ($gender === 'business') {
+        $cacheKey = 'lp_stats:' . md5(implode('|', [
+            $gender,
+            $areaModel?->id ?? '',
+            $typeModel?->slug ?? '',
+            $prefSlug,
+        ]));
+
+        return Cache::remember($cacheKey, 1800, function () use ($gender, $areaModel, $typeModel, $prefSlug) {
+        if ($gender === 'yoasobi') {
             $query = ShopDetail::where('status', 'active')
                 ->when($areaModel, fn($q) => $q->whereHas('shop', fn($s) => $s->where('area_id', $areaModel->id)))
                 ->when($prefSlug, fn($q) => $q->whereHas('shop.area.prefecture', fn($p) => $p->where('slug', $prefSlug)));
@@ -464,14 +472,24 @@ class SearchController extends Controller
         }
 
         return $stats;
+        }); // Cache::remember lp_stats
     }
 
     /** LP関連リンク用データ（noindexページでも表示） */
     private function computeRelatedLinks(string $gender, ?Area $areaModel, string $areaSlug, string $jobSlug, ?Prefecture $prefModel = null): array
     {
+        $cacheKey = 'lp_related:' . md5(implode('|', [
+            $gender,
+            $areaModel?->id ?? '',
+            $areaSlug,
+            $jobSlug,
+            $prefModel?->id ?? '',
+        ]));
+
+        return Cache::remember($cacheKey, 1800, function () use ($gender, $areaModel, $areaSlug, $jobSlug, $prefModel) {
         $searchGroups = match($gender) {
             'male'     => ['male', 'both'],
-            'business' => ['business'],
+            'yoasobi' => ['yoasobi'],
             default    => ['female', 'both'],
         };
 
@@ -480,7 +498,7 @@ class SearchController extends Controller
         if ($areaModel?->prefecture_id) {
             $relatedAreas = Area::where('prefecture_id', $areaModel->prefecture_id)
                 ->where('id', '!=', $areaModel->id)
-                ->when($gender === 'business',
+                ->when($gender === 'yoasobi',
                     fn($q) => $q->whereHas('shops', fn($s) => $s->where('status', 'active')),
                     fn($q) => $q->whereHas('jobs', fn($j) => $j->where('status', 'active')->whereIn('search_group', $searchGroups))
                 )
@@ -490,7 +508,7 @@ class SearchController extends Controller
         } elseif ($prefModel) {
             // 都道府県LPの場合：同都道府県のエリア一覧
             $relatedAreas = Area::where('prefecture_id', $prefModel->id)
-                ->when($gender === 'business',
+                ->when($gender === 'yoasobi',
                     fn($q) => $q->whereHas('shops', fn($s) => $s->where('status', 'active')),
                     fn($q) => $q->whereHas('jobs', fn($j) => $j->where('status', 'active')->whereIn('search_group', $searchGroups))
                 )
@@ -501,7 +519,7 @@ class SearchController extends Controller
 
         // 関連職種/業種
         $relatedTypes = collect();
-        if ($gender === 'business') {
+        if ($gender === 'yoasobi') {
             $relatedTypes = \App\Models\Genre::whereHas('shops', fn($q) =>
                     $q->where('status', 'active')
                       ->when($areaModel, fn($s) => $s->where('area_id', $areaModel->id))
@@ -534,11 +552,12 @@ class SearchController extends Controller
         }
 
         return ['areas' => $relatedAreas, 'types' => $relatedTypes];
+        }); // Cache::remember lp_related
     }
 
     private function computeRelatedArticles(string $gender): \Illuminate\Database\Eloquent\Collection
     {
-        $articleGender = $gender === 'business' ? 'business' : $gender;
+        $articleGender = $gender;
 
         return Article::published()
             ->where('gender', $articleGender)
