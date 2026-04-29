@@ -140,8 +140,10 @@
         '@context'     => 'https://schema.org',
         '@type'        => 'CollectionPage',
         'name'         => $pageTitle,
+        'description'  => $pageDesc ?? null,
+        'inLanguage'   => 'ja',
         'url'          => $pageUrl,
-        'isPartOf'     => ['@type' => 'WebSite', 'url' => $canonicalUrl],
+        'isPartOf'     => ['@id' => url('/') . '#website'],
         'previousPage' => $prevUrl ?: null,
         'nextPage'     => $nextUrl ?: null,
     ]);
@@ -150,20 +152,20 @@
 @endif
 @php
     // BreadcrumbList
-    $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => url('/')]];
+    $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => route('top') . '/']];
     $pos = 2;
     if ($gender === 'yoasobi') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => url('/yoasobi/all/all/')];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
     } elseif ($gender === 'female') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => url('/female/all/all/')];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => route('search.directory', ['gender' => 'female', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
     } else {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク', 'item' => url('/male/all/all/')];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク', 'item' => route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
     }
     if (isset($prefModel) && $prefModel && empty($isPrefPage)) {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => url("/{$gender}/{$prefModel->slug}/all/")];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => $prefModel->slug, 'job_slug' => 'all']) . '/'];
     }
     if ($displayArea) {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => isset($area_slug) ? url("/{$gender}/{$area_slug}/all/") : null];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => isset($area_slug) ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => 'all']) . '/' : null];
     }
     if ($displayJob) {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayJob, 'item' => $canonicalUrl];
