@@ -6,7 +6,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">プライバシーポリシー</h1>
-    <p class="text-xs text-gray-400 mb-10">最終更新日：2026年4月18日</p>
+    <p class="text-xs text-gray-400 mb-10">最終更新日：2026年4月29日</p>
 
     <div class="bg-white rounded-xl shadow-sm p-8 space-y-8 text-sm text-gray-700 leading-relaxed">
 
@@ -18,8 +18,9 @@
             <ul class="list-disc list-inside space-y-1 text-gray-600">
                 <li>氏名（担当者名）・メールアドレス・電話番号</li>
                 <li>LINEアカウント情報（LINE ログイン利用時のユーザーID・表示名）</li>
-                <li>店舗名・業種・所在地・営業情報等の掲載情報</li>
+                <li>店舗名・業種・所在地・郵便番号・営業情報等の掲載情報</li>
                 <li>求人応募者の氏名・連絡先・応募メッセージ等の応募情報（応募先店舗の担当者に共有されます）</li>
+                <li>求人アラート登録時のメールアドレスおよび検索条件（性別・都道府県・業種等）</li>
                 <li>アクセスログ（IPアドレス・ブラウザ情報・参照元URL・Cookie等）</li>
             </ul>
         </section>
@@ -57,8 +58,8 @@
                     <p>本サービスでは、LINE株式会社が提供するLINEログインを認証手段として利用しています。LINEログインを通じて取得するユーザーIDおよび表示名は、アカウント識別の目的にのみ使用します。また、LINEログインで友だち登録された方には、LINE Messaging APIを通じてサービスに関する重要なお知らせ（掲載審査結果・掲載継続確認等）をLINEメッセージでお送りする場合があります。LINEのプライバシーポリシーについては、LINE株式会社の公式サイトをご参照ください。</p>
                 </div>
                 <div>
-                    <p class="font-medium text-gray-700 mb-1">Google アナリティクス（Google LLC）</p>
-                    <p>本サービスでは、Google LLC が提供するアクセス解析ツール「Google アナリティクス 4」を利用しています。同ツールはCookieを使用してアクセスデータ（閲覧ページ・滞在時間・参照元等）を収集し、Googleのサーバーに送信・処理します。収集されるデータは匿名化されており、個人を特定するものではありません。Google アナリティクスのデータ収集を無効にする場合は、Google アナリティクス オプトアウト アドオン（ブラウザ拡張機能）をご利用ください。Googleのプライバシーポリシーについては、Google LLC の公式サイトをご参照ください。</p>
+                    <p class="font-medium text-gray-700 mb-1">Google タグマネージャー・Google アナリティクス（Google LLC）</p>
+                    <p>本サービスでは、Google LLC が提供する「Google タグマネージャー」および「Google アナリティクス 4」を利用しています。これらのツールはCookieを使用してアクセスデータ（閲覧ページ・滞在時間・参照元等）を収集し、Googleのサーバーに送信・処理します。収集されるデータは匿名化されており、個人を特定するものではありません。Google アナリティクスのデータ収集を無効にする場合は、Google アナリティクス オプトアウト アドオン（ブラウザ拡張機能）をご利用ください。Googleのプライバシーポリシーについては、Google LLC の公式サイトをご参照ください。</p>
                 </div>
             </div>
         </section>

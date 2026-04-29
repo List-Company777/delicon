@@ -17,13 +17,20 @@
             @endif
         </div>
 
-        <div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-6">
+        <div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-4">
             <p class="text-sm font-bold text-green-800 mb-2">掲載は基本無料です</p>
             <ul class="text-xs text-green-700 space-y-1">
                 <li>✓ 求人・営業情報を無料で掲載</li>
                 <li>✓ 登録はメールまたはLINEで最短5分</li>
                 <li>✓ 最短即日で掲載可能</li>
             </ul>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-6">
+            <p class="text-xs text-red-700 leading-relaxed">
+                <span class="font-bold">【掲載対象外】</span>
+                風俗営業等規制法に基づく許可・届出のない違法な営業形態の店舗、およびソープランド・デリヘル・ファッションヘルス等のアダルト系業態は掲載をお断りしております。
+            </p>
         </div>
 
         @if(isset($partner) && $partner)

@@ -59,7 +59,7 @@
                 </tr>
                 <tr>
                     <th class="bg-gray-50 text-gray-500 font-normal text-left px-5 py-4 align-top whitespace-nowrap">その他費用</th>
-                    <td class="px-5 py-4 text-gray-600">インターネット接続に伴う通信費等は、お客様のご負担となります。</td>
+                    <td class="px-5 py-4 text-gray-600">インターネット接続に伴う通信費等のほか、銀行振込の場合の振込手数料は、お客様のご負担となります。</td>
                 </tr>
                 <tr>
                     <th class="bg-gray-50 text-gray-500 font-normal text-left px-5 py-4 align-top whitespace-nowrap">支払方法</th>
