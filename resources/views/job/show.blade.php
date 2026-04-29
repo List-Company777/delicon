@@ -68,6 +68,7 @@
             'address' => array_filter([
                 '@type'          => 'PostalAddress',
                 'addressCountry' => 'JP',
+                'postalCode'     => $job->shop->postal_code ?: null,
                 'addressRegion'   => $job->prefecture?->name ?? null,
                 'addressLocality' => $job->shop->address_locality ?? $job->area?->name ?? $job->shop->area?->name ?? null,
                 'streetAddress'   => $job->shop->address ?: null,
@@ -104,7 +105,7 @@
 @php
     $bcItems = [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク',    'item' => route('top') . '/'],
-        ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => $c['label'], 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
     ];
     $bcPos = 3;
     if ($job->prefecture) $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $job->prefecture->name, 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->prefecture->slug, 'job_slug' => 'all']) . '/'];
@@ -127,7 +128,7 @@
     <div class="max-w-4xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $c['genderLabel'] }}</a>
+        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $c['label'] }}</a>
         @if($job->prefecture)
         <span class="mx-2 opacity-40">›</span>
         <a href="{{ route('search.prefecture', ['gender' => $c['genderRoute'], 'pref_slug' => $job->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $job->prefecture->name }}</a>
@@ -161,16 +162,23 @@
 
             <header>
                 {{-- タグ列 --}}
-                @if($job->is_hotlink || $job->jobType || $job->shop->genre)
+                @php $tagArea = $job->area ?? $job->shop->area; @endphp
+                @if($job->is_hotlink || $job->jobType || $job->shop->genre || $tagArea)
                 <div class="flex flex-wrap gap-2 mb-3">
                     @if($job->is_hotlink)
                         <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
                     @endif
                     @if($job->jobType)
-                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $job->jobType->name }}</span>
+                        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => $job->jobType->slug]) }}/"
+                           class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full hover:opacity-80 transition-opacity">{{ $job->jobType->name }}</a>
                     @endif
                     @if($job->shop->genre)
-                        <span class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full">{{ $job->shop->genre->name }}</span>
+                        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => $job->shop->genre->slug]) }}/"
+                           class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full hover:opacity-80 transition-opacity">{{ $job->shop->genre->name }}</a>
+                    @endif
+                    @if($tagArea)
+                        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $tagArea->slug, 'job_slug' => 'all']) }}/"
+                           class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full hover:opacity-80 transition-opacity">{{ $tagArea->name }}</a>
                     @endif
                 </div>
                 @endif
@@ -218,11 +226,19 @@
                     <dd class="text-gray-700">{{ $job->shop->name }}</dd>
                     @if($job->area)
                         <dt class="text-gray-400">エリア</dt>
-                        <dd class="text-gray-700">{{ $job->area->name }}</dd>
+                        <dd class="text-gray-700">
+                            <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->area->slug, 'job_slug' => 'all']) }}/"
+                               class="{{ $c['text'] }} hover:underline">{{ $job->area->name }}</a>
+                        </dd>
                     @endif
                     @if($job->shop->address_locality || $job->shop->address)
+                        @php $fullAddress = trim(($job->shop->address_locality ? $job->shop->address_locality . ' ' : '') . $job->shop->address); @endphp
                         <dt class="text-gray-400">住所</dt>
-                        <dd class="text-gray-700">{{ trim(($job->shop->address_locality ? $job->shop->address_locality . ' ' : '') . $job->shop->address) }}</dd>
+                        <dd class="text-gray-700">
+                            <a href="https://maps.google.com/?q={{ urlencode($fullAddress) }}"
+                               target="_blank" rel="noopener noreferrer"
+                               class="hover:underline">{{ $fullAddress }}&nbsp;<span class="text-xs text-gray-400">🗺</span></a>
+                        </dd>
                     @endif
                     @if($job->shop->nearest_station_name)
                         <dt class="text-gray-400">最寄り駅</dt>

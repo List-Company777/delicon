@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\AreaAddressMapping;
 use App\Models\JobType;
 use App\Models\Prefecture;
+use App\Services\LpNormalizationService;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
@@ -49,7 +50,7 @@ class MasterController extends Controller
             'parent_id'     => ['nullable', 'exists:areas,id'],
         ]);
 
-        Area::create([
+        $area = Area::create([
             'prefecture_id' => $request->prefecture_id,
             'parent_id'     => $request->input('parent_id') ?: null,
             'name'          => $request->name,
@@ -57,7 +58,10 @@ class MasterController extends Controller
             'sort_order'    => Area::max('sort_order') + 1,
         ]);
 
-        return back()->with('success', "エリア「{$request->name}」を追加しました");
+        $area->load('prefecture');
+        $count = (new LpNormalizationService)->generateForArea($area);
+
+        return back()->with('success', "エリア「{$request->name}」を追加しました（LP正規化 {$count} 件生成）");
     }
 
     public function storeJobType(Request $request)

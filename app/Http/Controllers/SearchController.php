@@ -217,7 +217,12 @@ class SearchController extends Controller
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterType->keyword_filter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        // shop: プレフィックスはShopDetail列への直接フィルタ（例: shop:has_karaoke）
+        $rawFilter      = $filterType->keyword_filter;
+        $filterKeyword  = str_starts_with($rawFilter, 'shop:') ? '' : $rawFilter;
+        $shopBoolFilter = str_starts_with($rawFilter, 'shop:') ? substr($rawFilter, 5) : '';
+
+        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterKeyword, shopBoolFilter: $shopBoolFilter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
 
         $noindex = $results->total() <= 5;
         $status  = $results->total() === 0 ? 404 : 200;
@@ -237,20 +242,20 @@ class SearchController extends Controller
         ), $status);
     }
 
-    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
+    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $shopBoolFilter = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
     {
         $page    = (int) request()->input('page', 1);
         $perPage = 20;
 
         // キャッシュにはIDのみ保存（Eloquentオブジェクトはシリアライズ不可）
         $idsCacheKey = 'search_ids:' . md5(implode('|', [
-            $gender, $area, $keyword, $useSlug, $filterKeyword,
+            $gender, $area, $keyword, $useSlug, $filterKeyword, $shopBoolFilter,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug,
         ]));
 
         $allIds = Cache::remember($idsCacheKey, 1800, function () use (
-            $gender, $area, $keyword, $useSlug, $filterKeyword,
+            $gender, $area, $keyword, $useSlug, $filterKeyword, $shopBoolFilter,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
             $hasPrivateRoom, $discountFirstSet, $prefSlug
         ) {
@@ -297,9 +302,10 @@ class SearchController extends Controller
                           ->orWhereHas('genre', fn($g) => $g->where('name', 'like', "%{$keyword}%"))
                       )
                 )
-                ->when($filterKeyword, fn($q) => $q->whereHas('shop', fn($s) => $s->where('name', 'like', "%{$filterKeyword}%")))
-                ->when($allYouCanDrink,   fn($q) => $q->where('all_you_can_drink', true))
-                ->when($hasKaraoke,      fn($q) => $q->where('has_karaoke', true))
+                ->when($filterKeyword,   fn($q) => $q->whereHas('shop', fn($s) => $s->where('name', 'like', "%{$filterKeyword}%")))
+                ->when($shopBoolFilter, fn($q) => $q->where($shopBoolFilter, true))
+                ->when($allYouCanDrink, fn($q) => $q->where('all_you_can_drink', true))
+                ->when($hasKaraoke,     fn($q) => $q->where('has_karaoke', true))
                 ->when($hasPrivateRoom,  fn($q) => $q->where('has_private_room', true))
                 ->when($discountFirstSet, fn($q) => $q->where('discount_first_set', true))
                 ->orderByDesc(fn($q) =>

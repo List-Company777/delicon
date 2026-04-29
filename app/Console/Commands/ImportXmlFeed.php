@@ -252,6 +252,12 @@ class ImportXmlFeed extends Command
             return null;
         }
 
+        // 住所フィールドを補完（未設定の場合のみ）
+        $xmlAddress = trim($stateName . $cityName);
+        if ($xmlAddress && !$shop->address && !$this->dryRun) {
+            $shop->update(['address' => $xmlAddress]);
+        }
+
         // プラン同期（自社サイトかつ未同期の店舗のみ）。shop->id=0はdry-run用ダミー
         $shopKey = $shop->id ?: ('dry_' . $shopName . '_' . ($prefecture?->id ?? '0') . '_' . ($area?->id ?? '0'));
         if ($feed->is_own_site && !in_array($shopKey, $syncedShopIds, true)) {
@@ -487,12 +493,14 @@ class ImportXmlFeed extends Command
 
         $existing = Shop::where('xml_source', $feed->slug)->where('xml_id', $xmlId)->first();
 
+        $xmlAddress = trim($stateName . $cityName);
         $shopData = [
             'name'          => $shopName,
             'genre_id'      => $genreId ?? $existing?->genre_id,
             'prefecture_id' => $prefecture?->id ?? $existing?->prefecture_id,
             'area_id'       => $area?->id ?? $existing?->area_id,
             'tel'           => $tel ?: ($existing?->tel),
+            'address'       => $xmlAddress ?: ($existing?->address),
             'status'        => 'active',
             'xml_source'    => $feed->slug,
             'xml_id'        => $xmlId,

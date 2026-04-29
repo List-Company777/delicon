@@ -20,6 +20,7 @@ class ShopInfoController extends BaseController
         $request->validate([
             'name'                  => ['required', 'string', 'max:100'],
             'kana'                  => ['nullable', 'string', 'max:100'],
+            'postal_code'           => ['nullable', 'string', 'max:8', 'regex:/^\d{3}-?\d{4}$/'],
             'address_locality'      => ['nullable', 'string', 'max:100'],
             'address'               => ['required', 'string', 'max:200'],
             'tel'                   => ['required', 'string', 'max:20'],
@@ -31,7 +32,7 @@ class ShopInfoController extends BaseController
 
         // 業種・都道府県・エリアは管理者のみ変更可のため除外
         $shop->update($request->only([
-            'name', 'kana', 'address_locality', 'address', 'tel',
+            'name', 'kana', 'postal_code', 'address_locality', 'address', 'tel',
             'nearest_line', 'nearest_station_name', 'nearest_station_walk',
             'line_id',
         ]));

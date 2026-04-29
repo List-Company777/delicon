@@ -52,6 +52,7 @@ class DashboardController extends BaseController
         abort_if($shop->status !== 'inactive', 403);
 
         $missing = [];
+        if (! $shop->postal_code)      $missing[] = '郵便番号';
         if (! $shop->address_locality) $missing[] = '市区町村';
         if (! $shop->address)          $missing[] = '番地・建物名';
         if ($missing) {

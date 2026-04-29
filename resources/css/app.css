@@ -7,7 +7,7 @@
 
 
 @theme {
-    --font-sans: 'Noto Sans JP', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
     /* 営業リスト：ティール  ベース:#B0D0D3 / メイン:#F8F7F9 / アクセント:#1A535C */

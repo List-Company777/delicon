@@ -41,10 +41,11 @@
             'addressCountry' => 'JP',
         ],
     ];
-    if ($shop->prefecture)       $ld['address']['addressRegion']   = $shop->prefecture->name;
+    if ($shop->postal_code)       $ld['address']['postalCode']       = $shop->postal_code;
+    if ($shop->prefecture)        $ld['address']['addressRegion']   = $shop->prefecture->name;
     $locality = $shop->address_locality ?? $shop->area?->name ?? null;
-    if ($locality)               $ld['address']['addressLocality'] = $locality;
-    if ($shop->address)          $ld['address']['streetAddress']   = $shop->address;
+    if ($locality)                $ld['address']['addressLocality'] = $locality;
+    if ($shop->address)           $ld['address']['streetAddress']   = $shop->address;
     if ($shop->tel)        $ld['telephone'] = $shop->tel;
     if ($shop->genre)      $ld['description'] = $shop->genre->name . 'の営業情報';
     if ($detail->content)  $ld['description'] = mb_strimwidth(strip_tags($detail->content), 0, 200, '…');
@@ -163,9 +164,12 @@
                 {{-- タグ列 --}}
                 <div class="flex flex-wrap gap-2 mb-3">
                     @if($shop->genre)
-                        <span class="text-xs px-2 py-0.5 bg-business-50 border border-business-300 text-business-700 rounded-full">
-                            {{ $shop->genre->name }}
-                        </span>
+                        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => $shop->genre->slug]) }}/"
+                           class="text-xs px-2 py-0.5 bg-business-50 border border-business-300 text-business-700 rounded-full hover:opacity-80 transition-opacity">{{ $shop->genre->name }}</a>
+                    @endif
+                    @if($shop->area)
+                        <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/"
+                           class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full hover:opacity-80 transition-opacity">{{ $shop->area->name }}</a>
                     @endif
                     @if($detail->is_hotlink)
                         <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
@@ -334,7 +338,10 @@
                     @if($shop->area)
                     <tr class="border-b border-gray-100">
                         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">エリア</th>
-                        <td class="px-4 py-3 text-gray-700">{{ $shop->area->name }}</td>
+                        <td class="px-4 py-3 text-gray-700">
+                            <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/"
+                               class="text-business-700 hover:underline">{{ $shop->area->name }}</a>
+                        </td>
                     </tr>
                     @endif
                     @if($shop->address_locality || $shop->address)

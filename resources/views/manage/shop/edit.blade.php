@@ -61,6 +61,15 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">郵便番号</th>
+                <td class="px-4 py-3">
+                    <input type="text" name="postal_code" value="{{ old('postal_code', $shop->postal_code) }}"
+                           placeholder="例：160-0021" maxlength="8"
+                           class="w-40 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('postal_code') border-red-400 @enderror">
+                    @error('postal_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </td>
+            </tr>
+            <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">市区町村</th>
                 <td class="px-4 py-3">
                     <input type="text" name="address_locality" value="{{ old('address_locality', $shop->address_locality) }}"

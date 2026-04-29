@@ -7,8 +7,7 @@
     <title>@yield('title', '管理画面') | 夜ビジ Admin</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="stylesheet" href="/fonts/noto-sans-jp.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased">

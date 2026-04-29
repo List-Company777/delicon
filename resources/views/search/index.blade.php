@@ -141,7 +141,7 @@
 @endif
 @php
     // BreadcrumbList
-    $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => route('top') . '/']];
+    $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/']];
     $pos = 2;
     if ($gender === 'yoasobi') {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
@@ -197,7 +197,7 @@
 <nav aria-label="パンくずリスト" class="bg-gray-50 border-b border-gray-100">
     <div class="max-w-6xl mx-auto px-4 py-2">
         <ol class="flex flex-wrap items-center gap-1 text-xs text-gray-500">
-            <li><a href="{{ url('/') }}" class="hover:text-gray-700">ホーム</a></li>
+            <li><a href="{{ route('top') }}/" class="hover:text-gray-700">ナイトワーク</a></li>
             @foreach(array_slice($breadcrumbs, 1) as $crumb)
             <li class="flex items-center gap-1">
                 <span class="text-gray-300">›</span>
