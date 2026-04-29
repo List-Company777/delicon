@@ -5,11 +5,6 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-/* 検索結果カード：オフスクリーン要素のレイアウト計算をスキップ */
-.result-card {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 380px;
-}
 
 @theme {
     --font-sans: 'Noto Sans JP', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
