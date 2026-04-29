@@ -35,7 +35,7 @@
     <script @nonce>(function(){
       function injectFont(){
         var l=document.createElement('link');
-        l.rel='stylesheet';l.href='/fonts/noto-sans-jp.css';
+        l.rel='stylesheet';l.href='/fonts/noto-sans-jp-subset.css';
         document.head.appendChild(l);
       }
       if(window.requestIdleCallback){
@@ -44,7 +44,7 @@
         window.addEventListener('load',injectFont);
       }
     }());</script>
-    <noscript><link rel="stylesheet" href="/fonts/noto-sans-jp.css"></noscript>
+    <noscript><link rel="stylesheet" href="/fonts/noto-sans-jp-subset.css"></noscript>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
     @stack('head')
