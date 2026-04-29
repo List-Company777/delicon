@@ -308,18 +308,22 @@
     @endif
 
     {{-- 最近見た求人 --}}
-    <div x-data="recentlyViewedJobs()" x-init="init()" class="mt-8" x-show="items.length > 0" x-cloak>
-        <h2 class="text-sm font-bold text-gray-600 mb-3">最近見た求人</h2>
-        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            <template x-for="item in items" :key="item.id">
-                <a :href="item.url"
-                   class="shrink-0 w-36 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition group">
-                    <p class="text-xs text-gray-400 mb-1" x-text="item.type"></p>
-                    <p class="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1" x-text="item.title"></p>
-                    <p class="text-xs text-gray-400 truncate" x-text="item.shop"></p>
-                </a>
-            </template>
-        </div>
+    <div x-data="recentlyViewedJobs()" x-init="init()">
+        <template x-if="items.length > 0">
+            <section class="mt-8" aria-label="最近見た求人">
+                <h2 class="text-sm font-bold text-gray-600 mb-3">最近見た求人</h2>
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <template x-for="item in items" :key="item.id">
+                        <a :href="item.url"
+                           class="shrink-0 w-36 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition group">
+                            <p class="text-xs text-gray-400 mb-1" x-text="item.type"></p>
+                            <p class="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1" x-text="item.title"></p>
+                            <p class="text-xs text-gray-400 truncate" x-text="item.shop"></p>
+                        </a>
+                    </template>
+                </div>
+            </section>
+        </template>
     </div>
 
     {{-- 戻るリンク --}}

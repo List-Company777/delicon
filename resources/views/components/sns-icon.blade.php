@@ -1,16 +1,7 @@
 @switch($type)
     @case('instagram')
-        <svg width="16" height="16" class="shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:#f09433"/>
-                    <stop offset="25%" style="stop-color:#e6683c"/>
-                    <stop offset="50%" style="stop-color:#dc2743"/>
-                    <stop offset="75%" style="stop-color:#cc2366"/>
-                    <stop offset="100%" style="stop-color:#bc1888"/>
-                </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#ig-grad)"/>
+        <svg width="16" height="16" class="shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="#e1306c"/>
             <circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="1.8"/>
             <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
         </svg>

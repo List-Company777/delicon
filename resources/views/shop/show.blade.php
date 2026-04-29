@@ -128,58 +128,60 @@
 
 @section('content')
 
-{{-- ヘッダーバー --}}
-<div class="bg-business-700 text-white py-3">
+{{-- パンくずナビ --}}
+<nav aria-label="パンくずリスト" class="bg-business-700 text-white py-3">
     <div class="max-w-4xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
-        <span class="mx-2 opacity-40">›</span>
+        <span class="mx-2 opacity-40" aria-hidden="true">›</span>
         <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">夜遊び</a>
         @if($shop->prefecture)
-        <span class="mx-2 opacity-40">›</span>
+        <span class="mx-2 opacity-40" aria-hidden="true">›</span>
         <a href="{{ route('search.prefecture', ['gender' => 'yoasobi', 'pref_slug' => $shop->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->prefecture->name }}</a>
         @endif
         @if($shop->area)
-        <span class="mx-2 opacity-40">›</span>
+        <span class="mx-2 opacity-40" aria-hidden="true">›</span>
         <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $shop->area->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $shop->area->name }}</a>
         @endif
-        <span class="mx-2 opacity-40">›</span>
+        <span class="mx-2 opacity-40" aria-hidden="true">›</span>
         <span class="opacity-90">{{ $shop->name }}</span>
     </div>
-</div>
+</nav>
 
 <div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <article class="bg-white rounded-xl shadow-sm overflow-hidden">
 
         {{-- メイン画像 --}}
         @if($shop->main_image)
             <x-shop-image :src="$shop->main_image" :alt="$shop->name" class="w-full aspect-video object-cover" fetchpriority="high" loading="eager" />
         @else
-            <div class="h-3 bg-business-700"></div>
+            <div class="h-3 bg-business-700" aria-hidden="true"></div>
         @endif
 
         <div class="p-6 md:p-8">
 
-            {{-- タグ列 --}}
-            <div class="flex flex-wrap gap-2 mb-3">
-                @if($shop->genre)
-                    <span class="text-xs px-2 py-0.5 bg-business-50 border border-business-300 text-business-700 rounded-full">
-                        {{ $shop->genre->name }}
-                    </span>
-                @endif
-                @if($detail->is_hotlink)
-                    <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
-                @endif
-            </div>
+            <header>
+                {{-- タグ列 --}}
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @if($shop->genre)
+                        <span class="text-xs px-2 py-0.5 bg-business-50 border border-business-300 text-business-700 rounded-full">
+                            {{ $shop->genre->name }}
+                        </span>
+                    @endif
+                    @if($detail->is_hotlink)
+                        <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
+                    @endif
+                </div>
 
-            {{-- 店舗名 --}}
-            <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">{{ $shop->name }}</h1>
+                {{-- 店舗名 --}}
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">{{ $shop->name }}</h1>
 
-            {{-- ひとこと紹介 --}}
-            @if($detail->short_description)
-                <p class="text-sm text-gray-500 mb-5">{{ $detail->short_description }}</p>
-            @else
-                <div class="mb-5"></div>
-            @endif
+                {{-- ひとこと紹介 --}}
+                @if($detail->short_description)
+                    <p class="text-sm text-gray-500 mb-5">{{ $detail->short_description }}</p>
+                @else
+                    <div class="mb-5"></div>
+                @endif
+            </header>
 
             {{-- 割引・特典 --}}
             @if($detail && ($detail->discount_first_set || $detail->discount_custom))
@@ -195,8 +197,9 @@
             @endif
 
             {{-- 営業情報テーブル --}}
-            <div class="mb-6 border border-gray-100 rounded-lg overflow-hidden">
+            <section class="mb-6 border border-gray-100 rounded-lg overflow-hidden" aria-label="営業情報">
                 <table class="w-full text-sm">
+                <caption class="sr-only">{{ $shop->name }} の営業情報</caption>
                     @if($shop->genre)
                     <tr class="border-b border-gray-100">
                         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">業種</th>
@@ -408,28 +411,29 @@
                     </tr>
                     @endif
                 </table>
-            </div>
+            </section>
 
             {{-- 店舗紹介文 --}}
             @if($detail->content)
-                <div class="mb-6">
+                <section class="mb-6" aria-label="店舗紹介">
                     <h2 class="font-bold text-gray-700 mb-2 text-sm">店舗紹介</h2>
                     <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $detail->content }}</div>
-                </div>
+                </section>
             @endif
 
             {{-- ギャラリー --}}
             @if($detail->image_paths && count($detail->image_paths) > 0)
-                <div class="mb-6">
+                <section class="mb-6" aria-label="店内写真">
                     <h2 class="font-bold text-gray-700 mb-2 text-sm">店内写真</h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                         @foreach($detail->image_paths as $i => $imgPath)
                             <img src="{{ asset('storage/' . $imgPath) }}"
                                  alt="{{ $shop->name }} 店内写真{{ $i + 1 }}"
-                                 class="w-full h-32 object-cover rounded-lg">
+                                 class="w-full h-32 object-cover rounded-lg"
+                                 loading="lazy" decoding="async">
                         @endforeach
                     </div>
-                </div>
+                </section>
             @endif
 
             {{-- この店舗の求人情報 --}}
@@ -438,7 +442,7 @@
                 $staffJobs = $shop->jobs->filter(fn($j) => $j->search_group === 'male');
             @endphp
             @if($shop->jobs->isNotEmpty())
-                <div class="mb-6 border-t border-gray-100 pt-6">
+                <section class="mb-6 border-t border-gray-100 pt-6" aria-label="求人情報">
                     <h2 class="font-bold text-gray-700 mb-3 text-sm">この店舗の求人情報</h2>
                     <div class="space-y-2">
                         @foreach($castJobs as $job)
@@ -478,7 +482,7 @@
                             </a>
                         @endforeach
                     </div>
-                </div>
+                </section>
             @endif
 
             {{-- ホットリンクボタン --}}
@@ -491,11 +495,11 @@
             @endif
 
         </div>
-    </div>
+    </article>
 
     {{-- 同業種・同エリアの関連店舗（無料店のみ表示） --}}
     @if($relatedShops->isNotEmpty())
-    <div class="mt-8">
+    <section class="mt-8" aria-label="関連店舗">
         <h2 class="text-sm font-bold text-gray-600 mb-3">{{ $shop->genre?->name ?? '同業種' }}の他店舗（{{ $shop->area?->name }}）</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @foreach($relatedShops as $relShop)
@@ -517,27 +521,35 @@
             </a>
             @endforeach
         </div>
-    </div>
+    </section>
     @endif
 
     {{-- 最近見た店舗 --}}
-    <div x-data="recentlyViewedShops()" x-init="init()" class="mt-8" x-show="items.length > 0" x-cloak>
-        <h2 class="text-sm font-bold text-gray-600 mb-3">最近見た店舗</h2>
-        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            <template x-for="item in items" :key="item.id">
-                <a :href="item.url"
-                   class="shrink-0 w-32 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-sm transition group">
-                    <div class="h-20 bg-gray-100 overflow-hidden">
-                        <img x-show="item.img" :src="item.img" :alt="item.name"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
-                        <div x-show="!item.img" class="w-full h-full flex items-center justify-center text-gray-300 text-2xl">🏮</div>
-                    </div>
-                    <div class="p-2">
-                        <p class="text-xs text-gray-700 font-medium line-clamp-2 leading-tight" x-text="item.name"></p>
-                    </div>
-                </a>
-            </template>
-        </div>
+    <div x-data="recentlyViewedShops()" x-init="init()">
+        <template x-if="items.length > 0">
+            <section class="mt-8" aria-label="最近見た店舗">
+                <h2 class="text-sm font-bold text-gray-600 mb-3">最近見た店舗</h2>
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <template x-for="item in items" :key="item.id">
+                        <a :href="item.url"
+                           class="shrink-0 w-32 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-sm transition group">
+                            <div class="h-20 bg-gray-100 overflow-hidden">
+                                <template x-if="item.img">
+                                    <img :src="item.img" :alt="item.name"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                                </template>
+                                <template x-if="!item.img">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-300 text-2xl" aria-hidden="true">🏮</div>
+                                </template>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-gray-700 font-medium line-clamp-2 leading-tight" x-text="item.name"></p>
+                            </div>
+                        </a>
+                    </template>
+                </div>
+            </section>
+        </template>
     </div>
 
     {{-- 戻るリンク --}}
