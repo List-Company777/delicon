@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "vite build && find public/build/assets -name '*.css' -o -name '*.js' | xargs -I{} sh -c 'brotli -q 11 -k -f \"$1\" -o \"${1}.br\" && gzip -9 -k -f \"$1\"' _ {}",
         "dev": "vite"
     },
     "devDependencies": {

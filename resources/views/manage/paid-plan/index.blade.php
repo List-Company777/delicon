@@ -240,8 +240,8 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" @nonce></script>
+<script @nonce>
 new Chart(document.getElementById('clickChart'), {
     type: 'bar',
     data: {

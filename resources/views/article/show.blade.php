@@ -119,8 +119,8 @@
         ],
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
-<script type="application/ld+json">{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @if(!empty($article->faq))
 @php
     $faqLd = [
@@ -133,7 +133,7 @@
         ])->values()->all(),
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @if($article->video?->isDone())
 @php
@@ -148,7 +148,7 @@
         'publisher'    => ['@type' => 'Organization', 'name' => 'ナイトワークリスト'],
     ];
 @endphp
-<script type="application/ld+json">{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @endpush
 
@@ -322,7 +322,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
 // h2/h3から目次を自動生成
 (function () {
     const body    = document.getElementById('article-body');

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
@@ -23,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Blade::directive('nonce', fn() => '<?php echo \'nonce="\' . e(Vite::cspNonce()) . \'"\'; ?>');
+
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }

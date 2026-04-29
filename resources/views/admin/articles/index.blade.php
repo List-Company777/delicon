@@ -447,7 +447,7 @@
 </div>{{-- /x-data --}}
 
 @push('scripts')
-<script>
+<script @nonce>
 function articleVideo(articleId, initialStatus, downloadUrl) {
     return {
         articleId,

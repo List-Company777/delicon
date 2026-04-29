@@ -84,7 +84,7 @@
         ];
     }
 @endphp
-<script type="application/ld+json">
+<script type="application/ld+json" @nonce>
 {!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @php
@@ -102,7 +102,7 @@
         'itemListElement' => $bcItems,
     ];
 @endphp
-<script type="application/ld+json">
+<script type="application/ld+json" @nonce>
 {!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @endpush
@@ -322,7 +322,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
 function recentlyViewedJobs() {
     // search_group → localStorage キー: スタッフ/キャスト/店舗で分離
     const GROUP_KEY = {

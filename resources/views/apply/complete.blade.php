@@ -98,7 +98,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
 function recentlyViewedComplete() {
     const GROUP_KEY = {
         female: 'nw_recent_jobs_female',

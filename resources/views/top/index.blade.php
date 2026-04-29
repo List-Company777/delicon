@@ -225,7 +225,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
 function recentlyViewedTop() {
     return {
         items: [],

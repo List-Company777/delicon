@@ -29,7 +29,7 @@
         この{{ $reportTargetType === 'shop' ? '店舗' : '求人' }}を通報する
     </button>
 
-    <div x-show="open" x-transition class="mt-3 border border-gray-200 rounded-xl p-5 bg-gray-50">
+    <div x-show="open" x-cloak class="mt-3 border border-gray-200 rounded-xl p-5 bg-gray-50">
 
         @if(session('report_error'))
             <p class="text-sm text-red-600">{{ session('report_error') }}</p>

@@ -146,7 +146,7 @@
         'nextPage'     => $nextUrl ?: null,
     ]);
 @endphp
-<script type="application/ld+json">{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endif
 @php
     // BreadcrumbList
@@ -171,7 +171,7 @@
     $breadcrumbs = array_map(fn($b) => array_filter($b), $breadcrumbs);
     $ldBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $breadcrumbs];
 @endphp
-<script type="application/ld+json">{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endpush
 
 @section('content')
@@ -383,7 +383,7 @@
                         <span class="ml-2 bg-yellow-100 text-yellow-700 border border-yellow-300 rounded-full px-2 py-0.5 text-xs">設定中</span>
                     @endif
                 </button>
-                <div x-show="detail" x-transition class="mt-3 flex flex-wrap items-center gap-3">
+                <div x-show="detail" @if(!$hasWageFilter) x-cloak @endif class="mt-3 flex flex-wrap items-center gap-3">
                     <select name="wage_type"
                             class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none bg-white">
                         <option value="">給与形態を選択</option>
@@ -556,125 +556,112 @@
             @foreach($results as $item)
                 @if($gender === 'yoasobi')
                     {{-- 営業情報カード --}}
-                    <a href="{{ url('/track/shop/' . $item->shop->id) . '/' }}"
-                       rel="nofollow"
-                       class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden block">
-                        @if($item->shop->main_image)
-                            <picture>
-                                <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($item->shop->main_image)) }}" type="image/webp">
-                                <img src="{{ asset('storage/' . $item->shop->main_image) }}"
-                                     alt="{{ $item->shop->name }}"
-                                     width="640" height="360"
-                                     @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
-                                     class="w-full aspect-video object-cover">
-                            </picture>
-                        @else
-                            <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
-                        @endif
-                        <div class="p-4">
-                            <div class="flex items-start justify-between gap-2 mb-2">
-                                <h2 class="font-bold text-gray-800 text-sm leading-tight">
-                                    {{ $item->shop->name ?? '店舗名未設定' }}
-                                </h2>
-                                @if($item->shop->genre)
-                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">
-                                        {{ $item->shop->genre->name }}
-                                    </span>
+                    <article class="result-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
+                        <a href="{{ url('/track/shop/' . $item->shop->id) . '/' }}"
+                           rel="nofollow"
+                           class="block h-full">
+                            @if($item->shop->main_image)
+                                <picture>
+                                    <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($item->shop->main_image)) }}" type="image/webp">
+                                    <img src="{{ asset('storage/' . $item->shop->main_image) }}"
+                                         alt="{{ $item->shop->name }}"
+                                         width="640" height="360"
+                                         @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
+                                         class="w-full aspect-video object-cover">
+                                </picture>
+                            @else
+                                <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
+                            @endif
+                            <div class="p-4">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <h2 class="font-bold text-gray-800 text-sm leading-tight">
+                                        {{ $item->shop->name ?? '店舗名未設定' }}
+                                    </h2>
+                                    @if($item->shop->genre)
+                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">
+                                            {{ $item->shop->genre->name }}
+                                        </span>
+                                    @endif
+                                </div>
+                                @if($item->set_price)
+                                    <p class="text-xs text-gray-500 mb-1">セット料金：{{ $item->set_price }}</p>
+                                @endif
+                                @if($item->opening_hours)
+                                    <p class="text-xs text-gray-500 mb-2">営業時間：{{ $item->opening_hours }}〜{{ $item->closing_hours }}</p>
+                                @endif
+                                @if($item->shop->nearest_station_name)
+                                    <p class="text-xs text-gray-500 mb-1">🚉 @if($item->shop->nearest_line){{ $item->shop->nearest_line }} @endif{{ $item->shop->nearest_station_name }}駅@if($item->shop->nearest_station_walk) 徒歩{{ $item->shop->nearest_station_walk }}分@endif</p>
+                                @endif
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    @if($item->all_you_can_drink)
+                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">飲み放題</span>
+                                    @endif
+                                    @if($item->has_karaoke)
+                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">カラオケ</span>
+                                    @endif
+                                    @if($item->has_private_room)
+                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">個室あり</span>
+                                    @endif
+                                    @if($item->discount_first_set)
+                                        <span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold">初回割引</span>
+                                    @endif
+                                </div>
+                                @if($item->shop->area)
+                                    <p class="text-xs text-gray-400 mt-1">📍 {{ $item->shop->area->name }}</p>
                                 @endif
                             </div>
-                            @if($item->set_price)
-                                <p class="text-xs text-gray-500 mb-1">セット料金：{{ $item->set_price }}</p>
-                            @endif
-                            @if($item->opening_hours)
-                                <p class="text-xs text-gray-500 mb-2">
-                                    営業時間：{{ $item->opening_hours }}〜{{ $item->closing_hours }}
-                                </p>
-                            @endif
-                            @if($item->shop->nearest_station_name)
-                                <p class="text-xs text-gray-500 mb-1">
-                                    🚉
-                                    @if($item->shop->nearest_line){{ $item->shop->nearest_line }} @endif
-                                    {{ $item->shop->nearest_station_name }}駅
-                                    @if($item->shop->nearest_station_walk) 徒歩{{ $item->shop->nearest_station_walk }}分 @endif
-                                </p>
-                            @endif
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                @if($item->all_you_can_drink)
-                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">飲み放題</span>
-                                @endif
-                                @if($item->has_karaoke)
-                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">カラオケ</span>
-                                @endif
-                                @if($item->has_private_room)
-                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">個室あり</span>
-                                @endif
-                                @if($item->discount_first_set)
-                                    <span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold">初回割引</span>
-                                @endif
-                            </div>
-                            @if($item->shop->area)
-                                <p class="text-xs text-gray-400 mt-1">📍 {{ $item->shop->area->name }}</p>
-                            @endif
-                        </div>
-                    </a>
+                        </a>
+                    </article>
                 @else
                     {{-- 求人カード --}}
-                    <a href="{{ $item->is_hotlink && $item->hotlink_url ? url('/click/' . $item->id) . '/' : url('/track/job/' . $item->id) . '/' }}"
-                       rel="nofollow"
-                       class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden block">
-                        @php
-                            $cardImg     = $item->image_path ?? $item->shop?->main_image;
-                            $cardImgWebp = $cardImg ? \App\Services\ImageService::webpPath($cardImg) : null;
-                        @endphp
-                        @if($cardImg)
-                            <picture>
-                                <source srcset="{{ asset('storage/' . $cardImgWebp) }}" type="image/webp">
-                                <img src="{{ asset('storage/' . $cardImg) }}"
-                                     alt="{{ $item->title }}"
-                                     width="640" height="360"
-                                     @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
-                                     class="w-full aspect-video object-cover">
-                            </picture>
-                        @else
-                            <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
-                        @endif
-                        <div class="p-4">
-                            <div class="flex items-start justify-between gap-2 mb-2">
-                                <h2 class="font-bold text-gray-800 text-sm leading-tight">
-                                    {{ $item->title }}
-                                </h2>
-                                @if($item->is_hotlink)
-                                    <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full whitespace-nowrap">
-                                        PR
-                                    </span>
+                    @php
+                        $cardImg     = $item->image_path ?? $item->shop?->main_image;
+                        $cardImgWebp = $cardImg ? \App\Services\ImageService::webpPath($cardImg) : null;
+                    @endphp
+                    <article class="result-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
+                        <a href="{{ $item->is_hotlink && $item->hotlink_url ? url('/click/' . $item->id) . '/' : url('/track/job/' . $item->id) . '/' }}"
+                           rel="nofollow"
+                           class="block h-full">
+                            @if($cardImg)
+                                <picture>
+                                    <source srcset="{{ asset('storage/' . $cardImgWebp) }}" type="image/webp">
+                                    <img src="{{ asset('storage/' . $cardImg) }}"
+                                         alt="{{ $item->title }}"
+                                         width="640" height="360"
+                                         @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
+                                         class="w-full aspect-video object-cover">
+                                </picture>
+                            @else
+                                <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
+                            @endif
+                            <div class="p-4">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <h2 class="font-bold text-gray-800 text-sm leading-tight">
+                                        {{ $item->title }}
+                                    </h2>
+                                    @if($item->is_hotlink)
+                                        <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full whitespace-nowrap">PR</span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">{{ $item->shop->name ?? '' }}</p>
+                                @if($item->hourly_wage_min)
+                                    <p class="text-sm font-bold {{ $c['text'] }}">
+                                        {{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$item->wage_type ?? 'hourly'] }}
+                                        {{ number_format($item->hourly_wage_min) }}円〜@if($item->hourly_wage_max){{ number_format($item->hourly_wage_max) }}円@endif
+                                    </p>
+                                @endif
+                                @if($item->jobType)
+                                    <span class="inline-block mt-2 text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $item->jobType->name }}</span>
+                                @endif
+                                @if($item->working_hours)
+                                    <p class="text-xs text-gray-500 mt-1">⏱ {{ $item->working_hours }}</p>
+                                @endif
+                                @if($item->area)
+                                    <p class="text-xs text-gray-400 mt-1">📍 {{ $item->area->name }}</p>
                                 @endif
                             </div>
-                            <p class="text-xs text-gray-600 mb-2">{{ $item->shop->name ?? '' }}</p>
-                            @if($item->hourly_wage_min)
-                                <p class="text-sm font-bold {{ $c['text'] }}">
-                                    {{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$item->wage_type ?? 'hourly'] }}
-                                    {{ number_format($item->hourly_wage_min) }}円〜
-                                    @if($item->hourly_wage_max)
-                                        {{ number_format($item->hourly_wage_max) }}円
-                                    @endif
-                                </p>
-                            @endif
-                            @if($item->jobType)
-                                <span class="inline-block mt-2 text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">
-                                    {{ $item->jobType->name }}
-                                </span>
-                            @endif
-                            @if($item->working_hours)
-                                <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    {{ $item->working_hours }}
-                                </p>
-                            @endif
-                            @if($item->area)
-                                <p class="text-xs text-gray-400 mt-1">📍 {{ $item->area->name }}</p>
-                            @endif
-                        </div>
-                    </a>
+                        </a>
+                    </article>
                 @endif
             @endforeach
         </div>

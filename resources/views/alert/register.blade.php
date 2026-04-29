@@ -116,8 +116,8 @@ $c = $colorMap[$gender];
 
 </div>
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js" @nonce></script>
+<script @nonce>
 new TomSelect('#area_id', {
     placeholder: '都道府県を入力してください',
     allowEmptyOption: false,

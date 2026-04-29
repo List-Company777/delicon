@@ -102,7 +102,7 @@
         $ld['openingHoursSpecification'] = $spec;
     }
 @endphp
-<script type="application/ld+json">
+<script type="application/ld+json" @nonce>
 {!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @php
@@ -120,7 +120,7 @@
         'itemListElement' => $bcItems,
     ];
 @endphp
-<script type="application/ld+json">
+<script type="application/ld+json" @nonce>
 {!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
 @endpush
@@ -554,7 +554,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
 function recentlyViewedShops() {
     const KEY = 'nw_recent_shops_business';
     const MAX = 8;

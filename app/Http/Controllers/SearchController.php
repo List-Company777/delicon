@@ -486,7 +486,9 @@ class SearchController extends Controller
             $prefModel?->id ?? '',
         ]));
 
-        return Cache::remember($cacheKey, 1800, function () use ($gender, $areaModel, $areaSlug, $jobSlug, $prefModel) {
+        // Eloquent Collectionをそのままigbinaryシリアライズすると
+        // OPcacheリロード後にデシリアライズ失敗するため、純粋な配列で保存する
+        $data = Cache::remember($cacheKey, 1800, function () use ($gender, $areaModel, $areaSlug, $jobSlug, $prefModel) {
         $searchGroups = match($gender) {
             'male'     => ['male', 'both'],
             'yoasobi' => ['yoasobi'],
@@ -551,8 +553,17 @@ class SearchController extends Controller
                 ->get(['id', 'name', 'slug']);
         }
 
-        return ['areas' => $relatedAreas, 'types' => $relatedTypes];
+        return [
+            'areas' => $relatedAreas->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'slug' => $m->slug])->all(),
+            'types' => $relatedTypes->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'slug' => $m->slug])->all(),
+        ];
         }); // Cache::remember lp_related
+
+        // 取り出し後にCollection<stdClass>に変換（ビューが->slug / ->isNotEmpty()を使うため）
+        return [
+            'areas' => collect($data['areas'])->map(fn($a) => (object) $a),
+            'types' => collect($data['types'])->map(fn($a) => (object) $a),
+        ];
     }
 
     private function computeRelatedArticles(string $gender): \Illuminate\Database\Eloquent\Collection

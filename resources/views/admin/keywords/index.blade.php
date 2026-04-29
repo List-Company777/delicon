@@ -17,7 +17,7 @@
         JSON_UNESCAPED_UNICODE
     );
 @endphp
-<script>
+<script @nonce>
     window.areaOptions = {!! $areaOptionsJson !!};
     window.jobTypeOptions = {!! $jobTypeOptionsJson !!};
 </script>

@@ -27,12 +27,19 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="preload" href="/fonts/noto-sans-jp.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    {{-- 外部ドメインへの事前接続（GA/GTM） --}}
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="preload" href="/fonts/noto-sans-jp.css" as="style" id="font-noto">
+    <script @nonce>(function(){var l=document.getElementById('font-noto');if(l)l.addEventListener('load',function(){this.rel='stylesheet';});}());</script>
     <noscript><link rel="stylesheet" href="/fonts/noto-sans-jp.css"></noscript>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
     @stack('head')
-    <script type="application/ld+json">{!! json_encode([
+@php
+    $ldSchema = [
         '@context' => 'https://schema.org',
         '@graph'   => [
             [
@@ -85,10 +92,12 @@
                 ],
             ],
         ],
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+    ];
+@endphp
+    <script type="application/ld+json" @nonce>{!! json_encode($ldSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE65XYN5VT"></script>
-    <script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE65XYN5VT" @nonce></script>
+    <script @nonce>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -144,7 +153,7 @@
         <div x-data="{ open: false }"
              @toggle-menu.window="open = !open"
              x-show="open"
-             x-transition
+             x-cloak
              class="md:hidden bg-gray-800 px-4 pb-4">
             <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                class="block py-2 text-business-300 font-medium">夜遊びリスト</a>
