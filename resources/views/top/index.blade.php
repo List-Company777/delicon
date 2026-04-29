@@ -46,18 +46,20 @@ $ldTop = [
 
             {{-- 夜遊びリスト --}}
             <div class="rounded-xl p-5 border border-business-700/40 bg-business-700/10">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="w-3 h-3 rounded-full bg-business-300 inline-block"></span>
-                    <h2 class="text-business-300 font-bold text-lg">夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span></h2>
-                </div>
+                <h2 class="flex items-center gap-2 mb-4 text-business-300 font-bold text-lg">
+                    <span class="w-3 h-3 rounded-full bg-business-300 shrink-0" aria-hidden="true"></span>
+                    夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span>
+                </h2>
                 <p class="text-gray-400 text-xs mb-4">夜遊びスポット情報・セット料金を検索</p>
                 <form action="{{ route('search') }}" method="GET">
                     <input type="hidden" name="gender" value="business">
                     <div class="space-y-2">
-                        <input type="text" name="area"
+                        <label class="sr-only" for="yoasobi-area">エリア・駅名</label>
+                        <input id="yoasobi-area" type="text" name="area"
                                placeholder="エリア・駅名（例：新宿）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-business-300">
-                        <input type="text" name="keyword"
+                        <label class="sr-only" for="yoasobi-keyword">業種・店名</label>
+                        <input id="yoasobi-keyword" type="text" name="keyword"
                                placeholder="業種・店名（例：キャバクラ）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-business-300">
                         <button type="submit"
@@ -70,18 +72,20 @@ $ldTop = [
 
             {{-- 男性ナイトワーク --}}
             <div class="rounded-xl p-5 border border-male-300/30 bg-male-800/30">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="w-3 h-3 rounded-full bg-male-300 inline-block"></span>
-                    <h2 class="text-male-300 font-bold text-lg">男性ナイトワーク</h2>
-                </div>
+                <h2 class="flex items-center gap-2 mb-4 text-male-300 font-bold text-lg">
+                    <span class="w-3 h-3 rounded-full bg-male-300 shrink-0" aria-hidden="true"></span>
+                    男性ナイトワーク
+                </h2>
                 <p class="text-gray-400 text-xs mb-4">ホスト・黒服・ボーイなどの男性ナイトワーク</p>
                 <form action="{{ route('search') }}" method="GET">
                     <input type="hidden" name="gender" value="male">
                     <div class="space-y-2">
-                        <input type="text" name="area"
+                        <label class="sr-only" for="male-area">エリア・駅名</label>
+                        <input id="male-area" type="text" name="area"
                                placeholder="エリア・駅名（例：歌舞伎町）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-male-300">
-                        <input type="text" name="keyword"
+                        <label class="sr-only" for="male-keyword">職種・業種</label>
+                        <input id="male-keyword" type="text" name="keyword"
                                placeholder="職種・業種（例：黒服、キャバクラ）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-male-300">
                         <button type="submit"
@@ -94,18 +98,20 @@ $ldTop = [
 
             {{-- 女性ナイトワーク --}}
             <div class="rounded-xl p-5 border border-female-500/40 bg-female-600/10">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="w-3 h-3 rounded-full bg-female-500 inline-block"></span>
-                    <h2 class="text-female-400 font-bold text-lg">女性ナイトワーク</h2>
-                </div>
+                <h2 class="flex items-center gap-2 mb-4 text-female-400 font-bold text-lg">
+                    <span class="w-3 h-3 rounded-full bg-female-500 shrink-0" aria-hidden="true"></span>
+                    女性ナイトワーク
+                </h2>
                 <p class="text-gray-400 text-xs mb-4">キャスト・ガールズバーなどの女性ナイトワーク</p>
                 <form action="{{ route('search') }}" method="GET">
                     <input type="hidden" name="gender" value="female">
                     <div class="space-y-2">
-                        <input type="text" name="area"
+                        <label class="sr-only" for="female-area">エリア・駅名</label>
+                        <input id="female-area" type="text" name="area"
                                placeholder="エリア・駅名（例：池袋）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-female-400">
-                        <input type="text" name="keyword"
+                        <label class="sr-only" for="female-keyword">職種・業種</label>
+                        <input id="female-keyword" type="text" name="keyword"
                                placeholder="職種・業種（例：キャスト、ガールズバー）"
                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-female-400">
                         <button type="submit"
@@ -126,12 +132,12 @@ $ldTop = [
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {{-- 夜遊びリスト --}}
-        <div>
+        <nav aria-label="夜遊びリスト エリア別">
             <h3 class="text-sm font-bold text-business-700 border-b-2 border-business-300 pb-1 mb-3">
                 夜遊びリスト（ナイトスポット情報）
             </h3>
             <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('yoasobi', collect()) as $row)
+                @forelse($popularAreas->get('yoasobi', collect())->take(15) as $row)
                 <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
                     {{ $row->area_name }}
@@ -145,15 +151,15 @@ $ldTop = [
                 @endforeach
                 @endforelse
             </div>
-        </div>
+        </nav>
 
         {{-- 男性向け --}}
-        <div>
+        <nav aria-label="男性ナイトワーク エリア別">
             <h3 class="text-sm font-bold text-male-600 border-b-2 border-male-300 pb-1 mb-3">
                 男性ナイトワーク
             </h3>
             <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('male', collect()) as $row)
+                @forelse($popularAreas->get('male', collect())->take(15) as $row)
                 <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
                     {{ $row->area_name }}
@@ -167,15 +173,15 @@ $ldTop = [
                 @endforeach
                 @endforelse
             </div>
-        </div>
+        </nav>
 
         {{-- 女性向け --}}
-        <div>
+        <nav aria-label="女性ナイトワーク エリア別">
             <h3 class="text-sm font-bold text-female-600 border-b-2 border-female-400 pb-1 mb-3">
                 女性ナイトワーク
             </h3>
             <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('female', collect()) as $row)
+                @forelse($popularAreas->get('female', collect())->take(15) as $row)
                 <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
                     {{ $row->area_name }}
@@ -189,27 +195,30 @@ $ldTop = [
                 @endforeach
                 @endforelse
             </div>
-        </div>
+        </nav>
 
     </div>
 </section>
 
 {{-- 最近見た求人・店舗 --}}
-<div x-data="recentlyViewedTop()" x-init="init()" x-show="items.length > 0" x-cloak
-     class="max-w-6xl mx-auto px-4 py-8 border-t border-gray-100">
-    <h2 class="text-sm font-bold text-gray-500 mb-3">最近見た求人・店舗</h2>
-    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        <template x-for="item in items" :key="item.id + item.kind">
-            <a :href="item.url"
-               class="shrink-0 w-36 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition">
-                <p class="text-xs mb-1"
-                   :class="item.kind === 'shop' ? 'text-business-600' : (item.group === 'male' ? 'text-male-600' : 'text-female-500')"
-                   x-text="item.type"></p>
-                <p class="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1" x-text="item.title"></p>
-                <p class="text-xs text-gray-400 truncate" x-text="item.shop || item.name"></p>
-            </a>
-        </template>
-    </div>
+<div x-data="recentlyViewedTop()" x-init="init()">
+    <template x-if="items.length > 0">
+        <section class="max-w-6xl mx-auto px-4 py-8 border-t border-gray-100" aria-label="最近見た求人・店舗">
+            <h2 class="text-sm font-bold text-gray-500 mb-3">最近見た求人・店舗</h2>
+            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <template x-for="item in items" :key="item.id + item.kind">
+                    <a :href="item.url"
+                       class="shrink-0 w-36 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition">
+                        <p class="text-xs mb-1"
+                           :class="item.kind === 'shop' ? 'text-business-600' : (item.group === 'male' ? 'text-male-600' : 'text-female-500')"
+                           x-text="item.type"></p>
+                        <p class="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1" x-text="item.title"></p>
+                        <p class="text-xs text-gray-400 truncate" x-text="item.shop || item.name"></p>
+                    </a>
+                </template>
+            </div>
+        </section>
+    </template>
 </div>
 
 {{-- みんなの検索ワード --}}
