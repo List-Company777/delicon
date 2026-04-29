@@ -32,8 +32,18 @@
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://www.google-analytics.com">
-    <link rel="preload" href="/fonts/noto-sans-jp.css" as="style" id="font-noto">
-    <script @nonce>(function(){var l=document.getElementById('font-noto');if(l)l.addEventListener('load',function(){this.rel='stylesheet';});}());</script>
+    <script @nonce>(function(){
+      function injectFont(){
+        var l=document.createElement('link');
+        l.rel='stylesheet';l.href='/fonts/noto-sans-jp.css';
+        document.head.appendChild(l);
+      }
+      if(window.requestIdleCallback){
+        window.addEventListener('load',function(){requestIdleCallback(injectFont,{timeout:2000});});
+      } else {
+        window.addEventListener('load',injectFont);
+      }
+    }());</script>
     <noscript><link rel="stylesheet" href="/fonts/noto-sans-jp.css"></noscript>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
