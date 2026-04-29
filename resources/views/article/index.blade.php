@@ -60,14 +60,18 @@
                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
             </div>
             @else
-            <div class="h-44 bg-gradient-to-br
-                @if($article->gender === 'female') from-female-100 to-female-50
-                @elseif($article->gender === 'male') from-male-100 to-male-50
-                @elseif($article->gender === 'yoasobi') from-business-100 to-business-50
-                @elseif($article->gender === 'shop') from-green-100 to-green-50
-                @else from-gray-100 to-gray-50 @endif
-                flex items-center justify-center">
-                <span class="text-4xl opacity-30">📝</span>
+            @php
+                [$bgFrom, $bgTo, $labelColor, $labelText] = match($article->gender) {
+                    'female'  => ['from-female-200', 'to-female-100',    'text-female-600',   '女性ナイトワーク'],
+                    'male'    => ['from-male-200',   'to-male-100',      'text-male-600',     '男性ナイトワーク'],
+                    'yoasobi' => ['from-business-200','to-business-100', 'text-business-700', '夜遊び'],
+                    'shop'    => ['from-green-200',  'to-green-100',     'text-green-700',    '経営者向け'],
+                    default   => ['from-gray-200',   'to-gray-100',      'text-gray-600',     'ナイトワーク'],
+                };
+            @endphp
+            <div class="h-44 bg-gradient-to-br {{ $bgFrom }} {{ $bgTo }} flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl opacity-40">📝</span>
+                <span class="text-sm font-bold {{ $labelColor }} opacity-80 tracking-wide">{{ $labelText }}</span>
             </div>
             @endif
             <div class="p-4">

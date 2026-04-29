@@ -139,25 +139,6 @@
 @if($nextUrl)
 <link rel="next" href="{{ $nextUrl }}">
 @endif
-@if($currentPage > 1 || $results->hasMorePages())
-@php
-    $pageUrl = $currentPage > 1
-        ? $canonicalUrl . (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . $currentPage
-        : $canonicalUrl;
-    $ldPage  = array_filter([
-        '@context'     => 'https://schema.org',
-        '@type'        => 'CollectionPage',
-        'name'         => $pageTitle,
-        'description'  => $pageDesc ?? null,
-        'inLanguage'   => 'ja',
-        'url'          => $pageUrl,
-        'isPartOf'     => ['@id' => url('/') . '#website'],
-        'previousPage' => $prevUrl ?: null,
-        'nextPage'     => $nextUrl ?: null,
-    ]);
-@endphp
-<script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
-@endif
 @php
     // BreadcrumbList
     $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => route('top') . '/']];
@@ -179,8 +160,34 @@
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayJob, 'item' => $canonicalUrl];
     }
     $breadcrumbs = array_map(fn($b) => array_filter($b), $breadcrumbs);
-    $ldBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $breadcrumbs];
+    $breadcrumbId = $canonicalUrl . '#breadcrumb';
+    $ldBreadcrumb = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        '@id'             => $breadcrumbId,
+        'itemListElement' => $breadcrumbs,
+    ];
+
+    // CollectionPage（LP 1ページ目も含め常に出力）
+    $pageUrl = $currentPage > 1
+        ? $canonicalUrl . (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . $currentPage
+        : $canonicalUrl;
+    $ldPage = array_filter([
+        '@context'     => 'https://schema.org',
+        '@type'        => 'CollectionPage',
+        '@id'          => $pageUrl . '#webpage',
+        'url'          => $pageUrl,
+        'name'         => $pageTitle,
+        'description'  => $pageDesc ?? null,
+        'inLanguage'   => 'ja',
+        'isPartOf'     => ['@id' => url('/') . '#website'],
+        'publisher'    => ['@id' => url('/') . '#org'],
+        'breadcrumb'   => ['@id' => $breadcrumbId],
+        'previousPage' => $prevUrl ?: null,
+        'nextPage'     => $nextUrl ?: null,
+    ]);
 @endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 <script type="application/ld+json" @nonce>{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endpush
 
@@ -205,8 +212,8 @@
     </div>
 </nav>
 
-{{-- カラーバー --}}
-<div class="{{ $c['bg'] }} text-white py-4">
+{{-- ページヘッダー --}}
+<header class="{{ $c['bg'] }} text-white py-4">
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-center gap-3">
             <h1 class="text-lg font-bold">
@@ -239,7 +246,7 @@
             </form>
         </div>
     </div>
-</div>
+</header>
 
 @php
     $wageType = $wageType ?? '';
@@ -251,7 +258,7 @@
     $hasWageFilter = $wageType && $wageMin > 0;
 @endphp
 
-<div class="bg-gray-50 border-b border-gray-200">
+<section class="bg-gray-50 border-b border-gray-200" aria-label="絞り込み検索">
     <div class="max-w-6xl mx-auto px-4 py-4"
          x-data="{ detail: {{ $hasWageFilter ? 'true' : 'false' }} }">
         <form action="{{ route('search') }}/" method="GET">
@@ -393,7 +400,7 @@
                         <span class="ml-2 bg-yellow-100 text-yellow-700 border border-yellow-300 rounded-full px-2 py-0.5 text-xs">設定中</span>
                     @endif
                 </button>
-                <div x-show="detail" @if(!$hasWageFilter) x-cloak @endif class="mt-3 flex flex-wrap items-center gap-3">
+                <div class="mt-3 flex flex-wrap items-center gap-3{{ !$hasWageFilter ? ' hidden' : '' }}" :class="{ 'hidden': !detail }">
                     <select name="wage_type"
                             class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none bg-white">
                         <option value="">給与形態を選択</option>
@@ -420,9 +427,9 @@
             @endif
         </form>
     </div>
-</div>
+</section>
 
-<div class="max-w-6xl mx-auto px-4 py-6">
+<section class="max-w-6xl mx-auto px-4 py-6" aria-label="{{ $gender === 'yoasobi' ? '夜遊びスポット一覧' : $c['label'] . '求人一覧' }}">
 
     {{-- 件数 --}}
     <p class="text-sm text-gray-500 mb-4">
@@ -562,6 +569,7 @@
             </a>
         </div>
     @else
+        @php $lcpImgRendered = false; @endphp
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($results as $item)
                 @if($gender === 'yoasobi')
@@ -571,53 +579,55 @@
                            rel="nofollow"
                            class="block h-full">
                             @if($item->shop->main_image)
+                                @php $isFirstImg = !$lcpImgRendered; $lcpImgRendered = true; @endphp
                                 <picture>
                                     <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($item->shop->main_image)) }}" type="image/webp">
                                     <img src="{{ asset('storage/' . $item->shop->main_image) }}"
                                          alt="{{ $item->shop->name }}"
                                          width="640" height="360"
-                                         @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
+                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
                                          class="w-full aspect-video object-cover">
                                 </picture>
                             @else
                                 <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
                             @endif
                             <div class="p-4">
-                                <div class="flex items-start justify-between gap-2 mb-2">
-                                    <h2 class="font-bold text-gray-800 text-sm leading-tight">
-                                        {{ $item->shop->name ?? '店舗名未設定' }}
-                                    </h2>
+                                <h2 class="flex items-start justify-between gap-2 mb-2 font-bold text-gray-800 text-sm leading-tight">
+                                    {{ $item->shop->name ?? '店舗名未設定' }}
                                     @if($item->shop->genre)
-                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">
-                                            {{ $item->shop->genre->name }}
-                                        </span>
+                                        <span class="text-xs font-normal px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap shrink-0">{{ $item->shop->genre->name }}</span>
                                     @endif
-                                </div>
-                                @if($item->set_price)
-                                    <p class="text-xs text-gray-500 mb-1">セット料金：{{ $item->set_price }}</p>
+                                </h2>
+                                @if($item->set_price || $item->opening_hours)
+                                @php
+                                    $priceStr = implode(' · ', array_filter([
+                                        $item->set_price    ? 'セット：' . $item->set_price : null,
+                                        $item->opening_hours ? $item->opening_hours . '〜' . $item->closing_hours : null,
+                                    ]));
+                                @endphp
+                                    <p class="text-xs text-gray-500 mb-1">{{ $priceStr }}</p>
                                 @endif
-                                @if($item->opening_hours)
-                                    <p class="text-xs text-gray-500 mb-2">営業時間：{{ $item->opening_hours }}〜{{ $item->closing_hours }}</p>
+                                @if($item->shop->nearest_station_name || $item->shop->area)
+                                @php
+                                    $locationParts = [];
+                                    if ($item->shop->nearest_station_name) {
+                                        $st = '🚉 ';
+                                        if ($item->shop->nearest_line) $st .= $item->shop->nearest_line . ' ';
+                                        $st .= $item->shop->nearest_station_name . '駅';
+                                        if ($item->shop->nearest_station_walk) $st .= ' 徒歩' . $item->shop->nearest_station_walk . '分';
+                                        $locationParts[] = $st;
+                                    }
+                                    if ($item->shop->area) $locationParts[] = '📍 ' . $item->shop->area->name;
+                                @endphp
+                                    <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', $locationParts) }}</p>
                                 @endif
-                                @if($item->shop->nearest_station_name)
-                                    <p class="text-xs text-gray-500 mb-1">🚉 @if($item->shop->nearest_line){{ $item->shop->nearest_line }} @endif{{ $item->shop->nearest_station_name }}駅@if($item->shop->nearest_station_walk) 徒歩{{ $item->shop->nearest_station_walk }}分@endif</p>
-                                @endif
+                                @if($item->all_you_can_drink || $item->has_karaoke || $item->has_private_room || $item->discount_first_set)
                                 <div class="flex flex-wrap gap-1 mt-2">
-                                    @if($item->all_you_can_drink)
-                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">飲み放題</span>
-                                    @endif
-                                    @if($item->has_karaoke)
-                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">カラオケ</span>
-                                    @endif
-                                    @if($item->has_private_room)
-                                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">個室あり</span>
-                                    @endif
-                                    @if($item->discount_first_set)
-                                        <span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold">初回割引</span>
-                                    @endif
+                                    @if($item->all_you_can_drink)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">飲み放題</span>@endif
+                                    @if($item->has_karaoke)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">カラオケ</span>@endif
+                                    @if($item->has_private_room)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">個室あり</span>@endif
+                                    @if($item->discount_first_set)<span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold">初回割引</span>@endif
                                 </div>
-                                @if($item->shop->area)
-                                    <p class="text-xs text-gray-400 mt-1">📍 {{ $item->shop->area->name }}</p>
                                 @endif
                             </div>
                         </a>
@@ -633,41 +643,40 @@
                            rel="nofollow"
                            class="block h-full">
                             @if($cardImg)
+                                @php $isFirstImg = !$lcpImgRendered; $lcpImgRendered = true; @endphp
                                 <picture>
                                     <source srcset="{{ asset('storage/' . $cardImgWebp) }}" type="image/webp">
                                     <img src="{{ asset('storage/' . $cardImg) }}"
                                          alt="{{ $item->title }}"
                                          width="640" height="360"
-                                         @if($loop->first) fetchpriority="high" @else loading="lazy" decoding="async" @endif
+                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
                                          class="w-full aspect-video object-cover">
                                 </picture>
                             @else
                                 <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
                             @endif
                             <div class="p-4">
-                                <div class="flex items-start justify-between gap-2 mb-2">
-                                    <h2 class="font-bold text-gray-800 text-sm leading-tight">
-                                        {{ $item->title }}
-                                    </h2>
+                                <h2 class="flex items-start justify-between gap-2 mb-2 font-bold text-gray-800 text-sm leading-tight">
+                                    {{ $item->title }}
                                     @if($item->is_hotlink)
-                                        <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full whitespace-nowrap">PR</span>
+                                        <span class="text-xs font-normal px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full whitespace-nowrap shrink-0">PR</span>
                                     @endif
-                                </div>
-                                <p class="text-xs text-gray-600 mb-2">{{ $item->shop->name ?? '' }}</p>
+                                </h2>
+                                <p class="text-xs text-gray-600 mb-1">{{ $item->shop->name ?? '' }}</p>
                                 @if($item->hourly_wage_min)
-                                    <p class="text-sm font-bold {{ $c['text'] }}">
-                                        {{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$item->wage_type ?? 'hourly'] }}
-                                        {{ number_format($item->hourly_wage_min) }}円〜@if($item->hourly_wage_max){{ number_format($item->hourly_wage_max) }}円@endif
-                                    </p>
+                                    <p class="text-sm font-bold {{ $c['text'] }}">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$item->wage_type ?? 'hourly'] }} {{ number_format($item->hourly_wage_min) }}円〜@if($item->hourly_wage_max){{ number_format($item->hourly_wage_max) }}円@endif</p>
                                 @endif
                                 @if($item->jobType)
-                                    <span class="inline-block mt-2 text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $item->jobType->name }}</span>
+                                    <span class="inline-block mt-1 text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $item->jobType->name }}</span>
                                 @endif
-                                @if($item->working_hours)
-                                    <p class="text-xs text-gray-500 mt-1">⏱ {{ $item->working_hours }}</p>
-                                @endif
-                                @if($item->area)
-                                    <p class="text-xs text-gray-400 mt-1">📍 {{ $item->area->name }}</p>
+                                @if($item->working_hours || $item->area)
+                                @php
+                                    $workStr = implode(' · ', array_filter([
+                                        $item->working_hours ? '⏱ ' . $item->working_hours : null,
+                                        $item->area          ? '📍 ' . $item->area->name   : null,
+                                    ]));
+                                @endphp
+                                    <p class="text-xs text-gray-500 mt-1">{{ $workStr }}</p>
                                 @endif
                             </div>
                         </a>
@@ -677,14 +686,14 @@
         </div>
 
         {{-- ページネーション --}}
-        <div class="mt-8">
+        <nav class="mt-8" aria-label="ページネーション">
             {{ $results->appends(request()->query())->links() }}
-        </div>
+        </nav>
     @endif
 
     {{-- 関連コラム（LPのみ・1ページ目・記事あり） --}}
     @if($isLp && $currentPage === 1 && isset($relatedArticles) && $relatedArticles->isNotEmpty())
-    <div class="mt-10">
+    <section class="mt-10" aria-label="関連コラム">
         <p class="text-xs font-bold text-gray-400 mb-3">関連コラム・ガイド</p>
         <div class="space-y-3">
             @foreach($relatedArticles as $ra)
@@ -710,7 +719,7 @@
             </a>
             @endforeach
         </div>
-    </div>
+    </section>
     @endif
 
     {{-- 関連エリア・関連職種リンク（LPのみ） --}}
@@ -776,5 +785,5 @@
     </div>
     @endif
 
-</div>
+</section>
 @endsection

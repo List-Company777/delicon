@@ -31,10 +31,10 @@ $ldTop = [
         {{-- タイトル --}}
         <div class="text-center mb-8">
             <h1 class="text-2xl md:text-4xl font-bold mb-2">
-                ナイトワーク<span class="text-business-300">リスト</span>
+                ナイトワーク<span class="text-business-300">求人</span>・夜遊び情報
             </h1>
             <p class="text-gray-400 text-sm md:text-base">
-                キャバクラ・ホスト・ガールズバーの求人・夜遊び情報
+                ナイトワークリスト｜キャバクラ・ホスト・ガールズバーをエリア・職種から検索
             </p>
             <p class="text-gray-500 text-xs mt-2">
                 ※本サイトは18歳以上の方を対象としています

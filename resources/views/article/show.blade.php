@@ -27,7 +27,7 @@
 
 @extends('layouts.app')
 
-@section('canonical', route('article.show', $article->slug))
+@section('canonical', route('article.show', $article->slug) . '/')
 @section('title', $article->title . ' | ナイトワークリスト')
 @section('description', $article->lead ?? mb_strimwidth(strip_tags($article->body ?? ''), 0, 120, '…'))
 @if($article->is_published && $article->published_at?->lte(now()))
@@ -94,31 +94,56 @@
 }
 </style>
 @php
+    $articleUrl = route('article.show', $article->slug) . '/';
     $ld = [
         '@context'         => 'https://schema.org',
         '@type'            => 'Article',
+        '@id'              => $articleUrl . '#article',
+        'url'              => $articleUrl,
         'headline'         => $article->title,
         'description'      => $article->lead ?? '',
         'datePublished'    => $article->published_at?->toIso8601String(),
         'dateModified'     => ($article->updated_at_manual ?? $article->updated_at)?->toIso8601String(),
-        'author'           => ['@type' => 'Organization', 'name' => 'ナイトワークリスト編集部'],
-        'publisher'        => ['@type' => 'Organization', 'name' => 'ナイトワークリスト',
-                               'logo' => ['@type' => 'ImageObject', 'url' => asset('android-chrome-192x192.png')]],
+        'inLanguage'       => 'ja',
+        'mainEntityOfPage' => ['@id' => $articleUrl . '#webpage'],
+        'author'           => ['@type' => 'Organization', '@id' => url('/') . '#org', 'name' => 'ナイトワークリスト編集部'],
+        'publisher'        => ['@id' => url('/') . '#org'],
+        'isPartOf'         => ['@id' => url('/') . '#website'],
     ];
     if ($article->hero_image) {
-        $ld['image'] = asset('storage/' . $article->hero_image);
+        $ld['image'] = [
+            '@type'  => 'ImageObject',
+            'url'    => asset('storage/' . $article->hero_image),
+            'width'  => 1200,
+            'height' => 630,
+        ];
     }
 
     $breadcrumb = [
         '@context' => 'https://schema.org',
         '@type'    => 'BreadcrumbList',
+        '@id'      => $articleUrl . '#breadcrumb',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => 'コラム・ガイド', 'item' => route('article.index')],
-            ['@type' => 'ListItem', 'position' => 3, 'name' => $article->title, 'item' => route('article.show', $article->slug)],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => 'コラム・ガイド', 'item' => route('article.index') . '/'],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $article->title, 'item' => $articleUrl],
         ],
     ];
+
+    $ldPage = [
+        '@context'   => 'https://schema.org',
+        '@type'      => 'WebPage',
+        '@id'        => $articleUrl . '#webpage',
+        'url'        => $articleUrl,
+        'name'       => $article->title . ' | ナイトワークリスト',
+        'inLanguage' => 'ja',
+        'isPartOf'   => ['@id' => url('/') . '#website'],
+        'about'      => ['@id' => url('/') . '#org'],
+        'publisher'  => ['@id' => url('/') . '#org'],
+        'breadcrumb' => ['@id' => $articleUrl . '#breadcrumb'],
+    ];
 @endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 <script type="application/ld+json" @nonce>{!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 <script type="application/ld+json" @nonce>{!! json_encode($breadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @if(!empty($article->faq))
@@ -157,15 +182,17 @@
 <div class="max-w-3xl mx-auto px-4 py-8">
 
     {{-- パンくず --}}
-    <nav class="text-xs text-gray-400 mb-6">
+    <nav class="text-xs text-gray-400 mb-6" aria-label="パンくずリスト">
         <a href="{{ route('top') }}/" class="hover:text-gray-600">ナイトワーク</a>
-        <span class="mx-1">›</span>
+        <span class="mx-1" aria-hidden="true">›</span>
         <a href="{{ route('article.index') }}" class="hover:text-gray-600">コラム・ガイド</a>
-        <span class="mx-1">›</span>
-        <span class="text-gray-600">{{ $article->title }}</span>
+        <span class="mx-1" aria-hidden="true">›</span>
+        <span class="text-gray-600" aria-current="page">{{ $article->title }}</span>
     </nav>
 
     <article>
+
+        <header>
 
         {{-- カテゴリ・タグ・日付 --}}
         <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -188,6 +215,18 @@
             {{ $article->title }}
         </h1>
 
+        {{-- ヒーロー画像（タイトル直下に配置してLCP候補にする） --}}
+        @if($article->hero_image)
+        <picture class="block mb-6 rounded-xl overflow-hidden">
+            <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($article->hero_image)) }}" type="image/webp">
+            <img src="{{ asset('storage/' . $article->hero_image) }}"
+                 alt="{{ $article->title }}"
+                 class="w-full h-64 md:h-80 object-cover"
+                 fetchpriority="high"
+                 decoding="async">
+        </picture>
+        @endif
+
         {{-- リード文 --}}
         @if($article->lead)
         <p class="text-gray-600 text-base leading-relaxed border-l-4 border-gray-300 pl-4 mb-6">
@@ -195,24 +234,13 @@
         </p>
         @endif
 
-        {{-- ヒーロー画像 --}}
-        @if($article->hero_image)
-        <div class="mb-8 rounded-xl overflow-hidden">
-            <picture>
-                <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($article->hero_image)) }}" type="image/webp">
-                <img src="{{ asset('storage/' . $article->hero_image) }}"
-                     alt="{{ $article->title }}"
-                     class="w-full h-64 md:h-80 object-cover"
-                     fetchpriority="high">
-            </picture>
-        </div>
-        @endif
+        </header>
 
         {{-- 目次（JSで自動生成） --}}
-        <div id="mokuji" class="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-8 hidden">
-            <p class="text-sm font-bold text-gray-700 mb-3">目次</p>
+        <nav id="mokuji" class="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-8 hidden" aria-label="目次">
+            <p class="text-sm font-bold text-gray-700 mb-3" aria-hidden="true">目次</p>
             <ol id="toc-list" class="space-y-1 text-sm text-gray-600"></ol>
-        </div>
+        </nav>
 
         {{-- 本文 --}}
         <div id="article-body" class="text-base max-w-none mb-10">
@@ -221,7 +249,7 @@
 
         {{-- FAQ --}}
         @if(!empty($article->faq))
-        <div class="mt-10 pt-8 border-t border-gray-100" id="faq">
+        <section class="mt-10 pt-8 border-t border-gray-100" id="faq" aria-label="よくある質問">
             <h2 class="text-xl font-bold text-gray-800 mb-5">よくある質問</h2>
             <dl class="space-y-4">
                 @foreach($article->faq as $item)
@@ -237,7 +265,7 @@
                 </div>
                 @endforeach
             </dl>
-        </div>
+        </section>
         @endif
 
         {{-- 動画 --}}
@@ -266,56 +294,51 @@
 
     {{-- 関連求人 --}}
     @if($relatedJobs->isNotEmpty())
-    <div class="mt-6 border-t border-gray-100 pt-8">
-        <h2 class="text-sm font-bold text-gray-600 mb-3">
-            {{ $genderLabel }}の求人を見る
-        </h2>
+    <section class="mt-6 border-t border-gray-100 pt-8" aria-label="{{ $genderLabel }}の求人">
+        <h2 class="text-sm font-bold text-gray-600 mb-3">{{ $genderLabel }}の求人を見る</h2>
         <div class="space-y-2">
             @foreach($relatedJobs as $rJob)
             <a href="{{ url('/track/job/' . $rJob->id) . '/' }}"
                rel="nofollow"
                class="flex items-center justify-between p-3 rounded-xl border {{ $jobBorderColor }} transition group">
-                <div class="min-w-0">
-                    <p class="text-xs {{ $jobTextColor }} font-medium">
-                        {{ $rJob->jobType?->name ?? '求人' }} &nbsp;·&nbsp; {{ $rJob->shop->area?->name ?? '' }}
-                    </p>
-                    <p class="text-sm font-bold text-gray-800 truncate">{{ $rJob->title }}</p>
-                    <p class="text-xs text-gray-500 truncate">{{ $rJob->shop->name }}</p>
-                </div>
-                <span class="{{ $jobTextColor }} opacity-60 ml-3 shrink-0 group-hover:translate-x-0.5 transition-transform">›</span>
+                <span class="min-w-0">
+                    <b class="block text-sm font-bold text-gray-800 truncate">{{ $rJob->title }}</b>
+                    <span class="block text-xs text-gray-500">{{ $rJob->jobType?->name ?? '求人' }} · {{ $rJob->shop->area?->name ?? '' }} · {{ $rJob->shop->name }}</span>
+                </span>
+                <span class="{{ $jobTextColor }} opacity-60 ml-3 shrink-0 group-hover:translate-x-0.5 transition-transform" aria-hidden="true">›</span>
             </a>
             @endforeach
         </div>
-        <div class="mt-4 text-center">
+        <p class="mt-4 text-center">
             <a href="{{ route('search', ['gender' => in_array($article->gender, ['female','male','yoasobi']) ? $article->gender : 'female']) }}"
                class="text-sm text-gray-500 hover:text-gray-700 underline">
                 {{ $genderLabel }}の求人をもっと見る →
             </a>
-        </div>
-    </div>
+        </p>
+    </section>
     @endif
 
     {{-- エリアLPクロスリンク --}}
     @if(!empty($lpLinks))
-    <div class="mt-8 border-t border-gray-100 pt-8">
+    <section class="mt-8 border-t border-gray-100 pt-8" aria-label="エリア別求人">
         <h2 class="text-sm font-bold text-gray-600 mb-3">エリア別求人を探す</h2>
-        <div class="flex flex-wrap gap-2">
+        <nav class="flex flex-wrap gap-2" aria-label="エリア別リンク">
             @foreach($lpLinks as $link)
             <a href="{{ $link['url'] }}"
                class="text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
                 {{ $link['label'] }}
             </a>
             @endforeach
-        </div>
-    </div>
+        </nav>
+    </section>
     @endif
 
     {{-- 記事一覧へ戻る --}}
-    <div class="mt-10 text-center">
+    <p class="mt-10 text-center">
         <a href="{{ route('article.index') }}" class="text-sm text-gray-400 hover:text-gray-600">
             ← コラム・ガイド一覧に戻る
         </a>
-    </div>
+    </p>
 
 </div>
 
