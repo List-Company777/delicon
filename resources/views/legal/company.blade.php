@@ -24,14 +24,14 @@
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-6 py-4 whitespace-nowrap">電話番号</th>
                 <td class="px-6 py-4 text-gray-700">
-                    <a href="tel:0352066966" class="text-business-700 hover:underline">03-5206-6966</a>
+                    <a href="tel:0352066966" class="text-business-700 underline underline-offset-2 hover:no-underline">03-5206-6966</a>
                     <span class="text-gray-400 text-xs ml-2">（平日 10:00〜19:00）</span>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-6 py-4 whitespace-nowrap">メール</th>
                 <td class="px-6 py-4 text-gray-700">
-                    <a href="mailto:info@list-company.net" class="text-business-700 hover:underline">info@list-company.net</a>
+                    <a href="mailto:info@list-company.net" class="text-business-700 underline underline-offset-2 hover:no-underline">info@list-company.net</a>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -49,7 +49,7 @@
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-6 py-4 whitespace-nowrap">公式サイト</th>
                 <td class="px-6 py-4">
                     <a href="https://list-company.net/" target="_blank" rel="noopener noreferrer"
-                       class="text-business-700 hover:underline">https://list-company.net/</a>
+                       class="text-business-700 underline underline-offset-2 hover:no-underline">https://list-company.net/</a>
                 </td>
             </tr>
         </table>

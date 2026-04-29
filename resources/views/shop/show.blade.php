@@ -342,7 +342,7 @@
                             <a href="https://maps.google.com/?q={{ urlencode($fullAddress) }}"
                                target="_blank"
                                rel="noopener noreferrer"
-                               class="text-business-700 hover:underline">{{ $fullAddress }}</a>
+                               class="text-business-700 underline underline-offset-2 hover:no-underline">{{ $fullAddress }}</a>
                             <p class="text-xs text-gray-500 mt-1">※クリックするとGoogleマップに遷移します</p>
                         </td>
                     </tr>
@@ -365,7 +365,7 @@
                     <tr class="border-b border-gray-100">
                         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">電話番号</th>
                         <td class="px-4 py-3 text-gray-700">
-                            <a href="tel:{{ $shop->tel }}" class="text-business-700 hover:underline">{{ $shop->tel }}</a>
+                            <a href="tel:{{ $shop->tel }}" class="text-business-700 underline underline-offset-2 hover:no-underline">{{ $shop->tel }}</a>
                             <p class="text-xs text-gray-500 mt-1">※ナイトワークリストを見たとお伝えいただくとスムーズです</p>
                         </td>
                     </tr>
