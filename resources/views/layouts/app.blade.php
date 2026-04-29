@@ -56,7 +56,7 @@
                 '@type'           => 'Organization',
                 '@id'             => url('/') . '#org',
                 'name'            => 'ナイトワークリスト',
-                'url'             => url('/'),
+                'url'             => url('/') . '/',
                 'foundingDate'    => '2026',
                 'foundingLocation'=> ['@type' => 'Place', 'name' => '日本'],
                 'logo'            => [
@@ -90,14 +90,14 @@
             [
                 '@type'           => 'WebSite',
                 '@id'             => url('/') . '#website',
-                'url'             => url('/'),
+                'url'             => url('/') . '/',
                 'name'            => 'ナイトワークリスト',
                 'inLanguage'      => 'ja',
                 'publisher'       => ['@id' => url('/') . '#org'],
                 'isAccessibleForFree' => true,
                 'potentialAction' => [
                     '@type'       => 'SearchAction',
-                    'target'      => ['@type' => 'EntryPoint', 'urlTemplate' => url('/search/') . '?keyword={search_term_string}'],
+                    'target'      => ['@type' => 'EntryPoint', 'urlTemplate' => url('/') . '/search/?keyword={search_term_string}'],
                     'query-input' => 'required name=search_term_string',
                 ],
             ],

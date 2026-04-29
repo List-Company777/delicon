@@ -1,8 +1,26 @@
 @extends('layouts.app')
 
-@section('title', 'ナイトワークリスト - キャバクラ・ホスト・ガールズバーの求人・夜遊び情報')
-@section('canonical', route('top'))
+@section('title', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報')
+@section('canonical', route('top') . '/')
 @section('description', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。')
+
+@push('head')
+@php
+$ldTop = [
+    '@context' => 'https://schema.org',
+    '@type'    => 'WebPage',
+    '@id'      => route('top') . '/#webpage',
+    'url'      => route('top') . '/',
+    'name'     => 'ナイトワークリスト | キャバクラ・ホスト・ガールズバーの求人・夜遊び情報',
+    'inLanguage'  => 'ja',
+    'description' => 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。',
+    'isPartOf'    => ['@id' => url('/') . '#website'],
+    'about'       => ['@id' => url('/') . '#org'],
+    'publisher'   => ['@id' => url('/') . '#org'],
+];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ldTop, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+@endpush
 
 @section('content')
 
