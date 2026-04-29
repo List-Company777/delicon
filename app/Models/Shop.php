@@ -15,7 +15,7 @@ class Shop extends Model
 {
     protected $fillable = [
         'name', 'kana', 'genre_id', 'prefecture_id', 'area_id', 'station_id',
-        'address', 'nearest_line', 'nearest_station_name', 'nearest_station_walk',
+        'address_locality', 'address', 'nearest_line', 'nearest_station_name', 'nearest_station_walk',
         'tel', 'line_id',
         'logo_image', 'main_image', 'status', 'bid_price', 'budget_balance', 'partner_id',
         'xml_source', 'xml_id', 'xml_enabled',

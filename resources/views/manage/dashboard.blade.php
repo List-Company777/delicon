@@ -136,8 +136,10 @@
                 @elseif($shop->status === 'pending')
                     <span class="text-xs px-3 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700">申請中（審査待ち）</span>
                 @else
+                    @php $applyReady = $shop->address_locality && $shop->address; @endphp
                     <div class="flex items-center gap-3">
                         <span class="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500">非公開</span>
+                        @if($applyReady)
                         <form action="{{ route('manage.apply') }}/" method="POST">
                             @csrf
                             <button type="submit"
@@ -146,7 +148,22 @@
                                 掲載申請する
                             </button>
                         </form>
+                        @else
+                        <a href="{{ route('manage.shop.edit') }}"
+                           class="text-xs px-4 py-1.5 bg-gray-300 text-gray-500 rounded-full font-medium cursor-not-allowed"
+                           title="住所情報を入力してから申請できます">
+                            掲載申請する
+                        </a>
+                        @endif
                     </div>
+                    @error('apply')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                    @if(! $applyReady)
+                    <p class="text-xs text-amber-600 mt-1">
+                        申請前に <a href="{{ route('manage.shop.edit') }}" class="underline">店舗情報</a> で市区町村・番地を入力してください。
+                    </p>
+                    @endif
                 @endif
             </div>
         </div>

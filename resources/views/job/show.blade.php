@@ -68,9 +68,9 @@
             'address' => array_filter([
                 '@type'          => 'PostalAddress',
                 'addressCountry' => 'JP',
-                'addressRegion'  => $job->prefecture?->name ?? null,
-                'addressLocality' => $job->area?->name ?? $job->shop->area?->name ?? null,
-                'streetAddress'  => $job->shop->address ?: null,
+                'addressRegion'   => $job->prefecture?->name ?? null,
+                'addressLocality' => $job->shop->address_locality ?? $job->area?->name ?? $job->shop->area?->name ?? null,
+                'streetAddress'   => $job->shop->address ?: null,
             ]),
         ],
     ];
@@ -220,9 +220,9 @@
                         <dt class="text-gray-400">エリア</dt>
                         <dd class="text-gray-700">{{ $job->area->name }}</dd>
                     @endif
-                    @if($job->shop->address)
+                    @if($job->shop->address_locality || $job->shop->address)
                         <dt class="text-gray-400">住所</dt>
-                        <dd class="text-gray-700">{{ $job->shop->address }}</dd>
+                        <dd class="text-gray-700">{{ trim(($job->shop->address_locality ? $job->shop->address_locality . ' ' : '') . $job->shop->address) }}</dd>
                     @endif
                     @if($job->shop->nearest_station_name)
                         <dt class="text-gray-400">最寄り駅</dt>

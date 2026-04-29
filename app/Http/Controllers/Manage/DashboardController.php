@@ -51,6 +51,13 @@ class DashboardController extends BaseController
         abort_if(! $shop, 404);
         abort_if($shop->status !== 'inactive', 403);
 
+        $missing = [];
+        if (! $shop->address_locality) $missing[] = '市区町村';
+        if (! $shop->address)          $missing[] = '番地・建物名';
+        if ($missing) {
+            return back()->withErrors(['apply' => '掲載申請には ' . implode('・', $missing) . ' の入力が必要です。店舗情報ページから入力してください。']);
+        }
+
         $shop->update(['status' => 'pending']);
 
         return back()->with('applied', true);

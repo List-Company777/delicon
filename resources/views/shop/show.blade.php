@@ -41,9 +41,10 @@
             'addressCountry' => 'JP',
         ],
     ];
-    if ($shop->area)       $ld['address']['addressLocality'] = $shop->area->name;
-    if ($shop->prefecture) $ld['address']['addressRegion']   = $shop->prefecture->name;
-    if ($shop->address)    $ld['address']['streetAddress']   = $shop->address;
+    if ($shop->prefecture)       $ld['address']['addressRegion']   = $shop->prefecture->name;
+    $locality = $shop->address_locality ?? $shop->area?->name ?? null;
+    if ($locality)               $ld['address']['addressLocality'] = $locality;
+    if ($shop->address)          $ld['address']['streetAddress']   = $shop->address;
     if ($shop->tel)        $ld['telephone'] = $shop->tel;
     if ($shop->genre)      $ld['description'] = $shop->genre->name . 'の営業情報';
     if ($detail->content)  $ld['description'] = mb_strimwidth(strip_tags($detail->content), 0, 200, '…');
@@ -333,14 +334,15 @@
                         <td class="px-4 py-3 text-gray-700">{{ $shop->area->name }}</td>
                     </tr>
                     @endif
-                    @if($shop->address)
+                    @if($shop->address_locality || $shop->address)
+                    @php $fullAddress = trim(($shop->address_locality ? $shop->address_locality . ' ' : '') . $shop->address); @endphp
                     <tr class="border-b border-gray-100">
                         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">住所</th>
                         <td class="px-4 py-3 text-gray-700">
-                            <a href="https://maps.google.com/?q={{ urlencode($shop->address) }}"
+                            <a href="https://maps.google.com/?q={{ urlencode($fullAddress) }}"
                                target="_blank"
                                rel="noopener noreferrer"
-                               class="text-business-700 hover:underline">{{ $shop->address }}</a>
+                               class="text-business-700 hover:underline">{{ $fullAddress }}</a>
                             <p class="text-xs text-gray-500 mt-1">※クリックするとGoogleマップに遷移します</p>
                         </td>
                     </tr>

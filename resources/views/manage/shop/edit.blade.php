@@ -61,10 +61,20 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">住所 <span class="text-red-400">*</span></th>
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">市区町村</th>
+                <td class="px-4 py-3">
+                    <input type="text" name="address_locality" value="{{ old('address_locality', $shop->address_locality) }}"
+                           placeholder="例：新宿区歌舞伎町"
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('address_locality') border-red-400 @enderror">
+                    <p class="text-xs text-gray-400 mt-0.5">区・町・丁目まで入力してください（検索エンジン向け住所情報に使用）</p>
+                    @error('address_locality')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </td>
+            </tr>
+            <tr class="border-b border-gray-100">
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">番地・建物名 <span class="text-red-400">*</span></th>
                 <td class="px-4 py-3">
                     <input type="text" name="address" value="{{ old('address', $shop->address) }}" required
-                           placeholder="例：東京都新宿区歌舞伎町1-1-1 ○○ビル3F"
+                           placeholder="例：1-1-1 ○○ビル3F"
                            class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('address') border-red-400 @enderror">
                     @error('address')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
