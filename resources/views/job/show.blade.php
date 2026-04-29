@@ -40,32 +40,41 @@
 @endif
 @php
     $ld = [
-        '@context'           => 'https://schema.org',
-        '@type'              => 'JobPosting',
-        'title'              => $job->title,
-        'description'        => implode(' ', array_filter([
+        '@context'    => 'https://schema.org',
+        '@type'       => 'JobPosting',
+        'title'       => $job->title,
+        'description' => implode(' ', array_filter([
             $job->description ?? $job->title,
             $job->is_daily_pay     ? '日払いOK。'     : '',
             $job->is_inexperienced ? '未経験歓迎。'   : '',
             $job->working_hours    ? '勤務時間：' . $job->working_hours . '。' : '',
         ])),
-        'datePosted'         => ($job->published_at ?? $job->created_at)->toIso8601String(),
-        'hiringOrganization' => [
+        'identifier'  => [
+            '@type' => 'PropertyValue',
+            'name'  => 'nightwork-list',
+            'value' => (string) $job->id,
+        ],
+        'datePosted'  => ($job->published_at ?? $job->created_at)->toIso8601String(),
+        'directApply' => true,
+        'hiringOrganization' => array_filter([
             '@type' => 'Organization',
             'name'  => $job->shop->name,
-        ],
+            'url'   => $job->shop->detail?->status === 'active'
+                        ? route('shop.show', $job->shop->id) . '/'
+                        : null,
+        ]),
         'jobLocation' => [
             '@type'   => 'Place',
-            'address' => [
+            'address' => array_filter([
                 '@type'          => 'PostalAddress',
                 'addressCountry' => 'JP',
-                'addressLocality' => $job->area?->name ?? $job->shop->area?->name ?? '',
-                'streetAddress'   => $job->shop->address ?? '',
-            ],
+                'addressRegion'  => $job->prefecture?->name ?? null,
+                'addressLocality' => $job->area?->name ?? $job->shop->area?->name ?? null,
+                'streetAddress'  => $job->shop->address ?: null,
+            ]),
         ],
     ];
     if ($job->employment_type) {
-        // schema.org 期待値: FULL_TIME / PART_TIME / CONTRACTOR / TEMPORARY / INTERN / VOLUNTEER / PER_DIEM / OTHER
         $ld['employmentType'] = $job->employment_type;
     }
     if ($job->expires_at) {
@@ -98,9 +107,9 @@
         ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
     ];
     $bcPos = 3;
-    if ($job->prefecture) $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $job->prefecture->name, 'item' => route('search.prefecture', ['gender' => $c['genderRoute'], 'pref_slug' => $job->prefecture->slug]) . '/'];
+    if ($job->prefecture) $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $job->prefecture->name, 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->prefecture->slug, 'job_slug' => 'all']) . '/'];
     if ($job->area)       $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos++, 'name' => $job->area->name, 'item' => route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->area->slug, 'job_slug' => 'all']) . '/'];
-    $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos, 'name' => $job->shop->name, 'item' => route('job.show', $job->id) . '/'];
+    $bcItems[] = ['@type' => 'ListItem', 'position' => $bcPos, 'name' => $job->title, 'item' => route('job.show', $job->id) . '/'];
     $breadcrumb = [
         '@context' => 'https://schema.org',
         '@type'    => 'BreadcrumbList',
