@@ -23,19 +23,27 @@
 
     if ($gender === 'yoasobi') {
         if ($hasArea && $hasJob) {
-            $pageTitle = "{$displayArea}の{$displayJob}" . ($isLp ? '一覧' : '検索結果') . $pageSuffix;
+            $pageTitle = "{$displayArea}の{$displayJob}" . ($isLp ? '情報' : '検索結果') . $pageSuffix;
         } elseif ($hasArea) {
-            $pageTitle = "{$displayArea}の夜遊びスポット" . ($isLp ? '一覧' : '検索結果') . $pageSuffix;
+            $pageTitle = "{$displayArea}の夜遊びスポット情報" . ($isLp ? '' : '検索結果') . $pageSuffix;
         } elseif ($hasJob) {
-            $pageTitle = ($isLp ? '全国の' : '') . "{$displayJob}" . ($isLp ? '情報一覧' : '検索結果') . $pageSuffix;
+            $pageTitle = ($isLp ? '全国の' : '') . "{$displayJob}情報" . ($isLp ? '' : '検索結果') . $pageSuffix;
         } else {
-            $pageTitle = ($isLp ? '夜遊びスポット・ナイト系店舗情報一覧' : '夜遊びスポット検索結果') . $pageSuffix;
+            $pageTitle = ($isLp ? '夜遊びスポット情報一覧' : '夜遊びスポット検索結果') . $pageSuffix;
         }
     } else {
-        $titlePrefix = implode('　', array_filter([$displayArea, $displayJob]));
         if ($isLp) {
-            $pageTitle = ($titlePrefix ? "{$titlePrefix}の{$c['label']}求人" : "{$c['label']}求人一覧") . $pageSuffix;
+            if ($hasArea && $hasJob) {
+                $pageTitle = "{$displayArea}の{$displayJob}求人（{$c['label']}）" . $pageSuffix;
+            } elseif ($hasArea) {
+                $pageTitle = "{$displayArea}の{$c['label']}求人" . $pageSuffix;
+            } elseif ($hasJob) {
+                $pageTitle = "{$displayJob}の{$c['label']}求人" . $pageSuffix;
+            } else {
+                $pageTitle = "{$c['label']}求人一覧" . $pageSuffix;
+            }
         } else {
+            $titlePrefix = implode(' ', array_filter([$displayArea, $displayJob]));
             $pageTitle = ($titlePrefix ? "{$titlePrefix} {$c['label']}検索結果" : "{$c['label']}検索結果") . $pageSuffix;
         }
     }
@@ -59,7 +67,7 @@
         } elseif ($hasJob) {
             $pageDesc = "{$displayJob}の求人を全国から検索。時給・日払い・未経験歓迎の女性向けナイトワーク求人。{$site}。";
         } else {
-            $pageDesc = null; // レイアウトのデフォルトdescriptionを使用
+            $pageDesc = "女性ナイトワーク求人を全国から検索。キャバクラ・ガールズバー・ラウンジ・ナイトクラブのキャスト・ホステス求人。時給・日払い・未経験歓迎の求人は{$site}。";
         }
     } else { // male
         if ($hasArea && $hasJob) {
@@ -69,7 +77,7 @@
         } elseif ($hasJob) {
             $pageDesc = "{$displayJob}の求人を全国から検索。未経験歓迎・日払いOKの男性向けナイトワーク求人。{$site}。";
         } else {
-            $pageDesc = null; // レイアウトのデフォルトdescriptionを使用
+            $pageDesc = "男性ナイトワーク求人を全国から検索。ホスト・黒服・ボーイ・バーテンダーなどの男性向けナイトワーク求人。未経験歓迎・日払いOKの求人は{$site}。";
         }
     }
 @endphp

@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報')
+@section('title', 'ナイトワーク求人・夜遊び情報')
 @section('canonical', route('top') . '/')
-@section('description', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。')
+@section('description', 'ナイトワーク求人・夜遊びスポット情報を掲載。キャバクラ・ホスト・ガールズバーなどの求人をエリア・職種から簡単検索。全国のナイトワーク情報はナイトワークリスト。')
 
 @push('head')
 @php
