@@ -33,6 +33,11 @@
 @endif
 
 @push('head')
+@if($job->image_path)
+<link rel="preload" as="image" href="{{ asset('storage/' . $job->image_path) }}" fetchpriority="high">
+@elseif($job->shop->main_image)
+<link rel="preload" as="image" href="{{ asset('storage/' . $job->shop->main_image) }}" fetchpriority="high">
+@endif
 @php
     $ld = [
         '@context'           => 'https://schema.org',
@@ -109,7 +114,7 @@
 
 @section('content')
 
-<div class="{{ $c['bar'] }} text-white py-3">
+<nav aria-label="パンくずリスト" class="{{ $c['bar'] }} text-white py-3">
     <div class="max-w-4xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
@@ -125,10 +130,10 @@
         <span class="mx-2 opacity-40">›</span>
         <span class="opacity-90">{{ $job->shop->name }}</span>
     </div>
-</div>
+</nav>
 
 <div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <article class="bg-white rounded-xl shadow-sm overflow-hidden">
 
         {{-- 求人画像 → 店舗メイン画像 → カラーバー の順でフォールバック --}}
         @if($job->image_path)
@@ -145,22 +150,24 @@
 
         <div class="p-6 md:p-8">
 
-            {{-- タグ列 --}}
-            <div class="flex flex-wrap gap-2 mb-3">
-                @if($job->is_hotlink)
-                    <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
+            <header>
+                {{-- タグ列 --}}
+                @if($job->is_hotlink || $job->jobType || $job->shop->genre)
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @if($job->is_hotlink)
+                        <span class="text-xs px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full">PR</span>
+                    @endif
+                    @if($job->jobType)
+                        <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $job->jobType->name }}</span>
+                    @endif
+                    @if($job->shop->genre)
+                        <span class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full">{{ $job->shop->genre->name }}</span>
+                    @endif
+                </div>
                 @endif
-                @if($job->jobType)
-                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $job->jobType->name }}</span>
-                @endif
-                @if($job->shop->genre)
-                    <span class="text-xs px-2 py-0.5 bg-gray-100 border border-gray-300 text-gray-600 rounded-full">{{ $job->shop->genre->name }}</span>
-                @endif
-            </div>
-
-            {{-- タイトル --}}
-            <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-1">{{ $job->title }}</h1>
-            <p class="text-gray-500 text-sm mb-4">{{ $job->shop->name }}</p>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-1">{{ $job->title }}</h1>
+                <p class="text-gray-500 text-sm mb-4">{{ $job->shop->name }}</p>
+            </header>
 
             {{-- 給与・雇用形態 --}}
             @if($job->hourly_wage_min || $job->employment_type)
@@ -188,14 +195,14 @@
 
             {{-- 求人詳細 --}}
             @if($job->description)
-                <div class="mb-6">
+                <section class="mb-6">
                     <h2 class="font-bold text-gray-700 mb-2 text-sm">求人詳細</h2>
-                    <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $job->description }}</div>
-                </div>
+                    <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $job->description }}</p>
+                </section>
             @endif
 
             {{-- 店舗情報 --}}
-            <div class="mb-8 border-t border-gray-100 pt-6">
+            <section class="mb-8 border-t border-gray-100 pt-6" aria-label="店舗情報">
                 <h2 class="font-bold text-gray-700 mb-3 text-sm">店舗情報</h2>
                 <dl class="grid grid-cols-2 gap-y-2 text-sm">
                     <dt class="text-gray-400">店舗名</dt>
@@ -227,7 +234,7 @@
                         この店舗の営業情報を見る →
                     </a>
                 @endif
-            </div>
+            </section>
 
             {{-- 応募ボタン --}}
             <a href="{{ route('apply.create', $job->id) }}/"
@@ -241,11 +248,11 @@
             </p>
 
         </div>
-    </div>
+    </article>
 
     {{-- 同じ店舗の他の求人 --}}
     @if($sameShopJobs->isNotEmpty())
-    <div class="mt-8">
+    <section class="mt-8" aria-label="{{ $job->shop->name }}の他の求人">
         <h2 class="text-sm font-bold text-gray-600 mb-3">{{ $job->shop->name }}の他の求人</h2>
         <div class="space-y-2">
             @foreach($sameShopJobs as $sJob)
@@ -265,12 +272,12 @@
             </a>
             @endforeach
         </div>
-    </div>
+    </section>
     @endif
 
     {{-- 関連求人（同エリア・同職種、無料店ページのみ・有料店優先・クリック課金） --}}
     @if($relatedJobs->isNotEmpty())
-    <div class="mt-8">
+    <section class="mt-8" aria-label="関連求人">
         <h2 class="text-sm font-bold text-gray-600 mb-3">関連求人</h2>
         <div class="space-y-2">
             @foreach($relatedJobs as $rJob)
@@ -288,7 +295,7 @@
             </a>
             @endforeach
         </div>
-    </div>
+    </section>
     @endif
 
     {{-- 最近見た求人 --}}

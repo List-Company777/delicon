@@ -43,18 +43,16 @@
             <input type="hidden" name="target_type" value="{{ $reportTargetType }}">
             <input type="hidden" name="target_id"   value="{{ $reportTargetId }}">
 
-            <div>
-                <p class="text-xs font-medium text-gray-600 mb-2">通報の種別 <span class="text-red-500">*</span></p>
-                <div class="space-y-1.5">
-                    @foreach(['closed' => '閉店している', 'false_info' => '虚偽・誇大情報', 'inappropriate' => '不適切なコンテンツ', 'other' => 'その他'] as $val => $label)
-                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                        <input type="radio" name="reason" value="{{ $val }}" required
-                               class="text-business-700 focus:ring-business-600">
-                        {{ $label }}
-                    </label>
-                    @endforeach
-                </div>
-            </div>
+            <fieldset class="space-y-1.5 border-0 m-0 p-0">
+                <legend class="text-xs font-medium text-gray-600 mb-2">通報の種別 <span class="text-red-500">*</span></legend>
+                @foreach(['closed' => '閉店している', 'false_info' => '虚偽・誇大情報', 'inappropriate' => '不適切なコンテンツ', 'other' => 'その他'] as $val => $label)
+                <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input type="radio" name="reason" value="{{ $val }}" required
+                           class="text-business-700 focus:ring-business-600">
+                    {{ $label }}
+                </label>
+                @endforeach
+            </fieldset>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">詳細コメント（任意・300文字以内）</label>
