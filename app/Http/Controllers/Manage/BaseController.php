@@ -7,6 +7,12 @@ use App\Models\Shop;
 
 class BaseController extends Controller
 {
+    /**
+     * getShop() でeager loadするリレーション。
+     * 各コントローラーで必要なものだけオーバーライドする。
+     */
+    protected array $shopWith = ['detail', 'genre', 'area', 'prefecture'];
+
     protected function getShop(): ?Shop
     {
         $user = auth()->user();
@@ -14,7 +20,7 @@ class BaseController extends Controller
         // 代理店ユーザーが代理操作中の場合：セッションの shop を使う
         if ($user->isPartner() && session()->has('acting_shop_id')) {
             $shopId = session('acting_shop_id');
-            return Shop::with(['detail', 'genre', 'area', 'prefecture', 'jobs.jobType', 'setPrices'])
+            return Shop::with($this->shopWith)
                 ->where('id', $shopId)
                 ->where('partner_id', $user->partner_id)
                 ->first();
@@ -24,7 +30,7 @@ class BaseController extends Controller
         $managingId = session('managing_shop_id');
         if ($managingId) {
             $shop = $user->shops()
-                ->with(['detail', 'genre', 'area', 'prefecture', 'jobs.jobType', 'setPrices'])
+                ->with($this->shopWith)
                 ->wherePivot('role', 'owner')
                 ->where('shops.id', $managingId)
                 ->first();
@@ -33,7 +39,7 @@ class BaseController extends Controller
 
         // セッションなし or 無効 → 最初の店舗でセッション初期化
         $shop = $user->shops()
-            ->with(['detail', 'genre', 'area', 'prefecture', 'jobs.jobType', 'setPrices'])
+            ->with($this->shopWith)
             ->wherePivot('role', 'owner')
             ->first();
         if ($shop) session(['managing_shop_id' => $shop->id]);

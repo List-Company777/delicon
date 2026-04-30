@@ -27,7 +27,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login/',    [LoginController::class, 'show'])->name('login');
     Route::post('/login/',   [LoginController::class, 'store'])->middleware('throttle:5,15');
     Route::get('/register/', [RegisterController::class, 'show'])->name('register');
-    Route::post('/register/', [RegisterController::class, 'store']);
+    Route::post('/register/', [RegisterController::class, 'store'])->middleware('throttle:5,30');
     // www.up-stage.info連携店舗の引き継ぎ検索（登録フォームのAJAX）
     Route::get('/api/xml-shops/search/', [RegisterController::class, 'xmlShopSearch'])->name('api.xml-shops.search');
     Route::get('/auth/line/',          [LineAuthController::class, 'redirect'])->name('auth.line');
@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
         return back()->with('resent', true);
     })->middleware('throttle:6,1')->name('verification.send');
 });
+
+// 夜ビズ LP
+Route::view('/yorubiz/', 'lp.yorubiz')->name('lp.yorubiz');
 
 // 法的ページ・会社情報
 Route::view('/privacy/',    'legal.privacy')->name('privacy');

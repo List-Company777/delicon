@@ -537,13 +537,14 @@
         </div>
     </article>
 
-    {{-- 同業種・同エリアの関連店舗（無料店のみ表示） --}}
+    {{-- 同業種・同エリアの関連店舗 --}}
     @if($relatedShops->isNotEmpty())
     <section class="mt-8" aria-label="関連店舗">
         <h2 class="text-sm font-bold text-gray-600 mb-3">{{ $shop->genre?->name ?? '同業種' }}の他店舗（{{ $shop->area?->name }}）</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @foreach($relatedShops as $relShop)
-            <a href="{{ route('shop.show', $relShop->id) }}/"
+            <a href="{{ url('/track/shop/' . $relShop->id) }}/"
+               rel="nofollow"
                class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-3 hover:border-business-300 hover:shadow-sm transition group">
                 @if($relShop->main_image)
                     <img src="{{ asset('storage/' . \App\Services\ImageService::webpPath($relShop->main_image)) }}"

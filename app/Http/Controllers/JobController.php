@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Mail\BudgetDepleted;
-use App\Models\Area;
 use App\Models\Job;
 use App\Models\JobAccessLog;
 use App\Models\XmlFeed;
@@ -41,52 +40,37 @@ class JobController extends Controller
             ->limit(4)
             ->get();
 
-        // 同エリア（親子含む）の他店舗求人（無料店のみ表示・有料店優先ランダム）
-        // 不足時は同都道府県で補完
+        // 無料店舗の求人詳細のみ表示・有料/XML店優先・同職種×同エリア（不足時は同都道府県で補完）
         $relatedJobs = collect();
-        if (! $job->shop->hasBudget()) {
-            // 親エリア→自分＋子エリア全部、子エリア→親＋兄弟エリア全部
-            $areaGroup = [];
-            if ($job->area_id) {
-                $area = $job->area;
-                if ($area?->parent_id) {
-                    $areaGroup = Area::where('id', $area->parent_id)
-                        ->orWhere('parent_id', $area->parent_id)
-                        ->pluck('id')->toArray();
-                } else {
-                    $areaGroup = Area::where('id', $job->area_id)
-                        ->orWhere('parent_id', $job->area_id)
-                        ->pluck('id')->toArray();
-                }
-            }
-
-            $baseQuery = fn($q) => $q
+        if (! $job->shop->hasBudget() && $job->job_type_id) {
+            $buildBase = fn() => Job::with(['shop', 'jobType'])
                 ->join('shops', 'shops.id', '=', 'jobs.shop_id')
                 ->where('jobs.id', '!=', $job->id)
                 ->where('jobs.shop_id', '!=', $job->shop_id)
                 ->where('jobs.status', 'active')
                 ->where('jobs.search_group', $job->search_group)
-                ->orderByRaw('(shops.budget_balance >= shops.bid_price) DESC, RAND()');
+                ->where('jobs.job_type_id', $job->job_type_id)
+                ->where(fn($q) => $q
+                    ->whereRaw('shops.budget_balance >= shops.bid_price')
+                    ->orWhereNotNull('shops.xml_source')
+                )
+                ->orderByRaw('(shops.budget_balance >= shops.bid_price) DESC')
+                ->orderByDesc('shops.bid_price');
 
-            if (!empty($areaGroup)) {
-                $relatedJobs = Job::with(['shop', 'jobType'])
-                    ->tap($baseQuery)
-                    ->whereIn('jobs.area_id', $areaGroup)
+            if ($job->area_id) {
+                $relatedJobs = $buildBase()
+                    ->where('jobs.area_id', $job->area_id)
                     ->limit(4)
                     ->get(['jobs.*']);
             }
 
-            // 同エリアグループで足りなければ同都道府県で補完
             if ($relatedJobs->count() < 4 && $job->prefecture_id) {
-                $excludeIds = $relatedJobs->pluck('id')->push($job->id);
-                $extra = Job::with(['shop', 'jobType'])
-                    ->tap($baseQuery)
+                $additional = $buildBase()
+                    ->whereNotIn('jobs.id', $relatedJobs->pluck('id')->push($job->id))
                     ->where('jobs.prefecture_id', $job->prefecture_id)
-                    ->whereNotIn('jobs.area_id', $areaGroup ?: [$job->area_id])
-                    ->whereNotIn('jobs.id', $excludeIds)
                     ->limit(4 - $relatedJobs->count())
                     ->get(['jobs.*']);
-                $relatedJobs = $relatedJobs->concat($extra);
+                $relatedJobs = $relatedJobs->concat($additional);
             }
         }
 

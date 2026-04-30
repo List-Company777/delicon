@@ -48,6 +48,8 @@
             $job->is_daily_pay     ? '日払いOK。'     : '',
             $job->is_inexperienced ? '未経験歓迎。'   : '',
             $job->working_hours    ? '勤務時間：' . $job->working_hours . '。' : '',
+            $job->holiday          ? '休日：' . $job->holiday . '。'           : '',
+            $job->preventsmoke     ? '喫煙環境：' . $job->preventsmoke . '。'  : '',
         ])),
         'identifier'  => [
             '@type' => 'PropertyValue',
@@ -77,6 +79,10 @@
     ];
     if ($job->employment_type) {
         $ld['employmentType'] = $job->employment_type;
+    }
+    $benefitsText = implode("\n", array_filter([$job->job_benefits, $job->insurance]));
+    if ($benefitsText) {
+        $ld['jobBenefits'] = $benefitsText;
     }
     if ($job->expires_at) {
         $ld['validThrough'] = $job->expires_at->toIso8601String();
@@ -200,31 +206,48 @@
                 <p class="text-gray-500 text-sm mb-4">{{ $job->shop->name }}</p>
             </header>
 
-            {{-- 給与・雇用形態 --}}
-            @if($job->wage_type === 'commission' || $job->hourly_wage_min || $job->employment_type)
+            {{-- 給与 --}}
+            @if($job->wage_type === 'commission' || $job->hourly_wage_min)
                 @php $wageLabel = ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$job->wage_type ?? 'hourly']; @endphp
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg">
                     @if($job->wage_type === 'commission')
                         <p class="text-xs text-gray-500 mb-1">給与形態</p>
                         <p class="text-2xl font-bold {{ $c['text'] }}">完全歩合制</p>
-                    @elseif($job->hourly_wage_min)
+                    @else
                         <p class="text-xs text-gray-500 mb-1">{{ $wageLabel }}</p>
                         <p class="text-2xl font-bold {{ $c['text'] }}">
                             {{ number_format($job->hourly_wage_min) }}円
-                            @if($job->hourly_wage_max)
-                                〜 {{ number_format($job->hourly_wage_max) }}円
-                            @endif
-                        </p>
-                    @endif
-                    @if($job->working_hours)
-                        <p class="text-xs text-gray-500 mt-1">勤務時間：{{ $job->working_hours }}</p>
-                    @endif
-                    @if($job->employment_type)
-                        <p class="text-xs text-gray-500 {{ ($job->wage_type === 'commission' || $job->hourly_wage_min) ? 'mt-2' : 'mb-1' }}">
-                            雇用形態：{{ $employmentLabels[$job->employment_type] }}
+                            @if($job->hourly_wage_max)〜 {{ number_format($job->hourly_wage_max) }}円@endif
                         </p>
                     @endif
                 </div>
+            @endif
+
+            {{-- 勤務条件 --}}
+            @if($job->employment_type || $job->working_hours || $job->holiday)
+                <section class="mb-6">
+                    <h2 class="font-bold text-gray-700 mb-2 text-sm">勤務条件</h2>
+                    <dl class="divide-y divide-gray-100 border border-gray-100 rounded-lg text-sm overflow-hidden">
+                        @if($job->employment_type)
+                        <div class="flex gap-3 px-4 py-2.5">
+                            <dt class="text-gray-400 shrink-0 w-24">雇用形態</dt>
+                            <dd class="text-gray-700">{{ $employmentLabels[$job->employment_type] }}</dd>
+                        </div>
+                        @endif
+                        @if($job->working_hours)
+                        <div class="flex gap-3 px-4 py-2.5">
+                            <dt class="text-gray-400 shrink-0 w-24">勤務時間</dt>
+                            <dd class="text-gray-700 whitespace-pre-line">{{ $job->working_hours }}</dd>
+                        </div>
+                        @endif
+                        @if($job->holiday)
+                        <div class="flex gap-3 px-4 py-2.5">
+                            <dt class="text-gray-400 shrink-0 w-24">休日・休暇</dt>
+                            <dd class="text-gray-700 whitespace-pre-line">{{ $job->holiday }}</dd>
+                        </div>
+                        @endif
+                    </dl>
+                </section>
             @endif
 
             {{-- 求人詳細 --}}
@@ -232,6 +255,39 @@
                 <section class="mb-6">
                     <h2 class="font-bold text-gray-700 mb-2 text-sm">求人詳細</h2>
                     <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $job->description }}</p>
+                </section>
+            @endif
+
+            {{-- 待遇・福利厚生 --}}
+            @if($job->job_benefits || $job->insurance)
+                <section class="mb-6">
+                    <h2 class="font-bold text-gray-700 mb-2 text-sm">待遇・福利厚生</h2>
+                    <dl class="divide-y divide-gray-100 border border-gray-100 rounded-lg text-sm overflow-hidden">
+                        @if($job->job_benefits)
+                        <div class="px-4 py-2.5">
+                            <dd class="text-gray-700 whitespace-pre-line">{{ $job->job_benefits }}</dd>
+                        </div>
+                        @endif
+                        @if($job->insurance)
+                        <div class="flex gap-3 px-4 py-2.5">
+                            <dt class="text-gray-400 shrink-0 w-24">社会保険</dt>
+                            <dd class="text-gray-700">{{ $job->insurance }}</dd>
+                        </div>
+                        @endif
+                    </dl>
+                </section>
+            @endif
+
+            {{-- 職場環境 --}}
+            @if($job->preventsmoke)
+                <section class="mb-6">
+                    <h2 class="font-bold text-gray-700 mb-2 text-sm">職場環境</h2>
+                    <dl class="divide-y divide-gray-100 border border-gray-100 rounded-lg text-sm overflow-hidden">
+                        <div class="flex gap-3 px-4 py-2.5">
+                            <dt class="text-gray-400 shrink-0 w-24">受動喫煙対策</dt>
+                            <dd class="text-gray-700">{{ $job->preventsmoke }}</dd>
+                        </div>
+                    </dl>
                 </section>
             @endif
 

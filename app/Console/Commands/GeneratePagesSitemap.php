@@ -47,6 +47,9 @@ class GeneratePagesSitemap extends Command
                 ];
             });
 
+        // 夜ビズ LP
+        $urls[] = ['loc' => $base . '/yorubiz/', 'lastmod' => $now, 'changefreq' => 'monthly', 'priority' => '0.6'];
+
         // 問い合わせ
         $urls[] = ['loc' => $base . '/inquiry/', 'lastmod' => $now, 'changefreq' => 'monthly', 'priority' => '0.3'];
 

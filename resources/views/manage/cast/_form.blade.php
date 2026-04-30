@@ -214,6 +214,39 @@
             <p class="text-xs text-gray-400 mt-1">※ キャスト募集で雇用形態がわからない場合、お店が働き方を決めるならアルバイト、本人の裁量で働くなら業務委託を選択ください。</p>
         </td>
     </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">休日・休暇</th>
+        <td class="px-4 py-3">
+            <textarea name="holiday" rows="3" maxlength="500"
+                      class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('holiday', $job?->holiday) }}</textarea>
+            <p class="text-xs text-gray-400 mt-0.5">例：週1日以上・シフト制、希望休相談可　／　最大500文字</p>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">待遇・福利厚生</th>
+        <td class="px-4 py-3">
+            <textarea name="job_benefits" rows="5" maxlength="2000"
+                      class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('job_benefits', $job?->job_benefits) }}</textarea>
+            <p class="text-xs text-gray-400 mt-0.5">例：日払いOK・交通費支給・体験入店あり・昇給随時・まかない有・寮完備・入店祝金など　／　最大2000文字</p>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">社会保険</th>
+        <td class="px-4 py-3">
+            <input type="text" name="insurance" value="{{ old('insurance', $job?->insurance) }}" maxlength="200"
+                   placeholder="例：社会保険完備（健康保険・厚生年金・雇用保険・労災保険）"
+                   class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap align-top pt-4">受動喫煙対策</th>
+        <td class="px-4 py-3">
+            <input type="text" name="preventsmoke" value="{{ old('preventsmoke', $job?->preventsmoke) }}" maxlength="200"
+                   placeholder="例：屋内全面禁煙 / 分煙（喫煙室あり）/ 喫煙可"
+                   class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
+            <p class="text-xs text-orange-600 mt-1">⚠️ 受動喫煙が生じる環境（喫煙可・分煙）での就業は20歳以上の方のみ雇用できます。就業場所の実態に応じて正確に記載してください。</p>
+        </td>
+    </tr>
     <tr>
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">求人画像</th>
         <td class="px-4 py-3">

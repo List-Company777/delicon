@@ -41,4 +41,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>{{ $base }}/yorubiz/</loc>
+    <lastmod>{{ $siteStart }}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

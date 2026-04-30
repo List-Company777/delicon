@@ -114,13 +114,13 @@
                    class="text-business-300 hover:text-business-200 font-medium transition">
                     夜遊びリスト
                 </a>
-                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
-                   class="text-male-300 hover:text-male-200 font-medium transition">
-                    男性ナイトワーク
-                </a>
                 <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                    class="text-female-400 hover:text-female-300 font-medium transition">
                     女性ナイトワーク
+                </a>
+                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+                   class="text-male-300 hover:text-male-200 font-medium transition">
+                    男性ナイトワーク
                 </a>
                 <a href="{{ route('article.index') }}"
                    class="text-gray-300 hover:text-white font-medium transition">
@@ -152,10 +152,10 @@
                 <div class="md:hidden bg-gray-800 px-4 pb-4">
                     <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                        class="block py-2 text-business-300 font-medium">夜遊びリスト</a>
-                    <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
-                       class="block py-2 text-male-300 font-medium">男性ナイトワーク</a>
                     <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                        class="block py-2 text-female-400 font-medium">女性ナイトワーク</a>
+                    <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+                       class="block py-2 text-male-300 font-medium">男性ナイトワーク</a>
                     <a href="{{ route('article.index') }}"
                        class="block py-2 text-gray-300 font-medium">コラム</a>
                     <div class="border-t border-gray-700 mt-2 pt-2">
@@ -231,19 +231,6 @@
                     </ul>
                 </div>
                 <div>
-                    <p class="text-white font-bold mb-3">男性ナイトワーク</p>
-                    <ul class="space-y-1">
-                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
-                               class="text-male-400 hover:text-male-300 font-medium transition">男性ナイトワーク求人を探す</a></li>
-                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'shinjuku', 'job_slug' => 'all']) }}/"
-                               class="hover:text-male-300 transition">新宿の男性求人</a></li>
-                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'ikebukuro', 'job_slug' => 'all']) }}/"
-                               class="hover:text-male-300 transition">池袋の男性求人</a></li>
-                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'shibuya', 'job_slug' => 'all']) }}/"
-                               class="hover:text-male-300 transition">渋谷の男性求人</a></li>
-                    </ul>
-                </div>
-                <div>
                     <p class="text-white font-bold mb-3">女性ナイトワーク</p>
                     <ul class="space-y-1">
                         <li><a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
@@ -254,6 +241,19 @@
                                class="hover:text-female-400 transition">池袋の女性求人</a></li>
                         <li><a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => 'shibuya', 'job_slug' => 'all']) }}/"
                                class="hover:text-female-400 transition">渋谷の女性求人</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-white font-bold mb-3">男性ナイトワーク</p>
+                    <ul class="space-y-1">
+                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
+                               class="text-male-400 hover:text-male-300 font-medium transition">男性ナイトワーク求人を探す</a></li>
+                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'shinjuku', 'job_slug' => 'all']) }}/"
+                               class="hover:text-male-300 transition">新宿の男性求人</a></li>
+                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'ikebukuro', 'job_slug' => 'all']) }}/"
+                               class="hover:text-male-300 transition">池袋の男性求人</a></li>
+                        <li><a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'shibuya', 'job_slug' => 'all']) }}/"
+                               class="hover:text-male-300 transition">渋谷の男性求人</a></li>
                     </ul>
                 </div>
                 <div>

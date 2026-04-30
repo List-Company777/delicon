@@ -36,6 +36,16 @@ class ImportUpstageXml extends Command
         'ラウンジバー',
     ];
 
+    /** XML jobtype → employment_type (schema.org) */
+    private const JOBTYPE_EMPLOYMENT_MAP = [
+        '正社員'   => 'FULL_TIME',
+        '契約社員' => 'CONTRACTOR',
+        '派遣社員' => 'TEMPORARY',
+        'パート'   => 'PART_TIME',
+        'アルバイト' => 'PART_TIME',
+        '業務委託' => 'OTHER',
+    ];
+
     /** カテゴリ × タイトルキーワード → job_types.id（汎用マップより優先） */
     private const CATEGORY_TITLE_JOBTYPE_MAP = [
         'ホストクラブ' => ['ホスト' => 26],
@@ -189,16 +199,21 @@ class ImportUpstageXml extends Command
             return null;
         }
 
-        $xmlId    = trim((string) $job->referencenumber);
-        $shopName = trim((string) ($job->store ?: $job->company));
-        $stateName = trim((string) $job->state);
-        $cityName  = trim((string) $job->city);
-        $title     = trim((string) $job->title);
-        $desc      = trim((string) $job->description);
-        $salary    = trim((string) $job->salary);
-        $applyUrl  = trim((string) $job->applyurl);
-        $expStr    = trim((string) $job->expdate);
-        $timeshift = trim((string) $job->timeshift);
+        $xmlId      = trim((string) $job->referencenumber);
+        $shopName   = trim((string) ($job->store ?: $job->company));
+        $stateName  = trim((string) $job->state);
+        $cityName   = trim((string) $job->city);
+        $title      = trim((string) $job->title);
+        $desc       = trim((string) $job->description);
+        $salary     = trim((string) $job->salary);
+        $applyUrl   = trim((string) $job->applyurl);
+        $expStr     = trim((string) $job->expdate);
+        $timeshift  = trim((string) $job->timeshift);
+        $xmlJobtype   = trim((string) $job->jobtype);
+        $benefits     = trim((string) $job->benefits);
+        $insurance    = trim((string) $job->insurance);
+        $preventsmoke = trim((string) $job->preventsmoke);
+        $holiday      = trim((string) $job->holiday);
 
         if (empty($xmlId)) {
             $this->skipped++;
@@ -260,10 +275,14 @@ class ImportUpstageXml extends Command
             'title'           => $title ?: ($shopName . ' ボーイ求人'),
             'description'     => $desc,
             'working_hours'   => $timeshift ?: null,
+            'job_benefits'    => $benefits ?: null,
+            'insurance'       => $insurance ?: null,
+            'preventsmoke'    => $preventsmoke ?: null,
+            'holiday'         => $holiday ?: null,
             'wage_type'       => $wageData['type'],
             'hourly_wage_min' => $wageData['min'],
             'hourly_wage_max' => $wageData['max'],
-            'employment_type' => 'PART_TIME',
+            'employment_type' => self::JOBTYPE_EMPLOYMENT_MAP[$xmlJobtype] ?? 'PART_TIME',
             'search_group'    => 'male',
             'is_hotlink'      => true,
             'hotlink_url'     => $applyUrl ?: null,

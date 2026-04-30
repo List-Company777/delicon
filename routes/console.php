@@ -38,3 +38,12 @@ Schedule::command('articles:generate')->weeklyOn(5, '02:00');  // 金曜
 
 // 同一入札スコア内の表示順をシャッフル（30分ごと・検索IDキャッシュTTLと同期）
 Schedule::command('shops:shuffle-display-sort')->everyThirtyMinutes();
+
+// アクセスログのパージ（400日超のレコードを毎週月曜 午前3時30分に削除）
+Schedule::command('logs:prune')->weeklyOn(1, '03:30');
+
+// 月次レポートメール（毎月1日 00:05 に前月分を集計して送信）
+Schedule::command('report:monthly')->monthlyOn(1, '00:05');
+
+// 月次レポートメール 第2送信（01:05 に再送）
+Schedule::command('report:monthly')->monthlyOn(1, '01:05');

@@ -49,7 +49,7 @@ class ShopInfoController extends BaseController
     public function storeImage(Request $request)
     {
         $request->validate([
-            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120', 'dimensions:max_width=4000,max_height=4000'],
         ], [
             'image.mimes' => 'JPEG・PNG・WebPファイルのみ入稿できます',
             'image.max'   => 'ファイルサイズは5MB以下にしてください',

@@ -70,8 +70,8 @@ $ldTop = [
                 </form>
             </div>
 
-            {{-- 男性ナイトワーク（mobile:3位、desktop:2位） --}}
-            <div class="order-3 md:order-2 rounded-xl p-5 border border-male-300/30 bg-male-800/30">
+            {{-- 男性ナイトワーク（mobile:3位、desktop:3位） --}}
+            <div class="order-3 md:order-3 rounded-xl p-5 border border-male-300/30 bg-male-800/30">
                 <h2 class="flex items-center gap-2 mb-4 text-male-300 font-bold text-lg">
                     <span class="w-3 h-3 rounded-full bg-male-300 shrink-0" aria-hidden="true"></span>
                     男性ナイトワーク
@@ -96,8 +96,8 @@ $ldTop = [
                 </form>
             </div>
 
-            {{-- 女性ナイトワーク（mobile:2位、desktop:3位） --}}
-            <div class="order-2 md:order-3 rounded-xl p-5 border border-female-500/40 bg-female-600/10">
+            {{-- 女性ナイトワーク（mobile:2位、desktop:2位） --}}
+            <div class="order-2 md:order-2 rounded-xl p-5 border border-female-500/40 bg-female-600/10">
                 <h2 class="flex items-center gap-2 mb-4 text-female-400 font-bold text-lg">
                     <span class="w-3 h-3 rounded-full bg-female-500 shrink-0" aria-hidden="true"></span>
                     女性ナイトワーク
@@ -153,28 +153,6 @@ $ldTop = [
             </div>
         </nav>
 
-        {{-- 男性向け --}}
-        <nav aria-label="男性ナイトワーク エリア別">
-            <h3 class="text-sm font-bold text-male-600 border-b-2 border-male-300 pb-1 mb-3">
-                男性ナイトワーク
-            </h3>
-            <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('male', collect())->take(15) as $row)
-                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
-                    {{ $row->area_name }}
-                </a>
-                @empty
-                @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
-                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
-                    {{ $name }}
-                </a>
-                @endforeach
-                @endforelse
-            </div>
-        </nav>
-
         {{-- 女性向け --}}
         <nav aria-label="女性ナイトワーク エリア別">
             <h3 class="text-sm font-bold text-female-600 border-b-2 border-female-400 pb-1 mb-3">
@@ -190,6 +168,28 @@ $ldTop = [
                 @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
                 <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
                    class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
+                    {{ $name }}
+                </a>
+                @endforeach
+                @endforelse
+            </div>
+        </nav>
+
+        {{-- 男性向け --}}
+        <nav aria-label="男性ナイトワーク エリア別">
+            <h3 class="text-sm font-bold text-male-600 border-b-2 border-male-300 pb-1 mb-3">
+                男性ナイトワーク
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                @forelse($popularAreas->get('male', collect())->take(15) as $row)
+                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
+                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
+                    {{ $row->area_name }}
+                </a>
+                @empty
+                @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
+                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
+                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
                     {{ $name }}
                 </a>
                 @endforeach

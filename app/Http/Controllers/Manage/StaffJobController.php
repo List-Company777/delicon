@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class StaffJobController extends BaseController
 {
+    protected array $shopWith = ['detail', 'genre', 'area', 'prefecture', 'jobs.jobType'];
+
     public function index()
     {
         $shop = $this->shopOrFail();
@@ -148,9 +150,13 @@ class StaffJobController extends BaseController
             'hourly_wage_min' => ['nullable', 'integer', 'min:0'],
             'hourly_wage_max' => ['nullable', 'integer', 'min:0', 'gte:hourly_wage_min'],
             'working_hours'   => ['nullable', 'string', 'max:100'],
+            'job_benefits'    => ['nullable', 'string', 'max:2000'],
+            'insurance'       => ['nullable', 'string', 'max:200'],
+            'preventsmoke'    => ['nullable', 'string', 'max:200'],
+            'holiday'         => ['nullable', 'string', 'max:500'],
             'employment_type' => ['nullable', 'in:PART_TIME,CONTRACTOR,FULL_TIME,PER_DIEM,OTHER'],
             'status'          => ['required', 'in:active,inactive,draft'],
-            'image'           => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'image'           => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120', 'dimensions:max_width=4000,max_height=4000'],
         ]);
     }
 }

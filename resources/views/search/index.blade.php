@@ -13,19 +13,58 @@
     $displayArea = $isLp ? ($areaName ?? '') : ($area ?? '');
     $displayJob  = $isLp ? ($jobTypeName ?? '') : ($keyword ?? '');
 
-    // 人気エリアチップス（キャッシュ30分）: [['name'=>..., 'slug'=>...], ...]
-    $popularAreaChips = \Illuminate\Support\Facades\Cache::remember("popular_area_chips_v2_{$gender}", 1800, function() use ($gender) {
-        return \Illuminate\Support\Facades\DB::table('search_page_views as v')
-            ->join('areas as a', 'a.slug', '=', 'v.area_slug')
-            ->selectRaw('a.name, a.slug, SUM(v.count) as total')
-            ->whereRaw('v.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
-            ->where('v.area_slug', '!=', 'all')
-            ->where('v.gender', $gender)
-            ->groupBy('a.name', 'a.slug')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get()
-            ->map(fn($r) => ['name' => $r->name, 'slug' => $r->slug])
+    // エリアdatalist: active求人5件以上のエリアを検索回数順
+    $areaDatalist = \Illuminate\Support\Facades\Cache::remember("datalist_area_v2_{$gender}", 1800, function() use ($gender) {
+        return \Illuminate\Support\Facades\DB::table('areas as a')
+            ->leftJoinSub(
+                \Illuminate\Support\Facades\DB::table('jobs as j')
+                    ->join('shops as s', 's.id', '=', 'j.shop_id')
+                    ->selectRaw('j.area_id, COUNT(*) as cnt')
+                    ->where('j.status', 'active')
+                    ->where('s.status', 'active')
+                    ->groupBy('j.area_id'),
+                'jc', 'jc.area_id', '=', 'a.id'
+            )
+            ->leftJoinSub(
+                \Illuminate\Support\Facades\DB::table('search_page_views')
+                    ->selectRaw('area_slug, SUM(`count`) as total')
+                    ->where('gender', $gender)
+                    ->groupBy('area_slug'),
+                'sv', 'sv.area_slug', '=', 'a.slug'
+            )
+            ->selectRaw('a.name, COALESCE(jc.cnt, 0) as job_count, COALESCE(sv.total, 0) as view_total')
+            ->havingRaw('job_count >= 5')
+            ->orderByDesc('view_total')
+            ->pluck('name')
+            ->toArray();
+    });
+
+    // キーワードdatalist: active求人5件以上の職種を検索回数順
+    $keywordDatalist = \Illuminate\Support\Facades\Cache::remember("datalist_keyword_v1_{$gender}", 1800, function() use ($gender) {
+        return \Illuminate\Support\Facades\DB::table('job_types as jt')
+            ->leftJoinSub(
+                \Illuminate\Support\Facades\DB::table('jobs as j')
+                    ->join('shops as s', 's.id', '=', 'j.shop_id')
+                    ->selectRaw('j.job_type_id, COUNT(*) as cnt')
+                    ->where('j.status', 'active')
+                    ->where('s.status', 'active')
+                    ->groupBy('j.job_type_id'),
+                'jc', 'jc.job_type_id', '=', 'jt.id'
+            )
+            ->leftJoinSub(
+                \Illuminate\Support\Facades\DB::table('search_page_views')
+                    ->selectRaw('job_slug, SUM(`count`) as total')
+                    ->where('gender', $gender)
+                    ->where('job_slug', '!=', 'all')
+                    ->groupBy('job_slug'),
+                'sv', 'sv.job_slug', '=', 'jt.slug'
+            )
+            ->when($gender !== 'yoasobi', fn($q) => $q->where('jt.target_gender', $gender))
+            ->selectRaw('jt.name, COALESCE(jc.cnt, 0) as job_count, COALESCE(sv.total, 0) as view_total, jt.sort_order')
+            ->havingRaw('job_count >= 5')
+            ->orderByDesc('view_total')
+            ->orderBy('jt.sort_order')
+            ->pluck('name')
             ->toArray();
     });
 
@@ -260,6 +299,14 @@
 
 @section('content')
 
+{{-- datalist（エリア・キーワード候補。ページ全体で共有） --}}
+<datalist id="dl-area">
+    @foreach($areaDatalist as $n)<option value="{{ $n }}">@endforeach
+</datalist>
+<datalist id="dl-keyword">
+    @foreach($keywordDatalist as $n)<option value="{{ $n }}">@endforeach
+</datalist>
+
 {{-- パンくずリスト --}}
 <nav aria-label="パンくずリスト" class="bg-gray-50 border-b border-gray-100">
     <div class="max-w-6xl mx-auto px-4 py-2">
@@ -302,10 +349,10 @@
             <form action="{{ route('search') }}/" method="GET" class="hidden md:flex gap-2 ml-auto">
                 <input type="hidden" name="gender" value="{{ $gender }}">
                 <input type="text" name="area" value="{{ $displayArea }}"
-                       placeholder="エリア・駅名"
+                       list="dl-area" placeholder="エリア・駅名"
                        class="bg-white/20 border border-white/40 rounded px-3 py-1 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/30 w-32">
                 <input type="text" name="keyword" value="{{ $displayJob }}"
-                       placeholder="{{ $gender === 'yoasobi' ? '業種・店名' : '職種・業種' }}"
+                       list="dl-keyword" placeholder="{{ $gender === 'yoasobi' ? '業種・店名' : '職種・業種' }}"
                        class="bg-white/20 border border-white/40 rounded px-3 py-1 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/30 w-32">
                 <button type="submit" class="bg-white/20 hover:bg-white/30 border border-white/40 text-white text-sm px-3 py-1 rounded transition">
                     検索
@@ -338,69 +385,21 @@
         <form action="{{ route('search') }}/" method="GET">
             <input type="hidden" name="gender" value="{{ $gender }}">
             <div class="flex flex-col sm:flex-row gap-2">
-                <div x-data="suggestBox('area', '{{ $gender }}', {{ json_encode($displayArea) }})" class="relative flex-1">
-                    <input type="text" name="area"
-                           x-model="query"
-                           @input.debounce.250ms="onInput($el.value)"
-                           @keydown.escape="close()"
-                           @keydown.down.prevent="focusNext()"
-                           @keydown.up.prevent="focusPrev()"
-                           @keydown.enter="handleEnter($event)"
-                           @focus="if(suggestions.length) open=true"
-                           @blur.window="$event.relatedTarget?.closest('[x-data]') === $el.closest('[x-data]') || close()"
-                           placeholder="エリア・駅名"
-                           autocomplete="off"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
-                    <ul x-show="open && suggestions.length"
-                        class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden text-sm">
-                        <template x-for="(s, i) in suggestions" :key="i">
-                            <li @mousedown.prevent="select(s)"
-                                :class="focused === i ? 'bg-gray-100' : 'hover:bg-gray-50'"
-                                class="px-3 py-2 cursor-pointer text-gray-800"
-                                x-text="s"></li>
-                        </template>
-                    </ul>
-                </div>
-                <div x-data="suggestBox('keyword', '{{ $gender }}', {{ json_encode($isLp ? ($jobTypeName ?? '') : ($keyword ?? '')) }})" class="relative flex-1">
-                    <input type="text" name="keyword"
-                           x-model="query"
-                           @input.debounce.250ms="onInput($el.value)"
-                           @keydown.escape="close()"
-                           @keydown.down.prevent="focusNext()"
-                           @keydown.up.prevent="focusPrev()"
-                           @keydown.enter="handleEnter($event)"
-                           @focus="if(suggestions.length) open=true"
-                           @blur.window="$event.relatedTarget?.closest('[x-data]') === $el.closest('[x-data]') || close()"
-                           placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
-                           autocomplete="off"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
-                    <ul x-show="open && suggestions.length"
-                        class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden text-sm">
-                        <template x-for="(s, i) in suggestions" :key="i">
-                            <li @mousedown.prevent="select(s)"
-                                :class="focused === i ? 'bg-gray-100' : 'hover:bg-gray-50'"
-                                class="px-3 py-2 cursor-pointer text-gray-800"
-                                x-text="s"></li>
-                        </template>
-                    </ul>
-                </div>
+                <input type="text" name="area"
+                       value="{{ $displayArea }}"
+                       list="dl-area"
+                       placeholder="エリア・駅名"
+                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : ($gender === 'yoasobi' ? 'business-300' : 'female-400') }}">
+                <input type="text" name="keyword"
+                       value="{{ $displayJob }}"
+                       list="dl-keyword"
+                       placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
+                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : ($gender === 'yoasobi' ? 'business-300' : 'female-400') }}">
                 <button type="submit"
                         class="{{ $c['btn'] }} text-white text-sm font-bold px-5 py-2 rounded-lg transition whitespace-nowrap">
                     再検索
                 </button>
             </div>
-            {{-- 人気エリアチップス --}}
-            @if(!empty($popularAreaChips) && !$displayArea)
-            <div class="flex flex-nowrap overflow-x-auto gap-1.5 mt-2.5 pb-1 md:flex-wrap md:overflow-x-visible items-center">
-                <span class="text-xs text-gray-400 shrink-0">人気：</span>
-                @foreach($popularAreaChips as $chip)
-                <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => $chip['slug'], 'job_slug' => 'all']) }}/"
-                   class="text-xs bg-white border border-gray-300 {{ $c['text'] }} rounded-full px-2.5 py-1 whitespace-nowrap hover:border-current transition shrink-0">
-                    {{ $chip['name'] }}
-                </a>
-                @endforeach
-            </div>
-            @endif
             {{-- クイックタグ --}}
             @if($gender === 'yoasobi')
             @php
@@ -605,7 +604,7 @@
     {{-- LINEアラート告知バナー（female/male・1ページ目のみ） --}}
     @if($gender !== 'yoasobi' && $currentPage === 1)
     <a href="{{ route('alert.register', ['gender' => $gender]) }}" rel="nofollow"
-       class="flex items-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3.5 mb-5 transition group">
+       class="hidden sm:flex items-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3.5 mb-5 transition group">
         <div class="text-2xl shrink-0">🔔</div>
         <div class="flex-1 min-w-0">
             <p class="text-sm font-bold text-green-800">新着求人をLINEで受け取る</p>
@@ -955,39 +954,3 @@
 </section>
 @endsection
 
-@push('scripts')
-<script>
-function suggestBox(type, gender, initial) {
-    return {
-        query: initial,
-        suggestions: [],
-        open: false,
-        focused: -1,
-        _ctrl: null,
-        onInput(val) {
-            this.query = val;
-            this.focused = -1;
-            if (!val.trim()) { this.suggestions = []; this.open = false; return; }
-            if (this._ctrl) this._ctrl.abort();
-            this._ctrl = new AbortController();
-            fetch('/suggest?q=' + encodeURIComponent(val) + '&type=' + type + '&gender=' + gender, { signal: this._ctrl.signal })
-                .then(r => r.json())
-                .then(data => { this.suggestions = data; this.open = data.length > 0; })
-                .catch(() => {});
-        },
-        select(s) { this.query = s; this.close(); },
-        close() { this.open = false; this.focused = -1; },
-        focusNext() { this.focused = Math.min(this.focused + 1, this.suggestions.length - 1); },
-        focusPrev() { this.focused = Math.max(this.focused - 1, 0); },
-        handleEnter(e) {
-            if (this.open && this.focused >= 0) {
-                e.preventDefault();
-                this.select(this.suggestions[this.focused]);
-            } else {
-                this.close();
-            }
-        },
-    };
-}
-</script>
-@endpush

@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 
 class BusinessController extends BaseController
 {
+    protected array $shopWith = ['detail', 'genre', 'area', 'prefecture', 'setPrices'];
+
     public function edit()
     {
         $shop         = $this->shopOrFail();
