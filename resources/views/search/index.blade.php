@@ -13,6 +13,22 @@
     $displayArea = $isLp ? ($areaName ?? '') : ($area ?? '');
     $displayJob  = $isLp ? ($jobTypeName ?? '') : ($keyword ?? '');
 
+    // 人気エリアチップス（キャッシュ30分）: [['name'=>..., 'slug'=>...], ...]
+    $popularAreaChips = \Illuminate\Support\Facades\Cache::remember("popular_area_chips_v2_{$gender}", 1800, function() use ($gender) {
+        return \Illuminate\Support\Facades\DB::table('search_page_views as v')
+            ->join('areas as a', 'a.slug', '=', 'v.area_slug')
+            ->selectRaw('a.name, a.slug, SUM(v.count) as total')
+            ->whereRaw('v.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
+            ->where('v.area_slug', '!=', 'all')
+            ->where('v.gender', $gender)
+            ->groupBy('a.name', 'a.slug')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get()
+            ->map(fn($r) => ['name' => $r->name, 'slug' => $r->slug])
+            ->toArray();
+    });
+
     $hasArea = (bool) $displayArea;
     $hasJob  = (bool) $displayJob;
     $site    = 'ナイトワークリスト';
@@ -322,17 +338,69 @@
         <form action="{{ route('search') }}/" method="GET">
             <input type="hidden" name="gender" value="{{ $gender }}">
             <div class="flex flex-col sm:flex-row gap-2">
-                <input type="text" name="area" value="{{ $displayArea }}"
-                       placeholder="エリア・駅名"
-                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
-                <input type="text" name="keyword" value="{{ $isLp ? ($jobTypeName ?? '') : ($keyword ?? '') }}"
-                       placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
-                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
+                <div x-data="suggestBox('area', '{{ $gender }}', {{ json_encode($displayArea) }})" class="relative flex-1">
+                    <input type="text" name="area"
+                           x-model="query"
+                           @input.debounce.250ms="onInput($el.value)"
+                           @keydown.escape="close()"
+                           @keydown.down.prevent="focusNext()"
+                           @keydown.up.prevent="focusPrev()"
+                           @keydown.enter="handleEnter($event)"
+                           @focus="if(suggestions.length) open=true"
+                           @blur.window="$event.relatedTarget?.closest('[x-data]') === $el.closest('[x-data]') || close()"
+                           placeholder="エリア・駅名"
+                           autocomplete="off"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
+                    <ul x-show="open && suggestions.length"
+                        class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden text-sm">
+                        <template x-for="(s, i) in suggestions" :key="i">
+                            <li @mousedown.prevent="select(s)"
+                                :class="focused === i ? 'bg-gray-100' : 'hover:bg-gray-50'"
+                                class="px-3 py-2 cursor-pointer text-gray-800"
+                                x-text="s"></li>
+                        </template>
+                    </ul>
+                </div>
+                <div x-data="suggestBox('keyword', '{{ $gender }}', {{ json_encode($isLp ? ($jobTypeName ?? '') : ($keyword ?? '')) }})" class="relative flex-1">
+                    <input type="text" name="keyword"
+                           x-model="query"
+                           @input.debounce.250ms="onInput($el.value)"
+                           @keydown.escape="close()"
+                           @keydown.down.prevent="focusNext()"
+                           @keydown.up.prevent="focusPrev()"
+                           @keydown.enter="handleEnter($event)"
+                           @focus="if(suggestions.length) open=true"
+                           @blur.window="$event.relatedTarget?.closest('[x-data]') === $el.closest('[x-data]') || close()"
+                           placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
+                           autocomplete="off"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
+                    <ul x-show="open && suggestions.length"
+                        class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden text-sm">
+                        <template x-for="(s, i) in suggestions" :key="i">
+                            <li @mousedown.prevent="select(s)"
+                                :class="focused === i ? 'bg-gray-100' : 'hover:bg-gray-50'"
+                                class="px-3 py-2 cursor-pointer text-gray-800"
+                                x-text="s"></li>
+                        </template>
+                    </ul>
+                </div>
                 <button type="submit"
                         class="{{ $c['btn'] }} text-white text-sm font-bold px-5 py-2 rounded-lg transition whitespace-nowrap">
                     再検索
                 </button>
             </div>
+            {{-- 人気エリアチップス --}}
+            @if(!empty($popularAreaChips) && !$displayArea)
+            <div class="flex flex-nowrap overflow-x-auto gap-1.5 mt-2.5 pb-1 md:flex-wrap md:overflow-x-visible items-center">
+                <span class="text-xs text-gray-400 shrink-0">人気：</span>
+                @foreach($popularAreaChips as $chip)
+                <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => $chip['slug'], 'job_slug' => 'all']) }}/"
+                   class="text-xs bg-white border border-gray-300 {{ $c['text'] }} rounded-full px-2.5 py-1 whitespace-nowrap hover:border-current transition shrink-0">
+                    {{ $chip['name'] }}
+                </a>
+                @endforeach
+            </div>
+            @endif
             {{-- クイックタグ --}}
             @if($gender === 'yoasobi')
             @php
@@ -886,3 +954,40 @@
 
 </section>
 @endsection
+
+@push('scripts')
+<script>
+function suggestBox(type, gender, initial) {
+    return {
+        query: initial,
+        suggestions: [],
+        open: false,
+        focused: -1,
+        _ctrl: null,
+        onInput(val) {
+            this.query = val;
+            this.focused = -1;
+            if (!val.trim()) { this.suggestions = []; this.open = false; return; }
+            if (this._ctrl) this._ctrl.abort();
+            this._ctrl = new AbortController();
+            fetch('/suggest?q=' + encodeURIComponent(val) + '&type=' + type + '&gender=' + gender, { signal: this._ctrl.signal })
+                .then(r => r.json())
+                .then(data => { this.suggestions = data; this.open = data.length > 0; })
+                .catch(() => {});
+        },
+        select(s) { this.query = s; this.close(); },
+        close() { this.open = false; this.focused = -1; },
+        focusNext() { this.focused = Math.min(this.focused + 1, this.suggestions.length - 1); },
+        focusPrev() { this.focused = Math.max(this.focused - 1, 0); },
+        handleEnter(e) {
+            if (this.open && this.focused >= 0) {
+                e.preventDefault();
+                this.select(this.suggestions[this.focused]);
+            } else {
+                this.close();
+            }
+        },
+    };
+}
+</script>
+@endpush

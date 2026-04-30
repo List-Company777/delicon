@@ -44,8 +44,8 @@ $ldTop = [
         {{-- 3グループの検索ボックス --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-            {{-- 夜遊びリスト --}}
-            <div class="rounded-xl p-5 border border-business-700/40 bg-business-700/10">
+            {{-- 夜遊びリスト（mobile:1位、desktop:1位） --}}
+            <div class="order-1 md:order-1 rounded-xl p-5 border border-business-700/40 bg-business-700/10">
                 <h2 class="flex items-center gap-2 mb-4 text-business-300 font-bold text-lg">
                     <span class="w-3 h-3 rounded-full bg-business-300 shrink-0" aria-hidden="true"></span>
                     夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span>
@@ -70,8 +70,8 @@ $ldTop = [
                 </form>
             </div>
 
-            {{-- 男性ナイトワーク --}}
-            <div class="rounded-xl p-5 border border-male-300/30 bg-male-800/30">
+            {{-- 男性ナイトワーク（mobile:3位、desktop:2位） --}}
+            <div class="order-3 md:order-2 rounded-xl p-5 border border-male-300/30 bg-male-800/30">
                 <h2 class="flex items-center gap-2 mb-4 text-male-300 font-bold text-lg">
                     <span class="w-3 h-3 rounded-full bg-male-300 shrink-0" aria-hidden="true"></span>
                     男性ナイトワーク
@@ -96,8 +96,8 @@ $ldTop = [
                 </form>
             </div>
 
-            {{-- 女性ナイトワーク --}}
-            <div class="rounded-xl p-5 border border-female-500/40 bg-female-600/10">
+            {{-- 女性ナイトワーク（mobile:2位、desktop:3位） --}}
+            <div class="order-2 md:order-3 rounded-xl p-5 border border-female-500/40 bg-female-600/10">
                 <h2 class="flex items-center gap-2 mb-4 text-female-400 font-bold text-lg">
                     <span class="w-3 h-3 rounded-full bg-female-500 shrink-0" aria-hidden="true"></span>
                     女性ナイトワーク

@@ -70,6 +70,9 @@ Route::view('/tokutei/',    'legal.tokutei')->name('tokutei');
 // 代理店パートナー募集（noindex）
 Route::view('/agency/', 'agency.index')->name('agency');
 
+// 検索サジェスト API
+Route::get('/suggest', [\App\Http\Controllers\SuggestController::class, 'search'])->name('suggest')->middleware('throttle:60,1');
+
 // お問い合わせ（一般）
 Route::get('/inquiry/',  [\App\Http\Controllers\InquiryController::class, 'show'])->name('inquiry');
 Route::post('/inquiry/', [\App\Http\Controllers\InquiryController::class, 'send'])->name('inquiry.send');
