@@ -30,8 +30,15 @@ class SuggestController extends Controller
 
     private function suggestArea(string $q): JsonResponse
     {
-        $results = Area::where('name', 'LIKE', "%{$q}%")
-            ->orWhere('slug', 'LIKE', "%{$q}%")
+        $results = Area::where(function ($query) use ($q) {
+                $query->where('name', 'LIKE', "%{$q}%")
+                      ->orWhere('slug', 'LIKE', "%{$q}%");
+            })
+            ->whereExists(function ($sub) {
+                $sub->from('shops')
+                    ->whereColumn('shops.area_id', 'areas.id')
+                    ->where('shops.status', 'active');
+            })
             ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END, name", ["{$q}%"])
             ->limit(8)
             ->pluck('name');
@@ -41,12 +48,18 @@ class SuggestController extends Controller
 
     private function suggestKeyword(string $q, string $gender): JsonResponse
     {
-        $jobTypeNames = Cache::remember("suggest_jobtypes_{$gender}", 3600, function () use ($gender) {
-            $query = JobType::orderBy('sort_order');
-            if ($gender !== 'yoasobi') {
-                $query->where('target_gender', $gender);
-            }
-            return $query->pluck('name')->toArray();
+        $jobTypeNames = Cache::remember("suggest_jobtypes_v2_{$gender}", 3600, function () use ($gender) {
+            return JobType::orderBy('sort_order')
+                ->when($gender !== 'yoasobi', fn($query) => $query->where('target_gender', $gender))
+                ->whereExists(function ($sub) {
+                    $sub->from('jobs')
+                        ->join('shops', 'jobs.shop_id', '=', 'shops.id')
+                        ->whereColumn('jobs.job_type_id', 'job_types.id')
+                        ->where('jobs.status', 'active')
+                        ->where('shops.status', 'active');
+                })
+                ->pluck('name')
+                ->toArray();
         });
 
         $filtered = collect($jobTypeNames)->filter(fn($name) => mb_strpos($name, $q) !== false)->values();
