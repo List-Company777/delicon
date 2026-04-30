@@ -8,6 +8,7 @@ use App\Models\Genre;
 use App\Models\Job;
 use App\Models\JobType;
 use App\Models\Prefecture;
+use App\Models\Shop;
 use App\Models\ShopDetail;
 use App\Models\SearchKeyword;
 use App\Models\KeywordNormalization;
@@ -245,7 +246,7 @@ class SearchController extends Controller
     private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $shopBoolFilter = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
     {
         $page    = (int) request()->input('page', 1);
-        $perPage = 20;
+        $perPage = $gender === 'yoasobi' ? 20 : 12;
 
         // キャッシュにはIDのみ保存（Eloquentオブジェクトはシリアライズ不可）
         $idsCacheKey = 'search_ids:' . md5(implode('|', [
@@ -315,64 +316,55 @@ class SearchController extends Controller
                         ELSE 5
                     END')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
                 )
+                ->orderBy(fn($q) =>
+                    $q->select('display_sort')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
+                )
                 ->pluck('shop_details.id')->all();
         } else {
-            $searchGroups = $gender === 'male'
-                ? ['male', 'both']
-                : ['female', 'both'];
+            $searchGroups = $gender === 'male' ? ['male', 'both'] : ['female', 'both'];
 
-            $query = Job::with(['shop.area', 'jobType', 'area'])
+            // 店舗単位で集約：マッチする求人を持つ店舗IDを入札スコア順で取得
+            $query = Shop::whereHas('jobs', fn($j) => $j
                 ->where('status', 'active')
                 ->whereIn('search_group', $searchGroups)
-                ->withinPlanLimit()
                 ->when($prefSlug, fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
                 ->when($area, fn($q) => $useSlug
                     ? $q->whereHas('area', fn($a) =>
                         $a->where('slug', $area)
                           ->orWhereHas('parent', fn($p) => $p->where('slug', $area))
-                          ->orWhereHas('prefecture', fn($p) => $p->where('slug', $area))
-                      )
+                          ->orWhereHas('prefecture', fn($p) => $p->where('slug', $area)))
                     : $q->where(fn($q2) =>
-                        $q2->whereHas('area', fn($a) => $a->where('name', 'like', "%{$area}%")
-                                ->orWhere('slug', 'like', "%{$area}%"))
+                        $q2->whereHas('area', fn($a) => $a->where('name', 'like', "%{$area}%")->orWhere('slug', 'like', "%{$area}%"))
                            ->orWhereHas('shop', fn($s) =>
-                                $s->where('nearest_line', 'like', "%{$area}%")
-                                  ->orWhere('nearest_station_name', 'like', "%{$stationArea}%"))
+                               $s->where('nearest_line', 'like', "%{$area}%")
+                                 ->orWhere('nearest_station_name', 'like', "%{$stationArea}%"))
                            ->orWhereHas('area', fn($a) =>
-                                $a->whereHas('prefecture', fn($p) => $p->where('name', 'like', "%{$area}%")))
-                    )
+                               $a->whereHas('prefecture', fn($p) => $p->where('name', 'like', "%{$area}%"))))
                 )
                 ->when($keyword, fn($q) => $useSlug
                     ? ($keywordFilterValue
-                        // keyword_filter型：タイトル全文検索
                         ? $this->whereTitleMatch($q, $keywordFilterValue)
-                        // 通常LP検索：job_type slug/group_slug OR genre slug
                         : $q->where(fn($q2) =>
                             $q2->whereHas('jobType', fn($j) => $j->where('slug', $keyword)->orWhere('group_slug', $keyword))
-                               ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('slug', $keyword)))
-                          )
-                      )
+                               ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('slug', $keyword)))))
                     : $q->where(fn($q2) =>
                         $this->whereTitleMatch($q2, $keyword)
                            ->orWhereHas('jobType', fn($j) => $j->where('name', 'like', "%{$keyword}%"))
-                           ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('name', 'like', "%{$keyword}%")))
-                      )
+                           ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('name', 'like', "%{$keyword}%"))))
                 )
                 ->when($filterKeyword, fn($q) => $this->whereTitleMatch($q, $filterKeyword))
                 ->when($wageType && $wageMin > 0, fn($q) =>
-                    $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin)
-                )
+                    $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin))
                 ->when($arubaito, fn($q) =>
-                    $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME')
-                )
-                ->orderByDesc(fn($q) =>
-                    $q->selectRaw('CASE
-                        WHEN budget_balance >= bid_price THEN bid_price
-                        WHEN main_image IS NOT NULL THEN 15
-                        ELSE 5
-                    END')->from('shops')->whereColumn('shops.id', 'jobs.shop_id')
-                )
-                ->pluck('jobs.id')->all();
+                    $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
+            )
+            ->orderByRaw('CASE
+                WHEN budget_balance >= bid_price THEN bid_price
+                WHEN xml_source = "upstage" AND bid_price > 0 THEN bid_price
+                WHEN main_image IS NOT NULL THEN 15
+                ELSE 5
+            END DESC, display_sort ASC')
+            ->pluck('shops.id')->all();
         }
 
         return $query;
@@ -391,11 +383,41 @@ class SearchController extends Controller
                 ->orderByRaw("FIELD(id, {$idOrder})")
                 ->get();
         } else {
+            // 求人フィルタの再構築（eager load でも同じ条件を適用する）
+            $searchGroups = $gender === 'male' ? ['male', 'both'] : ['female', 'both'];
+            $stationArea  = preg_replace('/駅$/u', '', $area);
+            $keywordFilterValue = null;
+            if ($useSlug && $keyword) {
+                $kfType = JobType::where(fn($q) => $q->where('slug', $keyword)->orWhere('group_slug', $keyword))
+                    ->whereNotNull('keyword_filter')->value('keyword_filter');
+                $keywordFilterValue = $kfType ?: null;
+            }
             $idOrder = implode(',', $pageIds);
-            $items = Job::with(['shop.area', 'jobType', 'area'])
-                ->whereIn('id', $pageIds)
-                ->orderByRaw("FIELD(id, {$idOrder})")
-                ->get();
+            $items = Shop::with([
+                'area', 'genre', 'prefecture',
+                'jobs' => fn($j) => $j
+                    ->where('status', 'active')
+                    ->whereIn('search_group', $searchGroups)
+                    ->with('jobType')
+                    // 職種・給与フィルタをカード内求人にも反映（他職種を混在させない）
+                    ->when($keyword, fn($q) => $useSlug
+                        ? ($keywordFilterValue
+                            ? $this->whereTitleMatch($q, $keywordFilterValue)
+                            : $q->whereHas('jobType', fn($t) => $t->where('slug', $keyword)->orWhere('group_slug', $keyword)))
+                        : $q->where(fn($q2) =>
+                            $this->whereTitleMatch($q2, $keyword)
+                               ->orWhereHas('jobType', fn($t) => $t->where('name', 'like', "%{$keyword}%")))
+                    )
+                    ->when($filterKeyword, fn($q) => $this->whereTitleMatch($q, $filterKeyword))
+                    ->when($wageType && $wageMin > 0, fn($q) =>
+                        $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin))
+                    ->when($arubaito, fn($q) =>
+                        $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
+                    ->orderBy('id'),
+            ])
+            ->whereIn('id', $pageIds)
+            ->orderByRaw("FIELD(id, {$idOrder})")
+            ->get();
         }
 
         return new \Illuminate\Pagination\LengthAwarePaginator(
@@ -461,6 +483,7 @@ class SearchController extends Controller
         $monthlyCount = (int) ($agg?->monthly_count ?? 0);
 
         $stats = [
+            'total_jobs'      => $query->count(),
             'daily_count'     => (int) ($agg?->daily_count     ?? 0),
             'part_time_count' => (int) ($agg?->part_time_count ?? 0),
         ];

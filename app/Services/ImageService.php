@@ -21,7 +21,7 @@ class ImageService
     }
 
     /**
-     * 店舗メイン画像を保存（JPG + WebP）
+     * 店舗メイン画像を保存（JPG + WebP + サムネイル）
      * @return string  storage/app/public/ からの相対パス（main_image カラムに保存する値）
      */
     public function saveShopMainImage(UploadedFile $file, int $shopId): string
@@ -31,11 +31,14 @@ class ImageService
 
         Storage::disk('public')->makeDirectory($dir);
 
-        $jpgBytes  = $this->manager->decode($file->getPathname())->encode(new JpegEncoder(quality: 85));
-        $webpBytes = $this->manager->decode($file->getPathname())->encode(new WebpEncoder(quality: 80));
+        $img = $this->manager->decode($file->getPathname());
+        Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
+        Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
 
-        Storage::disk('public')->put("{$base}.jpg",  (string) $jpgBytes);
-        Storage::disk('public')->put("{$base}.webp", (string) $webpBytes);
+        // サムネイル（224×126px crop、検索結果カード用）
+        $thumb = $this->manager->decode($file->getPathname())->cover(224, 126);
+        Storage::disk('public')->put("{$base}_thumb.webp", (string) $thumb->encode(new WebpEncoder(quality: 75)));
+        Storage::disk('public')->put("{$base}_thumb.jpg",  (string) $thumb->encode(new JpegEncoder(quality: 80)));
 
         return "{$base}.jpg";
     }
@@ -50,7 +53,7 @@ class ImageService
     }
 
     /**
-     * 求人画像を保存（JPG + WebP）
+     * 求人画像を保存（JPG + WebP + サムネイル）
      * @return string  storage/app/public/ からの相対パス（image_path カラムに保存する値）
      */
     public function saveJobImage(UploadedFile $file, int $shopId, int $jobId): string
@@ -60,11 +63,14 @@ class ImageService
 
         Storage::disk('public')->makeDirectory($dir);
 
-        $jpgBytes  = $this->manager->decode($file->getPathname())->encode(new JpegEncoder(quality: 85));
-        $webpBytes = $this->manager->decode($file->getPathname())->encode(new WebpEncoder(quality: 80));
+        $img = $this->manager->decode($file->getPathname());
+        Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
+        Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
 
-        Storage::disk('public')->put("{$base}.jpg",  (string) $jpgBytes);
-        Storage::disk('public')->put("{$base}.webp", (string) $webpBytes);
+        // サムネイル（224×126px crop、検索結果カード用）
+        $thumb = $this->manager->decode($file->getPathname())->cover(224, 126);
+        Storage::disk('public')->put("{$base}_thumb.webp", (string) $thumb->encode(new WebpEncoder(quality: 75)));
+        Storage::disk('public')->put("{$base}_thumb.jpg",  (string) $thumb->encode(new JpegEncoder(quality: 80)));
 
         return "{$base}.jpg";
     }
@@ -112,11 +118,14 @@ class ImageService
         Storage::disk('public')->makeDirectory($dir);
 
         try {
-            $jpgBytes  = $this->manager->decodeBinary($response->body())->encode(new JpegEncoder(quality: 85));
-            $webpBytes = $this->manager->decodeBinary($response->body())->encode(new WebpEncoder(quality: 80));
+            $body = $response->body();
+            $img  = $this->manager->decodeBinary($body);
+            Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
+            Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
 
-            Storage::disk('public')->put("{$base}.jpg",  (string) $jpgBytes);
-            Storage::disk('public')->put("{$base}.webp", (string) $webpBytes);
+            $thumb = $this->manager->decodeBinary($body)->cover(224, 126);
+            Storage::disk('public')->put("{$base}_thumb.webp", (string) $thumb->encode(new WebpEncoder(quality: 75)));
+            Storage::disk('public')->put("{$base}_thumb.jpg",  (string) $thumb->encode(new JpegEncoder(quality: 80)));
         } catch (\Exception $e) {
             Log::warning("ImageService: 店舗画像変換エラー url={$url} " . $e->getMessage());
             return null;
@@ -148,11 +157,14 @@ class ImageService
         Storage::disk('public')->makeDirectory($dir);
 
         try {
-            $jpgBytes  = $this->manager->decodeBinary($response->body())->encode(new JpegEncoder(quality: 85));
-            $webpBytes = $this->manager->decodeBinary($response->body())->encode(new WebpEncoder(quality: 80));
+            $body = $response->body();
+            $img  = $this->manager->decodeBinary($body);
+            Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
+            Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
 
-            Storage::disk('public')->put("{$base}.jpg",  (string) $jpgBytes);
-            Storage::disk('public')->put("{$base}.webp", (string) $webpBytes);
+            $thumb = $this->manager->decodeBinary($body)->cover(224, 126);
+            Storage::disk('public')->put("{$base}_thumb.webp", (string) $thumb->encode(new WebpEncoder(quality: 75)));
+            Storage::disk('public')->put("{$base}_thumb.jpg",  (string) $thumb->encode(new JpegEncoder(quality: 80)));
         } catch (\Exception $e) {
             Log::warning("ImageService: 画像変換エラー url={$url} " . $e->getMessage());
             return null;
@@ -176,5 +188,24 @@ class ImageService
     public static function webpPath(string $jpgPath): string
     {
         return str_replace('.jpg', '.webp', $jpgPath);
+    }
+
+    /**
+     * サムネイル WebP パスを返す（JPGパスから計算）
+     * ファイルが存在しない場合は通常の WebP パスにフォールバック
+     */
+    public static function thumbWebpPath(string $jpgPath): string
+    {
+        $thumb = str_replace('.jpg', '_thumb.webp', $jpgPath);
+        return Storage::disk('public')->exists($thumb) ? $thumb : str_replace('.jpg', '.webp', $jpgPath);
+    }
+
+    /**
+     * サムネイル JPG パスを返す（フォールバック付き）
+     */
+    public static function thumbJpgPath(string $jpgPath): string
+    {
+        $thumb = str_replace('.jpg', '_thumb.jpg', $jpgPath);
+        return Storage::disk('public')->exists($thumb) ? $thumb : $jpgPath;
     }
 }

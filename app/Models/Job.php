@@ -11,7 +11,7 @@ class Job extends Model
 {
     protected $fillable = [
         'shop_id', 'job_type_id', 'area_id', 'prefecture_id', 'station_id',
-        'title', 'description', 'wage_type', 'hourly_wage_min', 'hourly_wage_max', 'working_hours', 'employment_type',
+        'title', 'description', 'faq', 'wage_type', 'hourly_wage_min', 'hourly_wage_max', 'working_hours', 'employment_type',
         'gender_override', 'search_group', 'image_path', 'status',
         'is_hotlink', 'hotlink_url',
         'xml_source', 'xml_id', 'xml_enabled', 'xml_image_url', 'line_user_id',
@@ -19,6 +19,7 @@ class Job extends Model
     ];
 
     protected $casts = [
+        'faq'         => 'array',
         'is_hotlink'  => 'boolean',
         'xml_enabled' => 'boolean',
         'expires_at'  => 'datetime',

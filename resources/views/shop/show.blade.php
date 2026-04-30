@@ -107,6 +107,20 @@
 <script type="application/ld+json" @nonce>
 {!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
+@if(!empty($detail->faq))
+@php
+    $shopFaqLd = [
+        '@context'   => 'https://schema.org',
+        '@type'      => 'FAQPage',
+        'mainEntity' => collect($detail->faq)->map(fn($item) => [
+            '@type'          => 'Question',
+            'name'           => $item['q'],
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+        ])->values()->all(),
+    ];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($shopFaqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+@endif
 @php
     $bcItems = [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/'],
@@ -440,6 +454,25 @@
                                  loading="lazy" decoding="async">
                         @endforeach
                     </div>
+                </section>
+            @endif
+
+            {{-- よくある質問 --}}
+            @if(!empty($detail->faq))
+                <section class="mb-6 border-t border-gray-100 pt-6" aria-label="よくある質問">
+                    <h2 class="font-bold text-gray-700 mb-3 text-sm">よくある質問</h2>
+                    <dl class="space-y-3">
+                        @foreach($detail->faq as $item)
+                        <div class="bg-gray-50 rounded-lg px-4 py-3">
+                            <dt class="font-bold text-gray-800 text-sm flex items-start gap-2 mb-1">
+                                <span class="shrink-0 font-black text-gray-400">Q.</span>{{ $item['q'] }}
+                            </dt>
+                            <dd class="text-sm text-gray-600 leading-relaxed flex items-start gap-2">
+                                <span class="shrink-0 font-bold text-gray-400">A.</span>{{ $item['a'] }}
+                            </dd>
+                        </div>
+                        @endforeach
+                    </dl>
                 </section>
             @endif
 

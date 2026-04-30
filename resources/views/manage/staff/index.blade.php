@@ -62,19 +62,25 @@
 
     {{-- 手動登録求人セクション --}}
     @php $staffCount = $ownStaffJobs->count(); $maxJobs = $shop->staffJobLimit(); @endphp
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h2 class="text-base font-bold text-gray-800">手動登録求人</h2>
-            <p class="text-xs text-gray-400 mt-0.5">{{ $staffCount }} / {{ $maxJobs }} 件（{{ $shop->hasBudget() ? '有料プラン' : '無料プラン' }}）</p>
+    <div class="mb-4">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h2 class="text-base font-bold text-gray-800">手動登録求人</h2>
+                <p class="text-xs text-gray-400 mt-0.5">{{ $staffCount }} / {{ $maxJobs }} 件（{{ $shop->hasBudget() ? '有料プラン' : '無料プラン' }}）</p>
+            </div>
+            @if($staffCount < $maxJobs)
+                <a href="{{ route('manage.staff.create') }}"
+                   class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
+                    + 求人を追加
+                </a>
+            @else
+                <span class="text-xs text-gray-400 border border-gray-200 rounded-lg px-4 py-2">上限（{{ $maxJobs }}件）に達しています</span>
+            @endif
         </div>
-        @if($staffCount < $maxJobs)
-            <a href="{{ route('manage.staff.create') }}"
-               class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
-                + 求人を追加
-            </a>
-        @else
-            <span class="text-xs text-gray-400 border border-gray-200 rounded-lg px-4 py-2">上限（{{ $maxJobs }}件）に達しています</span>
-        @endif
+        <div class="bg-gray-50 border border-gray-200 text-gray-600 text-xs px-4 py-3 rounded-lg leading-relaxed">
+            検索結果ページでは、ユーザーの検索条件に応じて、無料掲載は１つまで、有料掲載は３つまでリスト表示されます。<br>
+            有料掲載の場合は５つまで入力しておくことが出来ます。
+        </div>
     </div>
 
     @if($ownStaffJobs->isEmpty())

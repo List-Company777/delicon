@@ -175,6 +175,32 @@
     </a>
 </div>
 
+{{-- XML未解決求人 --}}
+@if($unresolvedXmlJobs->isNotEmpty())
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h2 class="text-sm font-bold text-gray-600 mb-1">XML未解決求人 <span class="text-orange-500">{{ $unresolvedXmlJobs->sum('count') }}件</span></h2>
+    <p class="text-xs text-gray-400 mb-4">職種マッピング不可のためボーイに仮割り当て済み。マッピング追加 or 職種新規作成で解消できます。</p>
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-xs text-gray-400 border-b border-gray-100">
+                <th class="text-left pb-2 font-medium">タイトル（職種部分）</th>
+                <th class="text-right pb-2 font-medium w-16">件数</th>
+                <th class="text-left pb-2 font-medium pl-4">代表店舗</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            @foreach($unresolvedXmlJobs as $rawTitle => $info)
+            <tr>
+                <td class="py-2 font-medium text-gray-800">{{ $rawTitle }}</td>
+                <td class="py-2 text-right text-orange-600 font-bold">{{ $info['count'] }}</td>
+                <td class="py-2 pl-4 text-gray-500 text-xs">{{ $info['shop_names'] }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
+
 {{-- クイックリンク --}}
 <div class="bg-white rounded-xl shadow-sm p-6">
     <h2 class="text-sm font-bold text-gray-600 mb-4">クイックアクション</h2>

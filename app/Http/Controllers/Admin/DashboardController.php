@@ -11,6 +11,7 @@ use App\Models\SearchKeyword;
 use App\Models\SearchPageView;
 use App\Models\Shop;
 use App\Models\ShopPlanApplication;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -47,10 +48,30 @@ class DashboardController extends Controller
 
         $recentApplications = ShopPlanApplication::with('shop')->latest()->take(5)->get();
 
+        // XML未解決求人（職種マッピング不可）をDB側でグループ集計
+        $unresolvedXmlJobs = DB::table('jobs')
+            ->join('shops', 'jobs.shop_id', '=', 'shops.id')
+            ->where('jobs.xml_source', 'upstage')
+            ->where('jobs.xml_unresolved', true)
+            ->where('jobs.status', 'active')
+            ->selectRaw("SUBSTRING_INDEX(jobs.title, ' / ', 1) AS title_prefix")
+            ->selectRaw('COUNT(*) AS `count`')
+            ->selectRaw("GROUP_CONCAT(DISTINCT shops.name ORDER BY shops.name SEPARATOR '|') AS shop_names_raw")
+            ->groupByRaw("SUBSTRING_INDEX(jobs.title, ' / ', 1)")
+            ->orderByDesc('count')
+            ->get()
+            ->mapWithKeys(fn($row) => [
+                $row->title_prefix => [
+                    'count'      => $row->count,
+                    'shop_names' => collect(explode('|', $row->shop_names_raw ?? ''))->take(3)->implode('、'),
+                ],
+            ]);
+
         return view('admin.dashboard', compact(
             'stats', 'pendingShops', 'pendingPlanApplications',
             'kpi', 'articleStats', 'partnerCount',
-            'recentShops', 'recentApplications'
+            'recentShops', 'recentApplications',
+            'unresolvedXmlJobs'
         ));
     }
 }

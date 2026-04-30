@@ -42,6 +42,7 @@ class CastJobController extends BaseController
         }
 
         $data = $this->validated($request);
+        $data['faq'] = collect($data['faq'] ?? [])->filter(fn($item) => !empty($item['q']) && !empty($item['a']))->values()->all() ?: null;
 
         $job = Job::create(array_merge($data, [
             'shop_id'       => $shop->id,
@@ -75,6 +76,7 @@ class CastJobController extends BaseController
         abort_if(! $job, 404);
 
         $data = $this->validated($request);
+        $data['faq'] = collect($data['faq'] ?? [])->filter(fn($item) => !empty($item['q']) && !empty($item['a']))->values()->all() ?: null;
         $imageService = new ImageService;
 
         if ($request->hasFile('image')) {
@@ -115,7 +117,10 @@ class CastJobController extends BaseController
             'job_type_id'     => ['required', 'exists:job_types,id'],
             'title'           => ['required', 'string', 'max:60'],
             'description'     => ['nullable', 'string', 'max:3000'],
-            'wage_type'       => ['nullable', 'in:hourly,daily,monthly'],
+            'faq'             => ['nullable', 'array', 'max:3'],
+            'faq.*.q'         => ['nullable', 'string', 'max:100'],
+            'faq.*.a'         => ['nullable', 'string', 'max:300'],
+            'wage_type'       => ['nullable', 'in:hourly,daily,monthly,commission'],
             'hourly_wage_min' => ['nullable', 'integer', 'min:0'],
             'hourly_wage_max' => ['nullable', 'integer', 'min:0', 'gte:hourly_wage_min'],
             'working_hours'   => ['nullable', 'string', 'max:100'],

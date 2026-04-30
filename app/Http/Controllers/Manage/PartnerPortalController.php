@@ -7,6 +7,7 @@ use App\Models\JobType;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PartnerPortalController extends Controller
@@ -29,7 +30,9 @@ class PartnerPortalController extends Controller
         $totalCount     = $shops->count();
         $activeCount    = $shops->where('status', 'active')->count();
         $nonPublicCount = $totalCount - $activeCount;
-        $rankings       = $partner->isManagement() ? $this->computeShopRankings($shops) : collect();
+        $rankings = $partner->isManagement()
+            ? Cache::remember("partner_rankings:{$partner->id}", 1800, fn() => $this->computeShopRankings($shops))
+            : collect();
 
         return view('manage.partner.index', compact(
             'partner', 'shops', 'totalCount', 'activeCount', 'nonPublicCount', 'rankings', 'keyword'

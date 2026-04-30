@@ -102,6 +102,20 @@
 <script type="application/ld+json" @nonce>
 {!! json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
 </script>
+@if(!empty($job->faq))
+@php
+    $jobFaqLd = [
+        '@context'   => 'https://schema.org',
+        '@type'      => 'FAQPage',
+        'mainEntity' => collect($job->faq)->map(fn($item) => [
+            '@type'          => 'Question',
+            'name'           => $item['q'],
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+        ])->values()->all(),
+    ];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($jobFaqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+@endif
 @php
     $bcItems = [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク',    'item' => route('top') . '/'],
@@ -187,10 +201,13 @@
             </header>
 
             {{-- 給与・雇用形態 --}}
-            @if($job->hourly_wage_min || $job->employment_type)
-                @php $wageLabel = ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$job->wage_type ?? 'hourly']; @endphp
+            @if($job->wage_type === 'commission' || $job->hourly_wage_min || $job->employment_type)
+                @php $wageLabel = ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$job->wage_type ?? 'hourly']; @endphp
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    @if($job->hourly_wage_min)
+                    @if($job->wage_type === 'commission')
+                        <p class="text-xs text-gray-500 mb-1">給与形態</p>
+                        <p class="text-2xl font-bold {{ $c['text'] }}">完全歩合制</p>
+                    @elseif($job->hourly_wage_min)
                         <p class="text-xs text-gray-500 mb-1">{{ $wageLabel }}</p>
                         <p class="text-2xl font-bold {{ $c['text'] }}">
                             {{ number_format($job->hourly_wage_min) }}円
@@ -198,12 +215,12 @@
                                 〜 {{ number_format($job->hourly_wage_max) }}円
                             @endif
                         </p>
-                        @if($job->working_hours)
-                            <p class="text-xs text-gray-500 mt-1">勤務時間：{{ $job->working_hours }}</p>
-                        @endif
+                    @endif
+                    @if($job->working_hours)
+                        <p class="text-xs text-gray-500 mt-1">勤務時間：{{ $job->working_hours }}</p>
                     @endif
                     @if($job->employment_type)
-                        <p class="text-xs text-gray-500 {{ $job->hourly_wage_min ? 'mt-2' : 'mb-1' }}">
+                        <p class="text-xs text-gray-500 {{ ($job->wage_type === 'commission' || $job->hourly_wage_min) ? 'mt-2' : 'mb-1' }}">
                             雇用形態：{{ $employmentLabels[$job->employment_type] }}
                         </p>
                     @endif
@@ -215,6 +232,25 @@
                 <section class="mb-6">
                     <h2 class="font-bold text-gray-700 mb-2 text-sm">求人詳細</h2>
                     <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $job->description }}</p>
+                </section>
+            @endif
+
+            {{-- よくある質問 --}}
+            @if(!empty($job->faq))
+                <section class="mb-6 border-t border-gray-100 pt-6" aria-label="よくある質問">
+                    <h2 class="font-bold text-gray-700 mb-3 text-sm">よくある質問</h2>
+                    <dl class="space-y-3">
+                        @foreach($job->faq as $item)
+                        <div class="bg-gray-50 rounded-lg px-4 py-3">
+                            <dt class="font-bold text-gray-800 text-sm flex items-start gap-2 mb-1">
+                                <span class="shrink-0 font-black text-gray-400">Q.</span>{{ $item['q'] }}
+                            </dt>
+                            <dd class="text-sm text-gray-600 leading-relaxed flex items-start gap-2">
+                                <span class="shrink-0 font-bold text-gray-400">A.</span>{{ $item['a'] }}
+                            </dd>
+                        </div>
+                        @endforeach
+                    </dl>
                 </section>
             @endif
 

@@ -36,6 +36,36 @@ class ImportUpstageXml extends Command
         'ラウンジバー',
     ];
 
+    /** カテゴリ × タイトルキーワード → job_types.id（汎用マップより優先） */
+    private const CATEGORY_TITLE_JOBTYPE_MAP = [
+        'ホストクラブ' => ['ホスト' => 26],
+        'ホスト'       => ['ホスト' => 26],
+    ];
+
+    /** 求人タイトルのキーワード → job_types.id（上から優先順で判定） */
+    private const TITLE_JOBTYPE_MAP = [
+        'ヘアメイク'     => 3,
+        'キッチン'       => 6,
+        'ドライバー'     => 7,
+        '内勤スタッフ'   => 9,  // ホストクラブの内勤スタッフ → フロアスタッフ
+        'フロアスタッフ' => 9,
+        'ホールスタッフ' => 9,
+        '店内スタッフ'   => 9,
+        'フロントスタッフ' => 16,
+        'フロントマン'   => 16,
+        '案内スタッフ'   => 16, // 無料案内所は対象外のため、ナイトワーク文脈ではエスコート扱い
+        '黒服'           => 13,
+        '幹部'           => 15,
+        '店長'           => 15,
+        'エスコート'     => 16,
+        '外販'           => 19,
+        'キャッシャー'   => 20,
+        'バーテンダー'   => 22,
+        'WEBデザイナー'  => 24,
+        '経理'           => 25,
+        'ボーイ'         => 14,
+    ];
+
     /** カテゴリ名 → genres.id */
     private const CATEGORY_GENRE_MAP = [
         'キャバクラ'   => 1,
@@ -181,7 +211,9 @@ class ImportUpstageXml extends Command
             ?? $prefectures->get($stateName . '府')
             ?? $prefectures->get($stateName . '県');
 
-        $area = $areas->get($cityName);
+        $area = $areas->get($cityName)
+            ?? $areas->get(preg_replace('/[都道府県区市町村]$/u', '', $cityName))
+            ?? $areas->get(str_replace(['区','市','町','村'], '', $cityName));
 
         $genreId   = self::CATEGORY_GENRE_MAP[$category] ?? null;
         $expiresAt = $this->parseExpDate($expStr);
@@ -213,12 +245,16 @@ class ImportUpstageXml extends Command
             $this->syncedShopXmlIds[] = $shopXmlId;
         }
 
+        // 職種解決（null = 未解決 → fallback + フラグ立て）
+        $resolvedJobTypeId = $this->detectJobTypeId($title, $category);
+
         // 求人の upsert
         $existing = Job::where('xml_source', 'upstage')->where('xml_id', $xmlId)->first();
 
         $jobData = [
             'shop_id'         => $shop->id,
-            'job_type_id'     => $boyJobType->id,
+            'job_type_id'     => $resolvedJobTypeId ?? $boyJobType->id,
+            'xml_unresolved'  => $resolvedJobTypeId === null,
             'area_id'         => $area?->id ?? $shop->area_id,
             'prefecture_id'   => $prefecture?->id ?? $shop->prefecture_id,
             'title'           => $title ?: ($shopName . ' ボーイ求人'),
@@ -364,6 +400,11 @@ class ImportUpstageXml extends Command
             return $result;
         }
 
+        if (str_contains($salary, '完全歩合') || str_contains($salary, '歩合制')) {
+            $result['type'] = 'commission';
+            return $result;
+        }
+
         if (str_contains($salary, '月給') || str_contains($salary, '月収')) {
             $result['type'] = 'monthly';
         } elseif (str_contains($salary, '日給') || str_contains($salary, '日払')) {
@@ -405,6 +446,24 @@ class ImportUpstageXml extends Command
             // 無効な日付は無視
         }
 
+        return null;
+    }
+
+    /** タイトル+カテゴリから job_type_id を解決。未解決なら null を返す */
+    private function detectJobTypeId(string $title, string $category): ?int
+    {
+        if (isset(self::CATEGORY_TITLE_JOBTYPE_MAP[$category])) {
+            foreach (self::CATEGORY_TITLE_JOBTYPE_MAP[$category] as $keyword => $id) {
+                if (str_contains($title, $keyword)) {
+                    return $id;
+                }
+            }
+        }
+        foreach (self::TITLE_JOBTYPE_MAP as $keyword => $id) {
+            if (str_contains($title, $keyword)) {
+                return $id;
+            }
+        }
         return null;
     }
 }

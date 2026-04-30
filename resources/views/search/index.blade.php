@@ -168,6 +168,28 @@
         'itemListElement' => $breadcrumbs,
     ];
 
+    // ItemList（現在ページの検索結果一覧）— $results はコントローラーから渡される LengthAwarePaginator
+    $ldItemList = null;
+    if (isset($results) && $results->total() > 0) {
+        $basePos = $results->firstItem() ?? 1;
+        $listItems = [];
+        foreach (array_values($results->items()) as $idx => $item) {
+            if ($gender === 'yoasobi') {
+                $shopId   = $item->shop->id ?? null;
+                $shopName = $item->shop->name ?? '';
+            } else {
+                $shopId   = $item->id;
+                $shopName = $item->name;
+            }
+            if ($shopId) {
+                $listItems[] = ['@type' => 'ListItem', 'position' => $basePos + $idx, 'name' => $shopName, 'url' => url('/track/shop/' . $shopId) . '/'];
+            }
+        }
+        if ($listItems) {
+            $ldItemList = ['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => $pageTitle, 'numberOfItems' => $results->total(), 'itemListElement' => $listItems];
+        }
+    }
+
     // CollectionPage（LP 1ページ目も含め常に出力）
     $pageUrl = $currentPage > 1
         ? $canonicalUrl . (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . $currentPage
@@ -189,6 +211,9 @@
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 <script type="application/ld+json" @nonce>{!! json_encode($ldBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+@if(!empty($ldItemList))
+<script type="application/ld+json" @nonce>{!! json_encode($ldItemList, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -232,7 +257,7 @@
                 @endif
             </h1>
             {{-- 絞り込みフォーム --}}
-            <form action="{{ route('search') }}/" method="GET" class="flex gap-2 ml-auto">
+            <form action="{{ route('search') }}/" method="GET" class="hidden md:flex gap-2 ml-auto">
                 <input type="hidden" name="gender" value="{{ $gender }}">
                 <input type="text" name="area" value="{{ $displayArea }}"
                        placeholder="エリア・駅名"
@@ -251,10 +276,17 @@
 @php
     $wageType = $wageType ?? '';
     $wageMin  = $wageMin  ?? 0;
-    $wagePresets = [
-        'hourly' => [3000 => '時給3,000円以上', 5000 => '時給5,000円以上', 8000 => '時給8,000円以上', 10000 => '時給10,000円以上'],
-        'daily'  => [20000 => '日給20,000円以上', 40000 => '日給40,000円以上', 60000 => '日給60,000円以上'],
-    ];
+    if ($gender === 'male') {
+        $wagePresets = [
+            'hourly'  => [1500 => '時給1,500円以上', 2000 => '時給2,000円以上', 3000 => '時給3,000円以上', 5000 => '時給5,000円以上'],
+            'monthly' => [300000 => '月給30万円以上', 400000 => '月給40万円以上', 500000 => '月給50万円以上', 600000 => '月給60万円以上'],
+        ];
+    } else {
+        $wagePresets = [
+            'hourly' => [3000 => '時給3,000円以上', 5000 => '時給5,000円以上', 8000 => '時給8,000円以上', 10000 => '時給10,000円以上'],
+            'daily'  => [20000 => '日給20,000円以上', 40000 => '日給40,000円以上', 60000 => '日給60,000円以上'],
+        ];
+    }
     $hasWageFilter = $wageType && $wageMin > 0;
 @endphp
 
@@ -267,13 +299,9 @@
                 <input type="text" name="area" value="{{ $displayArea }}"
                        placeholder="エリア・駅名"
                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
-                @if(!($isLp ?? false))
-                <input type="text" name="keyword" value="{{ $keyword ?? '' }}"
+                <input type="text" name="keyword" value="{{ $isLp ? ($jobTypeName ?? '') : ($keyword ?? '') }}"
                        placeholder="{{ $gender === 'yoasobi' ? '業種・店名（例：キャバクラ）' : ($gender === 'male' ? '職種・業種（例：黒服、キャバクラ）' : '職種・業種（例：キャスト、ガールズバー）') }}"
                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-{{ $gender === 'male' ? 'male-500' : 'female-400' }}">
-                @else
-                <input type="hidden" name="keyword" value="{{ $jobTypeName ?? '' }}">
-                @endif
                 <button type="submit"
                         class="{{ $c['btn'] }} text-white text-sm font-bold px-5 py-2 rounded-lg transition whitespace-nowrap">
                     再検索
@@ -306,7 +334,7 @@
                     'discount_first_set' => $discountFirstSet ? 1 : null,
                 ], fn($v) => $v !== null && $v !== '');
             @endphp
-            <div class="flex flex-wrap gap-2 mt-3">
+            <div class="flex flex-nowrap overflow-x-auto gap-2 mt-3 pb-1 md:flex-wrap md:overflow-x-visible">
                 @foreach($businessChips as $param => $chip)
                     @php
                         if ($chip['active']) {
@@ -349,7 +377,7 @@
                     $arubaitoUrl = url()->current() . '?' . http_build_query($currentQs);
                 }
             @endphp
-            <div class="flex flex-wrap gap-2 mt-3">
+            <div class="flex flex-nowrap overflow-x-auto gap-2 mt-3 pb-1 md:flex-wrap md:overflow-x-visible">
                 @foreach($quickTags as $tag)
                     @php
                         if ($isLpMode) {
@@ -405,7 +433,11 @@
                             class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none bg-white">
                         <option value="">給与形態を選択</option>
                         <option value="hourly" {{ $wageType === 'hourly' ? 'selected' : '' }}>時給</option>
-                        <option value="daily"  {{ $wageType === 'daily'  ? 'selected' : '' }}>日給</option>
+                        @if($gender === 'male')
+                        <option value="monthly" {{ $wageType === 'monthly' ? 'selected' : '' }}>月給</option>
+                        @else
+                        <option value="daily"   {{ $wageType === 'daily'  ? 'selected' : '' }}>日給</option>
+                        @endif
                     </select>
                     <select name="wage_min"
                             class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none bg-white">
@@ -436,14 +468,14 @@
         {{ number_format($results->total()) }}件
         @if($hasWageFilter)
             <span class="ml-2 text-xs bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full px-2 py-0.5">
-                {{ ['hourly'=>'時給','daily'=>'日給'][$wageType] }}{{ number_format($wageMin) }}円以上で絞り込み中
+                {{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$wageType] ?? '' }}{{ number_format($wageMin) }}円以上で絞り込み中
             </span>
         @endif
     </p>
 
     {{-- LP導入文（ディレクトリURLのみ表示） --}}
     @if($isLp && !$results->isEmpty())
-    <div class="bg-white border border-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-600 leading-relaxed space-y-2">
+    <div class="hidden md:block bg-white border border-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-600 leading-relaxed space-y-2">
         @if($gender === 'yoasobi')
             @if($displayArea && $displayJob)
                 <p>{{ $displayArea }}の{{ $displayJob }}を{{ number_format($results->total()) }}店舗掲載中。営業時間・料金・アクセスなど店舗情報をまとめてチェックできます。</p>
@@ -499,8 +531,8 @@
             $statsLabel = $statsPrefix ? "{$statsPrefix}の{$c['label']}の統計データ" : "{$c['label']}の統計データ";
         }
     @endphp
-    <p class="text-xs font-medium text-gray-400 mb-2">{{ $statsLabel }}</p>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <p class="hidden md:block text-xs font-medium text-gray-400 mb-2">{{ $statsLabel }}</p>
+    <div class="hidden md:grid md:grid-cols-4 gap-3 mb-6">
         @if($gender === 'yoasobi')
             @if($lpStats['all_you_can_drink'] > 0)
             <div class="bg-white border border-gray-100 rounded-xl px-4 py-3 text-center">
@@ -528,7 +560,7 @@
             @endif
         @else
             <div class="bg-white border border-gray-100 rounded-xl px-4 py-3 text-center">
-                <p class="text-lg font-bold {{ $c['text'] }}">{{ number_format($results->total()) }}件</p>
+                <p class="text-lg font-bold {{ $c['text'] }}">{{ number_format($lpStats['total_jobs'] ?? $results->total()) }}件</p>
                 <p class="text-xs text-gray-500 mt-1">掲載求人数</p>
             </div>
             {{-- 時給：female/male 共通、5件以上のみ表示 --}}
@@ -570,116 +602,157 @@
         </div>
     @else
         @php $lcpImgRendered = false; @endphp
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start">
             @foreach($results as $item)
                 @if($gender === 'yoasobi')
-                    {{-- 営業情報カード --}}
+                    {{-- 夜遊びスポットカード --}}
+                    @php
+                        $isPaid = $item->shop->budget_balance >= $item->shop->bid_price;
+                        $thumbImg = $item->shop->main_image ?: null;
+                        $isFirstImg = !$lcpImgRendered;
+                        if ($thumbImg && $isPaid) $lcpImgRendered = true;
+                        $locationParts = [];
+                        if ($item->shop->nearest_station_name) {
+                            $st = '🚉 ';
+                            if ($item->shop->nearest_line) $st .= $item->shop->nearest_line . ' ';
+                            $st .= $item->shop->nearest_station_name . '駅';
+                            if ($item->shop->nearest_station_walk) $st .= ' 徒歩' . $item->shop->nearest_station_walk . '分';
+                            $locationParts[] = $st;
+                        }
+                        if ($item->shop->area) $locationParts[] = '📍 ' . $item->shop->area->name;
+                    @endphp
                     <article class="result-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
-                        <a href="{{ url('/track/shop/' . $item->shop->id) . '/' }}"
-                           rel="nofollow"
-                           class="block h-full">
-                            @if($item->shop->main_image)
-                                @php $isFirstImg = !$lcpImgRendered; $lcpImgRendered = true; @endphp
-                                <picture>
-                                    <source srcset="{{ asset('storage/' . \App\Services\ImageService::webpPath($item->shop->main_image)) }}" type="image/webp">
-                                    <img src="{{ asset('storage/' . $item->shop->main_image) }}"
-                                         alt="{{ $item->shop->name }}"
-                                         width="640" height="360"
-                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
-                                         class="w-full aspect-video object-cover">
-                                </picture>
-                            @else
-                                <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
-                            @endif
-                            <div class="p-4">
-                                <h2 class="flex items-start justify-between gap-2 mb-2 font-bold text-gray-800 text-sm leading-tight">
-                                    {{ $item->shop->name ?? '店舗名未設定' }}
-                                    @if($item->shop->genre)
-                                        <span class="text-xs font-normal px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap shrink-0">{{ $item->shop->genre->name }}</span>
-                                    @endif
-                                </h2>
-                                @if($item->set_price || $item->opening_hours)
-                                @php
-                                    $priceStr = implode(' · ', array_filter([
-                                        $item->set_price    ? 'セット：' . $item->set_price : null,
-                                        $item->opening_hours ? $item->opening_hours . '〜' . $item->closing_hours : null,
-                                    ]));
-                                @endphp
-                                    <p class="text-xs text-gray-500 mb-1">{{ $priceStr }}</p>
+                        {{-- 店舗ヘッダー（フル幅・有料無料共通） --}}
+                        <a href="{{ url('/track/shop/' . $item->shop->id) . '/' }}" rel="nofollow" class="block px-4 py-3">
+                            <h2 class="flex items-start justify-between gap-2 font-bold text-gray-800 text-sm leading-tight">
+                                {{ $item->shop->name ?? '店舗名未設定' }}
+                                @if($item->shop->genre)
+                                    <span class="text-xs font-normal px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap shrink-0">{{ $item->shop->genre->name }}</span>
                                 @endif
-                                @if($item->shop->nearest_station_name || $item->shop->area)
-                                @php
-                                    $locationParts = [];
-                                    if ($item->shop->nearest_station_name) {
-                                        $st = '🚉 ';
-                                        if ($item->shop->nearest_line) $st .= $item->shop->nearest_line . ' ';
-                                        $st .= $item->shop->nearest_station_name . '駅';
-                                        if ($item->shop->nearest_station_walk) $st .= ' 徒歩' . $item->shop->nearest_station_walk . '分';
-                                        $locationParts[] = $st;
-                                    }
-                                    if ($item->shop->area) $locationParts[] = '📍 ' . $item->shop->area->name;
-                                @endphp
-                                    <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', $locationParts) }}</p>
+                            </h2>
+                            @if($locationParts)
+                                <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', $locationParts) }}</p>
+                            @endif
+                            @if($item->set_price || $item->opening_hours)
+                                <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', array_filter([
+                                    $item->set_price    ? 'セット ' . $item->set_price        : null,
+                                    $item->opening_hours ? $item->opening_hours . '〜' . $item->closing_hours : null,
+                                ])) }}</p>
+                            @endif
+                        </a>
+                        {{-- アメニティタグ＋サムネイル（有料のみ） --}}
+                        @if($item->short_description || $item->all_you_can_drink || $item->has_karaoke || $item->has_private_room || $item->discount_first_set || ($thumbImg && $isPaid))
+                        <div class="border-t border-gray-100 flex">
+                            <div class="flex-1 min-w-0 px-4 py-2.5 flex flex-col justify-center gap-1.5">
+                                @if($item->short_description)
+                                    <p class="text-xs text-gray-600">{{ $item->short_description }}</p>
                                 @endif
                                 @if($item->all_you_can_drink || $item->has_karaoke || $item->has_private_room || $item->discount_first_set)
-                                <div class="flex flex-wrap gap-1 mt-2">
-                                    @if($item->all_you_can_drink)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">飲み放題</span>@endif
-                                    @if($item->has_karaoke)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">カラオケ</span>@endif
-                                    @if($item->has_private_room)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">個室あり</span>@endif
-                                    @if($item->discount_first_set)<span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold">初回割引</span>@endif
+                                <div class="flex {{ $isPaid ? 'flex-wrap' : 'flex-nowrap overflow-x-auto' }} gap-1">
+                                    @if($item->all_you_can_drink)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">飲み放題</span>@endif
+                                    @if($item->has_karaoke)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">カラオケ</span>@endif
+                                    @if($item->has_private_room)<span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap">個室あり</span>@endif
+                                    @if($item->discount_first_set)<span class="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-full font-bold whitespace-nowrap">初回割引</span>@endif
                                 </div>
                                 @endif
                             </div>
-                        </a>
+                            @if($thumbImg && $isPaid)
+                            <div class="shrink-0 border-l border-gray-100 self-stretch flex items-center p-2">
+                                <picture>
+                                    <source srcset="{{ asset('storage/' . \App\Services\ImageService::thumbWebpPath($thumbImg)) }}" type="image/webp">
+                                    <img src="{{ asset('storage/' . \App\Services\ImageService::thumbJpgPath($thumbImg)) }}"
+                                         alt="{{ $item->shop->name }}"
+                                         width="112" height="63"
+                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
+                                         class="w-28 aspect-video rounded object-cover">
+                                </picture>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
                     </article>
                 @else
-                    {{-- 求人カード --}}
+                    {{-- 店舗グループカード（横並びコンパクト・有料のみサムネイル） --}}
                     @php
-                        $cardImg     = $item->image_path ?? $item->shop?->main_image;
-                        $cardImgWebp = $cardImg ? \App\Services\ImageService::webpPath($cardImg) : null;
+                        $isPaid   = ($item->budget_balance >= $item->bid_price) || $item->xml_source === 'upstage';
+                        $jobLimit = $isPaid ? ($gender === 'male' ? 5 : 3) : 1;
+                        $thumbImg = ($item->jobs->first()?->image_path) ?: ($item->main_image ?: null);
+                        $isFirstImg = !$lcpImgRendered;
+                        if ($thumbImg && $isPaid) $lcpImgRendered = true;
+                        $locParts = [];
+                        if ($item->nearest_station_name) {
+                            $st = '🚉 ';
+                            if ($item->nearest_line) $st .= $item->nearest_line . ' ';
+                            $st .= $item->nearest_station_name . '駅';
+                            if ($item->nearest_station_walk) $st .= ' 徒歩' . $item->nearest_station_walk . '分';
+                            $locParts[] = $st;
+                        }
+                        if ($item->area) $locParts[] = '📍 ' . $item->area->name;
+                        elseif ($item->prefecture) $locParts[] = '📍 ' . $item->prefecture->name;
+                        $flagSlugs   = ['mikeiken', 'hibarai'];
+                        $hasNewbie   = $item->jobs->contains(fn($j) => $j->jobType?->slug === 'mikeiken');
+                        $hasDailyPay = $item->jobs->contains(fn($j) => $j->jobType?->slug === 'hibarai');
+                        $displayJobs = $item->jobs->filter(fn($j) => !in_array($j->jobType?->slug, $flagSlugs))->take($isPaid ? 3 : 1);
                     @endphp
                     <article class="result-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
-                        <a href="{{ $item->is_hotlink && $item->hotlink_url ? url('/click/' . $item->id) . '/' : url('/track/job/' . $item->id) . '/' }}"
-                           rel="nofollow"
-                           class="block h-full">
-                            @if($cardImg)
-                                @php $isFirstImg = !$lcpImgRendered; $lcpImgRendered = true; @endphp
-                                <picture>
-                                    <source srcset="{{ asset('storage/' . $cardImgWebp) }}" type="image/webp">
-                                    <img src="{{ asset('storage/' . $cardImg) }}"
-                                         alt="{{ $item->title }}"
-                                         width="640" height="360"
-                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
-                                         class="w-full aspect-video object-cover">
-                                </picture>
-                            @else
-                                <div class="aspect-video {{ $c['bg'] }} opacity-30"></div>
+                        {{-- 店舗ヘッダー（全カード共通・フル幅） → 店舗詳細ページ --}}
+                        <a href="{{ url('/track/shop/' . $item->id) . '/' }}" rel="nofollow" class="block px-4 py-3">
+                            <h2 class="flex items-start justify-between gap-2 font-bold text-gray-800 text-sm leading-tight">
+                                {{ $item->name }}
+                                @if($item->genre)
+                                    <span class="text-xs font-normal px-2 py-0.5 {{ $c['tag'] }} border rounded-full whitespace-nowrap shrink-0">{{ $item->genre->name }}</span>
+                                @endif
+                            </h2>
+                            @if($locParts)
+                                <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', $locParts) }}</p>
                             @endif
-                            <div class="p-4">
-                                <h2 class="flex items-start justify-between gap-2 mb-2 font-bold text-gray-800 text-sm leading-tight">
-                                    {{ $item->title }}
-                                    @if($item->is_hotlink)
-                                        <span class="text-xs font-normal px-2 py-0.5 bg-orange-100 border border-orange-300 text-orange-700 rounded-full whitespace-nowrap shrink-0">PR</span>
-                                    @endif
-                                </h2>
-                                <p class="text-xs text-gray-600 mb-1">{{ $item->shop->name ?? '' }}</p>
-                                @if($item->hourly_wage_min)
-                                    <p class="text-sm font-bold {{ $c['text'] }}">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$item->wage_type ?? 'hourly'] }} {{ number_format($item->hourly_wage_min) }}円〜@if($item->hourly_wage_max){{ number_format($item->hourly_wage_max) }}円@endif</p>
-                                @endif
-                                @if($item->jobType)
-                                    <span class="inline-block mt-1 text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full">{{ $item->jobType->name }}</span>
-                                @endif
-                                @if($item->working_hours || $item->area)
-                                @php
-                                    $workStr = implode(' · ', array_filter([
-                                        $item->working_hours ? '⏱ ' . $item->working_hours : null,
-                                        $item->area          ? '📍 ' . $item->area->name   : null,
-                                    ]));
-                                @endphp
-                                    <p class="text-xs text-gray-500 mt-1">{{ $workStr }}</p>
-                                @endif
+                            @if($hasNewbie || $hasDailyPay)
+                            <div class="flex gap-1 mt-1.5">
+                                @if($hasNewbie)<span class="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full whitespace-nowrap">未経験歓迎</span>@endif
+                                @if($hasDailyPay)<span class="text-xs px-2 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-full whitespace-nowrap">日払いOK</span>@endif
                             </div>
+                            @endif
                         </a>
+                        {{-- 求人行リスト（左）＋サムネイル（右） --}}
+                        <div class="border-t border-gray-100 flex">
+                            <ul class="flex-1 min-w-0 divide-y divide-gray-50 list-none">
+                                @foreach($displayJobs as $job)
+                                <li>
+                                <a href="{{ $job->is_hotlink && $job->hotlink_url ? url('/click/' . $job->id) . '/' : url('/track/job/' . $job->id) . '/' }}"
+                                   rel="nofollow"
+                                   class="job-row-link flex items-center px-4 py-2.5 hover:bg-gray-50 transition">
+                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full shrink-0">{{ $job->jobType?->name ?? '求人' }}</span>
+                                    @if($job->wage_type === 'commission')
+                                    <span class="text-sm font-bold {{ $c['text'] }} ml-2">完全歩合制</span>
+                                    @elseif($job->hourly_wage_min)
+                                    <span class="text-sm font-bold {{ $c['text'] }} ml-2">
+                                        {{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$job->wage_type ?? 'hourly'] }}
+                                        {{ number_format($job->hourly_wage_min) }}円〜
+                                    </span>
+                                    @endif
+                                </a>
+                                </li>
+                                @endforeach
+                                {{-- 有料店舗：3行未満の場合は空行で高さを揃える --}}
+                                @if($isPaid)
+                                    @for($pi = $displayJobs->count(); $pi < 3; $pi++)
+                                    <li class="px-4 py-2.5" aria-hidden="true"></li>
+                                    @endfor
+                                @endif
+                            </ul>
+                            @if($thumbImg && $isPaid)
+                            <div class="shrink-0 border-l border-gray-100 self-stretch flex items-center p-2">
+                                <picture>
+                                    <source srcset="{{ asset('storage/' . \App\Services\ImageService::thumbWebpPath($thumbImg)) }}" type="image/webp">
+                                    <img src="{{ asset('storage/' . \App\Services\ImageService::thumbJpgPath($thumbImg)) }}"
+                                         alt="{{ $item->name }}"
+                                         width="112" height="63"
+                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
+                                         class="w-28 aspect-video rounded object-cover">
+                                </picture>
+                            </div>
+                            @endif
+                        </div>
                     </article>
                 @endif
             @endforeach

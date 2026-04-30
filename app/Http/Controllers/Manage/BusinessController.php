@@ -31,7 +31,7 @@ class BusinessController extends BaseController
 
         $request->validate([
             'content'                            => ['nullable', 'string', 'max:2000'],
-            'short_description'                  => ['nullable', 'string', 'max:30'],
+            'short_description'                  => ['nullable', 'string', 'max:40'],
             'nomination_fee'                     => ['nullable', 'string', 'max:100'],
             'all_you_can_drink'                  => ['boolean'],
             'tax_included'                       => ['nullable', 'in:0,1'],
@@ -63,6 +63,9 @@ class BusinessController extends BaseController
             'external_urls'                      => ['nullable', 'array', 'max:6'],
             'external_urls.*.url_type'           => ['nullable', 'in:' . implode(',', array_keys(ShopExternalUrl::TYPES))],
             'external_urls.*.url'                => ['nullable', 'url', 'max:500'],
+            'faq'                                => ['nullable', 'array', 'max:3'],
+            'faq.*.q'                            => ['nullable', 'string', 'max:100'],
+            'faq.*.a'                            => ['nullable', 'string', 'max:300'],
         ]);
 
         $taxRaw      = $request->input('tax_included');
@@ -72,6 +75,7 @@ class BusinessController extends BaseController
             ['shop_id' => $shop->id],
             [
                 'content'           => $request->content,
+                'faq'               => collect($request->input('faq', []))->filter(fn($item) => !empty($item['q']) && !empty($item['a']))->values()->all() ?: null,
                 'short_description' => $request->input('short_description'),
                 'nomination_fee'    => $request->nomination_fee,
                 'all_you_can_drink' => $request->boolean('all_you_can_drink'),

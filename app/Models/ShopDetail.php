@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ShopDetail extends Model
 {
     protected $fillable = [
-        'shop_id', 'content', 'short_description', 'website_url', 'set_price', 'nomination_fee',
+        'shop_id', 'content', 'faq', 'short_description', 'website_url', 'set_price', 'nomination_fee',
         'all_you_can_drink', 'tax_included', 'service_charge', 'has_karaoke', 'has_private_room',
         'discount_first_set', 'discount_custom',
         'opening_hours', 'closing_hours', 'opening_days', 'holiday',
@@ -16,6 +16,7 @@ class ShopDetail extends Model
     ];
 
     protected $casts = [
+        'faq'                => 'array',
         'image_paths'        => 'array',
         'opening_days'       => 'array',
         'all_you_can_drink'  => 'boolean',

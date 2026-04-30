@@ -158,15 +158,15 @@
     {{-- 給与セクション：3行をまとめて1つのAlpineスコープで管理 --}}
     <tbody x-data="{
         wageType: '{{ $currentWageType }}',
-        labels:   { hourly: '時給', daily: '日給', monthly: '月給' },
-        pMin:     { hourly: '例：3000', daily: '例：30000', monthly: '例：250000' },
-        pMax:     { hourly: '例：8000', daily: '例：80000', monthly: '例：350000' },
+        labels:   { hourly: '時給', daily: '日給', monthly: '月給', commission: '完全歩合' },
+        pMin:     { hourly: '例：3000', daily: '例：30000', monthly: '例：250000', commission: '例：50000（目安）' },
+        pMax:     { hourly: '例：8000', daily: '例：80000', monthly: '例：350000', commission: '' },
     }">
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">給与形態</th>
         <td class="px-4 py-3">
             <input type="hidden" name="wage_type" :value="wageType">
-            @foreach(['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'] as $val=>$wageLabel)
+            @foreach(['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合制'] as $val=>$wageLabel)
                 <label class="inline-flex items-center gap-1.5 mr-4">
                     <input type="radio" value="{{ $val }}" @change="wageType = '{{ $val }}'"
                            {{ $currentWageType === $val ? 'checked' : '' }}>
@@ -175,16 +175,16 @@
             @endforeach
         </td>
     </tr>
-    <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap" x-text="labels[wageType] + '（下限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$currentWageType] }}（下限）</th>
+    <tr class="border-b border-gray-100" x-show="wageType !== 'commission'">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap" x-text="labels[wageType] + '（下限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$currentWageType] }}（下限）</th>
         <td class="px-4 py-3">
             <input type="number" name="hourly_wage_min" value="{{ old('hourly_wage_min', $job?->hourly_wage_min) }}"
                    min="0" :placeholder="pMin[wageType]"
                    class="w-36 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500"> 円
         </td>
     </tr>
-    <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap" x-text="labels[wageType] + '（上限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給'][$currentWageType] }}（上限）</th>
+    <tr class="border-b border-gray-100" x-show="wageType !== 'commission'">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap" x-text="labels[wageType] + '（上限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$currentWageType] }}（上限）</th>
         <td class="px-4 py-3">
             <input type="number" name="hourly_wage_max" value="{{ old('hourly_wage_max', $job?->hourly_wage_max) }}"
                    min="0" :placeholder="pMax[wageType]"
@@ -244,6 +244,43 @@
     </tr>
     </tbody>
 </table>
+{{-- よくある質問（求人面） --}}
+<div class="mx-4 mt-6 mb-2"
+     x-data="{
+         items: {{ Js::from(old('faq', $job->faq ?? [])) }},
+         add() { if (this.items.length < 3) this.items.push({ q: '', a: '' }); },
+         remove(i) { this.items.splice(i, 1); }
+     }">
+    <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-bold text-gray-700">よくある質問（求人）</h3>
+        <button type="button" @click="add()"
+                x-show="items.length < 3"
+                class="text-xs text-business-700 hover:underline">+ 追加</button>
+    </div>
+    <p class="text-xs text-gray-500 mb-3">この職種・雇用形態への応募で求職者からよく聞かれることとその答えをわかりやすく記載してください。他の求人と同じ内容にならないよう、この求人ならではの内容にしてください。</p>
+    <div class="space-y-3">
+        <template x-for="(item, i) in items" :key="i">
+            <div class="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-gray-500" x-text="`Q${i + 1}`"></span>
+                    <button type="button" @click="remove(i)" class="text-gray-400 hover:text-red-400 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <input type="text" :name="`faq[${i}][q]`" x-model="item.q"
+                       placeholder="質問（例：未経験でも応募できますか？）"
+                       maxlength="100"
+                       class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                <textarea :name="`faq[${i}][a]`" x-model="item.a"
+                          placeholder="回答（例：はい、未経験の方も大歓迎です。研修期間中は先輩スタッフが丁寧にサポートします。）"
+                          maxlength="300" rows="2"
+                          class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 resize-none"></textarea>
+            </div>
+        </template>
+        <p x-show="items.length === 0" class="text-xs text-gray-400">「追加」ボタンでよくある質問を登録できます（最大3件）</p>
+    </div>
+</div>
+
 <div class="mx-4 my-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800 leading-relaxed">
     <p class="font-bold mb-1">🔍 検索結果への反映について</p>
     <ul class="space-y-0.5 text-blue-700">

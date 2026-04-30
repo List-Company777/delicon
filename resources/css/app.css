@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 
+/* 求人行リンクの矢印アイコン — インラインSVGをDOMから排除してCSS化 */
+.job-row-link::after {
+    content: '';
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-left: auto;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23D1D5DB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -34,15 +47,15 @@
     --color-male-800: #0B132B;
     --color-male-900: #060B18;
 
-    /* 女性向け：ローズピンク  ベース:#FFD4D8 / メイン:#F6E8EA / アクセント:#E66A8C */
-    --color-female-50:  #F6E8EA;
-    --color-female-100: #FFD4D8;
-    --color-female-200: #F2B8C4;
-    --color-female-300: #EB9CB0;
-    --color-female-400: #E8849F;
-    --color-female-500: #E66A8C;
-    --color-female-600: #D44E75;
-    --color-female-700: #B83460;
-    --color-female-800: #8E1F49;
-    --color-female-900: #641233;
+    /* 女性向け：スモーキーローズ  彩度を落とし大人向けに */
+    --color-female-50:  #FDF2F4;
+    --color-female-100: #F9E0E5;
+    --color-female-200: #F0BFCA;
+    --color-female-300: #E49BAF;
+    --color-female-400: #D47893;
+    --color-female-500: #BF5878;
+    --color-female-600: #A3405F;
+    --color-female-700: #87304D;
+    --color-female-800: #66203A;
+    --color-female-900: #451226;
 }
