@@ -140,6 +140,32 @@
 <link rel="next" href="{{ $nextUrl }}">
 @endif
 @php
+    // LCP 画像の preload — ブラウザが HTML パース前に画像を発見できるようにする
+    $lcpPreloadUrl = null;
+    if (isset($results) && $results->count() > 0) {
+        foreach ($results->items() as $_ri) {
+            if ($gender === 'yoasobi') {
+                $_paid    = (int)($_ri->shop->budget_balance ?? 0) >= (int)($_ri->shop->bid_price ?? 1)
+                            && (int)($_ri->shop->bid_price ?? 0) > 0;
+                $_imgPath = $_ri->shop->main_image ?? null;
+            } else {
+                $_paid    = ((int)($_ri->budget_balance ?? 0) >= (int)($_ri->bid_price ?? 1) && (int)($_ri->bid_price ?? 0) > 0)
+                            || ($_ri->xml_source === 'upstage');
+                $_imgPath = ($_ri->jobs->first()?->image_path) ?: ($_ri->main_image ?? null);
+            }
+            if ($_paid && $_imgPath) {
+                // thumbWebpPath の exists() チェックを省略して直接パスを計算（全サムネイル生成済み）
+                $lcpPreloadUrl = asset('storage/' . str_replace('.jpg', '_thumb.webp', $_imgPath));
+                break;
+            }
+        }
+        unset($_ri, $_paid, $_imgPath);
+    }
+@endphp
+@if($lcpPreloadUrl)
+<link rel="preload" as="image" href="{{ $lcpPreloadUrl }}" fetchpriority="high" type="image/webp">
+@endif
+@php
     // BreadcrumbList
     $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/']];
     $pos = 2;
