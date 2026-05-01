@@ -298,7 +298,7 @@
         <h2 class="text-sm font-bold text-gray-600 mb-3">{{ $genderLabel }}の求人を見る</h2>
         <div class="space-y-2">
             @foreach($relatedJobs as $rJob)
-            <a href="{{ url('/track/job/' . $rJob->id) . '/' }}"
+            <a href="{{ route('job.show', $rJob->id) . '/' }}"
                rel="nofollow"
                class="flex items-center justify-between p-3 rounded-xl border {{ $jobBorderColor }} transition group">
                 <span class="min-w-0">

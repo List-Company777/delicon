@@ -358,6 +358,10 @@ class SearchController extends Controller
                 ->when($arubaito, fn($q) =>
                     $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
             )
+            ->when($hasKaraoke,      fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_karaoke', true)))
+            ->when($allYouCanDrink, fn($q) => $q->whereHas('detail', fn($s) => $s->where('all_you_can_drink', true)))
+            ->when($hasPrivateRoom,  fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_private_room', true)))
+            ->when($discountFirstSet, fn($q) => $q->whereHas('detail', fn($s) => $s->where('discount_first_set', true)))
             ->orderByRaw('CASE
                 WHEN budget_balance >= bid_price THEN bid_price
                 WHEN xml_source = "upstage" AND bid_price > 0 THEN bid_price

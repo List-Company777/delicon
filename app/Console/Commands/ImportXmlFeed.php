@@ -358,6 +358,9 @@ class ImportXmlFeed extends Command
             'スカウト・外販スタッフ' => 'gaihan',
             'メンズキャスト'      => 'mens-cast',
             'バーテンダー'       => 'bartender',
+            'ＷＥＢデザイナー'    => 'web-designer',
+            '事務・経理'         => 'office',
+            '清掃員'             => 'cleaning',
         ];
 
         return isset($map[$value]) ? $allJobTypes->get($map[$value]) : null;
@@ -378,6 +381,9 @@ class ImportXmlFeed extends Command
             'annai'       => ['案内'],
             'boy'         => ['ボーイ'],
             'hair-makeup' => ['ヘアメイク', 'ヘア'],
+            'web-designer' => ['WEB', 'Web', 'ウェブ', 'デザイナー'],
+            'office'      => ['経理', '事務'],
+            'cleaning'    => ['清掃'],
         ];
 
         foreach ($map as $slug => $keywords) {

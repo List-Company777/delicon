@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Area;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\Genre;
 use App\Models\Job;
 use Illuminate\Http\Request;
 
@@ -42,12 +43,37 @@ class ArticleController extends Controller
             default    => ['female', 'male', 'both'],
         };
 
-        $relatedJobs = Job::with(['shop.area', 'jobType'])
+        // タイトルからエリア・業種を抽出（長い名前優先で誤マッチ防止）
+        $areas  = Area::orderByRaw('LENGTH(name) DESC')->get(['id', 'name']);
+        $genres = Genre::orderByRaw('LENGTH(name) DESC')->get(['id', 'name']);
+
+        $matchedArea  = $areas->first(fn($a) => mb_strpos($article->title, $a->name) !== false);
+        $matchedGenre = $genres->first(fn($g) => mb_strpos($article->title, $g->name) !== false);
+
+        $baseQuery = fn() => Job::with(['shop.area', 'jobType'])
             ->where('status', 'active')
-            ->whereIn('search_group', $searchGroups)
+            ->whereIn('search_group', $searchGroups);
+
+        $relatedJobs = $baseQuery()
+            ->when($matchedArea,  fn($q) => $q->whereHas('shop', fn($s) => $s->where('area_id', $matchedArea->id)))
+            ->when($matchedGenre, fn($q) => $q->whereHas('shop', fn($s) => $s->where('genre_id', $matchedGenre->id)))
             ->inRandomOrder()
             ->limit(4)
             ->get();
+
+        // エリア＋業種で0件なら条件を緩めてリトライ
+        if ($relatedJobs->isEmpty() && $matchedArea && $matchedGenre) {
+            $relatedJobs = $baseQuery()
+                ->where(fn($q) => $q
+                    ->whereHas('shop', fn($s) => $s->where('area_id', $matchedArea->id))
+                    ->orWhereHas('shop', fn($s) => $s->where('genre_id', $matchedGenre->id)))
+                ->inRandomOrder()->limit(4)->get();
+        }
+
+        // それでも0件ならランダムフォールバック
+        if ($relatedJobs->isEmpty()) {
+            $relatedJobs = $baseQuery()->inRandomOrder()->limit(4)->get();
+        }
 
         $lpLinks = $this->buildLpLinks($article->gender);
 

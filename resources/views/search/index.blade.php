@@ -469,6 +469,15 @@
                     $currentQs['arubaito'] = 1;
                     $arubaitoUrl = url()->current() . '?' . http_build_query($currentQs);
                 }
+                $isKaraokeActive = $hasKaraoke ?? false;
+                $karaokeQs = request()->query();
+                if ($isKaraokeActive) {
+                    unset($karaokeQs['has_karaoke']);
+                    $karaokeUrl = url()->current() . ($karaokeQs ? '?' . http_build_query($karaokeQs) : '');
+                } else {
+                    $karaokeQs['has_karaoke'] = 1;
+                    $karaokeUrl = url()->current() . '?' . http_build_query($karaokeQs);
+                }
             @endphp
             <div class="flex flex-nowrap overflow-x-auto gap-2 mt-3 pb-1 md:flex-wrap md:overflow-x-visible">
                 @foreach($quickTags as $tag)
@@ -498,6 +507,16 @@
                         @if($isActive)✓ @endif{{ $tag['label'] }}
                     </a>
                 @endforeach
+                {{-- カラオケあり：女性のみ --}}
+                @if($gender === 'female')
+                <a href="{{ $karaokeUrl }}"
+                   class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
+                          {{ $isKaraokeActive
+                              ? $c['btn'] . ' text-white border-transparent'
+                              : 'bg-white ' . $c['text'] . ' border-gray-300 hover:border-current' }}">
+                    @if($isKaraokeActive)✓ @endifカラオケあり
+                </a>
+                @endif
                 {{-- アルバイト（時給 × PART_TIME）タグ：男性のみ --}}
                 @if($gender === 'male')
                 <a href="{{ $arubaitoUrl }}"
@@ -814,7 +833,10 @@
                                 <a href="{{ $job->is_hotlink && $job->hotlink_url ? url('/click/' . $job->id) . '/' : url('/track/job/' . $job->id) . '/' }}"
                                    rel="nofollow"
                                    class="job-row-link flex items-center px-4 py-2.5 hover:bg-gray-50 transition">
-                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full shrink-0">{{ $job->jobType?->name ?? '求人' }}</span>
+                                    <span class="text-xs px-2 py-0.5 {{ $c['tag'] }} border rounded-full shrink-0">
+                                        <span class="sm:hidden">{{ $job->jobType?->short_name ?? $job->jobType?->name ?? '求人' }}</span>
+                                        <span class="hidden sm:inline">{{ $job->jobType?->name ?? '求人' }}</span>
+                                    </span>
                                     @if($job->wage_type === 'commission')
                                     <span class="text-sm font-bold {{ $c['text'] }} ml-2">完全歩合制</span>
                                     @elseif($job->hourly_wage_min)
