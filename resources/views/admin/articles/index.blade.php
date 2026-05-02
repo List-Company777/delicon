@@ -360,7 +360,7 @@
                     <select name="gender" class="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-yellow-400">
                         <option value="female">女性</option>
                         <option value="male">男性</option>
-                        <option value="business">夜遊び</option>
+                        <option value="yoasobi">夜遊び</option>
                         <option value="shop">店舗</option>
                     </select>
                     <button type="submit"

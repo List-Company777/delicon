@@ -9,6 +9,7 @@ use App\Models\Shop;
 use App\Models\ShopAccessLog;
 use App\Models\XmlFeed;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 
@@ -19,12 +20,8 @@ class TrackController extends Controller
     {
         $job = Job::with('shop.partner')->where('status', 'active')->findOrFail($id);
 
-        // 同一IPが1時間以内に同じ求人をクリック済みなら課金しない
-        $isDuplicate = JobAccessLog::where('job_id', $id)
-            ->where('type', 'view')
-            ->where('ip', $request->ip())
-            ->where('created_at', '>=', now()->subHour())
-            ->exists();
+        // 同一IPが1時間以内に同じ求人をクリック済みなら課金しない（Redis TTLキーで判定）
+        $isDuplicate = ! Cache::add("track:job:{$id}:{$request->ip()}", 1, 3600);
 
         if (! $isDuplicate) {
             JobAccessLog::create([
@@ -59,11 +56,8 @@ class TrackController extends Controller
             return $this->hotlinkShopRedirect($request, $shop);
         }
 
-        // 同一IPが1時間以内に同じ店舗をクリック済みなら課金しない
-        $isDuplicate = ShopAccessLog::where('shop_id', $id)
-            ->where('ip', $request->ip())
-            ->where('created_at', '>=', now()->subHour())
-            ->exists();
+        // 同一IPが1時間以内に同じ店舗をクリック済みなら課金しない（Redis TTLキーで判定）
+        $isDuplicate = ! Cache::add("track:shop:{$id}:{$request->ip()}", 1, 3600);
 
         if (! $isDuplicate) {
             ShopAccessLog::create([
@@ -84,10 +78,7 @@ class TrackController extends Controller
 
     private function hotlinkShopRedirect(Request $request, Shop $shop): RedirectResponse
     {
-        $isDuplicate = ShopAccessLog::where('shop_id', $shop->id)
-            ->where('ip', $request->ip())
-            ->where('created_at', '>=', now()->subHour())
-            ->exists();
+        $isDuplicate = ! Cache::add("track:shop:{$shop->id}:{$request->ip()}", 1, 3600);
 
         ShopAccessLog::create([
             'shop_id'    => $shop->id,

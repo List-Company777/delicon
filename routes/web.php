@@ -49,16 +49,33 @@ Route::middleware('auth')->group(function () {
         return view('auth.verify-email');
     })->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}/', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
-        $request->fulfill();
-        return redirect()->route('manage.dashboard');
-    })->middleware('signed')->name('verification.verify');
-
     Route::post('/email/verification-notification/', function (\Illuminate\Http\Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return back()->with('resent', true);
     })->middleware('throttle:6,1')->name('verification.send');
 });
+
+// 認証リンクは未ログイン状態のデバイスからもクリックできるよう auth 不要
+Route::get('/email/verify/{id}/{hash}/', function (\Illuminate\Http\Request $request, $id, $hash) {
+    $user = \App\Models\User::findOrFail($id);
+
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        abort(403);
+    }
+
+    $alreadyVerified = $user->hasVerifiedEmail();
+
+    if (!$alreadyVerified) {
+        $user->markEmailAsVerified();
+    }
+
+    if (!auth()->check()) {
+        \Illuminate\Support\Facades\Auth::login($user);
+    }
+
+    return redirect()->route('manage.dashboard')
+        ->with('verified', !$alreadyVerified);
+})->middleware('signed')->name('verification.verify');
 
 // 夜ビズ LP
 Route::view('/yorubiz/', 'lp.yorubiz')->name('lp.yorubiz');

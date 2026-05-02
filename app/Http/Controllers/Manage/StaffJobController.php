@@ -147,7 +147,7 @@ class StaffJobController extends BaseController
             'faq.*.q'         => ['nullable', 'string', 'max:100'],
             'faq.*.a'         => ['nullable', 'string', 'max:300'],
             'wage_type'       => ['nullable', 'in:hourly,daily,monthly,commission'],
-            'hourly_wage_min' => ['nullable', 'integer', 'min:0'],
+            'hourly_wage_min' => [\Illuminate\Validation\Rule::requiredIf(fn() => $request->input('wage_type') !== 'commission'), 'nullable', 'integer', 'min:0'],
             'hourly_wage_max' => ['nullable', 'integer', 'min:0', 'gte:hourly_wage_min'],
             'working_hours'   => ['nullable', 'string', 'max:100'],
             'job_benefits'    => ['nullable', 'string', 'max:2000'],

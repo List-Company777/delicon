@@ -22,7 +22,7 @@
 
         {{-- 基本情報テーブル --}}
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm manage-table">
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-36 whitespace-nowrap">公開設定</th>
                 <td class="px-4 py-3">
@@ -50,7 +50,7 @@
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">店舗紹介文</th>
                 <td class="px-4 py-3">
-                    <textarea name="content" rows="5"
+                    <textarea name="content" rows="10"
                               class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('content', $detail->content) }}</textarea>
                     <p class="text-xs text-gray-400 mt-1">最大2000文字</p>
                 </td>
@@ -336,9 +336,9 @@
                 <template x-for="(row, i) in rows" :key="i">
                     <div class="flex items-center gap-2">
                         <input type="text" :name="`other_charges[${i}][label]`" x-model="row.label"
-                               placeholder="例: ボトルキープ" class="w-40 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                               placeholder="例: ボトルキープ" class="w-28 sm:w-40 shrink-0 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
                         <input type="text" :name="`other_charges[${i}][price]`" x-model="row.price"
-                               placeholder="10,000円〜" class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                               placeholder="10,000円〜" class="flex-1 min-w-0 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
                         <button type="button" @click="remove(i)"
                                 class="text-gray-400 hover:text-red-400 transition shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -359,52 +359,52 @@
                  ) }},
                  types: {{ Js::from($urlTypes) }},
                  add() {
-                     if (this.rows.length < 6) this.rows.push({ url_type: 'website', url: '' });
+                     if (this.rows.length < 3) this.rows.push({ url_type: 'website', url: '' });
                  },
                  remove(i) { this.rows.splice(i, 1); }
              }">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-sm font-bold text-gray-700">外部リンク</h3>
                 <button type="button" @click="add()"
-                        x-show="rows.length < 6"
+                        x-show="rows.length < 3"
                         class="text-xs text-business-700 hover:underline">+ 追加</button>
             </div>
             <div class="space-y-2">
                 <template x-for="(row, i) in rows" :key="i">
                     <div class="flex items-center gap-2">
                         <select :name="`external_urls[${i}][url_type]`" x-model="row.url_type"
-                                class="w-40 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500 shrink-0">
+                                class="w-24 sm:w-40 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500 shrink-0">
                             <template x-for="(label, val) in types" :key="val">
                                 <option :value="val" :selected="row.url_type === val" x-text="label"></option>
                             </template>
                         </select>
                         <input type="url" :name="`external_urls[${i}][url]`" x-model="row.url"
                                placeholder="https://example.com"
-                               class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                               class="flex-1 min-w-0 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
                         <button type="button" @click="remove(i)"
                                 class="text-gray-400 hover:text-red-400 transition shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                 </template>
-                <p x-show="rows.length === 0" class="text-xs text-gray-400">「追加」ボタンでSNSや公式サイトのURLを登録できます（最大6件）</p>
+                <p x-show="rows.length === 0" class="text-xs text-gray-400">「追加」ボタンでSNSや公式サイトのURLを登録できます（最大3件）</p>
             </div>
         </div>
 
         {{-- よくある質問（営業面） --}}
-        <div class="mt-6 mb-4"
+        <div class="bg-white rounded-xl shadow-sm p-5 mt-4"
              x-data="{
                  items: {{ Js::from(old('faq', $detail->faq ?? [])) }},
                  add() { if (this.items.length < 3) this.items.push({ q: '', a: '' }); },
                  remove(i) { this.items.splice(i, 1); }
              }">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between mb-1">
                 <h3 class="text-sm font-bold text-gray-700">よくある質問（営業）</h3>
                 <button type="button" @click="add()"
                         x-show="items.length < 3"
                         class="text-xs text-business-700 hover:underline">+ 追加</button>
             </div>
-            <p class="text-xs text-gray-500 mb-3">電話でのお客様からのお問い合わせでよく聞かれることとその答えをわかりやすく記載してください。</p>
+            <p class="text-xs text-gray-400 mb-3">最大3件まで登録できます。電話でのお客様からのお問い合わせでよく聞かれることとその答えをわかりやすく記載してください。</p>
             <div class="space-y-3">
                 <template x-for="(item, i) in items" :key="i">
                     <div class="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">

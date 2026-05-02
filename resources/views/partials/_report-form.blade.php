@@ -15,7 +15,7 @@
         <h2 class="text-lg font-bold text-gray-800 mb-2">通報を受け付けました</h2>
         <p class="text-sm text-gray-500 mb-6">ご協力ありがとうございます。</p>
         <button @click="show = false"
-                class="bg-business-700 hover:bg-business-600 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition w-full">
+                class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition w-full">
             閉じる
         </button>
     </div>
@@ -48,7 +48,7 @@
                 @foreach(['closed' => '閉店している', 'false_info' => '虚偽・誇大情報', 'inappropriate' => '不適切なコンテンツ', 'other' => 'その他'] as $val => $label)
                 <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input type="radio" name="reason" value="{{ $val }}" required
-                           class="text-business-700 focus:ring-business-600">
+                           class="text-gray-700 focus:ring-gray-500">
                     {{ $label }}
                 </label>
                 @endforeach
@@ -57,14 +57,14 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">詳細コメント（任意・300文字以内）</label>
                 <textarea name="comment" rows="3" maxlength="300"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-business-500"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
                           placeholder="具体的な内容があればご記入ください"></textarea>
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">メールアドレス（任意）</label>
                 <input type="email" name="reporter_email" maxlength="200"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-business-500"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
                        placeholder="your@email.com">
             </div>
 

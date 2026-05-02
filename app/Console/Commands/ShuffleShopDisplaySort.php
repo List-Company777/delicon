@@ -46,6 +46,9 @@ class ShuffleShopDisplaySort extends Command
         // 検索 ID キャッシュを全クリアして新しい並び順を即時反映
         \Illuminate\Support\Facades\Cache::flush();
 
+        // flush 後にトップページ datalist を事前ウォーム（次のリクエストをキャッシュHitさせる）
+        $this->call('cache:warm-datalist');
+
         $this->info('display_sort をシャッフルしました（' . count($updates) . '件）');
         return 0;
     }

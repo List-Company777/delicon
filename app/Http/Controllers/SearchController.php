@@ -21,7 +21,7 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        $gender   = $request->input('gender', 'female'); // business / male / female
+        $gender   = $request->input('gender', 'female'); // yoasobi / male / female
         $area     = $request->input('area') ?? '';
         $keyword  = $request->input('keyword') ?? '';
         $wageType = $request->input('wage_type') ?? '';
@@ -130,7 +130,7 @@ class SearchController extends Controller
         $wageMin     = 0;
         $isPrefPage  = true;
 
-        $lpStats          = $noindex ? null : $this->computeLpStats($gender, null, null, $pref_slug);
+        $lpStats          = $noindex ? null : $this->computeLpStats($gender, null, null, $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
         $lpRelated        = $this->computeRelatedLinks($gender, null, $pref_slug, 'all', $prefModel);
         $relatedArticles  = $this->computeRelatedArticles($gender);
 
@@ -146,10 +146,10 @@ class SearchController extends Controller
     // 正規化ディレクトリURL（LP）
     public function directory(Request $request, string $gender, string $area_slug, string $job_slug)
     {
-        $areaModel    = $area_slug !== 'all' ? Area::where('slug', $area_slug)->first() : null;
-        $prefOnlyModel = (!$areaModel && $area_slug !== 'all') ? Prefecture::where('slug', $area_slug)->first() : null;
-        $jobTypeModel = $job_slug  !== 'all' ? JobType::where('slug', $job_slug)->first()  : null;
-        $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Genre::where('slug', $job_slug)->first() : null;
+        $areaModel     = $area_slug !== 'all' ? Cache::remember("slug:area:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->first()) : null;
+        $prefOnlyModel = (!$areaModel && $area_slug !== 'all') ? Cache::remember("slug:pref:{$area_slug}", 86400, fn() => Prefecture::where('slug', $area_slug)->first()) : null;
+        $jobTypeModel  = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
+        $genreModel    = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
 
         $area    = ($areaModel && $area_slug !== 'all') ? $area_slug : '';
         $keyword = $job_slug  === 'all' ? '' : $job_slug;
@@ -176,7 +176,7 @@ class SearchController extends Controller
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel, $prefOnlyModel ? $area_slug : '');
+        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel, $prefOnlyModel ? $area_slug : '', arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
         $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug, $prefOnlyModel);
         $relatedArticles = $this->computeRelatedArticles($gender);
 
@@ -198,9 +198,9 @@ class SearchController extends Controller
             abort(404);
         }
 
-        $areaModel    = $area_slug !== 'all' ? Area::where('slug', $area_slug)->first() : null;
-        $jobTypeModel = $job_slug  !== 'all' ? JobType::where('slug', $job_slug)->first()  : null;
-        $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Genre::where('slug', $job_slug)->first() : null;
+        $areaModel    = $area_slug !== 'all' ? Cache::remember("slug:area:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->first()) : null;
+        $jobTypeModel = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
+        $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
 
         $area    = $area_slug === 'all' ? '' : $area_slug;
         $keyword = $job_slug  === 'all' ? '' : $job_slug;
@@ -230,7 +230,7 @@ class SearchController extends Controller
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel);
+        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel, filterKeyword: $filterKeyword, shopBoolFilter: $shopBoolFilter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
         $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug);
         $relatedArticles = $this->computeRelatedArticles($gender);
 
@@ -310,11 +310,7 @@ class SearchController extends Controller
                 ->when($hasPrivateRoom,  fn($q) => $q->where('has_private_room', true))
                 ->when($discountFirstSet, fn($q) => $q->where('discount_first_set', true))
                 ->orderByDesc(fn($q) =>
-                    $q->selectRaw('CASE
-                        WHEN budget_balance >= bid_price THEN bid_price
-                        WHEN main_image IS NOT NULL THEN 15
-                        ELSE 5
-                    END')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
+                    $q->select('rank_score')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
                 )
                 ->orderBy(fn($q) =>
                     $q->select('display_sort')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
@@ -362,12 +358,7 @@ class SearchController extends Controller
             ->when($allYouCanDrink, fn($q) => $q->whereHas('detail', fn($s) => $s->where('all_you_can_drink', true)))
             ->when($hasPrivateRoom,  fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_private_room', true)))
             ->when($discountFirstSet, fn($q) => $q->whereHas('detail', fn($s) => $s->where('discount_first_set', true)))
-            ->orderByRaw('CASE
-                WHEN budget_balance >= bid_price THEN bid_price
-                WHEN xml_source = "upstage" AND bid_price > 0 THEN bid_price
-                WHEN main_image IS NOT NULL THEN 15
-                ELSE 5
-            END DESC, display_sort ASC')
+            ->orderByRaw('rank_score DESC, display_sort ASC')
             ->pluck('shops.id')->all();
         }
 
@@ -434,27 +425,61 @@ class SearchController extends Controller
     }
 
     /** LP統計バー用の集計（noindexページでは呼ばない） */
-    private function computeLpStats(string $gender, ?Area $areaModel, mixed $typeModel, string $prefSlug = ''): array
-    {
+    private function computeLpStats(
+        string $gender,
+        ?Area  $areaModel,
+        mixed  $typeModel,
+        string $prefSlug       = '',
+        string $filterKeyword  = '',
+        string $shopBoolFilter = '',
+        bool   $arubaito          = false,
+        bool   $allYouCanDrink    = false,
+        bool   $hasKaraoke        = false,
+        bool   $hasPrivateRoom    = false,
+        bool   $discountFirstSet  = false,
+    ): array {
         $cacheKey = 'lp_stats:' . md5(implode('|', [
             $gender,
             $areaModel?->id ?? '',
             $typeModel?->slug ?? '',
             $prefSlug,
+            $filterKeyword,
+            $shopBoolFilter,
+            $arubaito ? '1' : '',
+            $allYouCanDrink ? '1' : '',
+            $hasKaraoke ? '1' : '',
+            $hasPrivateRoom ? '1' : '',
+            $discountFirstSet ? '1' : '',
         ]));
 
-        return Cache::remember($cacheKey, 1800, function () use ($gender, $areaModel, $typeModel, $prefSlug) {
+        return Cache::remember($cacheKey, 1800, function () use (
+            $gender, $areaModel, $typeModel, $prefSlug,
+            $filterKeyword, $shopBoolFilter,
+            $arubaito, $allYouCanDrink, $hasKaraoke, $hasPrivateRoom, $discountFirstSet
+        ) {
         if ($gender === 'yoasobi') {
             $query = ShopDetail::where('status', 'active')
                 ->when($areaModel, fn($q) => $q->whereHas('shop', fn($s) => $s->where('area_id', $areaModel->id)))
-                ->when($prefSlug, fn($q) => $q->whereHas('shop.area.prefecture', fn($p) => $p->where('slug', $prefSlug)));
+                ->when($prefSlug,  fn($q) => $q->whereHas('shop.area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
+                ->when($shopBoolFilter,   fn($q) => $q->where($shopBoolFilter, true))
+                ->when($allYouCanDrink,   fn($q) => $q->where('all_you_can_drink', true))
+                ->when($hasKaraoke,       fn($q) => $q->where('has_karaoke', true))
+                ->when($hasPrivateRoom,   fn($q) => $q->where('has_private_room', true))
+                ->when($discountFirstSet, fn($q) => $q->where('discount_first_set', true));
 
-            return [
-                'all_you_can_drink' => (clone $query)->where('all_you_can_drink', true)->count(),
-                'has_karaoke'       => (clone $query)->where('has_karaoke', true)->count(),
-                'has_private_room'  => (clone $query)->where('has_private_room', true)->count(),
-                'discount_first_set'=> (clone $query)->where('discount_first_set', true)->count(),
+            $stats = [
+                'all_you_can_drink'  => (clone $query)->where('all_you_can_drink', true)->count(),
+                'has_karaoke'        => (clone $query)->where('has_karaoke', true)->count(),
+                'has_private_room'   => (clone $query)->where('has_private_room', true)->count(),
+                'discount_first_set' => (clone $query)->where('discount_first_set', true)->count(),
             ];
+
+            // フィルター適用時は絞り込み後の総店舗数も返す
+            if ($shopBoolFilter || $allYouCanDrink || $hasKaraoke || $hasPrivateRoom || $discountFirstSet) {
+                $stats['total_shops'] = $query->count();
+            }
+
+            return $stats;
         }
 
         $searchGroups = $gender === 'male' ? ['male', 'both'] : ['female', 'both'];
@@ -467,10 +492,17 @@ class SearchController extends Controller
                    ->orWhereHas('area', fn($a) => $a->where('parent_id', $areaModel->id))
                    ->orWhereHas('shop.area', fn($a) => $a->where('parent_id', $areaModel->id))
             ))
-            ->when($prefSlug, fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
-            ->when($typeModel, fn($q) => $q->whereHas('jobType', fn($j) =>
+            ->when($prefSlug,      fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
+            ->when($typeModel,     fn($q) => $q->whereHas('jobType', fn($j) =>
                 $j->where('slug', $typeModel->slug)->orWhere('group_slug', $typeModel->slug ?? '')
-            ));
+            ))
+            ->when($filterKeyword, fn($q) => $this->whereTitleMatch($q, $filterKeyword))
+            ->when($arubaito,      fn($q) => $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
+            ->when($shopBoolFilter,   fn($q) => $q->whereHas('shop.detail', fn($s) => $s->where($shopBoolFilter, true)))
+            ->when($allYouCanDrink,   fn($q) => $q->whereHas('shop.detail', fn($s) => $s->where('all_you_can_drink', true)))
+            ->when($hasKaraoke,       fn($q) => $q->whereHas('shop.detail', fn($s) => $s->where('has_karaoke', true)))
+            ->when($hasPrivateRoom,   fn($q) => $q->whereHas('shop.detail', fn($s) => $s->where('has_private_room', true)))
+            ->when($discountFirstSet, fn($q) => $q->whereHas('shop.detail', fn($s) => $s->where('discount_first_set', true)));
 
         $agg = (clone $query)
             ->selectRaw('
@@ -494,8 +526,8 @@ class SearchController extends Controller
 
         // 時給：female/male 共通、5件以上あれば表示
         if ($hourlyCount >= 5) {
-            $stats['avg_hourly']    = (int) $agg->avg_hourly;
-            $stats['hourly_count']  = $hourlyCount;
+            $stats['avg_hourly']   = (int) $agg->avg_hourly;
+            $stats['hourly_count'] = $hourlyCount;
         }
 
         // 月給：male のみ、5件以上あれば表示

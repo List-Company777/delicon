@@ -7,7 +7,7 @@
     ];
     $currentWageType = old('wage_type', $job?->wage_type ?? 'hourly');
 @endphp
-<table class="w-full text-sm">
+<table class="w-full text-sm manage-table">
     <tbody>
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-36 whitespace-nowrap">公開設定</th>
@@ -86,7 +86,7 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">求人詳細</th>
         <td class="px-4 py-3" x-data="{ n: {{ mb_strlen(old('description', $job?->description ?? ''), 'UTF-8') }} }">
-            <textarea name="description" rows="8" maxlength="3000" @input="n = $event.target.value.length"
+            <textarea name="description" rows="12" maxlength="3000" @input="n = $event.target.value.length"
                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('description', $job?->description) }}</textarea>
             <div class="flex justify-end mt-0.5">
                 <span class="text-xs" :class="n > 2700 ? 'text-red-500 font-medium' : n > 2000 ? 'text-amber-500' : 'text-gray-400'" x-text="n + ' / 3,000文字'"></span>
@@ -168,7 +168,7 @@
             <input type="hidden" name="wage_type" :value="wageType">
             @foreach(['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合制'] as $val=>$wageLabel)
                 <label class="inline-flex items-center gap-1.5 mr-4">
-                    <input type="radio" value="{{ $val }}" @change="wageType = '{{ $val }}'"
+                    <input type="radio" name="wage_type_radio" value="{{ $val }}" @change="wageType = '{{ $val }}'"
                            {{ $currentWageType === $val ? 'checked' : '' }}>
                     <span class="text-sm text-gray-700">{{ $wageLabel }}</span>
                 </label>
@@ -176,10 +176,13 @@
         </td>
     </tr>
     <tr class="border-b border-gray-100" x-show="wageType !== 'commission'">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap" x-text="labels[wageType] + '（下限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$currentWageType] }}（下限）</th>
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">
+            <span x-text="labels[wageType] + '（下限）'">{{ ['hourly'=>'時給','daily'=>'日給','monthly'=>'月給','commission'=>'完全歩合'][$currentWageType] }}（下限）</span>
+            <span class="text-red-500 ml-0.5" x-show="wageType !== 'commission'">*</span>
+        </th>
         <td class="px-4 py-3">
             <input type="number" name="hourly_wage_min" value="{{ old('hourly_wage_min', $job?->hourly_wage_min) }}"
-                   min="0" :placeholder="pMin[wageType]"
+                   min="0" :placeholder="pMin[wageType]" :required="wageType !== 'commission'"
                    class="w-36 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500"> 円
         </td>
     </tr>
@@ -217,7 +220,7 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">休日・休暇</th>
         <td class="px-4 py-3">
-            <textarea name="holiday" rows="3" maxlength="500"
+            <textarea name="holiday" rows="4" maxlength="500"
                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('holiday', $job?->holiday) }}</textarea>
             <p class="text-xs text-gray-400 mt-0.5">例：週1日以上・シフト制、希望休相談可　／　最大500文字</p>
         </td>
@@ -225,7 +228,7 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">待遇・福利厚生</th>
         <td class="px-4 py-3">
-            <textarea name="job_benefits" rows="5" maxlength="2000"
+            <textarea name="job_benefits" rows="8" maxlength="2000"
                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-business-500">{{ old('job_benefits', $job?->job_benefits) }}</textarea>
             <p class="text-xs text-gray-400 mt-0.5">例：日払いOK・交通費支給・体験入店あり・昇給随時・まかない有・寮完備・入店祝金など　／　最大2000文字</p>
         </td>
@@ -278,19 +281,19 @@
     </tbody>
 </table>
 {{-- よくある質問（求人面） --}}
-<div class="mx-4 mt-6 mb-2"
+<div class="bg-white rounded-xl shadow-sm p-5 mt-4 mx-4 mb-2"
      x-data="{
          items: {{ Js::from(old('faq', $job->faq ?? [])) }},
          add() { if (this.items.length < 3) this.items.push({ q: '', a: '' }); },
          remove(i) { this.items.splice(i, 1); }
      }">
-    <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center justify-between mb-1">
         <h3 class="text-sm font-bold text-gray-700">よくある質問（求人）</h3>
         <button type="button" @click="add()"
                 x-show="items.length < 3"
                 class="text-xs text-business-700 hover:underline">+ 追加</button>
     </div>
-    <p class="text-xs text-gray-500 mb-3">この職種・雇用形態への応募で求職者からよく聞かれることとその答えをわかりやすく記載してください。他の求人と同じ内容にならないよう、この求人ならではの内容にしてください。</p>
+    <p class="text-xs text-gray-400 mb-3">最大3件まで登録できます。職種や雇用形態によってよく聞かれる内容は異なります（例：幹部候補とアルバイトのホールスタッフでは質問内容も変わります）。この求人ならではの質問と答えを記載してください。</p>
     <div class="space-y-3">
         <template x-for="(item, i) in items" :key="i">
             <div class="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
@@ -318,7 +321,6 @@
     <p class="font-bold mb-1">🔍 検索結果への反映について</p>
     <ul class="space-y-0.5 text-blue-700">
         <li>・<span class="font-medium">求人タイトル・職種</span>：フリーワード検索の対象になります。具体的なキーワードを含めると見つかりやすくなります。</li>
-        <li>・<span class="font-medium">検索表示対象</span>：女性ナイトワーク／男性ナイトワークのどちらの検索結果に表示するかを決定します。</li>
         <li>・<span class="font-medium">給与・給与形態</span>：給与フィルターで絞り込まれる際の条件になります。</li>
     </ul>
 </div>

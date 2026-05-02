@@ -7,6 +7,7 @@ use App\Models\Job;
 use App\Models\JobAccessLog;
 use App\Models\XmlFeed;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 class JobController extends Controller
@@ -43,35 +44,40 @@ class JobController extends Controller
         // 無料店舗の求人詳細のみ表示・有料/XML店優先・同職種×同エリア（不足時は同都道府県で補完）
         $relatedJobs = collect();
         if (! $job->shop->hasBudget() && $job->job_type_id) {
-            $buildBase = fn() => Job::with(['shop', 'jobType'])
-                ->join('shops', 'shops.id', '=', 'jobs.shop_id')
-                ->where('jobs.id', '!=', $job->id)
-                ->where('jobs.shop_id', '!=', $job->shop_id)
-                ->where('jobs.status', 'active')
-                ->where('jobs.search_group', $job->search_group)
-                ->where('jobs.job_type_id', $job->job_type_id)
-                ->where(fn($q) => $q
-                    ->whereRaw('shops.budget_balance >= shops.bid_price')
-                    ->orWhereNotNull('shops.xml_source')
-                )
-                ->orderByRaw('(shops.budget_balance >= shops.bid_price) DESC')
-                ->orderByDesc('shops.bid_price');
+            $relatedJobs = Cache::remember("related_jobs:{$job->id}", 1800, function () use ($job) {
+                $buildBase = fn() => Job::with(['shop', 'jobType'])
+                    ->join('shops', 'shops.id', '=', 'jobs.shop_id')
+                    ->where('jobs.id', '!=', $job->id)
+                    ->where('jobs.shop_id', '!=', $job->shop_id)
+                    ->where('jobs.status', 'active')
+                    ->where('jobs.search_group', $job->search_group)
+                    ->where('jobs.job_type_id', $job->job_type_id)
+                    ->where(fn($q) => $q
+                        ->whereRaw('shops.budget_balance >= shops.bid_price')
+                        ->orWhereNotNull('shops.xml_source')
+                    )
+                    ->orderByRaw('(shops.budget_balance >= shops.bid_price) DESC')
+                    ->orderByDesc('shops.bid_price');
 
-            if ($job->area_id) {
-                $relatedJobs = $buildBase()
-                    ->where('jobs.area_id', $job->area_id)
-                    ->limit(4)
-                    ->get(['jobs.*']);
-            }
+                $result = collect();
+                if ($job->area_id) {
+                    $result = $buildBase()
+                        ->where('jobs.area_id', $job->area_id)
+                        ->limit(4)
+                        ->get(['jobs.*']);
+                }
 
-            if ($relatedJobs->count() < 4 && $job->prefecture_id) {
-                $additional = $buildBase()
-                    ->whereNotIn('jobs.id', $relatedJobs->pluck('id')->push($job->id))
-                    ->where('jobs.prefecture_id', $job->prefecture_id)
-                    ->limit(4 - $relatedJobs->count())
-                    ->get(['jobs.*']);
-                $relatedJobs = $relatedJobs->concat($additional);
-            }
+                if ($result->count() < 4 && $job->prefecture_id) {
+                    $additional = $buildBase()
+                        ->whereNotIn('jobs.id', $result->pluck('id')->push($job->id))
+                        ->where('jobs.prefecture_id', $job->prefecture_id)
+                        ->limit(4 - $result->count())
+                        ->get(['jobs.*']);
+                    $result = $result->concat($additional);
+                }
+
+                return $result;
+            });
         }
 
         return view('job.show', compact('job', 'gender', 'sameShopJobs', 'relatedJobs'));
@@ -89,11 +95,7 @@ class JobController extends Controller
 
     private function hotlinkRedirect(Request $request, Job $job)
     {
-        $isDuplicate = JobAccessLog::where('job_id', $job->id)
-            ->where('type', 'click')
-            ->where('ip', $request->ip())
-            ->where('created_at', '>=', now()->subHour())
-            ->exists();
+        $isDuplicate = ! Cache::add("track:job-click:{$job->id}:{$request->ip()}", 1, 3600);
 
         $this->recordAccess($request, $job, 'click');
         $job->increment('click_count');

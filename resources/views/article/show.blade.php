@@ -28,7 +28,8 @@
 @extends('layouts.app')
 
 @section('canonical', route('article.show', $article->slug) . '/')
-@section('title', $article->title . ' | ナイトワークリスト')
+@section('og_type', 'article')
+@section('title', $article->title)
 @section('description', $article->lead ?? mb_strimwidth(strip_tags($article->body ?? ''), 0, 120, '…'))
 @if($article->is_published && $article->published_at?->lte(now()))
 @section('robots', 'index, follow')
@@ -185,7 +186,7 @@
     <nav class="text-xs text-gray-400 mb-6" aria-label="パンくずリスト">
         <a href="{{ route('top') }}/" class="hover:text-gray-600">ナイトワーク</a>
         <span class="mx-1" aria-hidden="true">›</span>
-        <a href="{{ route('article.index') }}" class="hover:text-gray-600">コラム・ガイド</a>
+        <a href="{{ route('article.index') }}/" class="hover:text-gray-600">コラム・ガイド</a>
         <span class="mx-1" aria-hidden="true">›</span>
         <span class="text-gray-600" aria-current="page">{{ $article->title }}</span>
     </nav>
@@ -197,15 +198,15 @@
         {{-- カテゴリ・タグ・日付 --}}
         <div class="flex flex-wrap items-center gap-2 mb-3">
             @foreach($article->categories as $cat)
-            <a href="{{ route('article.index') }}?category={{ $cat->slug }}"
+            <a href="{{ route('article.index') }}/?category={{ $cat->slug }}"
                class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 transition">
                 {{ $cat->name }}
             </a>
             @endforeach
             <span class="text-xs text-gray-400 ml-auto">
-                {{ $article->published_at?->format('Y年n月j日') }}
+                <time datetime="{{ $article->published_at?->toDateString() }}">{{ $article->published_at?->format('Y年n月j日') }}</time>
                 @if($article->updated_at_manual && $article->updated_at_manual->gt($article->published_at))
-                <span class="ml-2">更新: {{ $article->updated_at_manual->format('Y年n月j日') }}</span>
+                <time class="ml-2" datetime="{{ $article->updated_at_manual->toDateString() }}">更新: {{ $article->updated_at_manual->format('Y年n月j日') }}</time>
                 @endif
             </span>
         </div>
@@ -222,8 +223,7 @@
             <img src="{{ asset('storage/' . $article->hero_image) }}"
                  alt="{{ $article->title }}"
                  class="w-full h-64 md:h-80 object-cover"
-                 fetchpriority="high"
-                 decoding="async">
+                 fetchpriority="high">
         </picture>
         @endif
 
@@ -310,7 +310,7 @@
             @endforeach
         </div>
         <p class="mt-4 text-center">
-            <a href="{{ route('search', ['gender' => in_array($article->gender, ['female','male','yoasobi']) ? $article->gender : 'female']) }}"
+            <a href="{{ route('search') }}/?gender={{ in_array($article->gender, ['female','male','yoasobi']) ? $article->gender : 'female' }}"
                class="text-sm text-gray-500 hover:text-gray-700 underline">
                 {{ $genderLabel }}の求人をもっと見る →
             </a>
@@ -335,7 +335,7 @@
 
     {{-- 記事一覧へ戻る --}}
     <p class="mt-10 text-center">
-        <a href="{{ route('article.index') }}" class="text-sm text-gray-400 hover:text-gray-600">
+        <a href="{{ route('article.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">
             ← コラム・ガイド一覧に戻る
         </a>
     </p>

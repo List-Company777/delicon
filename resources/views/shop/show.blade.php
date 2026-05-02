@@ -5,6 +5,7 @@
 @extends('layouts.app')
 
 @section('canonical', route('shop.show', $shop->id) . '/')
+@section('robots', 'index, follow')
 @section('title', $shop->name . ' | 夜遊び情報')
 @section('description',
     ($shop->genre ? $shop->genre->name . '・' : '') .
@@ -167,7 +168,7 @@
 
         {{-- メイン画像 --}}
         @if($shop->main_image)
-            <x-shop-image :src="$shop->main_image" :alt="$shop->name" class="w-full aspect-video object-cover" fetchpriority="high" loading="eager" />
+            <x-shop-image :src="$shop->main_image" :alt="$shop->name" class="w-full aspect-video object-cover" fetchpriority="high" />
         @else
             <div class="h-3 bg-business-700" aria-hidden="true"></div>
         @endif
@@ -392,12 +393,6 @@
                             <a href="tel:{{ $shop->tel }}" class="text-business-700 underline underline-offset-2 hover:no-underline">{{ $shop->tel }}</a>
                             <p class="text-xs text-gray-500 mt-1">※ナイトワークリストを見たとお伝えいただくとスムーズです</p>
                         </td>
-                    </tr>
-                    @endif
-                    @if($shop->line_id)
-                    <tr{{ $shop->externalUrls->isNotEmpty() ? ' class="border-b border-gray-100"' : '' }}>
-                        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">LINE ID</th>
-                        <td class="px-4 py-3 text-gray-700">{{ $shop->line_id }}</td>
                     </tr>
                     @endif
                     @if($shop->externalUrls->isNotEmpty())

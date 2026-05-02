@@ -39,8 +39,21 @@
             ->toArray();
     });
 
-    // キーワードdatalist: active求人5件以上の職種を検索回数順
+    // キーワードdatalist: yoasobi=業種名(genres)、female/male=職種名(job_types)
     $keywordDatalist = \Illuminate\Support\Facades\Cache::remember("datalist_keyword_v1_{$gender}", 1800, function() use ($gender) {
+        if ($gender === 'yoasobi') {
+            return \Illuminate\Support\Facades\DB::table('genres as g')
+                ->join('shops as s', 's.genre_id', '=', 'g.id')
+                ->join('shop_details as sd', 'sd.shop_id', '=', 's.id')
+                ->where('sd.status', 'active')
+                ->where('s.status', 'active')
+                ->selectRaw('g.name, COUNT(*) as cnt')
+                ->groupBy('g.id', 'g.name', 'g.sort_order')
+                ->havingRaw('cnt >= 2')
+                ->orderBy('g.sort_order')
+                ->pluck('name')
+                ->toArray();
+        }
         return \Illuminate\Support\Facades\DB::table('job_types as jt')
             ->leftJoinSub(
                 \Illuminate\Support\Facades\DB::table('jobs as j')
@@ -59,7 +72,7 @@
                     ->groupBy('job_slug'),
                 'sv', 'sv.job_slug', '=', 'jt.slug'
             )
-            ->when($gender !== 'yoasobi', fn($q) => $q->where('jt.target_gender', $gender))
+            ->where('jt.target_gender', $gender)
             ->selectRaw('jt.name, COALESCE(jc.cnt, 0) as job_count, COALESCE(sv.total, 0) as view_total, jt.sort_order')
             ->havingRaw('job_count >= 5')
             ->orderByDesc('view_total')
@@ -235,7 +248,10 @@
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => $prefModel->slug, 'job_slug' => 'all']) . '/'];
     }
     if ($displayArea) {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => isset($area_slug) ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => 'all']) . '/' : null];
+        $areaItemSlug = $area_slug ?? ($prefModel->slug ?? null);
+        if ($areaItemSlug) {
+            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => $areaItemSlug, 'job_slug' => 'all']) . '/'];
+        }
     }
     if ($displayJob) {
         $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayJob, 'item' => $canonicalUrl];
@@ -747,7 +763,7 @@
                             @endif
                             @if($item->set_price || $item->opening_hours)
                                 <p class="text-xs text-gray-500 mt-1">{{ implode(' · ', array_filter([
-                                    $item->set_price    ? 'セット ' . $item->set_price        : null,
+                                    $item->set_price    ? 'セット ' . preg_replace('/円$/', '', $item->set_price) . '円' : null,
                                     $item->opening_hours ? $item->opening_hours . '〜' . $item->closing_hours : null,
                                 ])) }}</p>
                             @endif
@@ -775,7 +791,7 @@
                                     <img src="{{ asset('storage/' . \App\Services\ImageService::thumbJpgPath($thumbImg)) }}"
                                          alt="{{ $item->shop->name }}"
                                          width="112" height="63"
-                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
+                                         @if($isFirstImg) fetchpriority="high" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
                                          class="w-28 aspect-video rounded object-cover">
                                 </picture>
                             </div>
@@ -807,8 +823,8 @@
                         $displayJobs = $item->jobs->filter(fn($j) => !in_array($j->jobType?->slug, $flagSlugs))->take($isPaid ? 3 : 1);
                     @endphp
                     <article class="result-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
-                        {{-- 店舗ヘッダー（全カード共通・フル幅） → 店舗詳細ページ --}}
-                        <a href="{{ url('/track/shop/' . $item->id) . '/' }}" rel="nofollow" class="block px-4 py-3">
+                        {{-- 店舗ヘッダー --}}
+                        <div class="block px-4 py-3">
                             <h2 class="flex items-start justify-between gap-2 font-bold text-gray-800 text-sm leading-tight">
                                 {{ $item->name }}
                                 @if($item->genre)
@@ -824,7 +840,7 @@
                                 @if($hasDailyPay)<span class="text-xs px-2 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-full whitespace-nowrap">日払いOK</span>@endif
                             </div>
                             @endif
-                        </a>
+                        </div>
                         {{-- 求人行リスト（左）＋サムネイル（右） --}}
                         <div class="border-t border-gray-100 flex">
                             <ul class="flex-1 min-w-0 divide-y divide-gray-50 list-none">
@@ -862,7 +878,7 @@
                                     <img src="{{ asset('storage/' . \App\Services\ImageService::thumbJpgPath($thumbImg)) }}"
                                          alt="{{ $item->name }}"
                                          width="112" height="63"
-                                         @if($isFirstImg) fetchpriority="high" decoding="async" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
+                                         @if($isFirstImg) fetchpriority="high" @elseif($loop->index < 3) decoding="async" @else loading="lazy" decoding="async" @endif
                                          class="w-28 aspect-video rounded object-cover">
                                 </picture>
                             </div>
@@ -874,9 +890,9 @@
         </div>
 
         {{-- ページネーション --}}
-        <nav class="mt-8" aria-label="ページネーション">
-            {{ $results->appends(request()->query())->links() }}
-        </nav>
+        <div class="mt-8">
+            {{ $results->withPath(rtrim(request()->url(), '/') . '/')->appends(request()->except('page'))->links('vendor.pagination.tailwind', ['currentPageClass' => $c['btn']]) }}
+        </div>
     @endif
 
     {{-- 関連コラム（LPのみ・1ページ目・記事あり） --}}
@@ -885,7 +901,7 @@
         <p class="text-xs font-bold text-gray-400 mb-3">関連コラム・ガイド</p>
         <div class="space-y-3">
             @foreach($relatedArticles as $ra)
-            <a href="{{ route('article.show', $ra->slug) }}"
+            <a href="{{ route('article.show', $ra->slug) }}/"
                class="flex items-start gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3 hover:shadow-sm transition">
                 @if($ra->hero_image)
                 <picture class="shrink-0">

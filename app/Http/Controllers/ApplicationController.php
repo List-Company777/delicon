@@ -141,11 +141,13 @@ class ApplicationController extends Controller
                 Log::error("NewApplicationToShop mail failed: job={$job->id} - {$e->getMessage()}");
             }
 
-            // LINE通知：求人単位XML ID → 管理画面登録Notify ID → オーナーLINEログインIDの優先順
+            // LINE通知：有料店またはXML連携店のみ送信
+            // 求人単位XML ID → 管理画面登録Notify ID → オーナーLINEログインIDの優先順
             $lineUserId = $job->line_user_id
                 ?? $job->shop->line_notify_user_id
                 ?? $owner->line_user_id;
-            if ($lineUserId && config('services.line.messaging_token')) {
+            $canNotify = $job->shop->hasBudget() || $job->shop->isXmlActive();
+            if ($canNotify && $lineUserId && config('services.line.messaging_token')) {
                 try {
                     Http::withToken(config('services.line.messaging_token'))
                         ->post('https://api.line.me/v2/bot/message/push', [

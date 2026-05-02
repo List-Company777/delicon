@@ -62,7 +62,7 @@ class BusinessController extends BaseController
             'other_charges'                      => ['nullable', 'array', 'max:5'],
             'other_charges.*.label'              => ['nullable', 'string', 'max:50'],
             'other_charges.*.price'              => ['nullable', 'string', 'max:50'],
-            'external_urls'                      => ['nullable', 'array', 'max:6'],
+            'external_urls'                      => ['nullable', 'array', 'max:3'],
             'external_urls.*.url_type'           => ['nullable', 'in:' . implode(',', array_keys(ShopExternalUrl::TYPES))],
             'external_urls.*.url'                => ['nullable', 'url', 'max:500'],
             'faq'                                => ['nullable', 'array', 'max:3'],

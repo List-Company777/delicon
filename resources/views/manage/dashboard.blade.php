@@ -50,6 +50,19 @@
         <p class="text-sm text-business-900 leading-relaxed">「<span class="font-bold">夜ビジ：ナイトワークリスト</span>」は、ナイトビジネス全体を盛り上げるための営業支援サイトです。基本無料で利用できますので系列店やお知り合いのお店にご紹介をお願いいたします。</p>
     </div>
 
+    {{-- メール認証完了メッセージ --}}
+    @if(session('verified'))
+    <div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+            <p class="text-sm font-bold text-green-800">登録が完了しました！</p>
+            <p class="text-xs text-green-700 mt-0.5">ようこそ、ナイトワークリストへ。まずは店舗情報を入力してください。</p>
+        </div>
+    </div>
+    @endif
+
     {{-- 未読返信通知 --}}
     @if($unreadThreads->isNotEmpty())
     <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-4 mb-6">
@@ -123,49 +136,47 @@
 
         {{-- 店舗名 + 全体ステータス --}}
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">掲載店舗</p>
-                    <h2 class="text-xl font-bold text-gray-800">{{ $shop->name }}</h2>
-                    @if($shop->genre)
-                        <p class="text-sm text-gray-500 mt-0.5">{{ $shop->genre->name }}</p>
-                    @endif
-                </div>
-                @if($shop->status === 'active')
-                    <span class="text-xs px-3 py-1 rounded-full font-medium bg-green-100 text-green-700">掲載中</span>
-                @elseif($shop->status === 'pending')
-                    <span class="text-xs px-3 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700">申請中（審査待ち）</span>
-                @else
-                    @php $applyReady = $shop->address_locality && $shop->address; @endphp
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500">非公開</span>
-                        @if($applyReady)
-                        <form action="{{ route('manage.apply') }}/" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="text-xs px-4 py-1.5 bg-business-700 hover:bg-business-600 text-white rounded-full font-medium transition"
-                                    onclick="return confirm('掲載申請を送信しますか？')">
-                                掲載申請する
-                            </button>
-                        </form>
-                        @else
-                        <a href="{{ route('manage.shop.edit') }}"
-                           class="text-xs px-4 py-1.5 bg-gray-300 text-gray-500 rounded-full font-medium cursor-not-allowed"
-                           title="住所情報を入力してから申請できます">
-                            掲載申請する
-                        </a>
-                        @endif
-                    </div>
-                    @error('apply')
-                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                    @if(! $applyReady)
-                    <p class="text-xs text-amber-600 mt-1">
-                        申請前に <a href="{{ route('manage.shop.edit') }}" class="underline">店舗情報</a> で市区町村・番地を入力してください。
-                    </p>
-                    @endif
+            {{-- 上段：掲載店舗 店名 業種 --}}
+            <div class="flex items-center gap-3 min-w-0 mb-3">
+                <span class="text-xs text-gray-400 shrink-0">掲載店舗</span>
+                <h2 class="text-base font-bold text-gray-800 truncate">{{ $shop->name }}</h2>
+                @if($shop->genre)
+                    <span class="text-xs text-gray-500 shrink-0">{{ $shop->genre->name }}</span>
                 @endif
             </div>
+            {{-- 下段：ステータス・申請ボタン --}}
+            @if($shop->status === 'active')
+                <span class="text-xs px-3 py-1 rounded-full font-medium bg-green-100 text-green-700">掲載中</span>
+            @elseif($shop->status === 'pending')
+                <span class="text-xs px-3 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700">申請中（審査待ち）</span>
+            @else
+                @php $applyReady = $shop->address_locality && $shop->address; @endphp
+                <div class="flex items-center gap-3">
+                    <span class="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500">非公開</span>
+                    @if($applyReady)
+                    <form action="{{ route('manage.apply') }}/" method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="text-xs px-4 py-1.5 bg-business-700 hover:bg-business-600 text-white rounded-full font-medium transition"
+                                onclick="return confirm('掲載申請を送信しますか？')">
+                            掲載申請
+                        </button>
+                    </form>
+                    @else
+                    <a href="{{ route('manage.shop.edit') }}"
+                       class="text-xs px-4 py-1.5 bg-gray-300 text-gray-500 rounded-full font-medium cursor-not-allowed"
+                       title="住所情報を入力してから申請できます">
+                        掲載申請
+                    </a>
+                    @endif
+                </div>
+                @error('apply')
+                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+                @if(! $applyReady)
+                <p class="text-xs text-amber-600 mt-1">店舗情報・求人情報を全て入力してから、掲載申請をお願いします。</p>
+                @endif
+            @endif
         </div>
 
         {{-- セクション別ステータス --}}
@@ -253,7 +264,12 @@
 
         {{-- LINE通知設定 --}}
         @if($shop->status === 'active')
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6" x-data>
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 relative {{ !$shop->hasBudget() && !$shop->isXmlActive() ? 'opacity-60 pointer-events-none select-none' : '' }}" x-data>
+            @if(!$shop->hasBudget() && !$shop->isXmlActive())
+                <div class="absolute inset-0 flex items-center justify-center rounded-xl z-10">
+                    <span class="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-full">有料プランのみ</span>
+                </div>
+            @endif
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-sm font-bold text-gray-700">LINE応募通知</h3>
                 @if($shop->line_notify_user_id)
@@ -314,6 +330,25 @@
             @if(session('line_notify_removed'))
                 <p class="text-xs text-green-600 mt-2">LINE通知設定を解除しました。</p>
             @endif
+            <p class="text-xs text-gray-400 mt-4">※ LINE関連機能は、LINEの仕様変更等により予告なく停止となる場合がございます。あらかじめご了承ください。</p>
+        </div>
+        @endif
+
+        {{-- 有料掲載にすると変わること（無料店のみ） --}}
+        @if(!$shop->hasBudget() && !$shop->isXmlActive())
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">有料掲載にすると変わること</h3>
+            <ul class="space-y-2">
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>検索結果で上位に表示</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>検索一覧にメイン画像が表示</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>求人を複数登録（キャスト3件・スタッフ5件）</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>近隣の同業種・無料掲載店舗のページにも優先表示</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>応募があるとLINEに即時通知</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>ホットリンクで自社サイト・SNSへ誘導</li>
+            </ul>
+            <div class="mt-4">
+                <a href="{{ route('manage.paid-plan') }}" class="inline-block text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</a>
+            </div>
         </div>
         @endif
 
@@ -342,6 +377,33 @@
                    class="text-xs text-business-600 hover:underline shrink-0">
                     詳細・設定 →
                 </a>
+            </div>
+        </div>
+        @endif
+
+        {{-- 予算の消費について（有料店のみ） --}}
+        @if($shop->status === 'active' && $shop->hasBudget())
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">予算の消費について</h3>
+            <p class="text-xs text-gray-600 mb-4">店舗詳細・各求人詳細への遷移クリックが課金対象です。1クリックあたり入札単価（現在 {{ number_format($shop->bid_price) }}円）を消費します。</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs font-bold text-gray-700 mb-2">課金されるケース</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>検索結果一覧からのクリック</li>
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>無料掲載店舗の詳細ページ下部に表示される関連リンクからのクリック</li>
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>求人応募完了ページの関連リンクからのクリック</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-700 mb-2">課金されないケース</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>同一ユーザーが1時間以内に同じページを再クリックした場合</li>
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>検索エンジンから直接詳細ページに流入した場合</li>
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>検索エンジン・クローラーによるアクセス</li>
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>記事ページ下部の関連リンクからのクリック</li>
+                    </ul>
+                </div>
             </div>
         </div>
         @endif

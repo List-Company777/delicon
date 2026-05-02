@@ -13,6 +13,23 @@
     background-repeat: no-repeat;
 }
 
+/* 管理画面フォームテーブル：スマホでラベル列を固定幅に縮小して入力欄を広げる */
+@media (max-width: 639px) {
+    .manage-table th {
+        width: 5.5rem;
+        min-width: 5.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        font-size: 0.7rem;
+        white-space: normal;
+        word-break: keep-all;
+    }
+    .manage-table td {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

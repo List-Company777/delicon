@@ -51,8 +51,8 @@ $ldTop = [
                     夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span>
                 </h2>
                 <p class="text-gray-400 text-xs mb-4">夜遊びスポット情報・セット料金を検索</p>
-                <form action="{{ route('search') }}" method="GET">
-                    <input type="hidden" name="gender" value="business">
+                <form action="{{ route('search') }}/" method="GET">
+                    <input type="hidden" name="gender" value="yoasobi">
                     <div class="space-y-2">
                         <label class="sr-only" for="yoasobi-area">エリア・駅名</label>
                         <input id="yoasobi-area" type="text" name="area"
@@ -77,7 +77,7 @@ $ldTop = [
                     男性ナイトワーク
                 </h2>
                 <p class="text-gray-400 text-xs mb-4">ホスト・黒服・ボーイなどの男性ナイトワーク</p>
-                <form action="{{ route('search') }}" method="GET">
+                <form action="{{ route('search') }}/" method="GET">
                     <input type="hidden" name="gender" value="male">
                     <div class="space-y-2">
                         <label class="sr-only" for="male-area">エリア・駅名</label>
@@ -103,7 +103,7 @@ $ldTop = [
                     女性ナイトワーク
                 </h2>
                 <p class="text-gray-400 text-xs mb-4">キャスト・ガールズバーなどの女性ナイトワーク</p>
-                <form action="{{ route('search') }}" method="GET">
+                <form action="{{ route('search') }}/" method="GET">
                     <input type="hidden" name="gender" value="female">
                     <div class="space-y-2">
                         <label class="sr-only" for="female-area">エリア・駅名</label>
@@ -230,10 +230,10 @@ $ldTop = [
             @foreach($popularKeywords as $kw)
             @php
                 $kwStyle = match($kw->gender) {
-                    'female'   => 'bg-female-50 border-female-100 text-female-600 hover:bg-female-100',
-                    'male'     => 'bg-male-50 border-male-300 text-male-600 hover:bg-male-100',
-                    'business' => 'bg-business-50 border-business-300 text-business-700 hover:bg-business-100',
-                    default    => 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100',
+                    'female'  => 'bg-female-50 border-female-100 text-female-600 hover:bg-female-100',
+                    'male'    => 'bg-male-50 border-male-300 text-male-600 hover:bg-male-100',
+                    'yoasobi' => 'bg-business-50 border-business-300 text-business-700 hover:bg-business-100',
+                    default   => 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100',
                 };
             @endphp
             <a href="{{ $kw->directory_url ?? route('search', ['gender' => $kw->gender, 'keyword' => $kw->keyword]) }}"

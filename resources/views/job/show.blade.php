@@ -10,7 +10,7 @@
     $colorMap = [
         'male'   => ['bar' => 'bg-male-800',      'text' => 'text-male-600',      'btn' => 'bg-male-600 hover:bg-male-700',      'tag' => 'bg-male-50 border-male-300 text-male-600',             'label' => '男性ナイトワーク', 'genderLabel' => '男性', 'genderRoute' => 'male'],
         'female' => ['bar' => 'bg-female-600',    'text' => 'text-female-500',    'btn' => 'bg-female-600 hover:bg-female-500',    'tag' => 'bg-female-50 border-female-100 text-female-600',       'label' => '女性ナイトワーク', 'genderLabel' => '女性', 'genderRoute' => 'female'],
-        'both'   => ['bar' => 'bg-business-700',  'text' => 'text-business-600',  'btn' => 'bg-business-700 hover:bg-business-600',  'tag' => 'bg-business-50 border-business-300 text-business-700', 'label' => '男女向け求人',    'genderLabel' => '夜遊び', 'genderRoute' => 'business'],
+        'both'   => ['bar' => 'bg-business-700',  'text' => 'text-business-600',  'btn' => 'bg-business-700 hover:bg-business-600',  'tag' => 'bg-business-50 border-business-300 text-business-700', 'label' => '男女向け求人',    'genderLabel' => '夜遊び', 'genderRoute' => 'yoasobi'],
     ];
     $c = $colorMap[$gender] ?? $colorMap['female'];
 @endphp
@@ -18,6 +18,7 @@
 @extends('layouts.app')
 
 @section('canonical', route('job.show', $job->id) . '/')
+@section('robots', 'index, follow')
 @section('title', $job->title . ' | ' . $job->shop->name)
 @section('description', mb_strimwidth(strip_tags($job->description ?? $job->title), 0, 120, '…'))
 @php
@@ -93,15 +94,12 @@
             'monthly' => 'MONTH',
             default   => 'HOUR',
         };
+        $salaryValue = ['@type' => 'QuantitativeValue', 'minValue' => $job->hourly_wage_min, 'unitText' => $unitText];
+        if ($job->hourly_wage_max) $salaryValue['maxValue'] = $job->hourly_wage_max;
         $ld['baseSalary'] = [
             '@type'    => 'MonetaryAmount',
             'currency' => 'JPY',
-            'value'    => array_filter([
-                '@type'    => 'QuantitativeValue',
-                'minValue' => $job->hourly_wage_min,
-                'maxValue' => $job->hourly_wage_max ?: null,
-                'unitText' => $unitText,
-            ]),
+            'value'    => $salaryValue,
         ];
     }
 @endphp
@@ -151,7 +149,7 @@
         <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $c['label'] }}</a>
         @if($job->prefecture)
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.prefecture', ['gender' => $c['genderRoute'], 'pref_slug' => $job->prefecture->slug]) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $job->prefecture->name }}</a>
+        <a href="{{ route('search.directory', ['gender' => $c['genderRoute'], 'area_slug' => $job->prefecture->slug, 'job_slug' => 'all']) }}/" class="underline underline-offset-2 hover:no-underline text-white/90 hover:text-white">{{ $job->prefecture->name }}</a>
         @endif
         @if($job->area)
         <span class="mx-2 opacity-40">›</span>
@@ -171,9 +169,9 @@
                  alt="{{ $job->title }}"
                  width="640" height="360"
                  class="w-full aspect-video object-cover"
-                 fetchpriority="high" loading="eager">
+                 fetchpriority="high">
         @elseif($job->shop->main_image)
-            <x-shop-image :src="$job->shop->main_image" :alt="$job->shop->name" class="w-full aspect-video object-cover" fetchpriority="high" loading="eager" />
+            <x-shop-image :src="$job->shop->main_image" :alt="$job->shop->name" class="w-full aspect-video object-cover" fetchpriority="high" />
         @else
             <div class="h-16 {{ $c['bar'] }}"></div>
         @endif
@@ -347,7 +345,7 @@
                 </dl>
                 @if($job->shop->detail?->status === 'active')
                     <a href="{{ route('shop.show', $job->shop->id) }}/"
-                       class="mt-4 inline-block text-sm text-business-700 hover:underline">
+                       class="mt-4 inline-block text-sm {{ $c['text'] }} hover:underline">
                         この店舗の営業情報を見る →
                     </a>
                 @endif
@@ -436,9 +434,9 @@
 
     {{-- 戻るリンク --}}
     <div class="mt-6 text-center">
-        <a href="javascript:history.back()" class="text-sm text-gray-400 hover:text-gray-600">
+        <button type="button" onclick="history.back()" class="text-sm text-gray-400 hover:text-gray-600">
             ← 検索結果に戻る
-        </a>
+        </button>
     </div>
 
     @include('partials._promo-banner', ['wrapClass' => 'my-8 rounded-2xl overflow-hidden shadow-md', 'innerClass' => ''])

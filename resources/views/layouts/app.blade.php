@@ -15,7 +15,7 @@
     {{-- OGP / Twitter Card --}}
     <meta property="og:site_name" content="ナイトワークリスト">
     <meta property="og:locale" content="ja_JP">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:title" content="@yield('title', 'ナイトワークリスト') | ナイトワークリスト">
     <meta property="og:description" content="@yield('description', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。')">
     <meta property="og:url" content="@hasSection('canonical')@yield('canonical')@else{{ url()->current() }}@endif">
@@ -27,6 +27,12 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1A535C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ナイトワーク">
     {{-- 外部ドメインへの事前接続（GA/GTM） --}}
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
@@ -122,7 +128,7 @@
                    class="text-male-300 hover:text-male-200 font-medium transition">
                     男性ナイトワーク
                 </a>
-                <a href="{{ route('article.index') }}"
+                <a href="{{ route('article.index') }}/"
                    class="text-gray-300 hover:text-white font-medium transition">
                     コラム
                 </a>
@@ -156,7 +162,7 @@
                        class="block py-2 text-female-400 font-medium">女性ナイトワーク</a>
                     <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) }}/"
                        class="block py-2 text-male-300 font-medium">男性ナイトワーク</a>
-                    <a href="{{ route('article.index') }}"
+                    <a href="{{ route('article.index') }}/"
                        class="block py-2 text-gray-300 font-medium">コラム</a>
                     <div class="border-t border-gray-700 mt-2 pt-2">
                         @auth

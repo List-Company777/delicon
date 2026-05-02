@@ -17,7 +17,7 @@
             </div>
         </div>
         <div class="shrink-0">
-            <a href="{{ route('register') }}"
+            <a href="{{ route('register') }}/"
                class="inline-block bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-sm px-7 py-3 rounded-xl shadow-lg transition whitespace-nowrap">
                 無料で掲載する →
             </a>

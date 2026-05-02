@@ -36,6 +36,9 @@ Schedule::command('line:send-daily-job-alerts')->cron('0 15 */3 * *');
 Schedule::command('articles:generate')->weeklyOn(2, '02:00');  // 火曜
 Schedule::command('articles:generate')->weeklyOn(5, '02:00');  // 金曜
 
+// 検索順位スコアをバッチ更新（5分ごと）
+Schedule::command('shops:update-rank-scores')->everyFiveMinutes();
+
 // 同一入札スコア内の表示順をシャッフル（30分ごと・検索IDキャッシュTTLと同期）
 Schedule::command('shops:shuffle-display-sort')->everyThirtyMinutes();
 
