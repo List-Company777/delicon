@@ -146,7 +146,7 @@ class SearchController extends Controller
     // 正規化ディレクトリURL（LP）
     public function directory(Request $request, string $gender, string $area_slug, string $job_slug)
     {
-        $areaModel     = $area_slug !== 'all' ? Cache::remember("slug:area:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->first()) : null;
+        $areaModel     = $area_slug !== 'all' ? Cache::remember("slug:area2:{$area_slug}", 86400, fn() => Area::with('prefecture')->where('slug', $area_slug)->first()) : null;
         $prefOnlyModel = (!$areaModel && $area_slug !== 'all') ? Cache::remember("slug:pref:{$area_slug}", 86400, fn() => Prefecture::where('slug', $area_slug)->first()) : null;
         $jobTypeModel  = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
         $genreModel    = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
@@ -198,7 +198,7 @@ class SearchController extends Controller
             abort(404);
         }
 
-        $areaModel    = $area_slug !== 'all' ? Cache::remember("slug:area:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->first()) : null;
+        $areaModel    = $area_slug !== 'all' ? Cache::remember("slug:area2:{$area_slug}", 86400, fn() => Area::with('prefecture')->where('slug', $area_slug)->first()) : null;
         $jobTypeModel = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
         $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
 
