@@ -35,7 +35,7 @@ class SendJobAlerts implements ShouldQueue
         }
 
         $ownerLineIds = \App\Models\User::whereNotNull('line_user_id')
-            ->whereHas('shops', fn($q) => $q->wherePivot('role', 'owner'))
+            ->whereHas('shops', fn($q) => $q->where('shop_users.role', 'owner'))
             ->pluck('line_user_id')
             ->flip()
             ->all();
