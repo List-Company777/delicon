@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
+// official_hp 経営コックピット向け売上エクスポートAPI（token認証）
+Route::get('/api/sales/export/', [\App\Http\Controllers\Api\SalesExportController::class, 'export'])->name('api.sales.export');
+
 // サイトマップ（静的ファイルより先にルートで処理）
 Route::get('/sitemap.xml',        [SitemapController::class, 'main']);
 Route::get('/sitemap-detail.xml', [SitemapController::class, 'detail']);
