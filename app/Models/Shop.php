@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use App\Models\ShopPricePlan;
 use App\Models\ShopOtherCharge;
 use App\Models\XmlFeed;
@@ -113,6 +114,22 @@ class Shop extends Model
         return $this->budget_balance >= $this->bid_price;
     }
 
+    public function getFullAddressAttribute(): string
+    {
+        $addr = $this->address;
+        if (!$addr) {
+            return implode('', array_filter([
+                $this->prefecture?->name,
+                $this->address_locality ?: $this->area?->name,
+            ]));
+        }
+        $pref = $this->prefecture?->name;
+        if ($pref && !str_starts_with($addr, $pref)) {
+            return $pref . $addr;
+        }
+        return $addr;
+    }
+
     /** XML連携中（任意フィード）かどうか */
     public function isXmlActive(): bool
     {
@@ -132,34 +149,35 @@ class Shop extends Model
      */
     public function consumeBudget(int $surcharge = 0): bool
     {
-        if (!$this->hasBudget()) {
-            return false;
-        }
+        return DB::transaction(function () use ($surcharge) {
+            $shop = static::where('id', $this->id)->lockForUpdate()->first();
 
-        // XML連携中: 通常クリックは無料、hotlink surchargeのみ消費
-        if ($this->isXmlActive()) {
-            if ($surcharge <= 0) {
+            if (!$shop->hasBudget()) {
                 return false;
             }
-            $this->decrement('budget_balance', $surcharge);
-            $this->refresh();
-            if (!$this->hasBudget()) {
-                $this->update(['bid_price' => 30]);
+
+            // XML連携中: 通常クリックは無料、hotlink surchargeのみ消費
+            if ($shop->isXmlActive()) {
+                if ($surcharge <= 0) {
+                    return false;
+                }
+                $shop->decrement('budget_balance', $surcharge);
+                if (!$shop->fresh()->hasBudget()) {
+                    $shop->update(['bid_price' => 30]);
+                    return true;
+                }
+                return false;
+            }
+
+            $amount = $shop->bid_price + $surcharge;
+            $shop->decrement('budget_balance', $amount);
+            if (!$shop->fresh()->hasBudget()) {
+                $shop->update(['bid_price' => 30]);
                 return true;
             }
+
             return false;
-        }
-
-        $amount = $this->bid_price + $surcharge;
-        $this->decrement('budget_balance', $amount);
-        $this->refresh();
-
-        if (!$this->hasBudget()) {
-            $this->update(['bid_price' => 30]);
-            return true;
-        }
-
-        return false;
+        });
     }
 
     public function users(): BelongsToMany

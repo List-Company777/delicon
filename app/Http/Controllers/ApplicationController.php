@@ -95,9 +95,9 @@ class ApplicationController extends Controller
             $shopInfo = "━━ 店舗情報 ━━━━━━━━━━━━━━━\n";
             $shopInfo .= "求人名　：{$job->title}\n";
             $shopInfo .= "店舗名　：{$shop->name}\n";
-            if ($shop->address) {
-                $shopInfo .= "住所　　：{$shop->address}\n";
-                $shopInfo .= "地図　　：https://maps.google.com/?q=" . urlencode($shop->address) . "\n";
+            if ($shop->full_address) {
+                $shopInfo .= "住所　　：{$shop->full_address}\n";
+                $shopInfo .= "地図　　：https://maps.google.com/?q=" . urlencode($shop->full_address) . "\n";
             }
             if ($shop->nearest_station_name) {
                 $station = ($shop->nearest_line ? $shop->nearest_line . ' ' : '')

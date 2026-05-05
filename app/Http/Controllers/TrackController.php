@@ -20,27 +20,26 @@ class TrackController extends Controller
     {
         $job = Job::with('shop.partner')->where('status', 'active')->findOrFail($id);
 
-        // 同一IPが1時間以内に同じ求人をクリック済みなら課金しない（Redis TTLキーで判定）
-        $isDuplicate = ! Cache::add("track:job:{$id}:{$request->ip()}", 1, 3600);
+        if (! $this->isCrawler($request)) {
+            $first = Cache::add("track:job:{$id}:{$request->ip()}", 1, 3600);
+            if ($first) {
+                JobAccessLog::create([
+                    'job_id'     => $job->id,
+                    'type'       => 'view',
+                    'ip'         => $request->ip(),
+                    'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
+                    'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
+                ]);
 
-        if (! $isDuplicate) {
-            JobAccessLog::create([
-                'job_id'     => $job->id,
-                'type'       => 'view',
-                'ip'         => $request->ip(),
-                'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
-                'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
-            ]);
+                $reset = $job->shop->consumeBudget();
+                if ($reset) {
+                    $this->notifyBudgetDepleted($job->shop);
+                }
 
-            $reset = $job->shop->consumeBudget();
-            if ($reset) {
-                $this->notifyBudgetDepleted($job->shop);
-            }
-
-            // ベンダー（XMLフィード）の総額予算を消費
-            if ($job->xml_source) {
-                $feed = XmlFeed::where('slug', $job->xml_source)->first();
-                $feed?->consumeBudget($job->shop->bid_price);
+                if ($job->xml_source) {
+                    $feed = $this->findXmlFeed($job->xml_source);
+                    $feed?->consumeBudget($job->shop->bid_price);
+                }
             }
         }
 
@@ -56,20 +55,20 @@ class TrackController extends Controller
             return $this->hotlinkShopRedirect($request, $shop);
         }
 
-        // 同一IPが1時間以内に同じ店舗をクリック済みなら課金しない（Redis TTLキーで判定）
-        $isDuplicate = ! Cache::add("track:shop:{$id}:{$request->ip()}", 1, 3600);
+        if (! $this->isCrawler($request)) {
+            $first = Cache::add("track:shop:{$id}:{$request->ip()}", 1, 3600);
+            if ($first) {
+                ShopAccessLog::create([
+                    'shop_id'    => $shop->id,
+                    'ip'         => $request->ip(),
+                    'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
+                    'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
+                ]);
 
-        if (! $isDuplicate) {
-            ShopAccessLog::create([
-                'shop_id'    => $shop->id,
-                'ip'         => $request->ip(),
-                'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
-                'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
-            ]);
-
-            $reset = $shop->consumeBudget();
-            if ($reset) {
-                $this->notifyBudgetDepleted($shop);
+                $reset = $shop->consumeBudget();
+                if ($reset) {
+                    $this->notifyBudgetDepleted($shop);
+                }
             }
         }
 
@@ -78,41 +77,69 @@ class TrackController extends Controller
 
     private function hotlinkShopRedirect(Request $request, Shop $shop): RedirectResponse
     {
-        $isDuplicate = ! Cache::add("track:shop:{$shop->id}:{$request->ip()}", 1, 3600);
+        if (! $this->isCrawler($request)) {
+            $first = Cache::add("track:shop:{$shop->id}:{$request->ip()}", 1, 3600);
+            if ($first) {
+                ShopAccessLog::create([
+                    'shop_id'    => $shop->id,
+                    'ip'         => $request->ip(),
+                    'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
+                    'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
+                ]);
 
-        ShopAccessLog::create([
-            'shop_id'    => $shop->id,
-            'ip'         => $request->ip(),
-            'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
-            'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
-        ]);
+                $shop->detail->increment('click_count');
 
-        $shop->detail->increment('click_count');
-
-        if (! $isDuplicate) {
-            // hotlinkは通常の入札単価＋20円/クリック
-            $reset = $shop->consumeBudget(20);
-            if ($reset) {
-                $this->notifyBudgetDepleted($shop);
-            }
-            if ($shop->xml_source) {
-                $feed = XmlFeed::where('slug', $shop->xml_source)->first();
-                $feed?->consumeBudget($shop->bid_price + 20);
+                $reset = $shop->consumeBudget(20);
+                if ($reset) {
+                    $this->notifyBudgetDepleted($shop);
+                }
+                if ($shop->xml_source) {
+                    $feed = $this->findXmlFeed($shop->xml_source);
+                    $feed?->consumeBudget($shop->bid_price + 20);
+                }
             }
         }
 
         return redirect()->away($shop->detail->hotlink_url, 302);
     }
 
+    private function findXmlFeed(string $slug): ?XmlFeed
+    {
+        $id = Cache::remember("xml_feed_id:{$slug}", 3600, fn() => XmlFeed::where('slug', $slug)->value('id'));
+        return $id ? XmlFeed::find($id) : null;
+    }
+
+    private function isCrawler(Request $request): bool
+    {
+        $ua = strtolower($request->userAgent() ?? '');
+        if ($ua === '') {
+            return true;
+        }
+
+        $patterns = [
+            'bot', 'crawl', 'spider', 'slurp', 'mediapartners',
+            'facebookexternalhit', 'twitterbot', 'linkedinbot',
+            'whatsapp', 'applebot', 'pinterest', 'semrush',
+            'ahrefsbot', 'mj12bot', 'dotbot', 'bingpreview',
+            'yandex', 'baiduspider', 'duckduckbot',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (str_contains($ua, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function notifyBudgetDepleted(Shop $shop): void
     {
-        // 店舗オーナーへ通知
         $owner = $shop->users()->wherePivot('role', 'owner')->first();
         if ($owner) {
             Mail::to($owner->email)->queue(new BudgetDepleted($shop));
         }
 
-        // 代理店へ通知
         if ($shop->partner) {
             Mail::to($shop->partner->email)->queue(new BudgetDepleted($shop));
         }

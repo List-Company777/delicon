@@ -146,10 +146,15 @@ class SearchController extends Controller
     // 正規化ディレクトリURL（LP）
     public function directory(Request $request, string $gender, string $area_slug, string $job_slug)
     {
-        $areaModel     = $area_slug !== 'all' ? Cache::remember("slug:area2:{$area_slug}", 86400, fn() => Area::with('prefecture')->where('slug', $area_slug)->first()) : null;
-        $prefOnlyModel = (!$areaModel && $area_slug !== 'all') ? Cache::remember("slug:pref:{$area_slug}", 86400, fn() => Prefecture::where('slug', $area_slug)->first()) : null;
-        $jobTypeModel  = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
-        $genreModel    = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
+        // IDのみキャッシュしてモデルはPKで取得（Eloquentモデルの直列化によるデシリアライズエラーを防止）
+        $areaId        = $area_slug !== 'all' ? Cache::remember("slug:area_id:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->value('id')) : null;
+        $areaModel     = $areaId ? Area::with('prefecture')->find($areaId) : null;
+        $prefId        = (!$areaModel && $area_slug !== 'all') ? Cache::remember("slug:pref_id:{$area_slug}", 86400, fn() => Prefecture::where('slug', $area_slug)->value('id')) : null;
+        $prefOnlyModel = $prefId ? Prefecture::find($prefId) : null;
+        $jobTypeId     = $job_slug !== 'all' ? Cache::remember("slug:jobtype_id:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->value('id')) : null;
+        $jobTypeModel  = $jobTypeId ? JobType::find($jobTypeId) : null;
+        $genreId       = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre_id:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->value('id')) : null;
+        $genreModel    = $genreId ? Genre::find($genreId) : null;
 
         $area    = ($areaModel && $area_slug !== 'all') ? $area_slug : '';
         $keyword = $job_slug  === 'all' ? '' : $job_slug;
@@ -198,9 +203,12 @@ class SearchController extends Controller
             abort(404);
         }
 
-        $areaModel    = $area_slug !== 'all' ? Cache::remember("slug:area2:{$area_slug}", 86400, fn() => Area::with('prefecture')->where('slug', $area_slug)->first()) : null;
-        $jobTypeModel = $job_slug !== 'all' ? Cache::remember("slug:jobtype:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->first()) : null;
-        $genreModel   = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->first()) : null;
+        $areaId       = $area_slug !== 'all' ? Cache::remember("slug:area_id:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->value('id')) : null;
+        $areaModel    = $areaId ? Area::with('prefecture')->find($areaId) : null;
+        $jobTypeId    = $job_slug !== 'all' ? Cache::remember("slug:jobtype_id:{$job_slug}", 86400, fn() => JobType::where('slug', $job_slug)->value('id')) : null;
+        $jobTypeModel = $jobTypeId ? JobType::find($jobTypeId) : null;
+        $genreId      = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre_id:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->value('id')) : null;
+        $genreModel   = $genreId ? Genre::find($genreId) : null;
 
         $area    = $area_slug === 'all' ? '' : $area_slug;
         $keyword = $job_slug  === 'all' ? '' : $job_slug;
