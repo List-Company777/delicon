@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\ShopPricePlan;
 use App\Models\ShopOtherCharge;
 use App\Models\XmlFeed;
@@ -25,7 +26,7 @@ class Shop extends Model
         'alive_check_token', 'alive_check_sent_at', 'alive_confirmed_at',
         'base', 'catche', 'system_text', 'coupon', 'open_time', 'close_time', 'all_time', 'rest_day',
         'price_60', 'price_90', 'price_120', 'price_high', 'eigyo_area', 'eigyo_space',
-        'shop_type_id', 'shop_type_id2',
+        'shop_type_id', 'shop_type_id2', 'tags',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Shop extends Model
         'xml_plan_activated_at' => 'datetime',
         'xml_disabled_at'       => 'datetime',
         'alive_check_sent_at'   => 'datetime',
+        'tags'                  => 'array',
         'alive_confirmed_at'    => 'datetime',
     ];
 
@@ -198,6 +200,19 @@ class Shop extends Model
         return $path;
     }
 
+    /**
+     * 店舗詳細ページ用バナー画像URL（5:2）
+     * main_image（新規アップロード）→ shop_file_name（レガシー）の順で優先
+     */
+    public function getBannerUrlAttribute(): ?string
+    {
+        if ($this->main_image) {
+            $bannerPath = str_replace('main.jpg', 'main_banner.jpg', $this->main_image);
+            return Storage::url($bannerPath);
+        }
+        return $this->shop_banner_url;
+    }
+
     public function shopType(): BelongsTo
     {
         return $this->belongsTo(ShopType::class, "shop_type_id");
@@ -218,5 +233,10 @@ class Shop extends Model
         return $this->belongsToMany(User::class, 'shop_users')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ShopReview::class);
     }
 }

@@ -45,6 +45,8 @@ class ShopInfoController extends BaseController
             'eigyo_space'           => ['nullable', 'string', 'max:200'],
             'shop_type_id'          => ['nullable', 'integer', 'exists:shop_types,id'],
             'shop_type_id2'         => ['nullable', 'integer', 'exists:shop_types,id'],
+            'tags'                  => ['nullable', 'array'],
+            'tags.*'                => ['string', 'max:30'],
         ]);
 
         $shop->update($request->only([
@@ -54,7 +56,10 @@ class ShopInfoController extends BaseController
             'open_time', 'close_time', 'rest_day',
             'price_60', 'price_90', 'price_120', 'price_high',
             'eigyo_area', 'eigyo_space', 'shop_type_id', 'shop_type_id2',
-        ]) + ['all_time' => $request->boolean('all_time')]);
+        ]) + [
+            'all_time' => $request->boolean('all_time'),
+            'tags'     => $request->input('tags', []),
+        ]);
 
         return back()->with('success', '店舗基本情報を更新しました');
     }

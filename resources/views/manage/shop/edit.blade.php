@@ -225,6 +225,86 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">特色タグ</th>
+                <td class="px-4 py-3">
+                    <div class="flex flex-wrap gap-3">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="素人系"
+                                   @checked(in_array('素人系', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">素人系</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="人妻・熟女"
+                                   @checked(in_array('人妻・熟女', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">人妻・熟女</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="巨乳"
+                                   @checked(in_array('巨乳', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">巨乳</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="格安"
+                                   @checked(in_array('格安', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">格安</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="高級"
+                                   @checked(in_array('高級', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">高級</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="ロリ系"
+                                   @checked(in_array('ロリ系', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">ロリ系</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="スレンダー"
+                                   @checked(in_array('スレンダー', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">スレンダー</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="ぽっちゃり"
+                                   @checked(in_array('ぽっちゃり', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">ぽっちゃり</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="美人系"
+                                   @checked(in_array('美人系', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">美人系</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="ギャル系"
+                                   @checked(in_array('ギャル系', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">ギャル系</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="OL系"
+                                   @checked(in_array('OL系', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">OL系</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="コスプレ"
+                                   @checked(in_array('コスプレ', old('tags', $shop->tags ?? [])))
+                                   class="w-4 h-4 accent-red-600">
+                            <span class="text-sm text-gray-700">コスプレ</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">選択したタグで検索絞り込みができます</p>
+                </td>
+            </tr>
+            <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">プレイスペース</th>
                 <td class="px-4 py-3">
                     <input type="text" name="eigyo_space" value="{{ old('eigyo_space', $shop->eigyo_space) }}" maxlength="200"

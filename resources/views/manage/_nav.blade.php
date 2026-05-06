@@ -61,6 +61,7 @@
                     'manage.applications.index' => '応募管理',
                     'manage.paid-plan'          => '掲載プラン',
                     'manage.contact'            => 'お問い合わせ',
+                    'manage.review.index'       => '口コミ管理',
                     'manage.password.edit'      => 'パスワード変更',
                 ];
             @endphp

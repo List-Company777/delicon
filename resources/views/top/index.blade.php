@@ -143,8 +143,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     <img src="{{ $castImg }}"
                          alt="{{ $cast->name }}のキャスト情報"
                          loading="lazy"
-                         class="img-onerror-cast"
-                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 </div>
                 <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
                 <p class="text-xs text-[#6A6A7E] mt-0.5">
@@ -162,6 +161,65 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         @endif
     </div>
 </section>
+
+{{-- 本日の出勤 --}}
+@if($workingToday->isNotEmpty())
+<section class="bg-surface-700 py-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
+            <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
+            本日の出勤
+            <span class="text-sm font-normal text-deli-400 ml-1">{{ today()->format('m月d日') }}</span>
+        </h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            @foreach($workingToday as $cast)
+            @php $castImg = $cast->img_url; @endphp
+            <a href="{{ route('cast.show', $cast->id) }}/"
+               class="group">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-2 border border-surface-300 group-hover:border-deli-500 transition">
+                    <img src="{{ $castImg }}"
+                         alt="{{ $cast->name }}のデリヘル出勤情報"
+                         loading="lazy"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <span class="absolute top-1.5 left-1.5 bg-deli-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">出勤中</span>
+                </div>
+                <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $cast->shop_name }}</p>
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- 新人キャスト --}}
+@if($newArrivals->isNotEmpty())
+<section class="bg-surface-600 border-y border-surface-400 py-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
+            <span class="w-1 h-6 bg-gold-400 rounded-full inline-block"></span>
+            新人キャスト
+        </h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            @foreach($newArrivals as $cast)
+            @php $castImg = $cast->img_url; @endphp
+            <a href="{{ route('cast.show', $cast->id) }}/"
+               class="group">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-2 border border-surface-300 group-hover:border-gold-400 transition">
+                    <img src="{{ $castImg }}"
+                         alt="{{ $cast->name }}の新人デリヘルキャスト情報"
+                         loading="lazy"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <span class="absolute top-1.5 left-1.5 bg-gold-400 text-surface-800 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
+                </div>
+                <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $cast->join_date }}</p>
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
 {{-- 業種から探す --}}
 @if($popularKeywords->isNotEmpty())

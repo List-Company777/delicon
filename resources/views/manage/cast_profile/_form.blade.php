@@ -111,6 +111,25 @@
         </td>
     </tr>
     <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">入店日</th>
+        <td class="px-4 py-3">
+            <input type="date" name="join_date" value="{{ old('join_date', $cast?->join_date?->format('Y-m-d')) }}"
+                   class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+            <span class="text-xs text-gray-400 ml-2">入店から30日以内は「新人」バッジが表示されます</span>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">本日出勤</th>
+        <td class="px-4 py-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="working_today" value="1"
+                       @checked(old('working_today', $cast?->working_date?->isToday()))
+                       class="w-4 h-4 accent-red-600">
+                <span class="text-sm text-gray-700">今日出勤している（トップページの「本日の出勤」に表示されます）</span>
+            </label>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">おすすめ</th>
         <td class="px-4 py-3">
             <label class="flex items-center gap-2 cursor-pointer">

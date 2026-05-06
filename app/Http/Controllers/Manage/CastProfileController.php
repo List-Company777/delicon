@@ -50,6 +50,7 @@ class CastProfileController extends BaseController
             'message'        => ['nullable', 'string', 'max:2000'],
             'status'         => ['required', 'in:active,inactive'],
             'is_recommended' => ['boolean'],
+            'join_date'      => ['nullable', 'date'],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
 
@@ -57,6 +58,7 @@ class CastProfileController extends BaseController
         $cast->shop_id = $shop->id;
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
+        $cast->working_date   = $request->boolean('working_today') ? today() : null;
 
         if ($request->hasFile('photo')) {
             $cast->img_file_name = $this->savePhoto($request->file('photo'));
@@ -96,11 +98,13 @@ class CastProfileController extends BaseController
             'message'        => ['nullable', 'string', 'max:2000'],
             'status'         => ['required', 'in:active,inactive'],
             'is_recommended' => ['boolean'],
+            'join_date'      => ['nullable', 'date'],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
 
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
+        $cast->working_date   = $request->boolean('working_today') ? today() : null;
 
         if ($request->hasFile('photo')) {
             $cast->img_file_name = $this->savePhoto($request->file('photo'));

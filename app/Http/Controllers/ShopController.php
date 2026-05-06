@@ -49,7 +49,7 @@ class ShopController extends Controller
             ->orderBy('sort_order')
             ->paginate(24);
 
-        $news = $shop->news()->take(10)->get();
+        $news = $shop->news()->latest()->take(3)->get();
 
         return view('shop.show', compact('shop', 'casts', 'news'));
     }

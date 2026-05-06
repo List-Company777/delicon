@@ -20,10 +20,13 @@ class Cast extends Model
         'yuumeijin', 'shiofuki', 'zitaku',
         'twitter_account', 'official_url',
         'price_on', 'is_recommended', 'sort_order', 'ranking_count', 'status',
+        'join_date', 'working_date',
     ];
 
     protected $casts = [
         'is_recommended' => 'boolean',
+        'join_date'      => 'date',
+        'working_date'   => 'date',
     ];
 
     public function shop(): BelongsTo

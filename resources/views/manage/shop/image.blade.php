@@ -15,8 +15,8 @@
         <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
     @endif
 
-    <h2 class="text-lg font-bold text-gray-800 mb-2">メイン画像</h2>
-    <p class="text-sm text-gray-500 mb-4">店舗詳細ページの上部に表示されます。また、各求人に画像がセットされている場合はそちらが優先して使用されます。</p>
+    <h2 class="text-lg font-bold text-gray-800 mb-2">バナー画像</h2>
+    <p class="text-sm text-gray-500 mb-4">店舗詳細ページの上部に横長バナーとして表示されます。アップロード時に自動で 5:2 比率（900×360px）にトリミングされます。</p>
 
     {{-- ランキング説明バナー --}}
     <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
@@ -31,7 +31,9 @@
     @if($shop->main_image)
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <p class="text-sm font-bold text-gray-600 mb-3">現在の画像</p>
-            <x-shop-image :src="$shop->main_image" :alt="$shop->name" class="w-full max-h-72 object-contain rounded-lg bg-gray-100" />
+            <div class="relative w-full aspect-[5/2] rounded-lg overflow-hidden bg-gray-100">
+                <x-shop-image :src="str_replace('main.jpg', 'main_banner.jpg', $shop->main_image)" :alt="$shop->name" class="absolute inset-0 w-full h-full object-cover" />
+            </div>
             <form action="{{ route('manage.shop.image.destroy') }}" method="POST" class="mt-4 text-right"
                   onsubmit="return confirm('画像を削除しますか？')">
                 @csrf @method('DELETE')
@@ -44,11 +46,11 @@
     <div class="bg-white rounded-xl shadow-sm p-6">
         <p class="text-sm font-bold text-gray-600 mb-1">{{ $shop->main_image ? '画像を差し替える' : '画像をアップロードする' }}</p>
         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 leading-relaxed">
-            <p class="font-bold mb-1">入稿推奨サイズ：1280 × 720px（16:9）</p>
+            <p class="font-bold mb-1">入稿推奨サイズ：900 × 360px（5:2）以上</p>
             <p>・形式：JPEG / PNG / WebP</p>
             <p>・ファイルサイズ：5MB 以下</p>
-            <p>・アップロード時に WebP 形式も自動生成されます</p>
-            <p>・画像はアスペクト比を保ったまま表示されます。被写体は中央に配置してください</p>
+            <p>・アップロード時に自動で 900×360px（5:2）にクロップされます</p>
+            <p>・被写体は中央に配置してください（端が切れる場合があります）</p>
         </div>
         <form action="{{ route('manage.shop.image.store') }}" method="POST" enctype="multipart/form-data">
             @csrf

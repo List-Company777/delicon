@@ -76,11 +76,59 @@ class TopController extends Controller
         });
         $popularKeywords = collect($popularKeywordsRaw)->map(fn($k) => (object) $k);
 
+        // 本日の出勤キャスト
+        $workingTodayRaw = Cache::remember('delicon:top_working_today_' . today()->toDateString(), 300, function () {
+            return Cast::with(['shop', 'castType'])
+                ->where('status', 'active')
+                ->whereDate('working_date', today())
+                ->orderByDesc('is_recommended')
+                ->take(12)
+                ->get()
+                ->map(fn($cast) => [
+                    'id'             => $cast->id,
+                    'name'           => $cast->name,
+                    'age'            => $cast->age,
+                    'cup'            => $cast->cup,
+                    'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.jpg',
+                    'cast_type_name' => $cast->castType?->name,
+                    'shop_id'        => $cast->shop_id,
+                    'shop_name'      => $cast->shop?->name,
+                ])->all();
+        });
+        $workingToday = collect($workingTodayRaw)->map(fn($c) => (object) $c);
+
+        // 新人キャスト（入店日から30日以内）
+        $newArrivalRaw = Cache::remember('delicon:top_new_arrival', 1800, function () {
+            return Cast::with(['shop', 'castType'])
+                ->where('status', 'active')
+                ->whereNotNull('join_date')
+                ->whereDate('join_date', '>=', today()->subDays(30))
+                ->orderByDesc('join_date')
+                ->take(12)
+                ->get()
+                ->map(fn($cast) => [
+                    'id'             => $cast->id,
+                    'name'           => $cast->name,
+                    'age'            => $cast->age,
+                    'cup'            => $cast->cup,
+                    'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.jpg',
+                    'cast_type_name' => $cast->castType?->name,
+                    'shop_id'        => $cast->shop_id,
+                    'shop_name'      => $cast->shop?->name,
+                    'join_date'      => $cast->join_date?->format('m/d入店'),
+                ])->all();
+        });
+        $newArrivals = collect($newArrivalRaw)->map(fn($c) => (object) $c);
+
         return view('top.index', compact(
             'shopTypes',
             'recommendedShops',
             'newCasts',
-            'popularKeywords'
+            'popularKeywords',
+            'workingToday',
+            'newArrivals'
         ));
     }
 }

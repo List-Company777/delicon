@@ -14,6 +14,17 @@ use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CastController;
+use App\Http\Controllers\Manage\ShopInfoController;
+use App\Http\Controllers\Manage\BusinessController;
+use App\Http\Controllers\Manage\CastJobController;
+use App\Http\Controllers\Manage\StaffJobController;
+use App\Http\Controllers\Manage\ContactController;
+use App\Http\Controllers\Manage\ApplicationController as ManageApplicationController;
+use App\Http\Controllers\Auth\VisitorRegisterController;
+use App\Http\Controllers\Manage\CastProfileController;
+use App\Http\Controllers\Manage\ReviewManageController;
+use App\Http\Controllers\ReviewController;
+
 use Illuminate\Support\Facades\Route;
 
 // official_hp 経営コックピット向け売上エクスポートAPI（token認証）
@@ -47,6 +58,18 @@ Route::middleware('guest')->group(function () {
 
 // ログアウト
 Route::post('/logout/', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
+
+// 訪問者登録
+Route::middleware('guest')->group(function () {
+    Route::get('/visitor-register/',  [VisitorRegisterController::class, 'show'])->name('visitor.register');
+    Route::post('/visitor-register/', [VisitorRegisterController::class, 'store'])->middleware('throttle:5,30')->name('visitor.register.store');
+});
+
+// 口コミ投稿（ログイン必須）
+Route::middleware('auth')->group(function () {
+    Route::get('/reviews/create/',  [ReviewController::class, 'create'])->name('review.create');
+    Route::post('/reviews/',        [ReviewController::class, 'store'])->name('review.store')->middleware('throttle:10,60');
+});
 
 // メール認証
 Route::middleware('auth')->group(function () {
@@ -108,13 +131,6 @@ Route::post('/alert/',         [\App\Http\Controllers\AlertRegistrationControlle
 Route::get('/alert/{token}/',  [\App\Http\Controllers\AlertRegistrationController::class, 'complete'])->name('alert.complete');
 
 // 店舗管理（要ログイン）
-use App\Http\Controllers\Manage\ShopInfoController;
-use App\Http\Controllers\Manage\BusinessController;
-use App\Http\Controllers\Manage\CastJobController;
-use App\Http\Controllers\Manage\StaffJobController;
-use App\Http\Controllers\Manage\ContactController;
-use App\Http\Controllers\Manage\ApplicationController as ManageApplicationController;
-use App\Http\Controllers\Manage\CastProfileController;
 
 Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->group(function () {
     Route::get('/dashboard/',            [DashboardController::class, 'index'])->name('dashboard');
@@ -154,6 +170,12 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/casts/{id}/edit/',       [CastProfileController::class, 'edit'])->name('cast-profile.edit')->where('id', '[0-9]+');
     Route::put('/casts/{id}/',            [CastProfileController::class, 'update'])->name('cast-profile.update')->where('id', '[0-9]+');
     Route::delete('/casts/{id}/',         [CastProfileController::class, 'destroy'])->name('cast-profile.destroy')->where('id', '[0-9]+');
+
+    // 口コミ管理
+    Route::get('/reviews/',                            [ReviewManageController::class, 'index'])->name('review.index');
+    Route::get('/reviews/users/{userId}/',             [ReviewManageController::class, 'showUser'])->name('review.user')->where('userId','[0-9]+');
+    Route::patch('/reviews/{reviewId}/status/',        [ReviewManageController::class, 'updateStatus'])->name('review.status')->where('reviewId','[0-9]+');
+    Route::post('/reviews/users/{userId}/coupon/',     [ReviewManageController::class, 'sendCoupon'])->name('review.coupon.send')->where('userId','[0-9]+');
 
 
     // 掲載申請

@@ -35,6 +35,11 @@ class ImageService
         Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
         Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
 
+        // バナー（900×360px crop、5:2 比率・店舗詳細ページヘッダー用）
+        $banner = $this->manager->decode($file->getPathname())->cover(900, 360);
+        Storage::disk('public')->put("{$base}_banner.jpg",  (string) $banner->encode(new JpegEncoder(quality: 85)));
+        Storage::disk('public')->put("{$base}_banner.webp", (string) $banner->encode(new WebpEncoder(quality: 80)));
+
         // サムネイル（224×126px crop、検索結果カード用）
         $thumb = $this->manager->decode($file->getPathname())->cover(224, 126);
         Storage::disk('public')->put("{$base}_thumb.webp", (string) $thumb->encode(new WebpEncoder(quality: 75)));
