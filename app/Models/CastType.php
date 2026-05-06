@@ -1,0 +1,10 @@
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+class CastType extends Model
+{
+    public $timestamps = false;
+    protected $fillable = ['name', 'sort_order'];
+    public function castProfiles(): HasMany { return $this->hasMany(Cast::class, 'type_id'); }
+}

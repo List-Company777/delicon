@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE jobs ADD FULLTEXT INDEX jobs_title_ngram (title) WITH PARSER ngram');
+        DB::statement('ALTER TABLE jobs ADD FULLTEXT INDEX jobs_title_ngram (title) ');
     }
 
     public function down(): void

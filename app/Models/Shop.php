@@ -180,6 +180,26 @@ class Shop extends Model
         });
     }
 
+    public function castMembers(): HasMany
+    {
+        return $this->hasMany(Cast::class)->where("status", "active")->orderBy("sort_order");
+    }
+
+    public function shopType(): BelongsTo
+    {
+        return $this->belongsTo(ShopType::class, "shop_type_id");
+    }
+
+    public function shopType2(): BelongsTo
+    {
+        return $this->belongsTo(ShopType::class, "shop_type_id2");
+    }
+
+    public function news(): HasMany
+    {
+        return $this->hasMany(ShopNews::class)->latest();
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'shop_users')

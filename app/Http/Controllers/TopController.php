@@ -47,7 +47,7 @@ class TopController extends Controller
                 ->where('spv.job_slug', '!=', 'all')
                 ->where('spv.area_slug', 'all')
                 ->whereIn('spv.gender', ['female', 'male', 'yoasobi'])
-                ->groupBy('spv.gender', 'spv.job_slug', 'jt.name')
+                ->groupBy('spv.gender', 'spv.job_slug', 'jt.name', 'jt.slug')
                 ->get();
 
             return $areaKws->concat($jobKws)

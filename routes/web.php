@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\KeywordController as AdminKeyword;
 use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CastController;
 use Illuminate\Support\Facades\Route;
 
 // official_hp 経営コックピット向け売上エクスポートAPI（token認証）
@@ -187,8 +189,6 @@ Route::get('/search/', [SearchController::class, 'index'])->name('search');
 // 求人詳細
 Route::get('/job/{id}/', [JobController::class, 'show'])->name('job.show')->where('id', '[0-9]+');
 
-// 店舗詳細（営業リスト）
-Route::get('/shop/{id}/', [App\Http\Controllers\ShopController::class, 'show'])->name('shop.show')->where('id', '[0-9]+');
 
 // 通報フォーム
 Route::post('/report/', [\App\Http\Controllers\ReportController::class, 'send'])->name('report.send');
@@ -302,6 +302,16 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     // 記事生成プロンプト設定
     Route::put('/article-generation-prompts/{gender}/', [\App\Http\Controllers\Admin\ArticleController::class, 'updatePrompt'])->name('article-generation-prompts.update');
 });
+
+// ========== delicon 公開ルート ==========
+
+// 店舗一覧・詳細
+Route::get('/shops/', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/shops/{shop}/', [ShopController::class, 'show'])->name('shop.show')->where('shop', '[0-9]+');
+
+// キャスト一覧・詳細
+Route::get('/cast/', [CastController::class, 'index'])->name('cast.index');
+Route::get('/cast/{cast}/', [CastController::class, 'show'])->name('cast.show')->where('cast', '[0-9]+');
 
 // コラム・ガイド記事（公開）
 Route::get('/article/',         [\App\Http\Controllers\ArticleController::class, 'index'])->name('article.index');
