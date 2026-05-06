@@ -210,7 +210,7 @@ class Shop extends Model
             $bannerPath = str_replace('main.jpg', 'main_banner.jpg', $this->main_image);
             return Storage::url($bannerPath);
         }
-        return $this->shop_banner_url;
+        return $this->shop_file_name;
     }
 
     public function shopType(): BelongsTo

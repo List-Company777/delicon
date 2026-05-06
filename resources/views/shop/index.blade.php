@@ -39,7 +39,7 @@
         <p class="text-xs font-bold text-[#8A8A9E] mb-2 uppercase tracking-wider">エリアで探す</p>
         <div class="flex flex-wrap gap-2">
             @foreach($areas as $area)
-            <a href="{{ route('shop.region', $area->slug) }}/"
+            <a href="{{ route('shop.index') }}?area_id={{ $area->id }}"
                class="text-xs bg-surface-500 border border-surface-300 hover:border-deli-500 text-[#C8C4BC] hover:text-deli-400 px-3 py-1.5 rounded-full transition">
                 {{ $area->name }}
             </a>
@@ -56,7 +56,7 @@
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group">
             @if($shop->shop_file_name)
             <div class="relative overflow-hidden">
-                <img src="{{ $shop->shop_banner_url }}" alt="{{ $shop->name }}"
+                <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
                      class="w-full h-36 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-300"
                      loading="lazy" class="img-onerror-hide">
                 <div class="absolute inset-0 bg-gradient-to-t from-surface-900/60 to-transparent"></div>
