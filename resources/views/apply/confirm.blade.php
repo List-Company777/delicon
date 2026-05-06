@@ -19,7 +19,7 @@
         '@type'    => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク',    'item' => route('top') . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('shop.list', ['area_slug' => 'all']) . '/'],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $job->shop->name,  'item' => route('job.show', $job->id) . '/'],
             ['@type' => 'ListItem', 'position' => 4, 'name' => '応募内容の確認',  'item' => route('apply.confirm', $job->id) . '/'],
         ],
@@ -37,7 +37,7 @@
     <div class="max-w-2xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="opacity-70 hover:opacity-100">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $c['genderLabel'] }}</a>
+        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $c['genderLabel'] }}</a>
         <span class="mx-2 opacity-40">›</span>
         <a href="{{ route('job.show', $job->id) }}/" class="opacity-70 hover:opacity-100">{{ $job->shop->name }}</a>
         <span class="mx-2 opacity-40">›</span>
@@ -104,7 +104,7 @@
         </div>
 
         {{-- 送信ボタン --}}
-        <form action="{{ route('apply.final-store', $job->id) }}" method="POST">
+        <form action="{{ route('apply.final-store', $job->id) }}/" method="POST">
             @csrf
             <button type="submit"
                     class="{{ $c['btn'] }} text-white font-bold py-4 px-8 rounded-xl w-full text-base transition">
@@ -115,7 +115,7 @@
 
     {{-- 修正リンク --}}
     <div class="text-center">
-        <a href="{{ route('apply.create', $job->id) }}" class="text-sm text-gray-400 hover:text-gray-600">
+        <a href="{{ route('apply.create', $job->id) }}/" class="text-sm text-gray-400 hover:text-gray-600">
             ← 入力内容を修正する
         </a>
     </div>

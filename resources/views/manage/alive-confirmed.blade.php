@@ -17,7 +17,7 @@
                 引き続きナイトワークリストをご利用いただきありがとうございます。<br>
                 掲載は継続されます。
             </p>
-            <a href="{{ route('login') }}"
+            <a href="{{ route('login') }}/"
                class="mt-6 inline-block text-sm text-business-700 hover:underline">
                 管理画面へログイン →
             </a>

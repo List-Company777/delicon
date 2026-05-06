@@ -5,6 +5,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ShopType extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'slug'];
     public function shops(): HasMany { return $this->hasMany(Shop::class, 'shop_type_id'); }
 }

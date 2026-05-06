@@ -17,7 +17,7 @@
 {{-- タブ --}}
 <div class="flex gap-1 mb-6 border-b border-gray-200">
     @foreach(['pending' => '申請中', 'active' => '掲載中', 'inactive' => '非公開', 'all' => 'すべて'] as $s => $label)
-    <a href="{{ route('admin.shops.index', ['status' => $s]) }}"
+    <a href="{{ route('admin.shops.index', ['status' => $s]) }}/"
        class="{{ $status === $s
            ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold'
            : 'text-gray-500 hover:text-gray-700' }}
@@ -31,13 +31,13 @@
 </div>
 
 {{-- 店舗名検索 --}}
-<form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex gap-2">
+<form method="GET" action="{{ route('admin.shops.index') }}/" class="mb-4 flex gap-2">
     <input type="hidden" name="status" value="{{ $status }}">
     <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
     <button type="submit" class="px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">検索</button>
     @if($keyword)
-        <a href="{{ route('admin.shops.index', ['status' => $status]) }}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
+        <a href="{{ route('admin.shops.index', ['status' => $status]) }}/" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
     @endif
 </form>
 
@@ -66,7 +66,7 @@
             <tr class="hover:bg-gray-50 transition">
                 <td class="px-4 py-3 text-gray-400 text-xs">{{ $shop->id }}</td>
                 <td class="px-4 py-3 font-medium">
-                    <a href="{{ route('admin.shops.show', $shop->id) }}" class="text-gray-800 hover:text-business-700 hover:underline">{{ $shop->name }}</a>
+                    <a href="{{ route('admin.shops.show', $shop->id) }}/" class="text-gray-800 hover:text-business-700 hover:underline">{{ $shop->name }}</a>
                 </td>
                 <td class="px-4 py-3 text-gray-500 text-xs">{{ $shop->genre?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">{{ $shop->area?->name ?? '—' }}</td>

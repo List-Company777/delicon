@@ -4,7 +4,7 @@
 <div class="bg-gray-800 text-white py-4">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">Admin › 月次取引明細</h1>
-        <form method="GET" action="{{ route('admin.billing.index') }}" class="flex items-center gap-2 flex-wrap">
+        <form method="GET" action="{{ route('admin.billing.index') }}/" class="flex items-center gap-2 flex-wrap">
             <select name="year" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm">
                 @for($y = now()->year; $y >= now()->year - 1; $y--)
                     <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}年</option>
@@ -61,11 +61,11 @@
 
     {{-- CSVダウンロード --}}
     <div class="flex justify-end gap-3">
-        <a href="{{ route('admin.billing.csv', array_filter(['year' => $year, 'month' => $month, 'partner_id' => $partnerId ?: null])) }}"
+        <a href="{{ route('admin.billing.csv', array_filter(['year' => $year, 'month' => $month, 'partner_id' => $partnerId ?: null])) }}/"
            class="bg-green-700 hover:bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             CSVダウンロード（{{ $year }}年{{ $month }}月）
         </a>
-        <a href="{{ route('admin.billing.invoy-csv', ['year' => $year, 'month' => $month]) }}"
+        <a href="{{ route('admin.billing.invoy-csv', ['year' => $year, 'month' => $month]) }}/"
            class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             invoy用CSVダウンロード（{{ $year }}年{{ $month }}月）
         </a>

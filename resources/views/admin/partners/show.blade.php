@@ -4,7 +4,7 @@
 <div class="bg-gray-800 text-white py-4">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">Admin › {{ $partner->company_name }}</h1>
-        <a href="{{ route('admin.partners.edit', $partner) }}" class="bg-white text-gray-800 text-sm font-bold px-4 py-1.5 rounded hover:bg-gray-100">編集</a>
+        <a href="{{ route('admin.partners.edit', $partner) }}/" class="bg-white text-gray-800 text-sm font-bold px-4 py-1.5 rounded hover:bg-gray-100">編集</a>
     </div>
 </div>
 
@@ -95,7 +95,7 @@
                 @endforeach
             </div>
             @endif
-            <form action="{{ route('admin.partners.createUser', $partner) }}" method="POST" class="flex flex-wrap gap-3 items-end border-t border-gray-100 pt-4">
+            <form action="{{ route('admin.partners.createUser', $partner) }}/" method="POST" class="flex flex-wrap gap-3 items-end border-t border-gray-100 pt-4">
                 @csrf
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">担当者名 <span class="text-red-400">*</span></label>
@@ -161,7 +161,7 @@
     <div>
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-base font-bold text-gray-700">掲載申請記録（管理代行請求根拠）</h2>
-            <form method="GET" action="{{ route('admin.partners.downloadCsv', $partner) }}" class="flex items-center gap-2">
+            <form method="GET" action="{{ route('admin.partners.downloadCsv', $partner) }}/" class="flex items-center gap-2">
                 <select name="year" class="border border-gray-300 rounded px-2 py-1 text-sm">
                     @for($y = now()->year; $y >= now()->year - 1; $y--)
                         <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}年</option>
@@ -233,7 +233,7 @@
         {{-- 手動追加 --}}
         <div class="bg-white rounded-xl shadow-sm p-5 mb-4 text-sm">
             <p class="font-medium text-gray-700 mb-3">手数料を手動で記録</p>
-            <form action="{{ route('admin.partners.addCommission', $partner) }}" method="POST" class="flex flex-wrap gap-3 items-end">
+            <form action="{{ route('admin.partners.addCommission', $partner) }}/" method="POST" class="flex flex-wrap gap-3 items-end">
                 @csrf
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">対象店舗 <span class="text-red-400">*</span></label>
@@ -271,7 +271,7 @@
         </div>
 
         {{-- 一覧 + 支払済みマーク --}}
-        <form action="{{ route('admin.partners.markPaid', $partner) }}" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <form action="{{ route('admin.partners.markPaid', $partner) }}/" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden">
             @csrf
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">

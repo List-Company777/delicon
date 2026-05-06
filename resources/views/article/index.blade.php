@@ -28,7 +28,7 @@
     {{-- カテゴリフィルター --}}
     @if($categories->isNotEmpty())
     <div class="flex flex-wrap gap-2 mb-8">
-        <a href="{{ route('article.index') }}"
+        <a href="{{ route('article.index') }}/"
            class="px-3 py-1 rounded-full text-xs border transition
                   {{ !$currentCategory ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50' }}">
             すべて
@@ -51,7 +51,7 @@
     @else
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         @foreach($articles as $article)
-        <a href="{{ route('article.show', $article->slug) }}"
+        <a href="{{ route('article.show', $article->slug) }}/"
            class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition group">
             @if($article->hero_image)
             <div class="h-44 overflow-hidden">

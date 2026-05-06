@@ -40,11 +40,11 @@
 
     {{-- ボタン群 --}}
     <div class="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-        <a href="{{ route('top') }}"
+        <a href="{{ route('top') }}/"
            class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-xl transition">
             トップページへ戻る
         </a>
-        <a href="{{ route('search', ['gender' => $job->search_group === 'male' ? 'male' : 'female']) }}"
+        <a href="{{ route('search', ['gender' => $job->search_group === 'male' ? 'male' : 'female']) }}/"
            class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-8 rounded-xl transition">
             他の求人を見る
         </a>

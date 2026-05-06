@@ -12,7 +12,7 @@
         </div>
         @endif
 
-        <form action="{{ route('visitor.register.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('visitor.register.store') }}/" method="POST" class="space-y-4">
             @csrf
             @if($redirect ?? null)
             <input type="hidden" name="redirect" value="{{ $redirect }}">
@@ -44,7 +44,7 @@
             </button>
         </form>
         <p class="text-center text-sm text-[#6A6A7E] mt-4">
-            すでに登録済みの方は <a href="{{ route('login') }}" class="text-gold-400 hover:underline">ログイン</a>
+            すでに登録済みの方は <a href="{{ route('login') }}/" class="text-gold-400 hover:underline">ログイン</a>
         </p>
     </div>
 </div>

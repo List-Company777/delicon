@@ -4,7 +4,7 @@
 @include('manage._nav')
 <div class="max-w-4xl mx-auto px-4 pb-12">
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('manage.review.index') }}" class="text-sm text-gray-500 hover:underline">← 投稿者一覧</a>
+        <a href="{{ route('manage.review.index') }}/" class="text-sm text-gray-500 hover:underline">← 投稿者一覧</a>
         <span class="text-gray-300">/</span>
         <h1 class="text-xl font-bold text-gray-800">{{ $user->name }} さんの口コミ</h1>
     </div>
@@ -44,7 +44,7 @@
                         @else
                         <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium">非承認</span>
                         @endif
-                        <form action="{{ route('manage.review.status', $review->id) }}" method="POST">
+                        <form action="{{ route('manage.review.status', $review->id) }}/" method="POST">
                             @csrf @method('PATCH')
                             @if($review->status !== 'approved')
                             <button type="submit" name="status" value="approved" class="text-xs text-green-600 hover:underline">承認</button>
@@ -64,7 +64,7 @@
     {{-- クーポン送付フォーム --}}
     <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-4">割引クーポンを送付する</h2>
-        <form action="{{ route('manage.review.coupon.send', $user->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('manage.review.coupon.send', $user->id) }}/" method="POST" class="space-y-4">
             @csrf
             <div class="grid grid-cols-2 gap-4">
                 <div>

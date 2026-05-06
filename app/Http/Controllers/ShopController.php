@@ -8,6 +8,7 @@ use App\Models\Shop;
 use App\Models\ShopType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
@@ -162,6 +163,16 @@ class ShopController extends Controller
 
         $news = $shop->news()->orderByDesc("is_pinned")->latest()->take(3)->get();
 
-        return view('shop.show', compact('shop', 'casts', 'news'));
+        $footerPrefSlug = null;
+        if ($shop->area_id) {
+            $footerPrefSlug = Cache::remember("slug:pref_by_area:{$shop->area_id}", 86400,
+                fn() => DB::table('prefectures')
+                    ->join('areas', 'areas.prefecture_id', '=', 'prefectures.id')
+                    ->where('areas.id', $shop->area_id)
+                    ->value('prefectures.slug')
+            );
+        }
+
+        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug'));
     }
 }

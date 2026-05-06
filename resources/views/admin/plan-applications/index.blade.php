@@ -17,7 +17,7 @@
 {{-- タブ --}}
 <div class="flex gap-1 mb-6 border-b border-gray-200">
     @foreach(['pending' => '審査待ち', 'approved' => '承認済み', 'rejected' => '却下', 'all' => 'すべて'] as $s => $label)
-    <a href="{{ route('admin.plan-applications.index', ['status' => $s]) }}"
+    <a href="{{ route('admin.plan-applications.index', ['status' => $s]) }}/"
        class="{{ $status === $s
            ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold'
            : 'text-gray-500 hover:text-gray-700' }}
@@ -86,7 +86,7 @@
                     @if($application->status === 'pending')
                         <div class="flex items-center gap-2">
                             {{-- 承認 --}}
-                            <form action="{{ route('admin.plan-applications.approve', $application) }}" method="POST"
+                            <form action="{{ route('admin.plan-applications.approve', $application) }}/" method="POST"
                                   x-data="{ open: false }" @submit.prevent="open ? $el.submit() : (open = true)">
                                 @csrf
                                 <div x-show="open" class="mb-2 space-y-1" x-cloak>
@@ -102,7 +102,7 @@
                             </form>
 
                             {{-- 却下（メモ付き） --}}
-                            <form action="{{ route('admin.plan-applications.reject', $application) }}" method="POST"
+                            <form action="{{ route('admin.plan-applications.reject', $application) }}/" method="POST"
                                   x-data="{ open: false }" @submit.prevent="open ? $el.submit() : (open = true)">
                                 @csrf
                                 <div x-show="open" class="mb-2" x-cloak>

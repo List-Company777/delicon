@@ -19,7 +19,7 @@
         '@type'    => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク',    'item' => route('top') . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => 'all', 'job_slug' => 'all']) . '/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $c['genderLabel'], 'item' => route('shop.list', ['area_slug' => 'all']) . '/'],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $job->shop->name,  'item' => route('job.show', $job->id) . '/'],
             ['@type' => 'ListItem', 'position' => 4, 'name' => '応募フォーム',    'item' => route('apply.create', $job->id) . '/'],
         ],
@@ -37,7 +37,7 @@
     <div class="max-w-2xl mx-auto px-4 text-sm">
         <a href="{{ route('top') }}/" class="opacity-70 hover:opacity-100">ナイトワーク</a>
         <span class="mx-2 opacity-40">›</span>
-        <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => 'all', 'job_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $c['genderLabel'] }}</a>
+        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="opacity-70 hover:opacity-100">{{ $c['genderLabel'] }}</a>
         <span class="mx-2 opacity-40">›</span>
         <a href="{{ route('job.show', $job->id) }}/" class="opacity-70 hover:opacity-100">{{ $job->shop->name }}</a>
         <span class="mx-2 opacity-40">›</span>
@@ -82,7 +82,7 @@
             </div>
         @endif
 
-        <form action="{{ route('apply.store', $job->id) }}" method="POST" novalidate>
+        <form action="{{ route('apply.store', $job->id) }}/" method="POST" novalidate>
             @csrf
 
             {{-- お名前 --}}

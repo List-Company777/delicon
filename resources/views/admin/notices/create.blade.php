@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-xl font-bold text-gray-700">お知らせ作成</h1>
-    <a href="{{ route('admin.notices.index') }}" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
+    <a href="{{ route('admin.notices.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
 </div>
 
 @if($errors->any())
@@ -13,7 +13,7 @@
     </div>
 @endif
 
-<form action="{{ route('admin.notices.store') }}" method="POST"
+<form action="{{ route('admin.notices.store') }}/" method="POST"
       class="bg-white rounded-xl shadow-sm overflow-hidden">
     @csrf
     <table class="w-full text-sm">

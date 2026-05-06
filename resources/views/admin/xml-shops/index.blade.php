@@ -10,12 +10,12 @@
 
 {{-- アカウントフィルタータブ --}}
 <div class="flex gap-1 mb-4 border-b border-gray-200">
-    <a href="{{ route('admin.xml-shops.index', array_filter(['source' => $source ?: null, 'keyword' => $keyword ?: null])) }}"
+    <a href="{{ route('admin.xml-shops.index', array_filter(['source' => $source ?: null, 'keyword' => $keyword ?: null])) }}/"
        class="{{ $filter === 'all' ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
         すべて
         <span class="ml-1 text-xs {{ $filter === 'all' ? 'text-yellow-500' : 'text-gray-400' }}">{{ number_format($totalCount) }}</span>
     </a>
-    <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => 'no_account', 'source' => $source ?: null, 'keyword' => $keyword ?: null])) }}"
+    <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => 'no_account', 'source' => $source ?: null, 'keyword' => $keyword ?: null])) }}/"
        class="{{ $filter === 'no_account' ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
         アカウントなし
         <span class="ml-1 text-xs {{ $filter === 'no_account' ? 'text-yellow-500' : 'text-gray-400' }}">{{ number_format($noAccountCount) }}</span>
@@ -26,13 +26,13 @@
 <div class="flex flex-wrap items-center gap-3 mb-6">
     {{-- xml_source タブ --}}
     <div class="flex gap-1">
-        <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'keyword' => $keyword ?: null])) }}"
+        <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'keyword' => $keyword ?: null])) }}/"
            class="px-3 py-1.5 text-xs rounded-full border transition
                {{ $source === '' ? 'bg-gray-700 text-white border-gray-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}">
             すべての連携元
         </a>
         @foreach($sources as $src)
-        <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'source' => $src, 'keyword' => $keyword ?: null])) }}"
+        <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'source' => $src, 'keyword' => $keyword ?: null])) }}/"
            class="px-3 py-1.5 text-xs rounded-full border transition font-mono
                {{ $source === $src ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}">
             {{ $src }}
@@ -41,14 +41,14 @@
     </div>
 
     {{-- 店舗名検索 --}}
-    <form method="GET" action="{{ route('admin.xml-shops.index') }}" class="flex gap-2 ml-auto">
+    <form method="GET" action="{{ route('admin.xml-shops.index') }}/" class="flex gap-2 ml-auto">
         @if($filter !== 'all') <input type="hidden" name="filter" value="{{ $filter }}"> @endif
         @if($source !== '') <input type="hidden" name="source" value="{{ $source }}"> @endif
         <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
                class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 w-52">
         <button type="submit" class="px-3 py-1.5 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">検索</button>
         @if($keyword)
-            <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'source' => $source ?: null])) }}"
+            <a href="{{ route('admin.xml-shops.index', array_filter(['filter' => $filter !== 'all' ? $filter : null, 'source' => $source ?: null])) }}/"
                class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700">クリア</a>
         @endif
     </form>
@@ -77,7 +77,7 @@
             <tr class="hover:bg-gray-50 transition">
                 <td class="px-4 py-3 text-xs text-gray-400">{{ $shop->id }}</td>
                 <td class="px-4 py-3">
-                    <a href="{{ route('admin.shops.show', $shop->id) }}" class="font-medium text-gray-800 hover:text-yellow-600 transition">
+                    <a href="{{ route('admin.shops.show', $shop->id) }}/" class="font-medium text-gray-800 hover:text-yellow-600 transition">
                         {{ $shop->name }}
                     </a>
                 </td>

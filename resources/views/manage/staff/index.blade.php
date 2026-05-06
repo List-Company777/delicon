@@ -4,7 +4,7 @@
 <div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}" method="POST">@csrf<button class="text-sm opacity-70 hover:opacity-100">ログアウト</button></form>
+        <form action="{{ route('logout') }}/" method="POST">@csrf<button class="text-sm opacity-70 hover:opacity-100">ログアウト</button></form>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
                 <p class="text-xs text-gray-400 mt-0.5">{{ $staffCount }} / {{ $maxJobs }} 件（{{ $shop->hasBudget() ? '有料プラン' : '無料プラン' }}）</p>
             </div>
             @if($staffCount < $maxJobs)
-                <a href="{{ route('manage.staff.create') }}"
+                <a href="{{ route('manage.staff.create') }}/"
                    class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
                     + 求人を追加
                 </a>
@@ -86,7 +86,7 @@
     @if($ownStaffJobs->isEmpty())
         <div class="bg-white rounded-xl shadow-sm p-10 text-center text-gray-400">
             <p>手動登録のスタッフ求人がありません</p>
-            <a href="{{ route('manage.staff.create') }}" class="mt-3 inline-block text-sm text-business-700 hover:underline">求人を追加する →</a>
+            <a href="{{ route('manage.staff.create') }}/" class="mt-3 inline-block text-sm text-business-700 hover:underline">求人を追加する →</a>
         </div>
     @else
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -104,9 +104,9 @@
                     ])>
                         {{ ['active'=>'公開中','inactive'=>'非公開','draft'=>'下書き'][$job->status] }}
                     </span>
-                    <a href="{{ route('manage.staff.edit', $job->id) }}"
+                    <a href="{{ route('manage.staff.edit', $job->id) }}/"
                        class="text-xs text-business-700 hover:underline whitespace-nowrap">編集</a>
-                    <form action="{{ route('manage.staff.destroy', $job->id) }}" method="POST"
+                    <form action="{{ route('manage.staff.destroy', $job->id) }}/" method="POST"
                           onsubmit="return confirm('この求人を削除しますか？')">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs text-red-400 hover:text-red-600">削除</button>

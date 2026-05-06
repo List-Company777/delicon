@@ -4,7 +4,7 @@
 <div class="bg-gray-800 text-white py-4">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">Admin › パートナー管理</h1>
-        <a href="{{ route('admin.partners.create') }}" class="bg-white text-gray-800 text-sm font-bold px-4 py-1.5 rounded hover:bg-gray-100">＋ 新規登録</a>
+        <a href="{{ route('admin.partners.create') }}/" class="bg-white text-gray-800 text-sm font-bold px-4 py-1.5 rounded hover:bg-gray-100">＋ 新規登録</a>
     </div>
 </div>
 
@@ -66,10 +66,10 @@
                         @endif
                     </td>
                     <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
-                        <a href="{{ route('admin.partners.show', $p) }}" class="text-xs text-business-700 hover:underline">詳細</a>
-                        <a href="{{ route('admin.partners.edit', $p) }}" class="text-xs text-gray-500 hover:underline">編集</a>
+                        <a href="{{ route('admin.partners.show', $p) }}/" class="text-xs text-business-700 hover:underline">詳細</a>
+                        <a href="{{ route('admin.partners.edit', $p) }}/" class="text-xs text-gray-500 hover:underline">編集</a>
                         @if($p->isManagement())
-                            <a href="{{ route('admin.partners.downloadCsv', $p) }}" class="text-xs text-purple-600 hover:underline">CSV</a>
+                            <a href="{{ route('admin.partners.downloadCsv', $p) }}/" class="text-xs text-purple-600 hover:underline">CSV</a>
                         @endif
                     </td>
                 </tr>

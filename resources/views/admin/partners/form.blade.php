@@ -8,7 +8,7 @@
 </div>
 
 <div class="max-w-3xl mx-auto px-4 py-8">
-    <a href="{{ route('admin.partners.index') }}" class="text-sm text-gray-400 hover:text-gray-600">← パートナー一覧</a>
+    <a href="{{ route('admin.partners.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">← パートナー一覧</a>
 
     @if($errors->any())
         <div class="mt-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
@@ -17,10 +17,10 @@
     @endif
 
     @if($partner)
-        <form action="{{ route('admin.partners.update', $partner) }}" method="POST" class="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+        <form action="{{ route('admin.partners.update', $partner) }}/" method="POST" class="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
         @csrf @method('PUT')
     @else
-        <form action="{{ route('admin.partners.store') }}" method="POST" class="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+        <form action="{{ route('admin.partners.store') }}/" method="POST" class="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
         @csrf
     @endif
         <table class="w-full text-sm">

@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prefecture extends Model
 {
-    protected $fillable = ['prefecture', 'slug', 'block', 'ticker'];
+    protected $fillable = ["prefecture", "slug", "parent_slug", "block", "ticker"];
+    public $timestamps = false;
 
     // DB column は 'prefecture'、他クラスとの統一のため name アクセサを提供
     public function getNameAttribute(): string

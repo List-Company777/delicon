@@ -7,7 +7,7 @@
             <p class="text-xs opacity-70">代理店ポータル</p>
             <h1 class="font-bold">{{ $partner->company_name }}</h1>
         </div>
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('logout') }}/" method="POST">
             @csrf
             <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
         </form>
@@ -47,12 +47,12 @@
     @endif
 
     {{-- 店舗名検索 --}}
-    <form method="GET" action="{{ route('manage.partner.index') }}" class="mb-4 flex gap-2">
+    <form method="GET" action="{{ route('manage.partner.index') }}/" class="mb-4 flex gap-2">
         <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
         <button type="submit" class="px-4 py-2 bg-business-700 text-white text-sm rounded-lg hover:bg-business-600 transition">検索</button>
         @if($keyword)
-            <a href="{{ route('manage.partner.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
+            <a href="{{ route('manage.partner.index') }}/" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
         @endif
     </form>
 
@@ -96,7 +96,7 @@
                     </td>
                     <td class="px-4 py-3 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <form action="{{ route('manage.partner.actAs', $shop->id) }}" method="POST">
+                            <form action="{{ route('manage.partner.actAs', $shop->id) }}/" method="POST">
                                 @csrf
                                 <button type="submit"
                                         class="text-xs bg-business-700 hover:bg-business-600 text-white px-3 py-1.5 rounded transition">
@@ -104,7 +104,7 @@
                                 </button>
                             </form>
                             @if($partner->isManagement())
-                            <form action="{{ route('manage.partner.shops.destroy', $shop->id) }}" method="POST"
+                            <form action="{{ route('manage.partner.shops.destroy', $shop->id) }}/" method="POST"
                                   onsubmit="return confirm('「{{ $shop->name }}」を完全に削除します。\nオーナーアカウントも削除されます。この操作は取り消せません。')">
                                 @csrf @method('DELETE')
                                 <button type="submit"

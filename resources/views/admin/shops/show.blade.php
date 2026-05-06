@@ -4,7 +4,7 @@
 @section('content')
 
 <div class="flex items-center gap-3 mb-6">
-    <a href="{{ route('admin.shops.index') }}" class="text-sm text-gray-400 hover:text-gray-600">← 店舗審査一覧</a>
+    <a href="{{ route('admin.shops.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">← 店舗審査一覧</a>
     <h1 class="text-xl font-bold text-gray-700">{{ $shop->name }}</h1>
     @if($shop->status === 'active')
         <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 border border-green-200 rounded-full">掲載中</span>
@@ -313,7 +313,7 @@
                 {{-- 公開ページ --}}
                 @if($shop->status === 'active')
                 <div class="border-t border-gray-100 pt-4">
-                    <a href="{{ route('shop.show', $shop->id) }}" target="_blank"
+                    <a href="{{ route('shop.show', $shop->id) }}/" target="_blank"
                        class="text-xs text-blue-500 hover:underline">公開ページを確認 →</a>
                 </div>
                 @endif

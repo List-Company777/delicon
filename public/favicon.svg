@@ -1,6 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#111111"/>
-  <text x="256" y="380" text-anchor="middle"
-        font-family="'Noto Sans JP','Hiragino Sans','Meiryo',sans-serif"
-        font-size="360" font-weight="bold" fill="#FFFFFF">夜</text>
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="80" fill="#09090E"/>
+  <!-- 赤いアクセントバー（下部） -->
+  <rect x="0" y="432" width="512" height="80" rx="0" fill="#C02040"/>
+  <rect x="0" y="432" width="512" height="80" rx="80" fill="#C02040"/>
+  <!-- メインテキスト "デリ" -->
+  <text x="256" y="310"
+        text-anchor="middle"
+        font-family="'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo','Yu Gothic',sans-serif"
+        font-size="240"
+        font-weight="900"
+        fill="#E8E4DC"
+        letter-spacing="-8">デリ</text>
+  <!-- サブテキスト "ヘルリスト" -->
+  <text x="256" y="415"
+        text-anchor="middle"
+        font-family="'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo','Yu Gothic',sans-serif"
+        font-size="100"
+        font-weight="700"
+        fill="#C8A450"
+        letter-spacing="2">ヘルリスト</text>
 </svg>

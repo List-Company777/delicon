@@ -4,7 +4,7 @@
 <div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('logout') }}/" method="POST">
             @csrf
             <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
         </form>
@@ -20,7 +20,7 @@
 
     <h2 class="text-lg font-bold text-gray-800 mb-6">店舗基本情報</h2>
 
-    <form action="{{ route('manage.shop.update') }}" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <form action="{{ route('manage.shop.update') }}/" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden">
         @csrf @method('PUT')
         <table class="w-full text-sm">
             <tr class="border-b border-gray-100">
@@ -43,21 +43,21 @@
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">業種</th>
                 <td class="px-4 py-3">
                     <span class="text-gray-700">{{ $shop->genre?->name ?? '—' }}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">都道府県</th>
                 <td class="px-4 py-3">
                     <span class="text-gray-700">{{ $shop->prefecture?->name ?? '—' }}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">エリア</th>
                 <td class="px-4 py-3">
                     <span class="text-gray-700">{{ $shop->area?->name ?? '—' }}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">

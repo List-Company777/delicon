@@ -57,7 +57,7 @@
 {{-- タブ --}}
 <div class="flex gap-1 mb-6 border-b border-gray-200">
     @foreach(['new' => '未判定', 'mapped' => '仮確定', 'confirmed' => '確定済み', 'excluded' => '除外済み'] as $s => $label)
-    <a href="{{ route('admin.keywords.index', ['status' => $s]) }}"
+    <a href="{{ route('admin.keywords.index', ['status' => $s]) }}/"
        class="{{ $status === $s
            ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold'
            : 'text-gray-500 hover:text-gray-700' }}

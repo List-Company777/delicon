@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cast;
+use App\Models\Prefecture;
 use App\Models\Shop;
 use App\Models\ShopType;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +14,7 @@ class TopController extends Controller
     public function index()
     {
         $shopTypesRaw = ShopType::orderBy('id')->get()
-            ->map(fn($t) => ['id' => $t->id, 'name' => $t->name])
+            ->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'slug' => $t->slug])
             ->all();
         $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
 
@@ -66,10 +67,17 @@ class TopController extends Controller
                 ->orderByDesc('shops_count')
                 ->take(8)
                 ->get()
-                ->map(fn($t) => ['name' => $t->name, 'count' => $t->shops_count])
+                ->map(fn($t) => ['name' => $t->name, 'slug' => $t->slug, 'count' => $t->shops_count])
                 ->all();
         });
         $popularKeywords = collect($popularKeywordsRaw)->map(fn($k) => (object) $k);
+
+        $prefecturesRaw = Cache::remember('delicon:top_prefectures', 86400, function () {
+            return Prefecture::orderBy('id')->get(['id', 'prefecture', 'slug'])
+                ->map(fn($p) => ['id' => $p->id, 'prefecture' => $p->prefecture, 'slug' => $p->slug])
+                ->all();
+        });
+        $prefectures = collect($prefecturesRaw)->map(fn($p) => (object) $p);
 
         $workingTodayRaw = Cache::remember('delicon:top_working_today_' . today()->toDateString(), 300, function () {
             return Cast::with(['shop', 'castType'])
@@ -146,6 +154,7 @@ class TopController extends Controller
             'recommendedShops',
             'newCasts',
             'popularKeywords',
+            'prefectures',
             'workingToday',
             'newArrivals',
             'recommendations'

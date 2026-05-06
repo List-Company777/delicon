@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Genre;
 use App\Models\Job;
 use App\Models\JobType;
+use App\Models\ShopType;
 use App\Models\Prefecture;
 use App\Models\Shop;
 use App\Models\ShopDetail;
@@ -36,10 +37,8 @@ class SearchController extends Controller
 
         // 条件なしの場合はディレクトリLPへリダイレクト
         if (!$area && !$keyword && !$wageType && !$wageMin && !$arubaito) {
-            return redirect()->route('search.directory', [
-                'gender'    => $gender,
+            return redirect()->route('shop.list', [
                 'area_slug' => 'all',
-                'job_slug'  => 'all',
             ], 301);
         }
 
@@ -52,12 +51,10 @@ class SearchController extends Controller
                 ->first();
 
             if ($norm) {
-                // 都道府県のみ指定（職種なし）→ /{gender}/{pref_slug}/all/ へ
+                // 都道府県のみ指定（職種なし）→ /{pref_slug}/shop-list/ へ
                 if ($norm->prefecture_id && !$norm->area_id && !$norm->job_type_id && !$norm->genre_id && !$norm->filter_slug) {
-                    return redirect()->route('search.directory', [
-                        'gender'    => $gender,
+                    return redirect()->route('shop.list', [
                         'area_slug' => $norm->prefecture->slug,
-                        'job_slug'  => 'all',
                     ], 301);
                 }
                 // フリーワード検索へリダイレクト（未経験歓迎など属性系キーワード）
@@ -71,18 +68,15 @@ class SearchController extends Controller
                 $jobTypeSlug = $norm->jobType?->slug ?? $norm->genre?->slug ?? 'all';
                 // filter_slug が設定されていればフィルター付きLPへ
                 if ($norm->filter_slug) {
-                    return redirect()->route('search.filtered_directory', [
-                        'gender'      => $gender,
+                    return redirect()->route('shop.list.filter', [
                         'area_slug'   => $areaSlug,
-                        'job_slug'    => $jobTypeSlug,
                         'filter_slug' => $norm->filter_slug,
                     ], 301);
                 }
-                return redirect()->route('search.directory', [
-                    'gender'      => $gender,
+                return redirect()->route($jobTypeSlug === 'all' ? 'shop.list' : 'shop.list.filter', array_filter([
                     'area_slug'   => $areaSlug,
-                    'job_slug'    => $jobTypeSlug,
-                ], 301);
+                    'filter_slug' => $jobTypeSlug !== 'all' ? $jobTypeSlug : null,
+                ]), 301);
             }
         }
 
@@ -102,6 +96,16 @@ class SearchController extends Controller
         $results = $this->getResults($gender, $area, $keyword, wageType: $wageType, wageMin: $wageMin, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
         return view('search.index', compact('gender', 'area', 'keyword', 'wageType', 'wageMin', 'arubaito', 'results', 'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'shopTypeIds', 'ageRange'));
+    }
+
+    public function shopList(Request $request, string $area_slug)
+    {
+        return $this->renderDirectory($request, 'female', $area_slug, 'all');
+    }
+
+    public function shopListFilter(Request $request, string $area_slug, string $filter_slug)
+    {
+        return $this->renderDirectory($request, 'female', $area_slug, $filter_slug);
     }
 
     // 都道府県LP
@@ -149,7 +153,7 @@ class SearchController extends Controller
     }
 
     // 正規化ディレクトリURL（LP）
-    public function directory(Request $request, string $gender, string $area_slug, string $job_slug)
+    private function renderDirectory(Request $request, string $gender, string $area_slug, string $job_slug)
     {
         // IDのみキャッシュしてモデルはPKで取得（Eloquentモデルの直列化によるデシリアライズエラーを防止）
         $areaId        = $area_slug !== 'all' ? Cache::remember("slug:area_id:{$area_slug}", 86400, fn() => Area::where('slug', $area_slug)->value('id')) : null;
@@ -160,12 +164,16 @@ class SearchController extends Controller
         $jobTypeModel  = $jobTypeId ? JobType::find($jobTypeId) : null;
         $genreId       = ($job_slug !== 'all' && !$jobTypeModel) ? Cache::remember("slug:genre_id:{$job_slug}", 86400, fn() => Genre::where('slug', $job_slug)->value('id')) : null;
         $genreModel    = $genreId ? Genre::find($genreId) : null;
+        $shopTypeIdFromSlug = ($job_slug !== 'all' && !$jobTypeModel && !$genreModel)
+            ? Cache::remember("slug:shoptype_id:{$job_slug}", 86400, fn() => ShopType::where('slug', $job_slug)->value('id'))
+            : null;
+        $shopTypeModelFromSlug = $shopTypeIdFromSlug ? ShopType::find($shopTypeIdFromSlug) : null;
 
         $area    = ($areaModel && $area_slug !== 'all') ? $area_slug : '';
-        $keyword = $job_slug  === 'all' ? '' : $job_slug;
+        $keyword = ($job_slug === 'all' || $shopTypeModelFromSlug) ? '' : $job_slug;
 
         $areaName    = $areaModel?->name ?? $prefOnlyModel?->name ?? '';
-        $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? '';
+        $jobTypeName = $jobTypeModel?->name ?? $genreModel?->name ?? $shopTypeModelFromSlug?->name ?? '';
         $prefModel   = $areaModel?->prefecture;
         $isPrefPage  = (bool) $prefOnlyModel;
 
@@ -177,7 +185,9 @@ class SearchController extends Controller
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $shopTypeIds = array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
+        $shopTypeIds = $shopTypeModelFromSlug
+            ? [$shopTypeIdFromSlug]
+            : array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
         $ageRange    = request()->input('age_range', '');
         $results = $prefOnlyModel
             ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange)
@@ -188,23 +198,25 @@ class SearchController extends Controller
 
         SearchPageView::record($gender, $area_slug, $job_slug);
 
-        $lpStats         = $noindex ? null : $this->computeLpStats($gender, $areaModel, $jobTypeModel ?? $genreModel, $prefOnlyModel ? $area_slug : '', arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
-        $lpRelated       = $this->computeRelatedLinks($gender, $areaModel, $area_slug, $job_slug, $prefOnlyModel);
-        $relatedArticles = $this->computeRelatedArticles($gender);
+        $shopTypesRaw = Cache::remember('delicon:shop_types_list', 86400, fn() =>
+            ShopType::orderBy('id')->get(['id', 'name', 'slug'])
+                ->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'slug' => $t->slug])
+                ->all()
+        );
+        $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
 
-        return response()->view('search.index', compact(
+        return response()->view('search.shop_list', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'lpStats', 'lpRelated', 'relatedArticles',
-            'shopTypeIds', 'ageRange'
+            'noindex', 'shopTypes', 'shopTypeIds', 'ageRange'
         ), $status);
     }
 
     // フィルター付きディレクトリURL（LP + クイックタグ絞り込み）
     // 例: /male/shinjuku/all/hibarai/
-    public function filteredDirectory(Request $request, string $gender, string $area_slug, string $job_slug, string $filter_slug)
+    private function renderFilteredDirectory(Request $request, string $gender, string $area_slug, string $job_slug, string $filter_slug)
     {
         $filterType = JobType::where('slug', $filter_slug)->whereNotNull('keyword_filter')->first();
         if (!$filterType) {
@@ -265,7 +277,7 @@ class SearchController extends Controller
     private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $shopBoolFilter = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '', array $shopTypeIds = [], string $ageRange = '')
     {
         $page    = (int) request()->input('page', 1);
-        $perPage = $gender === 'yoasobi' ? 20 : 12;
+        $perPage = $gender === 'yoasobi' ? 20 : 20;
 
         // キャッシュにはIDのみ保存（Eloquentオブジェクトはシリアライズ不可）
         $idsCacheKey = 'search_ids:' . md5(implode('|', [
@@ -398,7 +410,7 @@ class SearchController extends Controller
                         ->pluck('shop_id')
                     );
                 })
-                ->orderByRaw('rank_score DESC, display_sort ASC')
+                ->orderByRaw('plan ASC, rank_score DESC, display_sort ASC')
                 ->pluck('id')->all();
         }
 
@@ -419,7 +431,7 @@ class SearchController extends Controller
                 ->get();
         } else {
             $idOrder = implode(',', $pageIds);
-            $items = Shop::with(['area', 'genre', 'prefecture', 'detail',
+            $items = Shop::with(['area', 'genre', 'prefecture', 'detail', 'shopType',
                 'castMembers' => fn($c) => $c->where('status', 'active')->orderByRaw('working_date = CURDATE() DESC')->orderBy('sort_order')->take(5),
             ])
             ->whereIn('id', $pageIds)

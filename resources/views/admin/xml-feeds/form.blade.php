@@ -143,7 +143,7 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <a href="{{ route('admin.xml-feeds.index') }}" class="text-sm text-gray-500 hover:underline">← 戻る</a>
+            <a href="{{ route('admin.xml-feeds.index') }}/" class="text-sm text-gray-500 hover:underline">← 戻る</a>
             <button type="submit"
                     class="bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition">
                 {{ $feed ? '更新する' : '追加する' }}
@@ -171,7 +171,7 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.xml-feeds.add-budget', $feed) }}" method="POST" class="flex items-end gap-3">
+        <form action="{{ route('admin.xml-feeds.add-budget', $feed) }}/" method="POST" class="flex items-end gap-3">
             @csrf
             <div>
                 <label class="block text-sm text-gray-600 mb-1">追加金額（円）</label>

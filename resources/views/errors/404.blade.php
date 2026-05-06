@@ -20,7 +20,7 @@
             </a>
         </div>
         
-        <a href="{ route('top') }/"
+        <a href="{{ route('top') }}/"
            class="inline-block bg-deli-500 hover:bg-deli-400 text-white font-bold px-8 py-3 rounded-lg transition">
             トップページへ戻る
         </a>

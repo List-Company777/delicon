@@ -98,10 +98,8 @@ class ArticleController extends Controller
             ->get(['id', 'name', 'slug'])
             ->map(fn($area) => [
                 'label' => $area->name . 'の求人を見る',
-                'url'   => route('search.directory', [
-                    'gender'    => $gender === 'yoasobi' ? 'female' : $gender,
+                'url'   => route('shop.list', [
                     'area_slug' => $area->slug,
-                    'job_slug'  => 'all',
                 ]) . '/',
             ])
             ->all();

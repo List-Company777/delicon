@@ -8,7 +8,7 @@
         <h1 class="font-bold text-lg">店舗管理</h1>
         <div class="flex items-center gap-4 text-sm">
             <span class="opacity-70">{{ auth()->user()->name }}</span>
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}/" method="POST">
                 @csrf
                 <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
             </form>
@@ -22,7 +22,7 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-lg font-bold text-gray-800">応募管理</h2>
-        <form method="GET" action="{{ route('manage.applications.index') }}" class="flex flex-wrap gap-2 items-center">
+        <form method="GET" action="{{ route('manage.applications.index') }}/" class="flex flex-wrap gap-2 items-center">
             @if($jobs->isNotEmpty())
             <select name="job_id" onchange="this.form.submit()"
                     class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500">
@@ -41,7 +41,7 @@
                 未読のみ
             </label>
             @if($jobId || $unread)
-                <a href="{{ route('manage.applications.index') }}" class="text-sm text-gray-400 hover:text-gray-600">クリア</a>
+                <a href="{{ route('manage.applications.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">クリア</a>
             @endif
         </form>
     </div>
@@ -63,7 +63,7 @@
                     default     => [$app->status, 'bg-gray-100 text-gray-500'],
                 };
             @endphp
-            <a href="{{ route('manage.applications.show', $app->id) }}"
+            <a href="{{ route('manage.applications.show', $app->id) }}/"
                class="block bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition">
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">

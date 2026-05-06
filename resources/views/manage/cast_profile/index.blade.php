@@ -4,7 +4,7 @@
 <div class="bg-red-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('logout') }}/" method="POST">
             @csrf
             <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
         </form>
@@ -20,7 +20,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-bold text-gray-800">在籍キャスト一覧</h2>
-        <a href="{{ route('manage.cast-profile.create') }}"
+        <a href="{{ route('manage.cast-profile.create') }}/"
            class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             ＋ キャストを追加
         </a>
@@ -56,9 +56,9 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <a href="{{ route('manage.cast-profile.edit', $cast->id) }}"
+                    <a href="{{ route('manage.cast-profile.edit', $cast->id) }}/"
                        class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded transition">編集</a>
-                    <form action="{{ route('manage.cast-profile.destroy', $cast->id) }}" method="POST"
+                    <form action="{{ route('manage.cast-profile.destroy', $cast->id) }}/" method="POST"
                           onsubmit="return confirm('このキャストを削除しますか？')">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded transition">削除</button>

@@ -12,6 +12,23 @@
 @section('ogp_image', url($cast->img_url))
 @section('twitter_card', 'summary_large_image')
 @endif
+@push('head')
+@php
+    $bc = [
+        '@context' => 'https://schema.org',
+        '@type'    => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type'=>'ListItem','position'=>1,'name'=>'ホーム','item'=>route('top').'/'],
+            ['@type'=>'ListItem','position'=>2,'name'=>'キャスト検索','item'=>route('cast.index').'/'],
+        ],
+    ];
+    if ($cast->shop) {
+        $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>3,'name'=>$cast->shop->name,'item'=>route('shop.show',$cast->shop->id).'/'];
+    }
+    $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>count($bc['itemListElement'])+1,'name'=>$cast->name,'item'=>route('cast.show',$cast->id).'/'];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endpush
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8">

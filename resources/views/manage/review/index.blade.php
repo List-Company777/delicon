@@ -40,7 +40,7 @@
                     </td>
                     <td class="px-4 py-3 text-gray-400 text-xs">{{ \Carbon\Carbon::parse($r->last_reviewed_at)->format('Y/m/d') }}</td>
                     <td class="px-4 py-3 text-right">
-                        <a href="{{ route('manage.review.user', $r->user->id) }}"
+                        <a href="{{ route('manage.review.user', $r->user->id) }}/"
                            class="inline-block text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-medium transition">
                             口コミを見る / クーポン送付
                         </a>

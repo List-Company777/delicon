@@ -50,3 +50,6 @@ Schedule::command('report:monthly')->monthlyOn(1, '00:05');
 
 // 月次レポートメール 第2送信（01:05 に再送）
 Schedule::command('report:monthly')->monthlyOn(1, '01:05');
+
+// フッター都道府県キャッシュ更新（毎日 02:00）
+Schedule::command('cache:warm-footer')->dailyAt('02:00');

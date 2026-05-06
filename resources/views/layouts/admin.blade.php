@@ -16,55 +16,55 @@
     <header class="bg-gray-900 text-white shadow">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-6">
-                <a href="{{ route('admin.dashboard') }}" class="text-lg font-bold tracking-wide hover:opacity-80 transition">
+                <a href="{{ route('admin.dashboard') }}/" class="text-lg font-bold tracking-wide hover:opacity-80 transition">
                     夜ビジ <span class="text-yellow-400 text-sm font-normal">Admin</span>
                 </a>
                 <nav class="hidden md:flex items-center gap-5 text-sm">
-                    <a href="{{ route('admin.dashboard') }}"
+                    <a href="{{ route('admin.dashboard') }}/"
                        class="{{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-gray-400 hover:text-white' }} transition">
                         ダッシュボード
                     </a>
-                    <a href="{{ route('admin.keywords.index') }}"
+                    <a href="{{ route('admin.keywords.index') }}/"
                        class="{{ request()->routeIs('admin.keywords.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         キーワード
                     </a>
-                    <a href="{{ route('admin.shops.index') }}"
+                    <a href="{{ route('admin.shops.index') }}/"
                        class="{{ request()->routeIs('admin.shops.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         掲載審査
                     </a>
-                    <a href="{{ route('admin.plan-applications.index') }}"
+                    <a href="{{ route('admin.plan-applications.index') }}/"
                        class="{{ request()->routeIs('admin.plan-applications.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         有料店舗
                     </a>
-                    <a href="{{ route('admin.partners.index') }}"
+                    <a href="{{ route('admin.partners.index') }}/"
                        class="{{ request()->routeIs('admin.partners.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         代理店
                     </a>
-                    <a href="{{ route('admin.billing.index') }}"
+                    <a href="{{ route('admin.billing.index') }}/"
                        class="{{ request()->routeIs('admin.billing.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         月次集計
                     </a>
-                    <a href="{{ route('admin.notices.index') }}"
+                    <a href="{{ route('admin.notices.index') }}/"
                        class="{{ request()->routeIs('admin.notices.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         お知らせ
                     </a>
-                    <a href="{{ route('admin.xml-shops.index') }}"
+                    <a href="{{ route('admin.xml-shops.index') }}/"
                        class="{{ request()->routeIs('admin.xml-shops.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         XML店舗
                     </a>
-                    <a href="{{ route('admin.master.index') }}"
+                    <a href="{{ route('admin.master.index') }}/"
                        class="{{ request()->routeIs('admin.master.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         職種管理
                     </a>
-                    <a href="{{ route('admin.articles.index') }}"
+                    <a href="{{ route('admin.articles.index') }}/"
                        class="{{ request()->routeIs('admin.articles.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         コラム
                     </a>
-                    <a href="{{ route('admin.search-page-views.index') }}"
+                    <a href="{{ route('admin.search-page-views.index') }}/"
                        class="{{ request()->routeIs('admin.search-page-views.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         PV分析
                     </a>
-                    <a href="{{ route('admin.deletion-requests.index') }}"
+                    <a href="{{ route('admin.deletion-requests.index') }}/"
                        class="{{ request()->routeIs('admin.deletion-requests.*') ? 'text-red-400' : 'text-gray-400 hover:text-white' }} transition">
                         削除依頼
                     </a>
@@ -84,7 +84,7 @@
                     <div x-show="open" x-transition @click.outside="open = false"
                          class="absolute right-0 mt-2 w-72 bg-white text-gray-800 rounded-lg shadow-xl z-50 p-4">
                         <p class="text-xs font-bold text-gray-600 mb-3">エリアを追加</p>
-                        <form action="{{ route('admin.master.area.store') }}" method="POST" class="space-y-2"
+                        <form action="{{ route('admin.master.area.store') }}/" method="POST" class="space-y-2"
                               x-data="{ prefId: '' }">
                             @csrf
                             <select name="prefecture_id" required x-model="prefId"
@@ -129,7 +129,7 @@
                     <div x-show="open" x-transition @click.outside="open = false"
                          class="absolute right-0 mt-2 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-50 p-4">
                         <p class="text-xs font-bold text-gray-600 mb-3">業種を追加</p>
-                        <form action="{{ route('admin.master.job_type.store') }}" method="POST" class="space-y-2">
+                        <form action="{{ route('admin.master.job_type.store') }}/" method="POST" class="space-y-2">
                             @csrf
                             <input type="text" name="name" placeholder="職種名（例：バーテン）" required
                                    class="w-full border border-gray-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-yellow-400">
@@ -161,7 +161,7 @@
 
                 <span class="text-gray-500">|</span>
                 <span class="text-gray-400">{{ auth()->user()->name }}</span>
-                <form action="{{ route('logout') }}" method="POST">
+                <form action="{{ route('logout') }}/" method="POST">
                     @csrf
                     <button type="submit" class="text-gray-400 hover:text-white transition">ログアウト</button>
                 </form>

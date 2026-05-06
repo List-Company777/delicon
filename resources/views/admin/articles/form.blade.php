@@ -8,12 +8,12 @@
     </h1>
     <div class="flex gap-3">
         @if($article->exists)
-        <a href="{{ route('admin.articles.preview', $article) }}" target="_blank"
+        <a href="{{ route('admin.articles.preview', $article) }}/" target="_blank"
            class="text-sm text-gray-400 hover:text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg">
             プレビュー
         </a>
         @endif
-        <a href="{{ route('admin.articles.index') }}" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
+        <a href="{{ route('admin.articles.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
     </div>
 </div>
 

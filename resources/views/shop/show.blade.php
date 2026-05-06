@@ -335,14 +335,14 @@
                 @endif
                 <div class="space-y-1.5 text-xs">
                     @if($shop->area)
-                    <a href="{{ route('shop.region', $shop->area->slug) }}/"
+                    <a href="{{ route('shop.list', ['area_slug' => $shop->area->slug]) }}/"
                        class="flex items-center justify-between text-deli-400 hover:text-deli-300 transition">
                         <span>{{ $shop->area->name }}の店舗一覧</span>
                         <span class="opacity-60">&rsaquo;</span>
                     </a>
                     @endif
                     @if($shop->prefecture && $shop->prefecture->slug)
-                    <a href="{{ route('shop.region', $shop->prefecture->slug) }}/"
+                    <a href="{{ route('shop.list', ['area_slug' => $shop->prefecture->slug]) }}/"
                        class="flex items-center justify-between text-[#8A8A9E] hover:text-deli-400 transition">
                         <span>{{ $shop->prefecture->name }}の店舗一覧</span>
                         <span class="opacity-60">&rsaquo;</span>

@@ -156,9 +156,9 @@
     $currentPage = (int) request()->input('page', 1);
 
     if ($isLp) {
-        $baseUrl = ($isPrefPage ?? false)
-            ? route('search.prefecture', ['gender' => $gender, 'pref_slug' => $area_slug]) . '/'
-            : route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/';
+        $baseUrl = ($job_slug ?? 'all') !== 'all'
+            ? route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $job_slug]) . '/'
+            : route('shop.list', ['area_slug' => $area_slug]) . '/';
         $extraParams  = array_filter([
             'all_you_can_drink' => ($allYouCanDrink ?? false)  ? 1 : null,
             'has_karaoke'       => ($hasKaraoke ?? false)      ? 1 : null,
@@ -238,19 +238,19 @@
     $breadcrumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => 'ナイトワーク', 'item' => route('top') . '/']];
     $pos = 2;
     if ($gender === 'yoasobi') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => route('search.directory', ['gender' => 'yoasobi', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '夜遊びリスト', 'item' => route('shop.list', ['area_slug' => 'all']) . '/'];
     } elseif ($gender === 'female') {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => route('search.directory', ['gender' => 'female', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '女性ナイトワーク', 'item' => route('shop.list', ['area_slug' => 'all']) . '/'];
     } else {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク', 'item' => route('search.directory', ['gender' => 'male', 'area_slug' => 'all', 'job_slug' => 'all']) . '/'];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => '男性ナイトワーク', 'item' => route('shop.list', ['area_slug' => 'all']) . '/'];
     }
     if (isset($prefModel) && $prefModel && empty($isPrefPage)) {
-        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => $prefModel->slug, 'job_slug' => 'all']) . '/'];
+        $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $prefModel->name, 'item' => route('shop.list', ['area_slug' => $prefModel->slug]) . '/'];
     }
     if ($displayArea) {
         $areaItemSlug = $area_slug ?? ($prefModel->slug ?? null);
         if ($areaItemSlug) {
-            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => route('search.directory', ['gender' => $gender, 'area_slug' => $areaItemSlug, 'job_slug' => 'all']) . '/'];
+            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $displayArea, 'item' => route('shop.list', ['area_slug' => $areaItemSlug]) . '/'];
         }
     }
     if ($displayJob) {
@@ -393,11 +393,12 @@
         ];
     }
     $hasWageFilter = $wageType && $wageMin > 0;
+    $activeGenreSlug = ($keyword ?? '') ? (\App\Models\Genre::where('slug', $keyword)->value('slug') ?? '') : '';
 @endphp
 
 <section class="bg-gray-50 border-b border-gray-200" aria-label="絞り込み検索">
     <div class="max-w-6xl mx-auto px-4 py-4"
-         x-data="{ detail: {{ $hasWageFilter ? 'true' : 'false' }}, shopType: {{ ($shopTypeIds ?? []) ? 'true' : 'false' }} }">
+         x-data="{ detail: {{ $hasWageFilter ? 'true' : 'false' }}, shopType: {{ ($shopTypeIds ?? []) ? 'true' : 'false' }}, genreFilter: {{ ($activeGenreSlug ?? '') ? 'true' : 'false' }} }">
         <form action="{{ route('search') }}/" method="GET">
             <input type="hidden" name="gender" value="{{ $gender }}">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -431,7 +432,9 @@
                 ];
                 // チップのURL生成：LPならpathベース、通常検索ならqueryベース
                 $chipBase = $isLp
-                    ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                    ? (($job_slug ?? 'all') !== 'all'
+                        ? route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $job_slug]) . '/'
+                        : route('shop.list', ['area_slug' => $area_slug]) . '/')
                     : url('/search/');
                 $chipQuery = array_filter([
                     'gender'             => $isLp ? null : $gender,
@@ -501,8 +504,8 @@
                         if ($isLpMode) {
                             $isActive = $activeFilter === $tag['slug'];
                             $tagUrl   = $isActive
-                                ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
-                                : route('search.filtered_directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug, 'filter_slug' => $tag['slug']]) . '/';
+                                ? route('shop.list', ['area_slug' => $area_slug]) . '/'
+                                : route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $tag['slug']]) . '/';
                         } else {
                             $isActive = $currentKeyword === $tag['label'];
                             $tagParams = array_filter([
@@ -579,7 +582,7 @@
                         @endforeach
                     </select>
                     @if($hasWageFilter)
-                        <a href="{{ route('search', array_filter(['gender' => $gender, 'area' => $area ?? '', 'keyword' => $keyword ?? ''], fn($v) => $v !== '')) }}"
+                        <a href="{{ route('search', array_filter(['gender' => $gender, 'area' => $area ?? '', 'keyword' => $keyword ?? ''], fn($v) => $v !== '')) }}/"
                            class="text-xs text-gray-400 hover:text-gray-600 underline">条件をリセット</a>
                     @endif
                 </div>
@@ -625,7 +628,9 @@
                         ? array_filter(array_merge($baseQs, ['age_range' => null, 'shop_type_ids' => $activeTypeIds ?: null]), fn($v) => $v !== null)
                         : array_filter(array_merge($baseQs, ['age_range' => $rangeVal, 'shop_type_ids' => $activeTypeIds ?: null]), fn($v) => $v !== null);
                     $chipUrl = ($isLp
-                        ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                        ? (($job_slug ?? 'all') !== 'all'
+                            ? route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $job_slug]) . '/'
+                            : route('shop.list', ['area_slug' => $area_slug]) . '/')
                         : url('/search/'))
                         . ($qs ? '?' . http_build_query($qs) : '');
                 @endphp
@@ -658,7 +663,9 @@
                             'age_range'     => $ageRange ?: null,
                         ]), fn($v) => $v !== null);
                         $url = ($isLp
-                            ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                            ? (($job_slug ?? 'all') !== 'all'
+                                ? route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $job_slug]) . '/'
+                                : route('shop.list', ['area_slug' => $area_slug]) . '/')
                             : url('/search/'))
                             . ($qs ? '?' . http_build_query($qs) : '');
                     @endphp
@@ -674,7 +681,9 @@
                     @php
                         $resetQs = array_filter(array_merge($baseQs, ['shop_type_ids' => null]), fn($v) => $v !== null);
                         $resetUrl = ($isLp
-                            ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                            ? (($job_slug ?? 'all') !== 'all'
+                                ? route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $job_slug]) . '/'
+                                : route('shop.list', ['area_slug' => $area_slug]) . '/')
                             : url('/search/'))
                             . ($resetQs ? '?' . http_build_query($resetQs) : '');
                     @endphp
@@ -682,10 +691,71 @@
                     @endif
                 </div>
             </div>
+
+            {{-- ジャンルフィルター --}}
+            @php
+                $genreList   = \App\Models\Genre::orderBy('sort_order')->get();
+                $activeGenre = $activeGenreSlug ? $genreList->firstWhere('slug', $activeGenreSlug) : null;
+            @endphp
+            @if($genreList->isNotEmpty())
+            <div class="mt-2">
+                <button type="button" @click="genreFilter = !genreFilter"
+                        class="text-xs text-gray-500 hover:opacity-80 flex items-center gap-1">
+                    <span x-text="genreFilter ? '▲ ジャンルを閉じる' : '▼ ジャンルで絞り込む'">▼ ジャンルで絞り込む</span>
+                    @if($activeGenre)
+                        <span class="ml-2 bg-pink-100 text-pink-600 border border-pink-200 rounded-full px-2 py-0.5 text-xs">{{ $activeGenre->name }}</span>
+                    @endif
+                </button>
+                <div class="mt-3 flex flex-wrap gap-2{{ $activeGenre ? '' : ' hidden' }}" :class="{ 'hidden': !genreFilter }">
+                    @foreach($genreList as $g)
+                    @php
+                        $isActiveGenre = $activeGenreSlug === $g->slug;
+                        if ($isLp) {
+                            $genreJobSlug = $isActiveGenre ? 'all' : $g->slug;
+                            $genreUrl = ($genreJobSlug === 'all'
+                                ? route('shop.list', ['area_slug' => $area_slug])
+                                : route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $genreJobSlug]))
+                                . '/';
+                        } else {
+                            $genreQs  = array_filter(array_merge($baseQs, [
+                                'keyword' => $isActiveGenre ? '' : $g->name,
+                            ]), fn($v) => $v !== null && $v !== '');
+                            $genreUrl = url('/search/') . ($genreQs ? '?' . http_build_query($genreQs) : '');
+                        }
+                    @endphp
+                    <a href="{{ $genreUrl }}"
+                       class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
+                              {{ $isActiveGenre
+                                  ? 'bg-pink-500 text-white border-transparent'
+                                  : 'bg-white text-gray-500 border-gray-300 hover:border-pink-400 hover:text-pink-500' }}">
+                        @if($isActiveGenre)✓ @endif{{ $g->name }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
             @endif
         </form>
     </div>
 </section>
+
+{{-- shop/girl タブ --}}
+@if($isLp)
+<div class="bg-white border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4">
+        <nav class="flex overflow-x-auto -mb-px" aria-label="一覧タブ">
+            <a href="{{ route('shop.list', ['area_slug' => $area_slug]) . '/' }}"
+               class="shrink-0 px-5 py-3 text-sm font-medium border-b-2 border-deli-500 text-deli-600 whitespace-nowrap">
+                店舗一覧
+            </a>
+            <a href="{{ route('girl.list', ['area_slug' => $area_slug]) . '/' }}"
+               class="shrink-0 px-5 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition whitespace-nowrap">
+                女性一覧
+            </a>
+        </nav>
+    </div>
+</div>
+@endif
 
 <section class="max-w-6xl mx-auto px-4 py-6" aria-label="{{ $gender === 'yoasobi' ? '夜遊びスポット一覧' : $c['label'] . '求人一覧' }}">
 
@@ -736,7 +806,7 @@
 
     {{-- LINEアラート告知バナー（female/male・1ページ目のみ） --}}
     @if($gender !== 'yoasobi' && $currentPage === 1)
-    <a href="{{ route('alert.register', ['gender' => $gender]) }}" rel="nofollow"
+    <a href="{{ route('alert.register', ['gender' => $gender]) }}/" rel="nofollow"
        class="hidden sm:flex items-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3.5 mb-5 transition group">
         <div class="text-2xl shrink-0">🔔</div>
         <div class="flex-1 min-w-0">
@@ -822,7 +892,7 @@
     @if($results->isEmpty())
         <div class="text-center py-16 text-gray-400">
             <p class="text-lg">該当する{{ $gender === 'yoasobi' ? '夜遊びスポット' : $c['label'] . '求人' }}が見つかりませんでした</p>
-            <a href="{{ route('top') }}" class="mt-4 inline-block text-sm {{ $c['text'] }} hover:underline">
+            <a href="{{ route('top') }}/" class="mt-4 inline-block text-sm {{ $c['text'] }} hover:underline">
                 ← トップに戻る
             </a>
         </div>
@@ -1038,7 +1108,7 @@
             <p class="text-xs font-bold text-gray-400 mb-3">関連エリア</p>
             <div class="flex flex-wrap gap-2">
                 @foreach($lpRelated['areas'] as $relArea)
-                <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => $relArea->slug, 'job_slug' => $job_slug ?? 'all']) }}/"
+                <a href="{{ ($job_slug ?? 'all') !== 'all' ? route('shop.list.filter', ['area_slug' => $relArea->slug, 'filter_slug' => $job_slug]) . '/' : route('shop.list', ['area_slug' => $relArea->slug]) . '/' }}"
                    class="px-3 py-1 text-xs rounded-full border {{ $c['tag'] }} hover:opacity-80 transition">
                     {{ $relArea->name }}
                 </a>
@@ -1051,7 +1121,7 @@
             <p class="text-xs font-bold text-gray-400 mb-3">関連{{ $typeLabel }}</p>
             <div class="flex flex-wrap gap-2">
                 @foreach($lpRelated['types'] as $relType)
-                <a href="{{ route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug ?? 'all', 'job_slug' => $relType->slug]) }}/"
+                <a href="{{ route('shop.list.filter', ['area_slug' => $area_slug ?? 'all', 'filter_slug' => $relType->slug]) }}/"
                    class="px-3 py-1 text-xs rounded-full border {{ $c['tag'] }} hover:opacity-80 transition">
                     {{ $relType->name }}
                 </a>
@@ -1078,7 +1148,7 @@
                 @endif
             </p>
         </div>
-        <a href="{{ route('alert.register', ['gender' => $gender]) }}"
+        <a href="{{ route('alert.register', ['gender' => $gender]) }}/"
            rel="nofollow"
            class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.070 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>

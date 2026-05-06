@@ -13,7 +13,7 @@
             </div>
             <p class="text-[#F0ECE4] font-bold text-lg">{{ $cast->name }}</p>
             <p class="text-xs text-[#6A6A7E] mt-0.5">写メ日記を投稿</p>
-            <a href="{{ route('cast.show', $cast) }}"
+            <a href="{{ route('cast.show', $cast) }}/"
                class="inline-block mt-2 text-xs text-deli-400 hover:text-deli-300 underline underline-offset-2 transition">
                 自分のページを確認する →
             </a>
@@ -25,8 +25,20 @@
         </div>
         @endif
 
+        @if($postedToday)
+        <div class="mb-5 bg-amber-900/40 border border-amber-600/40 text-amber-300 text-sm px-4 py-3 rounded-xl text-center font-medium">
+            本日はすでに投稿済みです。写メ日記は1日1件までです。
+        </div>
+        @endif
+
+        @error('limit')
+        <div class="mb-5 bg-amber-900/40 border border-amber-600/40 text-amber-300 text-sm px-4 py-3 rounded-xl text-center font-medium">
+            {{ $message }}
+        </div>
+        @enderror
+
         <form method="POST" action="/diary/post/{{ $dt->token }}/" enctype="multipart/form-data"
-              class="bg-surface-500 border border-surface-300 rounded-2xl p-6 space-y-5">
+              class="bg-surface-500 border border-surface-300 rounded-2xl p-6 space-y-5 {{ $postedToday ? 'opacity-50 pointer-events-none' : '' }}">
             @csrf
 
             {{-- 写真（最大5枚） --}}
@@ -59,8 +71,8 @@
                 @error('body')<p class="text-xs text-deli-400 mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <button type="submit"
-                    class="w-full bg-deli-500 hover:bg-deli-400 active:scale-95 text-white font-bold py-4 rounded-xl transition text-base">
+            <button type="submit" {{ $postedToday ? 'disabled' : '' }}
+                    class="w-full bg-deli-500 hover:bg-deli-400 active:scale-95 text-white font-bold py-4 rounded-xl transition text-base disabled:opacity-40 disabled:cursor-not-allowed">
                 投稿する
             </button>
         </form>

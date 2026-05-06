@@ -17,7 +17,7 @@
             お店の方にURLの再発行をお願いしてください。
         </p>
 
-        <a href="{{ url('/') }}"
+        <a href="/"
            class="inline-block text-sm text-[#6A6A7E] hover:text-[#C8C4BC] transition underline underline-offset-2">
             トップページへ戻る
         </a>

@@ -11,14 +11,14 @@
             <p class="text-sm text-gray-500 mt-1">掲載店舗の担当者様向けページです</p>
             <p class="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mt-3 inline-block">
                 掲載は基本無料 ―
-                <a href="{{ route('register') }}" class="font-bold underline hover:text-green-900">新規登録はこちら</a>
+                <a href="{{ route('register') }}/" class="font-bold underline hover:text-green-900">新規登録はこちら</a>
             </p>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm p-8">
 
             {{-- LINEログイン --}}
-            <a href="{{ route('auth.line') }}"
+            <a href="{{ route('auth.line') }}/"
                style="background-color:#06C755;"
                onmouseover="this.style.backgroundColor='#05b54d'" onmouseout="this.style.backgroundColor='#06C755'"
                class="flex items-center justify-center gap-3 w-full text-white font-bold py-3 px-6 rounded-lg transition text-sm mb-6">
@@ -35,7 +35,7 @@
             </div>
 
             {{-- メール/パスワードログイン --}}
-            <form action="{{ route('login') }}" method="POST" class="space-y-4">
+            <form action="{{ route('login') }}/" method="POST" class="space-y-4">
                 @csrf
 
                 @if($errors->has('line'))
@@ -62,7 +62,7 @@
                         <input type="checkbox" name="remember" class="rounded">
                         ログイン状態を保持
                     </label>
-                    <a href="{{ route('password.request') }}" class="text-gray-400 hover:text-business-700 transition">パスワードを忘れた方</a>
+                    <a href="{{ route('password.request') }}/" class="text-gray-400 hover:text-business-700 transition">パスワードを忘れた方</a>
                 </div>
 
                 <button type="submit"
@@ -73,12 +73,12 @@
 
             <div class="mt-6 text-center text-sm text-gray-500">
                 アカウントをお持ちでない方は
-                <a href="{{ route('register') }}" class="text-business-700 hover:underline">新規登録</a>
+                <a href="{{ route('register') }}/" class="text-business-700 hover:underline">新規登録</a>
             </div>
         </div>
 
         <p class="text-center text-xs text-gray-400 mt-6">
-            <a href="{{ route('top') }}" class="hover:text-gray-600">← サイトトップに戻る</a>
+            <a href="{{ route('top') }}/" class="hover:text-gray-600">← サイトトップに戻る</a>
         </p>
 
     </div>

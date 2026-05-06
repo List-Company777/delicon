@@ -56,7 +56,7 @@
     </div>
 
     <div class="mt-8 text-center">
-        <a href="{{ route('top') }}" class="text-sm text-gray-400 hover:text-gray-600">← トップに戻る</a>
+        <a href="{{ route('top') }}/" class="text-sm text-gray-400 hover:text-gray-600">← トップに戻る</a>
     </div>
 </div>
 @endsection

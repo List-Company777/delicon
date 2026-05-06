@@ -8,7 +8,7 @@
         <h1 class="font-bold text-lg">店舗管理</h1>
         <div class="flex items-center gap-4 text-sm">
             <span class="opacity-70">{{ auth()->user()->name }}</span>
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}/" method="POST">
                 @csrf
                 <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
             </form>
@@ -20,7 +20,7 @@
 
 <div class="max-w-3xl mx-auto px-4 py-8">
 
-    <a href="{{ route('manage.applications.index') }}"
+    <a href="{{ route('manage.applications.index') }}/"
        class="text-sm text-business-700 hover:underline mb-6 inline-block">← 応募一覧に戻る</a>
 
     @if(session('sent'))
@@ -61,7 +61,7 @@
                 {{-- ステータス変更 --}}
                 <div class="shrink-0">
                     <form x-ref="statusForm"
-                          action="{{ route('manage.applications.status', $application->id) }}" method="POST">
+                          action="{{ route('manage.applications.status', $application->id) }}/" method="POST">
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" x-ref="statusInput" value="{{ $application->status }}">
@@ -148,7 +148,7 @@
 
     {{-- 返信フォーム --}}
     <div class="bg-white rounded-xl shadow-sm p-5">
-        <form action="{{ route('manage.applications.message', $application->id) }}" method="POST">
+        <form action="{{ route('manage.applications.message', $application->id) }}/" method="POST">
             @csrf
             <label class="text-xs text-gray-600 block mb-2 font-medium">メッセージを送る</label>
             @error('body')

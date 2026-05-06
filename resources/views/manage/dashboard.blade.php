@@ -14,7 +14,7 @@
                     {{ auth()->user()->name }}
                 @endif
             </span>
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}/" method="POST">
                 @csrf
                 <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
             </form>
@@ -33,7 +33,7 @@
             @if($s->id === $shop?->id)
                 <span class="text-xs px-3 py-1 rounded-full bg-business-700 text-white font-medium">{{ $s->name }}</span>
             @else
-                <form method="POST" action="{{ route('manage.switch-shop', $s->id) }}">
+                <form method="POST" action="{{ route('manage.switch-shop', $s->id) }}/">
                     @csrf
                     <button type="submit" class="text-xs px-3 py-1 rounded-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 transition">{{ $s->name }}</button>
                 </form>
@@ -74,7 +74,7 @@
         </div>
         <div class="space-y-2">
             @foreach($unreadThreads as $thread)
-            <a href="{{ route('manage.applications.show', $thread->id) }}"
+            <a href="{{ route('manage.applications.show', $thread->id) }}/"
                class="flex items-center justify-between bg-white rounded-lg px-4 py-2.5 hover:bg-red-50 transition border border-red-100 group">
                 <div class="min-w-0">
                     <span class="text-sm font-medium text-gray-800 group-hover:text-red-700">{{ $thread->applicant_name }}</span>
@@ -163,7 +163,7 @@
                         </button>
                     </form>
                     @else
-                    <a href="{{ route('manage.shop.edit') }}"
+                    <a href="{{ route('manage.shop.edit') }}/"
                        class="text-xs px-4 py-1.5 bg-gray-300 text-gray-500 rounded-full font-medium cursor-not-allowed"
                        title="住所情報を入力してから申請できます">
                         掲載申請
@@ -207,7 +207,7 @@
                         @if($detail->opening_hours) {{ $detail->opening_hours }}〜{{ $detail->closing_hours }} @endif
                     </p>
                 @endif
-                <a href="{{ route('manage.business.edit') }}" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
+                <a href="{{ route('manage.business.edit') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
             </div>
 
             {{-- キャスト求人 --}}
@@ -232,7 +232,7 @@
                     {{ $castJobs->count() }}件登録
                     @if($castJobs->count() > 0)・公開中 {{ $activeCastJobs->count() }}件@endif
                 </p>
-                <a href="{{ route('manage.cast.index') }}" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
+                <a href="{{ route('manage.cast.index') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
             </div>
 
             {{-- スタッフ求人 --}}
@@ -257,7 +257,7 @@
                     {{ $staffJobs->count() }}件登録
                     @if($staffJobs->count() > 0)・公開中 {{ $activeStaffJobs->count() }}件@endif
                 </p>
-                <a href="{{ route('manage.staff.index') }}" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
+                <a href="{{ route('manage.staff.index') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
             </div>
 
         </div>
@@ -281,7 +281,7 @@
 
             @if($shop->line_notify_user_id)
                 <p class="text-xs text-gray-500 mb-3">応募があるとこのLINEアカウントに通知が届きます。</p>
-                <form method="POST" action="{{ route('manage.line-notify.remove') }}"
+                <form method="POST" action="{{ route('manage.line-notify.remove') }}/"
                       onsubmit="return confirm('LINE通知設定を解除しますか？')">
                     @csrf
                     @method('DELETE')
@@ -347,7 +347,7 @@
                 <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>ホットリンクで自社サイト・SNSへ誘導</li>
             </ul>
             <div class="mt-4">
-                <a href="{{ route('manage.paid-plan') }}" class="inline-block text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</a>
+                <a href="{{ route('manage.paid-plan') }}/" class="inline-block text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</a>
             </div>
         </div>
         @endif
@@ -373,7 +373,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('manage.paid-plan') }}"
+                <a href="{{ route('manage.paid-plan') }}/"
                    class="text-xs text-business-600 hover:underline shrink-0">
                     詳細・設定 →
                 </a>
@@ -411,7 +411,7 @@
         {{-- 公開ページへのリンク --}}
         @if($shop->status === 'active' && $shop->detail?->status === 'active')
             <div class="text-center">
-                <a href="{{ route('shop.show', $shop->id) }}"
+                <a href="{{ route('shop.show', $shop->id) }}/"
                    target="_blank"
                    class="text-sm text-business-700 hover:underline">
                     公開中の店舗ページを確認 →

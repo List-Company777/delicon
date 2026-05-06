@@ -4,7 +4,7 @@
 <div class="bg-gray-800 text-white py-4">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <h1 class="font-bold">Admin › XML外部連携</h1>
-        <a href="{{ route('admin.xml-feeds.create') }}"
+        <a href="{{ route('admin.xml-feeds.create') }}/"
            class="bg-white text-gray-800 text-sm font-bold px-4 py-1.5 rounded hover:bg-gray-100">＋ 連携先を追加</a>
     </div>
 </div>
@@ -69,7 +69,7 @@
                         {{ $feed->last_imported_at?->format('m/d H:i') ?? '未実行' }}
                     </td>
                     <td class="px-4 py-3">
-                        <form action="{{ route('admin.xml-feeds.toggle', $feed) }}" method="POST">
+                        <form action="{{ route('admin.xml-feeds.toggle', $feed) }}/" method="POST">
                             @csrf
                             <button type="submit" @class([
                                 'text-xs px-2 py-0.5 rounded-full border transition',
@@ -81,7 +81,7 @@
                         </form>
                     </td>
                     <td class="px-4 py-3 text-right">
-                        <a href="{{ route('admin.xml-feeds.edit', $feed) }}"
+                        <a href="{{ route('admin.xml-feeds.edit', $feed) }}/"
                            class="text-xs text-blue-600 hover:underline">編集</a>
                     </td>
                 </tr>

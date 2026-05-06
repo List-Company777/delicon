@@ -310,7 +310,7 @@
             @endforeach
         </div>
         <p class="mt-4 text-center">
-            <a href="{{ route('search') }}/?gender={{ in_array($article->gender, ['female','male','yoasobi']) ? $article->gender : 'female' }}"
+            <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/"
                class="text-sm text-gray-500 hover:text-gray-700 underline">
                 {{ $genderLabel }}の求人をもっと見る →
             </a>

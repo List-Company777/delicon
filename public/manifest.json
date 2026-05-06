@@ -1,13 +1,23 @@
 {
-  "name": "ナイトワークリスト",
-  "short_name": "ナイトワーク",
-  "description": "キャバクラ・ホスト・ガールズバーの求人・夜遊び情報",
+  "name": "デリヘルリスト",
+  "short_name": "デリヘルリスト",
+  "description": "デリヘル・風俗店舗とキャストを探せる情報サイト",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1A535C",
+  "background_color": "#09090E",
+  "theme_color": "#09090E",
   "lang": "ja",
   "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/pwa-icon-192.png",
       "sizes": "192x192",

@@ -33,18 +33,41 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <p class="text-[#A0A0B8] text-base md:text-lg mb-2 max-w-xl">
             デリヘル店のシステム・料金・在籍キャストを詳しく掲載
         </p>
-        <p class="text-[#6A6A7E] text-sm mb-10">デリコン｜デリヘル・風俗総合情報</p>
-        <div class="flex flex-col sm:flex-row gap-4">
-            <a href="{{ route('shop.index') }}/"
-               class="inline-block bg-deli-500 hover:bg-deli-400 text-white font-bold py-3.5 px-10 rounded-lg text-base transition shadow-lg">
-                デリヘル店舗を探す
-            </a>
-            <a href="{{ route('cast.index') }}/"
-               class="inline-block border border-gold-400 text-gold-400 hover:bg-gold-400 hover:text-surface-900 font-bold py-3.5 px-10 rounded-lg text-base transition">
-                キャストを探す
-            </a>
+        <p class="text-[#6A6A7E] text-sm mb-6">デリコン｜デリヘル・風俗総合情報</p>
+        <p class="text-sm font-semibold text-deli-400 mb-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
+
+        {{-- エリアから探す --}}
+        @if($prefectures->isNotEmpty())
+        @php
+            $heroRegions = [
+                '北海道・東北' => ['hokkaido','aomori','iwate','miyagi','akita','yamagata','fukushima'],
+                '関東'        => ['tokyo','kanagawa','saitama','chiba','ibaraki','tochigi','gunma','yamanashi','nagano'],
+                '中部'        => ['aichi','shizuoka','gifu','mie','niigata','toyama','ishikawa','fukui'],
+                '関西'        => ['osaka','hyogo','kyoto','nara','shiga','wakayama'],
+                '中国・四国'  => ['okayama','hiroshima','yamaguchi','tottori','shimane','tokushima','kagawa','ehime','kochi'],
+                '九州・沖縄'  => ['fukuoka','saga','nagasaki','kumamoto','oita','miyazaki','kagoshima','okinawa'],
+            ];
+            $heroPrefMap = $prefectures->keyBy('slug');
+        @endphp
+        <div class="space-y-4">
+            <h2 class="text-sm font-bold text-[#C8C4BC] tracking-wide">エリアから探す</h2>
+            @foreach($heroRegions as $regionName => $slugs)
+            <div>
+                <p class="text-xs text-[#6A6A7E] mb-1.5">{{ $regionName }}</p>
+                <div class="flex flex-wrap gap-1.5">
+                    @foreach($slugs as $slug)
+                    @if($heroPrefMap->has($slug))
+                    <a href="{{ route('area.top', ['area_slug' => $slug]) }}/"
+                       class="bg-surface-600/80 border border-surface-400 hover:border-deli-400 hover:text-deli-400 text-[#C8C4BC] text-xs px-3 py-1 rounded-full transition">
+                        {{ $heroPrefMap[$slug]->prefecture }}
+                    </a>
+                    @endif
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
         </div>
-        <p class="text-sm font-semibold text-deli-400 mt-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
+        @endif
     </div>
 </section>
 
@@ -53,12 +76,12 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 <nav class="bg-surface-600 border-b border-surface-400" aria-label="デリヘル業種別">
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex gap-1 overflow-x-auto py-2">
-            <a href="{{ route('shop.index') }}/"
+            <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/"
                class="flex-shrink-0 bg-deli-500 text-white text-xs font-medium px-4 py-1.5 rounded-full whitespace-nowrap">
                 すべて
             </a>
             @foreach($shopTypes as $type)
-            <a href="{{ route('shop.index') }}/?type={{ $type->id }}"
+            <a href="{{ $type->slug ? route('shop.list.filter', ['area_slug' => 'all', 'filter_slug' => $type->slug]).'/' : route('shop.list', ['area_slug' => 'all']).'/' }}"
                class="flex-shrink-0 bg-surface-400 hover:bg-deli-500 text-[#B0AEAD] hover:text-white text-xs px-4 py-1.5 rounded-full transition whitespace-nowrap">
                 {{ $type->name }}
             </a>
@@ -75,7 +98,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
             おすすめデリヘル店舗
         </h2>
-        <a href="{{ route('shop.index') }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
+        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
     </div>
     @if($recommendedShops->isNotEmpty())
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -116,7 +139,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     </div>
     @endif
     <div class="mt-8 text-center">
-        <a href="{{ route('shop.index') }}/"
+        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/"
            class="inline-block border border-deli-500 text-deli-400 hover:bg-deli-500 hover:text-white font-bold px-10 py-3 rounded-lg transition">
             デリヘル店舗をもっと見る
         </a>
@@ -131,7 +154,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 <span class="w-1 h-6 bg-deli-400 rounded-full inline-block"></span>
                 新着デリヘルキャスト
             </h2>
-            <a href="{{ route('cast.index') }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
+            <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
         </div>
         @if($newCasts->isNotEmpty())
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
@@ -153,7 +176,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             @endforeach
         </div>
         <div class="mt-8 text-center">
-            <a href="{{ route('cast.index') }}/"
+            <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/"
                class="inline-block border border-deli-400 text-deli-400 hover:bg-deli-500 hover:border-deli-500 hover:text-white font-bold px-10 py-3 rounded-lg transition">
                 キャストをもっと見る
             </a>
@@ -266,7 +289,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     </h2>
     <div class="flex flex-wrap gap-3">
         @foreach($popularKeywords as $kw)
-        <a href="{{ route('shop.index') }}/?type={{ $kw->id ?? '' }}"
+        <a href="{{ $kw->slug ? route('shop.list.filter', ['area_slug' => 'all', 'filter_slug' => $kw->slug]).'/' : route('shop.list', ['area_slug' => 'all']).'/' }}"
            class="bg-surface-500 border border-surface-300 hover:border-gold-400 text-[#B0AEAD] hover:text-gold-400 rounded-full px-5 py-2 text-sm transition">
             {{ $kw->name }}
             @if(isset($kw->count) && $kw->count > 0)

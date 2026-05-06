@@ -116,7 +116,7 @@ Route::view('/privacy/',    'legal.privacy')->name('privacy');
 Route::view('/terms/',      'legal.terms')->name('terms');
 Route::view('/advertiser/', 'legal.advertiser')->name('advertiser');
 Route::view('/company/',    'legal.company')->name('company');
-Route::view('/tokutei/',    'legal.tokutei')->name('tokutei');
+
 
 // 代理店パートナー募集（noindex）
 Route::view('/agency/', 'agency.index')->name('agency');
@@ -352,10 +352,10 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 // ========== delicon 公開ルート ==========
 
 // 店舗一覧・詳細
-Route::get('/shops/', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/shops/', fn() => redirect('/all/shop-list/', 301))->name('shop.index');
 Route::get('/shops/{shop}/', [ShopController::class, 'show'])->name('shop.show')->where('shop', '[0-9]+');
-Route::get('/shops/{pref}/', [ShopController::class, 'byPref'])->name('shop.pref')->where('pref', '[a-z][a-z0-9-]+');
-Route::get('/shops/{pref}/{area}/', [ShopController::class, 'byPrefArea'])->name('shop.pref_area')->where('pref', '[a-z][a-z0-9-]+')->where('area', '[a-z][a-z0-9-]+');
+Route::get('/shops/{pref}/', fn(string $pref) => redirect("/{$pref}/shop-list/", 301))->name('shop.pref')->where('pref', '[a-z][a-z0-9-]+');
+Route::get('/shops/{pref}/{area}/', fn(string $pref, string $area) => redirect("/{$area}/shop-list/", 301))->name('shop.pref_area')->where('pref', '[a-z][a-z0-9-]+')->where('area', '[a-z][a-z0-9-]+');
 
 // キャスト一覧・詳細
 // ユーザーダッシュボード・設定
@@ -368,7 +368,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
 });
 
-Route::get('/cast/', [CastController::class, 'index'])->name('cast.index');
+Route::get('/cast/', fn() => redirect('/all/girl-list/', 301))->name('cast.index');
 Route::get('/cast/{cast}/', [CastController::class, 'show'])->name('cast.show')->where('cast', '[0-9]+');
 
 // キャスト写メ日記投稿（トークンURL）
@@ -389,32 +389,44 @@ Route::get('/track/shop/{id}/', [\App\Http\Controllers\TrackController::class, '
 Route::get('/business/{any}', fn(string $any) => redirect('/yoasobi/' . $any, 301))
     ->where('any', '.*');
 
-// 検索（都道府県LP）
-// 例: /male/tokyo/ or /female/osaka/
-Route::get('/{gender}/{pref_slug}/', [SearchController::class, 'prefecture'])
-    ->where([
-        'gender'    => 'male|female|yoasobi',
-        'pref_slug' => '[a-z0-9\-]+',
-    ])
-    ->name('search.prefecture');
+// 店舗一覧: /{area}/shop-list/  and  /{area}/shop-list/{filter}/
+Route::get('/{area_slug}/shop-list/', [\App\Http\Controllers\SearchController::class, 'shopList'])
+    ->where(['area_slug' => '[a-z0-9\-]+'])
+    ->name('shop.list');
 
-// 検索（正規化ディレクトリURL）
-// 例: /male/shinjuku/host/ or /female/ikebukuro/all/
-Route::get('/{gender}/{area_slug}/{job_slug}/', [SearchController::class, 'directory'])
-    ->where([
-        'gender'    => 'male|female|yoasobi',
-        'area_slug' => '[a-z0-9\-]+',
-        'job_slug'  => '[a-z0-9\-]+',
-    ])
-    ->name('search.directory');
+Route::get('/{area_slug}/shop-list/{filter_slug}/', [\App\Http\Controllers\SearchController::class, 'shopListFilter'])
+    ->where(['area_slug' => '[a-z0-9\-]+', 'filter_slug' => '[a-z0-9\-]+'])
+    ->name('shop.list.filter');
 
-// 検索（フィルター付きディレクトリURL）
-// 例: /male/shinjuku/all/hibarai/ or /female/all/all/mikeiken/
-Route::get('/{gender}/{area_slug}/{job_slug}/{filter_slug}/', [SearchController::class, 'filteredDirectory'])
-    ->where([
-        'gender'      => 'male|female|yoasobi',
-        'area_slug'   => '[a-z0-9\-]+',
-        'job_slug'    => '[a-z0-9\-]+',
-        'filter_slug' => '[a-z0-9\-]+',
-    ])
-    ->name('search.filtered_directory');
+// 旧URLからの301リダイレクト (SEO保全)
+Route::get('/{gender}/{area_slug}/', fn($gender, $area_slug) => redirect("/{$area_slug}/shop-list/", 301))
+    ->where(['gender' => 'female|male|yoasobi', 'area_slug' => '[a-z0-9\-]+']);
+
+Route::get('/{gender}/{area_slug}/{job_slug}/', function ($gender, $area_slug, $job_slug) {
+    $filter = ($job_slug === 'all') ? '' : "/{$job_slug}";
+    return redirect("/{$area_slug}/shop-list{$filter}/", 301);
+})->where(['gender' => 'female|male|yoasobi', 'area_slug' => '[a-z0-9\-]+', 'job_slug' => '[a-z0-9\-]+']);
+
+Route::get('/{gender}/{area_slug}/{job_slug}/{filter_slug}/', function ($gender, $area_slug, $job_slug, $filter_slug) {
+    $jobPart = ($job_slug === 'all') ? '' : "/{$job_slug}";
+    return redirect("/{$area_slug}/shop-list{$jobPart}/{$filter_slug}/", 301);
+})->where(['gender' => 'female|male|yoasobi', 'area_slug' => '[a-z0-9\-]+', 'job_slug' => '[a-z0-9\-]+', 'filter_slug' => '[a-z0-9\-]+']);
+
+// 女性一覧 (girl-list) タブ
+Route::get('/{area_slug}/girl-list/', [\App\Http\Controllers\GirlListController::class, 'index'])
+    ->where(['area_slug' => '[a-z0-9\-]+'])
+    ->name('girl.list');
+
+Route::get('/{area_slug}/girl-list/{cast_tab}/', [\App\Http\Controllers\GirlListController::class, 'tab'])
+    ->where(['area_slug' => '[a-z0-9\-]+', 'cast_tab' => 'standby|new|diary|review'])
+    ->name('girl.list.tab');
+
+Route::get('/{area_slug}/girl-list/type/{type_slug}/', [\App\Http\Controllers\GirlListController::class, 'byType'])
+    ->where(['area_slug' => '[a-z0-9\-]+', 'type_slug' => '[a-z0-9\-]+'])
+    ->name('girl.list.type');
+
+
+// エリアトップ
+Route::get('/{area_slug}/', [\App\Http\Controllers\AreaTopController::class, 'show'])
+    ->where(['area_slug' => '[a-z0-9\-]+'])
+    ->name('area.top');

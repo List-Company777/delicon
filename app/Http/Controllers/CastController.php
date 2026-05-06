@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\CastFavorite;
 use App\Models\CastView;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CastController extends Controller
 {
@@ -80,7 +81,18 @@ class CastController extends Controller
             ->take(6)
             ->get();
 
-        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts'));
+        $footerPrefSlug = null;
+        if ($cast->shop?->area_id) {
+            $areaId = $cast->shop->area_id;
+            $footerPrefSlug = Cache::remember("slug:pref_by_area:{$areaId}", 86400,
+                fn() => DB::table('prefectures')
+                    ->join('areas', 'areas.prefecture_id', '=', 'prefectures.id')
+                    ->where('areas.id', $areaId)
+                    ->value('prefectures.slug')
+            );
+        }
+
+        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts', 'footerPrefSlug'));
     }
 
     public function submitDeletionRequest(Request $request, Cast $cast)

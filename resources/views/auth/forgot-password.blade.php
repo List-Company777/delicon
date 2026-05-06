@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
+            <form method="POST" action="{{ route('password.email') }}/" class="space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">メールアドレス</label>
@@ -36,7 +36,7 @@
             </form>
 
             <div class="text-center mt-6">
-                <a href="{{ route('login') }}" class="text-sm text-business-700 hover:underline">ログインに戻る</a>
+                <a href="{{ route('login') }}/" class="text-sm text-business-700 hover:underline">ログインに戻る</a>
             </div>
         </div>
     </div>

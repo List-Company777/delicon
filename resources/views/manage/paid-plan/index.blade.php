@@ -8,7 +8,7 @@
         <h1 class="font-bold text-lg">店舗管理</h1>
         <div class="flex items-center gap-4 text-sm">
             <span class="opacity-70">{{ auth()->user()->name }}</span>
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}/" method="POST">
                 @csrf
                 <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
             </form>
@@ -62,7 +62,7 @@
 
         {{-- 入札単価変更 --}}
         @if($shop->hasBudget())
-            <form action="{{ route('manage.bid-price.update') }}" method="POST">
+            <form action="{{ route('manage.bid-price.update') }}/" method="POST">
                 @csrf
                 @method('PATCH')
                 <label class="text-xs text-gray-600 block mb-1">入札単価を変更する（30〜9,990円・10円単位）</label>
@@ -140,7 +140,7 @@
         @else
             <div class="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm">
                 <p class="font-bold text-red-700 mb-1">チャージ後の返金はできません</p>
-                <p class="text-red-600 text-sm">一度チャージされた予算残高は、掲載取りやめ・退会・残高未消化の場合を含め、<span class="font-bold">いかなる理由があっても返金に応じることができません</span>。<a href="{{ route('advertiser') }}" target="_blank" class="underline">掲載規約 第4条</a>もあわせてご確認ください。</p>
+                <p class="text-red-600 text-sm">一度チャージされた予算残高は、掲載取りやめ・退会・残高未消化の場合を含め、<span class="font-bold">いかなる理由があっても返金に応じることができません</span>。<a href="{{ route('advertiser') }}/" target="_blank" class="underline">掲載規約 第4条</a>もあわせてご確認ください。</p>
             </div>
             <div class="mb-4 text-xs text-gray-500 leading-relaxed">
                 予算追加額と希望入札単価を入力して申し込んでください。<br>
@@ -158,7 +158,7 @@
                 showConfirm() { if (this.isValid) this.confirming = true; }
             }">
                 {{-- 入力フォーム --}}
-                <form action="{{ route('manage.plan.apply') }}" method="POST" class="space-y-4"
+                <form action="{{ route('manage.plan.apply') }}/" method="POST" class="space-y-4"
                       x-show="!confirming" @submit.prevent="showConfirm()">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -215,7 +215,7 @@
                     </div>
                     <p class="text-xs text-gray-500 mb-4">上記の内容で申し込みます。申し込み後に振込先をメールでご案内します。</p>
                     <div class="flex items-center gap-3">
-                        <form action="{{ route('manage.plan.apply') }}" method="POST">
+                        <form action="{{ route('manage.plan.apply') }}/" method="POST">
                             @csrf
                             <input type="hidden" name="amount" :value="amount">
                             <input type="hidden" name="bid_price_requested" :value="bidPrice">

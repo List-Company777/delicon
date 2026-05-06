@@ -24,7 +24,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
-        <a href="{{ route('manage.applications.index') }}" class="text-sm text-red-700 font-medium hover:underline">
+        <a href="{{ route('manage.applications.index') }}/" class="text-sm text-red-700 font-medium hover:underline">
             未対応の応募が <span class="font-bold">{{ $unreadCount }}</span> 件あります → 確認する
         </a>
     </div>
@@ -40,7 +40,7 @@
             <span class="font-bold">代理操作中：{{ $actingShop?->name }}</span>
             <span class="text-amber-600 ml-2">（{{ auth()->user()->partner?->company_name }}）</span>
         </p>
-        <form action="{{ route('manage.partner.stopActing') }}" method="POST">
+        <form action="{{ route('manage.partner.stopActing') }}/" method="POST">
             @csrf
             <button type="submit" class="text-xs text-amber-700 hover:underline font-medium">← 店舗一覧に戻る</button>
         </form>
@@ -67,7 +67,7 @@
                 ];
             @endphp
             @foreach($links as $route => $label)
-                <a href="{{ route($route) }}"
+                <a href="{{ route($route) }}/"
                    @class([
                        'whitespace-nowrap px-3 py-3 border-b-2 transition',
                        'border-business-600 text-business-700 font-medium' => request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')) || ($route === 'manage.shop.news.index' && request()->routeIs('manage.shop.news.*')),

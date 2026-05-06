@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-xl font-bold text-gray-700">お知らせ配信</h1>
-    <a href="{{ route('admin.notices.create') }}"
+    <a href="{{ route('admin.notices.create') }}/"
        class="bg-yellow-500 hover:bg-yellow-400 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
         + 新規作成
     </a>

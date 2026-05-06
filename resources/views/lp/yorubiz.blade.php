@@ -6,10 +6,10 @@
     <title>夜ビズ｜ナイトビジネス運営支援プラットフォーム</title>
     <meta name="description" content="夜ビズは、キャバクラ・ホストクラブ・ガールズバーなどのナイトビジネス向け無料掲載・求人プラットフォームです。集客情報の掲載・キャスト求人・スタッフ求人が基本無料。">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{{ url('/yorubiz/') }}">
+    <link rel="canonical" href="{{ url('/yorubiz/') . '/' }}">
     <meta property="og:title" content="夜ビズ｜ナイトビジネス運営支援プラットフォーム">
     <meta property="og:description" content="集客情報の掲載・キャスト求人・スタッフ求人が基本無料。ナイトビジネスの売上アップと採用をまとめてサポート。">
-    <meta property="og:url" content="{{ url('/yorubiz/') }}">
+    <meta property="og:url" content="/">
     <meta property="og:type" content="website">
     @vite(['resources/css/app.css'])
     <style>
@@ -351,8 +351,8 @@
             <div class="flex items-center gap-4">
                 <a href="https://nightwork-list.com/" class="hover:text-gray-300 transition">ナイトワークリスト</a>
                 <a href="https://fuzoku-list.com/" rel="noopener noreferrer" class="hover:text-gray-300 transition">風俗リスト</a>
-                <a href="{{ route('inquiry') }}" class="hover:text-gray-300 transition">お問い合わせ</a>
-                <a href="{{ route('privacy') }}" class="hover:text-gray-300 transition">プライバシーポリシー</a>
+                <a href="{{ route('inquiry') }}/" class="hover:text-gray-300 transition">お問い合わせ</a>
+                <a href="{{ route('privacy') }}/" class="hover:text-gray-300 transition">プライバシーポリシー</a>
             </div>
         </div>
         <p class="text-center text-gray-500 text-xs mt-6">&copy; {{ date('Y') }} 夜ビズ / ナイトワークリスト. All rights reserved.</p>

@@ -41,7 +41,7 @@
 
         {{-- LINEで登録（LINEアカウントなし or LINE認証済みの場合は非表示） --}}
         @if(!session('line_user_id'))
-        <a href="{{ route('auth.line') }}"
+        <a href="{{ route('auth.line') }}/"
            style="background-color:#06C755;"
            onmouseover="this.style.backgroundColor='#05b54d'" onmouseout="this.style.backgroundColor='#06C755'"
            class="flex items-center justify-center gap-3 w-full text-white font-bold py-3 px-6 rounded-lg transition text-sm mb-4">
@@ -98,7 +98,7 @@
                      this.claimShopMeta = '';
                  }
              }">
-            <form action="{{ route('register') }}" method="POST" class="space-y-5">
+            <form action="{{ route('register') }}/" method="POST" class="space-y-5">
                 @csrf
                 <input type="hidden" name="referral_code" value="{{ session('referral_code', $partner?->referral_code ?? '') }}">
                 <input type="hidden" name="claim_shop_id" :value="claimShopId">
@@ -268,7 +268,7 @@
                         <input type="checkbox" name="agree_terms" value="1" required
                                class="mt-0.5 rounded @error('agree_terms') outline outline-red-400 @enderror">
                         <span>
-                            <a href="{{ route('terms') }}" target="_blank" class="text-business-700 hover:underline">サービス利用規約</a>
+                            <a href="{{ route('terms') }}/" target="_blank" class="text-business-700 hover:underline">サービス利用規約</a>
                             に同意します
                         </span>
                     </label>
@@ -276,7 +276,7 @@
                         <input type="checkbox" name="agree_advertiser" value="1" required
                                class="mt-0.5 rounded @error('agree_advertiser') outline outline-red-400 @enderror">
                         <span>
-                            <a href="{{ route('advertiser') }}" target="_blank" class="text-business-700 hover:underline">掲載規約</a>
+                            <a href="{{ route('advertiser') }}/" target="_blank" class="text-business-700 hover:underline">掲載規約</a>
                             に同意します
                         </span>
                     </label>
@@ -284,7 +284,7 @@
                         <input type="checkbox" name="agree_privacy" value="1" required
                                class="mt-0.5 rounded @error('agree_privacy') outline outline-red-400 @enderror">
                         <span>
-                            <a href="{{ route('privacy') }}" target="_blank" class="text-business-700 hover:underline">プライバシーポリシー</a>
+                            <a href="{{ route('privacy') }}/" target="_blank" class="text-business-700 hover:underline">プライバシーポリシー</a>
                             に同意します
                         </span>
                     </label>
@@ -315,7 +315,7 @@
 
             <div class="mt-4 text-center text-sm text-gray-500">
                 すでにアカウントをお持ちの方は
-                <a href="{{ route('login') }}" class="text-business-700 hover:underline">ログイン</a>
+                <a href="{{ route('login') }}/" class="text-business-700 hover:underline">ログイン</a>
             </div>
         </div>
 

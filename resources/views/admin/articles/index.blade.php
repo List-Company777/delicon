@@ -24,7 +24,7 @@
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-xl font-bold text-gray-700">コラム・記事管理</h1>
         <a x-show="tab === 'articles_published' || tab === 'articles_draft'"
-           href="{{ route('admin.articles.create') }}"
+           href="{{ route('admin.articles.create') }}/"
            class="bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             ＋ 新規作成
         </a>
@@ -173,16 +173,16 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
-                                <a href="{{ route('admin.articles.preview', $article) }}"
+                                <a href="{{ route('admin.articles.preview', $article) }}/"
                                    target="_blank"
                                    class="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-2 py-1 rounded">
                                     プレビュー
                                 </a>
-                                <a href="{{ route('admin.articles.edit', $article) }}"
+                                <a href="{{ route('admin.articles.edit', $article) }}/"
                                    class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded">
                                     編集
                                 </a>
-                                <form action="{{ route('admin.articles.destroy', $article) }}" method="POST"
+                                <form action="{{ route('admin.articles.destroy', $article) }}/" method="POST"
                                       onsubmit="return confirm('削除しますか？')">
                                     @csrf @method('DELETE')
                                     <button class="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-1 rounded">
@@ -245,16 +245,16 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
-                                <a href="{{ route('admin.articles.preview', $article) }}"
+                                <a href="{{ route('admin.articles.preview', $article) }}/"
                                    target="_blank"
                                    class="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-2 py-1 rounded">
                                     プレビュー
                                 </a>
-                                <a href="{{ route('admin.articles.edit', $article) }}"
+                                <a href="{{ route('admin.articles.edit', $article) }}/"
                                    class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded">
                                     編集
                                 </a>
-                                <form action="{{ route('admin.articles.destroy', $article) }}" method="POST"
+                                <form action="{{ route('admin.articles.destroy', $article) }}/" method="POST"
                                       onsubmit="return confirm('削除しますか？')">
                                     @csrf @method('DELETE')
                                     <button class="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-1 rounded">
@@ -297,7 +297,7 @@
                     審査待ち
                     <span class="ml-1 text-xs font-normal text-amber-600">（{{ $pendingTopics->count() }}件）</span>
                 </p>
-                <form action="{{ route('admin.article-topics.suggest') }}" method="POST"
+                <form action="{{ route('admin.article-topics.suggest') }}/" method="POST"
                       x-data="{ loading: false }" @submit="loading = true">
                     @csrf
                     <button type="submit" :disabled="loading"
@@ -332,13 +332,13 @@
                     @endif
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <form action="{{ route('admin.article-topics.approve', $topic) }}" method="POST">
+                    <form action="{{ route('admin.article-topics.approve', $topic) }}/" method="POST">
                         @csrf @method('PATCH')
                         <button class="text-xs text-green-600 hover:text-green-800 border border-green-200 hover:border-green-400 px-2 py-1 rounded transition">
                             承認
                         </button>
                     </form>
-                    <form action="{{ route('admin.article-topics.destroy', $topic) }}" method="POST"
+                    <form action="{{ route('admin.article-topics.destroy', $topic) }}/" method="POST"
                           onsubmit="return confirm('却下して削除しますか？')">
                         @csrf @method('DELETE')
                         <button class="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 px-2 py-1 rounded transition">
@@ -353,7 +353,7 @@
 
             <div class="px-4 py-4 bg-gray-50 border-t border-gray-100">
                 <p class="text-xs font-medium text-gray-500 mb-2">手動でテーマを追加（審査待ちへ）</p>
-                <form action="{{ route('admin.article-topics.store') }}" method="POST" class="flex gap-2">
+                <form action="{{ route('admin.article-topics.store') }}/" method="POST" class="flex gap-2">
                     @csrf
                     <input type="text" name="title" required placeholder="記事テーマタイトル"
                            class="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-yellow-400">
@@ -383,7 +383,7 @@
             <div class="flex items-center gap-3 px-4 py-2.5 border-b border-gray-100 hover:bg-gray-50">
                 <span class="text-xs px-1.5 py-0.5 rounded {{ $genderBadge($topic->gender) }} shrink-0">{{ $topic->gender_label }}</span>
                 <p class="flex-1 text-sm text-gray-800 truncate">{{ $topic->title }}</p>
-                <form action="{{ route('admin.article-topics.destroy', $topic) }}" method="POST"
+                <form action="{{ route('admin.article-topics.destroy', $topic) }}/" method="POST"
                       onsubmit="return confirm('作成予定から削除しますか？')" class="shrink-0">
                     @csrf @method('DELETE')
                     <button class="text-xs text-gray-300 hover:text-red-500 transition">✕</button>
@@ -426,7 +426,7 @@
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-xs px-2 py-0.5 rounded-full {{ $badgeColor }}">{{ $prompt->gender_label }}</span>
                 </div>
-                <form action="{{ route('admin.article-generation-prompts.update', $prompt->gender) }}" method="POST">
+                <form action="{{ route('admin.article-generation-prompts.update', $prompt->gender) }}/" method="POST">
                     @csrf @method('PUT')
                     <textarea name="instruction" rows="4" maxlength="1000"
                               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-yellow-400 resize-none"

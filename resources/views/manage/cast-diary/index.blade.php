@@ -24,7 +24,7 @@
         @if($token && !$token->isExpired())
         <div class="flex gap-2 items-center">
             <input type="text" readonly id="token-url"
-                   value="{{ url('/diary/post/' . $token->token . '/') }}"
+                   value="/"
                    class="flex-1 bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-xs text-[#C8C4BC] min-w-0">
             <button onclick="navigator.clipboard.writeText(document.getElementById('token-url').value).then(()=>this.textContent='コピー済み')"
                     class="shrink-0 bg-deli-500 hover:bg-deli-400 text-white text-xs font-bold px-3 py-2 rounded-lg transition">

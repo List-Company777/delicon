@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-xl font-bold text-gray-700">お知らせ詳細</h1>
-    <a href="{{ route('admin.notices.index') }}" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
+    <a href="{{ route('admin.notices.index') }}/" class="text-sm text-gray-400 hover:text-gray-600">← 一覧に戻る</a>
 </div>
 
 @if(session('success'))
@@ -27,7 +27,7 @@
             @endif
         </div>
         @if(! $notice->isSent())
-            <form action="{{ route('admin.notices.send', $notice) }}" method="POST"
+            <form action="{{ route('admin.notices.send', $notice) }}/" method="POST"
                   onsubmit="return confirm('{{ $notice->targetLabel() }}（{{ number_format($targetCount) }}人）にメールを送信します。よろしいですか？')">
                 @csrf
                 <button type="submit"

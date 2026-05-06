@@ -14,6 +14,13 @@ class DiaryPostController extends Controller
         return CastDiaryToken::with('cast')->where('token', $token)->first();
     }
 
+    private function postedToday(\App\Models\Cast $cast): bool
+    {
+        return CastDiary::where('cast_id', $cast->id)
+            ->whereDate('created_at', today())
+            ->exists();
+    }
+
     public function show(string $token)
     {
         $t = $this->findToken($token);
@@ -23,9 +30,10 @@ class DiaryPostController extends Controller
         if ($t->isExpired()) {
             return response()->view('diary.expired', [], 410);
         }
-        $cast = $t->cast;
-        $dt   = $t;
-        return view('diary.post', compact('cast', 'dt'));
+        $cast       = $t->cast;
+        $dt         = $t;
+        $postedToday = $this->postedToday($cast);
+        return view('diary.post', compact('cast', 'dt', 'postedToday'));
     }
 
     public function store(Request $request, string $token, ImageService $imgSvc)
@@ -38,6 +46,10 @@ class DiaryPostController extends Controller
             return response()->view('diary.expired', [], 410);
         }
         $cast = $t->cast;
+
+        if ($this->postedToday($cast)) {
+            return back()->withErrors(['limit' => '本日はすでに投稿済みです。写メ日記は1日1件までです。']);
+        }
 
         $request->validate([
             'body'      => ['nullable', 'string', 'max:2000'],
