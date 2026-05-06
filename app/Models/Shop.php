@@ -188,6 +188,16 @@ class Shop extends Model
         return $this->hasMany(Cast::class)->where("status", "active")->orderBy("sort_order");
     }
 
+    public function getShopBannerUrlAttribute(): ?string
+    {
+        if (!$this->shop_file_name) return null;
+        $path = $this->shop_file_name;
+        if (!pathinfo($path, PATHINFO_EXTENSION)) {
+            $path .= '.jpg';
+        }
+        return $path;
+    }
+
     public function shopType(): BelongsTo
     {
         return $this->belongsTo(ShopType::class, "shop_type_id");

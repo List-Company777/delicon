@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-/* 求人行リンクの矢印アイコン — インラインSVGをDOMから排除してCSS化 */
 .job-row-link::after {
     content: '';
     display: block;
@@ -13,7 +12,6 @@
     background-repeat: no-repeat;
 }
 
-/* 管理画面フォームテーブル：スマホでラベル列を固定幅に縮小して入力欄を広げる */
 @media (max-width: 639px) {
     .manage-table th {
         width: 5.5rem;
@@ -35,12 +33,48 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-
 @theme {
     --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* 営業リスト：ティール  ベース:#B0D0D3 / メイン:#F8F7F9 / アクセント:#1A535C */
+    /* ===================== delicon ブランドカラー ===================== */
+    /* クリムゾン（メインアクセント） */
+    --color-deli-50:  #FFF0F3;
+    --color-deli-100: #FFD6DF;
+    --color-deli-200: #FFB0C3;
+    --color-deli-300: #FF7A9A;
+    --color-deli-400: #E04A6E;
+    --color-deli-500: #C02040;
+    --color-deli-600: #9A1530;
+    --color-deli-700: #730F22;
+    --color-deli-800: #4D0917;
+    --color-deli-900: #26040B;
+
+    /* ゴールド（サブアクセント・高級感） */
+    --color-gold-50:  #FFFBEB;
+    --color-gold-100: #FEF3C7;
+    --color-gold-200: #FCDF87;
+    --color-gold-300: #F8C84E;
+    --color-gold-400: #C8A450;
+    --color-gold-500: #A67C30;
+    --color-gold-600: #7C5A20;
+    --color-gold-700: #5A3F14;
+    --color-gold-800: #3A280C;
+    --color-gold-900: #1E1406;
+
+    /* ダークサーフェス（背景・カード） */
+    --color-surface-50:  #3A3A4E;
+    --color-surface-100: #2E2E42;
+    --color-surface-200: #252538;
+    --color-surface-300: #1E1E2E;
+    --color-surface-400: #18182A;
+    --color-surface-500: #141422;
+    --color-surface-600: #10101A;
+    --color-surface-700: #0D0D14;
+    --color-surface-800: #09090E;
+    --color-surface-900: #05050A;
+
+    /* ナイトワークリスト既存（管理画面用・変更しない） */
     --color-business-50:  #F3F8F9;
     --color-business-100: #D9ECED;
     --color-business-200: #C3E2E5;
@@ -52,7 +86,6 @@
     --color-business-800: #133F47;
     --color-business-900: #0C2B30;
 
-    /* 男性向け：ダークネイビー + ティール  ベース:#0B132B / メイン:#1C2541 / アクセント:#4ECDC4 */
     --color-male-50:  #EAF9F8;
     --color-male-100: #C6EEEC;
     --color-male-200: #9EE3E0;
@@ -64,7 +97,6 @@
     --color-male-800: #0B132B;
     --color-male-900: #060B18;
 
-    /* 女性向け：スモーキーローズ  彩度を落とし大人向けに */
     --color-female-50:  #FDF2F4;
     --color-female-100: #F9E0E5;
     --color-female-200: #F0BFCA;

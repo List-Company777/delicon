@@ -26,8 +26,8 @@
             <div class="bg-white rounded-lg shadow p-5 mb-5">
                 <div class="flex gap-4">
                     @if($shop->shop_file_name)
-                    <img src="/img/{{ ltrim($shop->shop_file_name, '/') }}" alt="{{ $shop->name }}"
-                         class="w-32 h-24 object-cover rounded shrink-0" onerror="this.style.display='none'">
+                    <img src="{{ $shop->shop_banner_url }}" alt="{{ $shop->name }}"
+                         class="w-32 h-24 object-cover rounded shrink-0 img-onerror-hide">
                     @endif
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap gap-1 mb-2">
@@ -113,7 +113,7 @@
                     <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
                         <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                              class="w-full aspect-[3/4] object-cover rounded mb-1 group-hover:opacity-90 transition"
-                             loading="lazy" onerror="this.src='/img/no-cast.jpg'">
+                             loading="lazy" class="img-onerror-cast">
                         <p class="text-xs font-medium group-hover:text-red-600 transition">{{ $cast->name }}</p>
                         @if($cast->castType)
                         <p class="text-xs text-gray-400">{{ $cast->castType->name }}</p>

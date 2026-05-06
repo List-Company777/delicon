@@ -26,7 +26,6 @@ class SecurityHeaders
             "frame-ancestors 'none'",
             "form-action 'self'",
             "base-uri 'self'",
-            "upgrade-insecure-requests",
         ]);
 
         $response->headers->set('Content-Security-Policy', $csp);

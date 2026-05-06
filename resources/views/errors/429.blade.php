@@ -1,33 +1,19 @@
 @extends('layouts.app')
-
-@section('title', 'アクセスが一時的に制限されています')
-@section('robots', 'noindex, nofollow')
+@section('title', 'リクエストが多すぎます')
+@section('robots', 'noindex, follow')
 
 @section('content')
-<div class="max-w-lg mx-auto px-4 py-16 text-center">
-
-    <p class="text-6xl font-bold text-orange-400 mb-4">429</p>
-    <h1 class="text-xl font-bold text-gray-700 mb-3">アクセスが一時的に制限されています</h1>
-    <p class="text-gray-500 text-sm mb-8">
-        短時間に複数回のログイン試行があったため、セキュリティのためアクセスを一時的に制限しました。<br>
-        しばらく時間をおいてから再度お試しください。
-    </p>
-
-    <div class="bg-orange-50 border border-orange-200 rounded-xl px-6 py-4 mb-8 text-left">
-        <p class="text-xs font-bold text-orange-700 mb-2">制限が解除されるまでの目安</p>
-        <p class="text-sm text-orange-800">約 <span class="font-bold">15分</span> 後に再試行できます。</p>
-    </div>
-
-    <div class="space-y-3">
-        <a href="{{ route('login') }}"
-           class="block w-full px-6 py-3 bg-business-700 hover:bg-business-600 text-white text-sm font-bold rounded-lg transition">
-            ログインページへ戻る
-        </a>
-        <a href="{{ route('password.request') }}"
-           class="block w-full px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm rounded-lg transition">
-            パスワードをお忘れの方はこちら
+<div class="min-h-[60vh] flex items-center justify-center px-4 py-16">
+    <div class="text-center max-w-lg">
+        <p class="text-7xl font-bold text-deli-500 mb-2 tracking-tight">429</p>
+        <div class="w-16 h-px bg-gold-400 mx-auto mb-6"></div>
+        <h1 class="text-xl font-bold text-[#E8E4DC] mb-3">リクエストが多すぎます</h1>
+        <p class="text-[#8A8A9E] text-sm mb-10 leading-7">短時間に多くのリクエストが送信されました。<br>しばらく時間をおいてから再度お試しください。</p>
+        
+        <a href="{ route('top') }/"
+           class="inline-block bg-deli-500 hover:bg-deli-400 text-white font-bold px-8 py-3 rounded-lg transition">
+            トップページへ戻る
         </a>
     </div>
-
 </div>
 @endsection

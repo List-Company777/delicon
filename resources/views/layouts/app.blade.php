@@ -185,11 +185,19 @@
             <div class="border-t border-surface-400 pt-6 text-center text-xs text-[#6A6A7E]">
                 <p class="text-[#E8E4DC] font-bold tracking-widest mb-2">deli<span class="text-gold-400">con</span></p>
                 <p>© {{ date('Y') }} デリコン All Rights Reserved.</p>
-                <p class="mt-1">本サイトは18歳以上の方を対象としています。</p>
+                <p class="mt-2 text-deli-400 font-semibold">⚠ 本サイトは18歳以上の方を対象としています。</p>
             </div>
         </div>
     </footer>
 
+    <script @nonce>
+    document.addEventListener('error', function(e) {
+        var t = e.target;
+        if (t.tagName !== 'IMG') return;
+        if (t.classList.contains('img-onerror-hide')) { t.style.display='none'; }
+        if (t.classList.contains('img-onerror-cast')) { if (t.src !== location.origin+'/img/no-cast.jpg') t.src='/img/no-cast.jpg'; }
+    }, true);
+    </script>
     @stack('scripts')
 </body>
 </html>

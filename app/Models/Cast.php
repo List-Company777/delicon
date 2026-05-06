@@ -84,7 +84,7 @@ class Cast extends Model
     public function getImgUrlAttribute(): string
     {
         if ($this->img_file_name && !str_starts_with($this->img_file_name, '/img/common/')) {
-            return '/img/girl/00/' . ltrim($this->img_file_name, '/');
+            return $this->img_file_name . 'big.jpg';
         }
         return '/img/no-cast.jpg';
     }
