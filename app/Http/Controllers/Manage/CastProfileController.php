@@ -29,14 +29,34 @@ class CastProfileController extends BaseController
     public function create()
     {
         $shop = $this->shopOrFail();
+        $limit = $this->castLimit($shop->plan ?? 5);
+        $currentCount = Cast::where('shop_id', $shop->id)->where('status', 'active')->count();
         $castTypes = CastType::orderBy('id')->get();
         $bodyTypes = CastBodyType::orderBy('id')->get();
-        return view('manage.cast_profile.create', compact('shop', 'castTypes', 'bodyTypes'));
+        return view('manage.cast_profile.create', compact('shop', 'castTypes', 'bodyTypes', 'limit', 'currentCount'));
+    }
+
+    private function castLimit(int $plan): ?int
+    {
+        return match($plan) {
+            5       => 10,
+            4       => 20,
+            default => null,
+        };
     }
 
     public function store(Request $request)
     {
         $shop = $this->shopOrFail();
+
+        // プラン別登録上限チェック
+        $limit = $this->castLimit($shop->plan ?? 5);
+        if ($limit !== null) {
+            $current = Cast::where('shop_id', $shop->id)->where('status', 'active')->count();
+            if ($current >= $limit) {
+                return back()->withErrors(['name' => "在籍登録数の上限（{$limit}人）に達しています。プランのアップグレードについてお問い合わせください。"])->withInput();
+            }
+        }
 
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:100'],
@@ -56,6 +76,17 @@ class CastProfileController extends BaseController
             'join_date'      => ['nullable', 'date'],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
+
+        // 名前＋年齢の重複チェック（同じ店舗内）
+        if (!empty($data['age'])) {
+            $exists = Cast::where('shop_id', $shop->id)
+                ->where('name', $data['name'])
+                ->where('age', (int) $data['age'])
+                ->exists();
+            if ($exists) {
+                return back()->withErrors(['name' => "「{$data['name']}」（{$data['age']}歳）は既に登録されています。"])->withInput();
+            }
+        }
 
         $cast = new Cast();
         $cast->shop_id = $shop->id;
