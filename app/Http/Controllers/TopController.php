@@ -30,6 +30,9 @@ class TopController extends Controller
                     'name'           => $shop->name,
                     'catche'         => $shop->catche,
                     'shop_file_name' => $shop->shop_file_name,
+                    'shop_banner_url' => $shop->shop_file_name
+                        ? ($shop->shop_file_name . (!pathinfo($shop->shop_file_name, PATHINFO_EXTENSION) ? '.jpg' : ''))
+                        : null,
                     'shop_type_name' => $shop->shopType?->name,
                     'cast_count'     => $shop->castMembers->count(),
                     'price_60'       => $shop->price_60,
@@ -51,6 +54,9 @@ class TopController extends Controller
                     'age'            => $cast->age,
                     'cup'            => $cast->cup,
                     'img_file_name'  => $cast->img_file_name,
+                    'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg'
+                        : '/img/no-cast.jpg',
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
