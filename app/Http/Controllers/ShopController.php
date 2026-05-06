@@ -29,6 +29,12 @@ class ShopController extends Controller
                 $q2->where('name', 'like', $q)->orWhere('address', 'like', $q)
             );
         }
+        if ($request->filled('area_id')) {
+            $query->where('area_id', (int) $request->area_id);
+        }
+        if ($request->filled('prefecture_id')) {
+            $query->where('prefecture_id', (int) $request->prefecture_id);
+        }
 
         $shops = $query->orderByDesc('ranking_count')
             ->orderBy('name')

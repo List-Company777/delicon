@@ -7,6 +7,10 @@
     'キャスト・システム・料金などをご紹介。'
 )
 @section('canonical', route('shop.show', $shop->id) . '/')
+@if($shop->banner_url)
+@section('ogp_image', $shop->banner_url)
+@section('twitter_card', 'summary_large_image')
+@endif
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8">
@@ -206,11 +210,20 @@
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     @forelse($casts as $cast)
+                    @php
+                        $isWorking = $cast->working_date && $cast->working_date->isToday();
+                        $isNew     = $cast->join_date && $cast->join_date->greaterThanOrEqualTo(today()->subDays(30));
+                    @endphp
                     <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
-                        <div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-500 transition">
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : 'border-surface-300 group-hover:border-deli-500' }} transition">
                             <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                                  class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300"
                                  loading="lazy">
+                            @if($isWorking)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">待機中</span>
+                            @elseif($isNew)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-gold-500 text-surface-800 px-1.5 py-0.5 rounded-full leading-none">NEW</span>
+                            @endif
                         </div>
                         <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
                         @if($cast->age)
@@ -307,8 +320,72 @@
                 </div>
                 @endif
             </div>
+
+            {{-- 利用エリア --}}
+            @if($shop->eigyo_area || $shop->area || $shop->prefecture)
+            <div class="bg-surface-500 border border-surface-300 rounded-xl p-4">
+                <p class="text-xs font-bold text-[#E8E4DC] mb-3 flex items-center gap-2">
+                    <span class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>利用エリア
+                </p>
+                @if($shop->eigyo_area)
+                <p class="text-xs text-[#B0AEAD] leading-relaxed mb-3 whitespace-pre-wrap">{{ $shop->eigyo_area }}</p>
+                @endif
+                <div class="space-y-1.5 text-xs">
+                    @if($shop->area)
+                    <a href="{{ route('shop.index') }}?area_id={{ $shop->area_id }}/"
+                       class="flex items-center justify-between text-deli-400 hover:text-deli-300 transition">
+                        <span>{{ $shop->area->name }}の店舗一覧</span>
+                        <span class="opacity-60">&rsaquo;</span>
+                    </a>
+                    @endif
+                    @if($shop->prefecture)
+                    <a href="{{ route('shop.index') }}?prefecture_id={{ $shop->prefecture_id }}/"
+                       class="flex items-center justify-between text-[#8A8A9E] hover:text-deli-400 transition">
+                        <span>{{ $shop->prefecture->name }}の店舗一覧</span>
+                        <span class="opacity-60">&rsaquo;</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
 
     </div>
 </div>
 @endsection
+@push('head')
+@php
+    $ld_breadcrumb = [
+        '@context' => 'https://schema.org',
+        '@type'    => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type'=>'ListItem','position'=>1,'name'=>'ホーム','item'=>route('top').'/'],
+            ['@type'=>'ListItem','position'=>2,'name'=>'店舗一覧','item'=>route('shop.index').'/'],
+            ['@type'=>'ListItem','position'=>3,'name'=>$shop->name,'item'=>route('shop.show',$shop->id).'/'],
+        ],
+    ];
+    $ld_local = [
+        '@context'    => 'https://schema.org',
+        '@type'       => 'LocalBusiness',
+        'name'        => $shop->name,
+        'telephone'   => $shop->tel ?? null,
+        'address'     => $shop->address ? [
+            '@type'           => 'PostalAddress',
+            'streetAddress'   => $shop->address,
+            'addressLocality' => $shop->address_locality ?? null,
+            'addressRegion'   => optional($shop->prefecture)->name,
+            'postalCode'      => $shop->postal_code ?? null,
+            'addressCountry'  => 'JP',
+        ] : null,
+        'image'       => $shop->banner_url ? [$shop->banner_url] : null,
+        'openingHours' => $shop->all_time ? ['Mo-Su 00:00-23:59'] : null,
+    ];
+    // null を取り除く
+    $ld_local = array_filter($ld_local, fn($v) => $v !== null);
+    if (isset($ld_local['address'])) {
+        $ld_local['address'] = array_filter($ld_local['address'], fn($v) => $v !== null);
+    }
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_breadcrumb, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ld_local, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endpush
