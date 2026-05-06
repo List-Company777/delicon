@@ -39,7 +39,7 @@
         <p class="text-xs font-bold text-[#8A8A9E] mb-2 uppercase tracking-wider">エリアで探す</p>
         <div class="flex flex-wrap gap-2">
             @foreach($areas as $area)
-            <a href="{{ route('shop.index') }}?area_id={{ $area->id }}"
+            <a href="{{ $area->pref_slug ? route('shop.pref_area', ['pref' => $area->pref_slug, 'area' => $area->slug]) . '/' : route('shop.index') . '?area_id=' . $area->id }}"
                class="text-xs bg-surface-500 border border-surface-300 hover:border-deli-500 text-[#C8C4BC] hover:text-deli-400 px-3 py-1.5 rounded-full transition">
                 {{ $area->name }}
             </a>

@@ -19,11 +19,12 @@ class ShopController extends Controller
         $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
 
         // エリア一覧（有効な店舗が存在するエリアのみ、キャッシュ済み）
-        $areasRaw = Cache::remember('delicon:active_areas', 3600, fn() =>
-            Area::whereHas('shops', fn($q) => $q->where('status', 'active'))
+        $areasRaw = Cache::remember('delicon:active_areas_v3', 3600, fn() =>
+            Area::with('prefecture:id,slug,parent_slug')
+                ->whereHas('shops', fn($q) => $q->where('status', 'active'))
                 ->orderBy('sort_order')->orderBy('name')
-                ->get(['id','name','slug'])
-                ->map(fn($a) => ['id' => $a->id, 'name' => $a->name, 'slug' => $a->slug])
+                ->get(['id','name','slug','prefecture_id'])
+                ->map(fn($a) => ['id' => $a->id, 'name' => $a->name, 'slug' => $a->slug, 'pref_slug' => $a->prefecture?->parent_slug])
                 ->all()
         );
         $areas = collect($areasRaw)->map(fn($a) => (object) $a);
