@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('title', $title)
 @section('description', $description)
-@section('canonical', route('shop.region', $slug) . '/')
-@section('og_type', 'website')
+@if(isset($slug))
+@section('canonical', route('shop.pref_area', [$parentPref, $slug]) . '/')
+@else
+@section('canonical', route('shop.pref', $parentPref) . '/')
+@endif
 
 @push('head')
 @php
@@ -25,7 +28,7 @@ $ld_breadcrumb = [
 
     {{-- パンくず --}}
     <nav class="text-xs text-[#6A6A7E] mb-4">
-        @foreach($breadcrumbs as $i => $crumb)
+        @foreach($breadcrumbs as $crumb)
             @if(!$loop->last)
                 <a href="{{ $crumb['url'] }}" class="hover:text-gold-400 transition">{{ $crumb['name'] }}</a>
                 <span class="mx-1">&rsaquo;</span>
@@ -39,7 +42,22 @@ $ld_breadcrumb = [
         <span class="w-1 h-7 bg-deli-500 rounded-full inline-block"></span>
         {{ $title }}
     </h1>
-    <p class="text-xs text-[#6A6A7E] mb-6">{{ $description }}</p>
+    <p class="text-xs text-[#6A6A7E] mb-5">{{ $description }}</p>
+
+    {{-- 配下エリアリンク（都道府県ページのみ表示） --}}
+    @if($areas->isNotEmpty())
+    <div class="mb-6">
+        <p class="text-xs font-bold text-[#8A8A9E] mb-2 uppercase tracking-wider">エリアで絞り込む</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($areas as $area)
+            <a href="{{ route('shop.pref_area', [$parentPref, $area->slug]) }}/"
+               class="text-xs bg-surface-500 border border-surface-300 hover:border-deli-500 text-[#C8C4BC] hover:text-deli-400 px-3 py-1.5 rounded-full transition">
+                {{ $area->name }}
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <p class="text-xs text-[#6A6A7E] mb-5">{{ $shops->total() }}件</p>
 

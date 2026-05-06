@@ -55,49 +55,96 @@ class ShopController extends Controller
         return view('shop.index', compact('shops', 'shopTypes', 'areas'));
     }
 
-    public function byRegion(string $slug)
+    /**
+     * /shops/{pref}/ — 都道府県レベルLP（東京・大阪etc.）
+     * 配下のエリア一覧リンクも表示
+     */
+    public function byPref(string $pref)
     {
-        // area.slug で検索（より詳細）
-        $area = Area::where('slug', $slug)->first();
-        if ($area) {
-            $shops = Shop::where('status', 'active')
-                ->where('area_id', $area->id)
-                ->with(['shopType'])
-                ->withCount('castMembers')
-                ->orderByDesc('ranking_count')->orderBy('name')
-                ->paginate(30);
+        $prefIds = Prefecture::where('parent_slug', $pref)->pluck('id');
+        if ($prefIds->isEmpty()) abort(404);
 
-            $title       = $area->name . 'のデリヘル店舗一覧';
-            $description = $area->name . 'のデリヘル・風俗店を一覧掲載。システム・料金・在籍キャストを詳しく紹介。';
-            $breadcrumbs = [
-                ['name' => 'ホーム',   'url' => route('top') . '/'],
-                ['name' => '店舗一覧', 'url' => route('shop.index') . '/'],
-                ['name' => $area->name . 'の店舗'],
-            ];
-            return view('shop.region', compact('shops', 'title', 'description', 'breadcrumbs', 'slug'));
-        }
+        $prefName = $this->parentSlugToName($pref);
 
-        // prefecture.slug で検索
-        $prefecture = Prefecture::where('slug', $slug)->first();
-        if ($prefecture) {
-            $shops = Shop::where('status', 'active')
-                ->where('prefecture_id', $prefecture->id)
-                ->with(['shopType'])
-                ->withCount('castMembers')
-                ->orderByDesc('ranking_count')->orderBy('name')
-                ->paginate(30);
+        $shops = Shop::where('status', 'active')
+            ->whereIn('prefecture_id', $prefIds)
+            ->with(['shopType'])
+            ->withCount('castMembers')
+            ->orderByDesc('ranking_count')->orderBy('name')
+            ->paginate(30);
 
-            $title       = $prefecture->name . 'のデリヘル店舗一覧';
-            $description = $prefecture->name . 'のデリヘル・風俗店を一覧掲載。システム・料金・在籍キャストを詳しく紹介。';
-            $breadcrumbs = [
-                ['name' => 'ホーム',   'url' => route('top') . '/'],
-                ['name' => '店舗一覧', 'url' => route('shop.index') . '/'],
-                ['name' => $prefecture->name . 'の店舗'],
-            ];
-            return view('shop.region', compact('shops', 'title', 'description', 'breadcrumbs', 'slug'));
-        }
+        // 配下エリア（店舗が存在するもの）
+        $areas = Area::whereIn('prefecture_id', $prefIds)
+            ->whereHas('shops', fn($q) => $q->where('status', 'active'))
+            ->orderBy('sort_order')->orderBy('name')
+            ->get(['id', 'name', 'slug']);
 
-        abort(404);
+        $title       = $prefName . 'のデリヘル店舗一覧';
+        $description = $prefName . 'のデリヘル・風俗店を一覧掲載。エリア別・システム・料金・在籍キャストを詳しく紹介。';
+        $breadcrumbs = [
+            ['name' => 'ホーム',           'url' => route('top') . '/'],
+            ['name' => '店舗一覧',         'url' => route('shop.index') . '/'],
+            ['name' => $prefName . 'の店舗'],
+        ];
+        $parentPref = $pref;
+        return view('shop.region', compact('shops', 'title', 'description', 'breadcrumbs', 'areas', 'parentPref'));
+    }
+
+    /**
+     * /shops/{pref}/{area}/ — エリアレベルLP（新宿・渋谷etc.）
+     */
+    public function byPrefArea(string $pref, string $areaSlug)
+    {
+        $area = Area::where('slug', $areaSlug)
+            ->whereHas('prefecture', fn($q) => $q->where('parent_slug', $pref))
+            ->with('prefecture')
+            ->firstOrFail();
+
+        $prefName = $this->parentSlugToName($pref);
+
+        $shops = Shop::where('status', 'active')
+            ->where('area_id', $area->id)
+            ->with(['shopType'])
+            ->withCount('castMembers')
+            ->orderByDesc('ranking_count')->orderBy('name')
+            ->paginate(30);
+
+        $areas = collect(); // エリアページでは子リンク不要
+        $title       = $area->name . 'のデリヘル店舗一覧';
+        $description = $prefName . '・' . $area->name . 'のデリヘル・風俗店を一覧掲載。システム・料金・在籍キャストを詳しく紹介。';
+        $breadcrumbs = [
+            ['name' => 'ホーム',               'url' => route('top') . '/'],
+            ['name' => '店舗一覧',             'url' => route('shop.index') . '/'],
+            ['name' => $prefName . 'の店舗',   'url' => route('shop.pref', $pref) . '/'],
+            ['name' => $area->name . 'の店舗'],
+        ];
+        $parentPref = $pref;
+        $slug = $areaSlug;
+        return view('shop.region', compact('shops', 'title', 'description', 'breadcrumbs', 'areas', 'parentPref', 'slug'));
+    }
+
+    private function parentSlugToName(string $slug): string
+    {
+        return match($slug) {
+            'tokyo'     => '東京',
+            'kanagawa'  => '神奈川',
+            'saitama'   => '埼玉',
+            'chiba'     => '千葉',
+            'ibaraki'   => '茨城',
+            'tochigi'   => '栃木',
+            'gunma'     => '群馬',
+            'osaka'     => '大阪',
+            'kyoto'     => '京都',
+            'nara'      => '奈良',
+            'shiga'     => '滋賀',
+            'hyogo'     => '兵庫',
+            'wakayama'  => '和歌山',
+            'aichi'     => '愛知',
+            'gifu'      => '岐阜',
+            'shizuoka'  => '静岡',
+            'mie'       => '三重',
+            default     => $slug,
+        };
     }
 
     public function show(Shop $shop)

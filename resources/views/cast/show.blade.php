@@ -54,7 +54,21 @@
                     <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded">おすすめ</span>
                     @endif
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ $cast->name }}</h1>
+                <div class="flex items-start justify-between gap-3 mb-1">
+                    <h1 class="text-2xl font-bold text-gray-900">{{ $cast->name }}</h1>
+                    <button id="fav-btn" data-cast="{{ $cast->id }}"
+                            data-favorited="{{ $isFavorited ? 'true' : 'false' }}"
+                            class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border transition
+                                   {{ $isFavorited ? 'bg-deli-500 border-deli-500 text-white' : 'bg-white border-gray-300 text-gray-400 hover:border-deli-400 hover:text-deli-400' }}"
+                            title="{{ auth()->check() ? 'お気に入り' : 'ログインするとお気に入り登録できます' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                             fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor"
+                             stroke-width="2" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                    </button>
+                </div>
                 @if($cast->shop)
                 <p class="text-sm text-gray-500">
                     <a href="{{ route('shop.show', $cast->shop->id) }}/" class="hover:text-red-600 transition">
@@ -226,5 +240,64 @@
     </div>
     @endif
 
+
+    {{-- 好みに合った似ているキャスト --}}
+    @if($similarCasts->isNotEmpty())
+    <div class="mt-8">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">こちらのキャストも人気</h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($similarCasts as $similar)
+            <a href="{{ route('cast.show', $similar->id) }}/" class="group text-center">
+                <img src="{{ $similar->img_url }}" alt="{{ $similar->name }}"
+                     class="w-full aspect-[3/4] object-cover rounded group-hover:opacity-90 transition img-onerror-cast"
+                     loading="lazy">
+                <p class="text-xs mt-1 group-hover:text-red-600 transition truncate">{{ $similar->name }}</p>
+                @if($similar->shop)
+                <p class="text-[10px] text-gray-500 truncate">{{ $similar->shop->name }}</p>
+                @endif
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var btn = document.getElementById('fav-btn');
+    if (!btn) return;
+    @auth
+    btn.addEventListener('click', function() {
+        var castId = btn.dataset.cast;
+        var favorited = btn.dataset.favorited === 'true';
+        fetch('/favorites/' + castId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            }
+        }).then(function(r){ return r.json(); }).then(function(data) {
+            btn.dataset.favorited = data.favorited ? 'true' : 'false';
+            var svg = btn.querySelector('svg');
+            if (data.favorited) {
+                btn.classList.add('bg-deli-500','border-deli-500','text-white');
+                btn.classList.remove('bg-white','border-gray-300','text-gray-400');
+                svg.setAttribute('fill','currentColor');
+            } else {
+                btn.classList.remove('bg-deli-500','border-deli-500','text-white');
+                btn.classList.add('bg-white','border-gray-300','text-gray-400');
+                svg.setAttribute('fill','none');
+            }
+        });
+    });
+    @else
+    btn.addEventListener('click', function() {
+        window.location.href = '{{ route("visitor.register") }}/';
+    });
+    @endauth
+})();
+</script>
+@endpush
 @endsection

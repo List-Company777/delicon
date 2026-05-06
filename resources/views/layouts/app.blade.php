@@ -98,11 +98,22 @@
                     コラム
                 </a>
                 @auth
+                    @if(auth()->user()->role === 'visitor')
+                    <a href="{{ route('user.dashboard') }}/"
+                       class="ml-2 border border-deli-500/50 hover:border-deli-400 text-deli-400 hover:text-deli-300 rounded px-3 py-1.5 text-xs transition">
+                        マイページ
+                    </a>
+                    @else
                     <a href="{{ route('manage.dashboard') }}/"
                        class="ml-2 border border-surface-300 hover:border-gold-400 text-[#B0AEAD] hover:text-gold-400 rounded px-3 py-1.5 text-xs transition">
                         管理画面
                     </a>
+                    @endif
                 @else
+                    <a href="{{ route('visitor.register') }}/"
+                       class="ml-2 border border-deli-500/50 hover:border-deli-400 text-deli-400 hover:text-deli-300 rounded px-3 py-1.5 text-xs transition">
+                        会員登録
+                    </a>
                     <a href="{{ route('login') }}/"
                        class="ml-2 border border-surface-300 hover:border-gold-400 text-[#B0AEAD] hover:text-gold-400 rounded px-3 py-1.5 text-xs transition">
                         店舗掲載

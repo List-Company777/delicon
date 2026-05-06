@@ -6,7 +6,10 @@ use App\Models\Cast;
 use App\Models\CastType;
 use App\Models\CastBodyType;
 use Illuminate\Http\Request;
+use App\Models\CastFavorite;
+use App\Models\CastView;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CastController extends Controller
 {
@@ -61,6 +64,17 @@ class CastController extends Controller
             'images', 'schedules', 'reviews',
         ]);
 
+        // 閲覧履歴を記録
+        $this->recordView($cast);
+
+        // お気に入り状態（ログイン時）
+        $isFavorited = auth()->check()
+            ? CastFavorite::where('user_id', auth()->id())->where('cast_id', $cast->id)->exists()
+            : false;
+
+        // 同体型・同年代スコア順（店舗問わず）
+        $similarCasts = $this->getSimilarCasts($cast);
+
         $otherCasts = Cast::active()
             ->where('shop_id', $cast->shop_id)
             ->where('id', '!=', $cast->id)
@@ -69,6 +83,53 @@ class CastController extends Controller
             ->take(6)
             ->get();
 
-        return view('cast.show', compact('cast', 'otherCasts'));
+        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts'));
+    }
+
+    private function recordView(Cast $cast): void
+    {
+        $data = [
+            'cast_id'    => $cast->id,
+            'viewed_at'  => now(),
+        ];
+
+        if (auth()->check()) {
+            $data['user_id']    = auth()->id();
+            $data['session_id'] = null;
+        } else {
+            $data['user_id']    = null;
+            $data['session_id'] = session()->getId();
+        }
+
+        CastView::create($data);
+
+        // セッション閲覧履歴（未ログインユーザー用・最新10件）
+        if (!auth()->check()) {
+            $viewed = session()->get('viewed_cast_ids', []);
+            $viewed = array_values(array_unique(array_merge([$cast->id], $viewed)));
+            session()->put('viewed_cast_ids', array_slice($viewed, 0, 10));
+        }
+    }
+
+    private function getSimilarCasts(Cast $cast, int $limit = 6): \Illuminate\Support\Collection
+    {
+        // スコア: 同body_id(+2) + 同type_id(+2) + 年齢±3歳(+1) で上位を取得
+        return Cast::active()
+            ->where('id', '!=', $cast->id)
+            ->whereHas('shop', fn($q) => $q->where('status', 'active'))
+            ->with(['shop'])
+            ->select('casts.*')
+            ->selectRaw('
+                (CASE WHEN body_id = ? THEN 2 ELSE 0 END) +
+                (CASE WHEN type_id = ? THEN 2 ELSE 0 END) +
+                (CASE WHEN age IS NOT NULL AND ABS(CAST(age AS SIGNED) - ?) <= 3 THEN 1 ELSE 0 END)
+                AS similarity_score',
+                [$cast->body_id ?? 0, $cast->type_id ?? 0, $cast->age ?? 0]
+            )
+            ->having('similarity_score', '>', 0)
+            ->orderByDesc('similarity_score')
+            ->orderByDesc('is_recommended')
+            ->take($limit)
+            ->get();
     }
 }

@@ -7,6 +7,9 @@ use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\CastView;
+use App\Models\CastFavorite;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -64,5 +67,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Shop::class, 'shop_users')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+    public function castFavorites(): HasMany
+    {
+        return $this->hasMany(CastFavorite::class);
+    }
+
+    public function favoriteCasts()
+    {
+        return $this->belongsToMany(Cast::class, 'cast_favorites', 'user_id', 'cast_id')
+            ->withTimestamps('created_at', 'created_at');
+    }
+
+    public function castViews(): HasMany
+    {
+        return $this->hasMany(CastView::class);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Manage;
 
+use App\Jobs\NotifyFavoritedCastWorking;
+use App\Jobs\NotifyNewCast;
 use App\Models\Cast;
 use App\Models\CastType;
 use App\Models\CastBodyType;
@@ -66,6 +68,11 @@ class CastProfileController extends BaseController
 
         $cast->save();
 
+        // 新人登録通知
+        if ($cast->join_date) {
+            NotifyNewCast::dispatch($cast->id);
+        }
+
         return redirect()->route('manage.cast-profile.index')
             ->with('success', 'キャストを登録しました');
     }
@@ -104,13 +111,20 @@ class CastProfileController extends BaseController
 
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
-        $cast->working_date   = $request->boolean('working_today') ? today() : null;
+        $wasWorking = $cast->working_date && $cast->working_date->isToday();
+        $cast->working_date = $request->boolean('working_today') ? today() : null;
+        $nowWorking = $request->boolean('working_today');
 
         if ($request->hasFile('photo')) {
             $cast->img_file_name = $this->savePhoto($request->file('photo'));
         }
 
         $cast->save();
+
+        // 新たに出勤フラグが立った場合のみ通知
+        if ($nowWorking && !$wasWorking) {
+            NotifyFavoritedCastWorking::dispatch($cast->id);
+        }
 
         return redirect()->route('manage.cast-profile.index')
             ->with('success', 'キャスト情報を更新しました');

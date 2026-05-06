@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\KeywordController as AdminKeyword;
 use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\CastController;
 use App\Http\Controllers\Manage\ShopInfoController;
 use App\Http\Controllers\Manage\BusinessController;
@@ -340,9 +342,18 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 // 店舗一覧・詳細
 Route::get('/shops/', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shops/{shop}/', [ShopController::class, 'show'])->name('shop.show')->where('shop', '[0-9]+');
-Route::get('/shops/{slug}/', [ShopController::class, 'byRegion'])->name('shop.region')->where('slug', '[a-z][a-z0-9-]+');
+Route::get('/shops/{pref}/', [ShopController::class, 'byPref'])->name('shop.pref')->where('pref', '[a-z][a-z0-9-]+');
+Route::get('/shops/{pref}/{area}/', [ShopController::class, 'byPrefArea'])->name('shop.pref_area')->where('pref', '[a-z][a-z0-9-]+')->where('area', '[a-z][a-z0-9-]+');
 
 // キャスト一覧・詳細
+// ユーザーダッシュボード・設定
+Route::middleware('auth')->group(function () {
+    Route::get('/user/dashboard/', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
+    Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
+    Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
+});
+
 Route::get('/cast/', [CastController::class, 'index'])->name('cast.index');
 Route::get('/cast/{cast}/', [CastController::class, 'show'])->name('cast.show')->where('cast', '[0-9]+');
 

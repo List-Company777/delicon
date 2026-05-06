@@ -1,0 +1,70 @@
+@extends('layouts.app')
+@section('title', 'マイページ')
+@section('robots', 'noindex')
+
+@section('content')
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
+        <span class="w-1 h-7 bg-deli-500 rounded-full inline-block"></span>
+        マイページ
+    </h1>
+
+    <div class="flex gap-4 mb-8 text-sm">
+        <a href="{{ route('user.dashboard') }}/" class="text-deli-400 border-b border-deli-500 pb-1">お気に入り / 閲覧履歴</a>
+        <a href="{{ route('user.settings') }}/" class="text-[#6A6A7E] hover:text-[#C8C4BC] transition">通知設定</a>
+    </div>
+
+    {{-- お気に入りキャスト --}}
+    <section class="mb-10">
+        <h2 class="font-bold text-[#E8E4DC] text-sm mb-4 flex items-center gap-2">
+            <span class="w-1 h-4 bg-deli-500 rounded-full"></span>
+            お気に入りキャスト <span class="text-[#6A6A7E] font-normal">({{ $favorites->count() }}名)</span>
+        </h2>
+        @if($favorites->isEmpty())
+        <p class="text-sm text-[#6A6A7E]">まだお気に入り登録がありません。キャストのページ右上の ♡ ボタンで登録できます。</p>
+        @else
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            @foreach($favorites as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-500 transition">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+                    @if($cast->working_date && $cast->working_date->isToday())
+                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>
+                    @endif
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $cast->name }}</p>
+                @if($cast->shop)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop->name }}</p>@endif
+            </a>
+            @endforeach
+        </div>
+        @endif
+    </section>
+
+    {{-- 閲覧履歴（最新10件） --}}
+    <section>
+        <h2 class="font-bold text-[#E8E4DC] text-sm mb-4 flex items-center gap-2">
+            <span class="w-1 h-4 bg-surface-200 rounded-full"></span>
+            最近見たキャスト
+        </h2>
+        @if($recentlyViewed->isEmpty())
+        <p class="text-sm text-[#6A6A7E]">閲覧履歴がありません。</p>
+        @else
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
+            @foreach($recentlyViewed as $view)
+            @if($view->cast)
+            <a href="{{ route('cast.show', $view->cast->id) }}/" class="group text-center">
+                <div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-500 transition">
+                    <img src="{{ $view->cast->img_url }}" alt="{{ $view->cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $view->cast->name }}</p>
+                <p class="text-[10px] text-[#6A6A7E]">{{ $view->viewed_at->diffForHumans() }}</p>
+            </a>
+            @endif
+            @endforeach
+        </div>
+        @endif
+    </section>
+</div>
+@endsection
