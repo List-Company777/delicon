@@ -330,8 +330,21 @@ class SearchController extends Controller
                 ->when($discountFirstSet, fn($q) => $q->where('discount_first_set', true))
                 ->when($shopTypeIds, fn($q) => $q->whereHas('shop', fn($s) => $s->whereIn('shop_type_id', $shopTypeIds)))
                 ->when($ageRange, function ($q) use ($ageRange) {
-                    [$min, $max] = $this->parseAgeRange($ageRange);
-                    return $q->whereHas('shop.castMembers', fn($c) => $c->whereBetween('age', [$min, $max]));
+                    [$min, $maxRaw] = $this->parseAgeRange($ageRange);
+                    $maxVal = $maxRaw >= 120 ? 200 : $maxRaw;
+                    $shopIds = \Illuminate\Support\Facades\DB::table('casts')
+                        ->selectRaw('shop_id')
+                        ->where('status', 'active')
+                        ->where('age', '>', 0)
+                        ->groupBy('shop_id')
+                        ->havingRaw("SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) >= GREATEST(
+                    SUM(CASE WHEN age BETWEEN 18 AND 24 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN age BETWEEN 25 AND 34 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN age BETWEEN 35 AND 44 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN age >= 45 THEN 1 ELSE 0 END)
+                ) AND SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) > 0", [$min, $maxVal, $min, $maxVal])
+                        ->pluck('shop_id');
+                    return $q->whereHas('shop', fn($s) => $s->whereIn('id', $shopIds));
                 })
                 ->orderByDesc(fn($q) =>
                     $q->select('rank_score')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
@@ -341,12 +354,8 @@ class SearchController extends Controller
                 )
                 ->pluck('shop_details.id')->all();
         } else {
-            $searchGroups = $gender === 'male' ? ['male', 'both'] : ['female', 'both'];
-
-            // 店舗単位で集約：マッチする求人を持つ店舗IDを入札スコア順で取得
-            $query = Shop::whereHas('jobs', fn($j) => $j
-                ->where('status', 'active')
-                ->whereIn('search_group', $searchGroups)
+            // デリコンは店舗案内サイト（求人なし）→ Shop を直接検索
+            $query = Shop::where('status', 'active')
                 ->when($prefSlug, fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
                 ->when($area, fn($q) => $useSlug
                     ? $q->whereHas('area', fn($a) =>
@@ -355,40 +364,42 @@ class SearchController extends Controller
                           ->orWhereHas('prefecture', fn($p) => $p->where('slug', $area)))
                     : $q->where(fn($q2) =>
                         $q2->whereHas('area', fn($a) => $a->where('name', 'like', "%{$area}%")->orWhere('slug', 'like', "%{$area}%"))
-                           ->orWhereHas('shop', fn($s) =>
-                               $s->where('nearest_line', 'like', "%{$area}%")
-                                 ->orWhere('nearest_station_name', 'like', "%{$stationArea}%"))
-                           ->orWhereHas('area', fn($a) =>
-                               $a->whereHas('prefecture', fn($p) => $p->where('name', 'like', "%{$area}%"))))
+                           ->orWhere('nearest_line', 'like', "%{$area}%")
+                           ->orWhere('nearest_station_name', 'like', "%{$stationArea}%")
+                           ->orWhereHas('area', fn($a) => $a->whereHas('prefecture', fn($p) => $p->where('name', 'like', "%{$area}%")))
+                    )
                 )
                 ->when($keyword, fn($q) => $useSlug
-                    ? ($keywordFilterValue
-                        ? $this->whereTitleMatch($q, $keywordFilterValue)
-                        : $q->where(fn($q2) =>
-                            $q2->whereHas('jobType', fn($j) => $j->where('slug', $keyword)->orWhere('group_slug', $keyword))
-                               ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('slug', $keyword)))))
+                    ? $q->whereHas('genre', fn($g) => $g->where('slug', $keyword))
                     : $q->where(fn($q2) =>
-                        $this->whereTitleMatch($q2, $keyword)
-                           ->orWhereHas('jobType', fn($j) => $j->where('name', 'like', "%{$keyword}%"))
-                           ->orWhereHas('shop', fn($s) => $s->whereHas('genre', fn($g) => $g->where('name', 'like', "%{$keyword}%"))))
+                        $q2->where('name', 'like', "%{$keyword}%")
+                           ->orWhereHas('genre', fn($g) => $g->where('name', 'like', "%{$keyword}%")))
                 )
-                ->when($filterKeyword, fn($q) => $this->whereTitleMatch($q, $filterKeyword))
-                ->when($wageType && $wageMin > 0, fn($q) =>
-                    $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin))
-                ->when($arubaito, fn($q) =>
-                    $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
-            )
-            ->when($hasKaraoke,      fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_karaoke', true)))
-            ->when($allYouCanDrink, fn($q) => $q->whereHas('detail', fn($s) => $s->where('all_you_can_drink', true)))
-            ->when($hasPrivateRoom,  fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_private_room', true)))
-            ->when($discountFirstSet, fn($q) => $q->whereHas('detail', fn($s) => $s->where('discount_first_set', true)))
-            ->when($shopTypeIds, fn($q) => $q->whereIn('shop_type_id', $shopTypeIds))
-            ->when($ageRange, function ($q) use ($ageRange) {
-                [$min, $max] = $this->parseAgeRange($ageRange);
-                return $q->whereHas('castMembers', fn($c) => $c->whereBetween('age', [$min, $max]));
-            })
-            ->orderByRaw('rank_score DESC, display_sort ASC')
-            ->pluck('shops.id')->all();
+                ->when($filterKeyword, fn($q) => $q->where('name', 'like', "%{$filterKeyword}%"))
+                ->when($hasKaraoke,      fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_karaoke', true)))
+                ->when($allYouCanDrink, fn($q) => $q->whereHas('detail', fn($s) => $s->where('all_you_can_drink', true)))
+                ->when($hasPrivateRoom,  fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_private_room', true)))
+                ->when($discountFirstSet, fn($q) => $q->whereHas('detail', fn($s) => $s->where('discount_first_set', true)))
+                ->when($shopTypeIds, fn($q) => $q->whereIn('shop_type_id', $shopTypeIds))
+                ->when($ageRange, function ($q) use ($ageRange) {
+                    [$min, $maxRaw] = $this->parseAgeRange($ageRange);
+                    $maxVal = $maxRaw >= 120 ? 200 : $maxRaw;
+                    return $q->whereIn('id', \Illuminate\Support\Facades\DB::table('casts')
+                        ->selectRaw('shop_id')
+                        ->where('status', 'active')
+                        ->where('age', '>', 0)
+                        ->groupBy('shop_id')
+                        ->havingRaw("SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) >= GREATEST(
+                        SUM(CASE WHEN age BETWEEN 18 AND 24 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN age BETWEEN 25 AND 34 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN age BETWEEN 35 AND 44 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN age >= 45 THEN 1 ELSE 0 END)
+                    ) AND SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) > 0", [$min, $maxVal, $min, $maxVal])
+                        ->pluck('shop_id')
+                    );
+                })
+                ->orderByRaw('rank_score DESC, display_sort ASC')
+                ->pluck('id')->all();
         }
 
         return $query;
@@ -407,37 +418,9 @@ class SearchController extends Controller
                 ->orderByRaw("FIELD(id, {$idOrder})")
                 ->get();
         } else {
-            // 求人フィルタの再構築（eager load でも同じ条件を適用する）
-            $searchGroups = $gender === 'male' ? ['male', 'both'] : ['female', 'both'];
-            $stationArea  = preg_replace('/駅$/u', '', $area);
-            $keywordFilterValue = null;
-            if ($useSlug && $keyword) {
-                $kfType = JobType::where(fn($q) => $q->where('slug', $keyword)->orWhere('group_slug', $keyword))
-                    ->whereNotNull('keyword_filter')->value('keyword_filter');
-                $keywordFilterValue = $kfType ?: null;
-            }
             $idOrder = implode(',', $pageIds);
-            $items = Shop::with([
-                'area', 'genre', 'prefecture',
-                'jobs' => fn($j) => $j
-                    ->where('status', 'active')
-                    ->whereIn('search_group', $searchGroups)
-                    ->with('jobType')
-                    // 職種・給与フィルタをカード内求人にも反映（他職種を混在させない）
-                    ->when($keyword, fn($q) => $useSlug
-                        ? ($keywordFilterValue
-                            ? $this->whereTitleMatch($q, $keywordFilterValue)
-                            : $q->whereHas('jobType', fn($t) => $t->where('slug', $keyword)->orWhere('group_slug', $keyword)))
-                        : $q->where(fn($q2) =>
-                            $this->whereTitleMatch($q2, $keyword)
-                               ->orWhereHas('jobType', fn($t) => $t->where('name', 'like', "%{$keyword}%")))
-                    )
-                    ->when($filterKeyword, fn($q) => $this->whereTitleMatch($q, $filterKeyword))
-                    ->when($wageType && $wageMin > 0, fn($q) =>
-                        $q->where('wage_type', $wageType)->where('hourly_wage_min', '>=', $wageMin))
-                    ->when($arubaito, fn($q) =>
-                        $q->where('wage_type', 'hourly')->where('employment_type', 'PART_TIME'))
-                    ->orderBy('id'),
+            $items = Shop::with(['area', 'genre', 'prefecture', 'detail',
+                'castMembers' => fn($c) => $c->where('status', 'active')->orderByRaw('working_date = CURDATE() DESC')->orderBy('sort_order')->take(5),
             ])
             ->whereIn('id', $pageIds)
             ->orderByRaw("FIELD(id, {$idOrder})")

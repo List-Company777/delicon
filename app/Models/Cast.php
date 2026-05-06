@@ -20,12 +20,14 @@ class Cast extends Model
         'shumi', 'zenshoku', 'tabacco', 'seiza', 'likeeat', 'osake',
         'yuumeijin', 'shiofuki', 'zitaku',
         'twitter_account', 'official_url',
-        'price_on', 'is_recommended', 'sort_order', 'ranking_count', 'status',
+        'price_on', 'is_recommended', 'is_new', 'new_since', 'sort_order', 'ranking_count', 'status',
         'join_date', 'working_date',
     ];
 
     protected $casts = [
         'is_recommended' => 'boolean',
+        'is_new'         => 'boolean',
+        'new_since'      => 'date',
         'join_date'      => 'date',
         'working_date'   => 'date',
     ];
@@ -83,6 +85,14 @@ class Cast extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(CastReview::class)->where('is_approved', true)->latest();
+    }
+
+    public function isNew(): bool
+    {
+        if (!$this->is_new) return false;
+        // 新人フラグ有効期限: new_since（設定時のcreated_at/join_dateの遅い方）から1ヶ月
+        $since = $this->new_since ?? $this->created_at;
+        return \Illuminate\Support\Carbon::parse($since)->addMonth()->isFuture();
     }
 
     public function scopeActive($query)

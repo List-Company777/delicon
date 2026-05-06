@@ -115,7 +115,7 @@
         <td class="px-4 py-3">
             <input type="date" name="join_date" value="{{ old('join_date', $cast?->join_date?->format('Y-m-d')) }}"
                    class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
-            <span class="text-xs text-gray-400 ml-2">入店から30日以内は「新人」バッジが表示されます</span>
+            <span class="text-xs text-gray-400 ml-2">入店日（任意）</span>
         </td>
     </tr>
     <tr class="border-b border-gray-100">
@@ -138,6 +138,20 @@
                        class="w-4 h-4 accent-red-600">
                 <span class="text-sm text-gray-700">おすすめキャストとして表示する（一覧の上位に表示）</span>
             </label>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">新人</th>
+        <td class="px-4 py-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_new" value="1"
+                       @checked(old('is_new', $cast?->is_new))
+                       class="w-4 h-4 accent-red-600">
+                <span class="text-sm text-gray-700">新人バッジを表示する（フラグを付けた日または入店日の遅い方から1ヶ月間）</span>
+            </label>
+            @if($cast?->is_new && $cast?->new_since)
+                <p class="text-xs text-gray-400 mt-1">有効期限: {{ \Carbon\Carbon::parse($cast->new_since)->addMonth()->format('Y/m/d') }} まで</p>
+            @endif
         </td>
     </tr>
     <tr class="border-b border-gray-100">

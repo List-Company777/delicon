@@ -52,6 +52,7 @@ class CastProfileController extends BaseController
             'message'        => ['nullable', 'string', 'max:2000'],
             'status'         => ['required', 'in:active,inactive'],
             'is_recommended' => ['boolean'],
+            'is_new'         => ['boolean'],
             'join_date'      => ['nullable', 'date'],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
@@ -60,6 +61,15 @@ class CastProfileController extends BaseController
         $cast->shop_id = $shop->id;
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
+        $wasNew = $cast->is_new;
+        $cast->is_new = $request->boolean('is_new');
+        if ($cast->is_new && !$wasNew) {
+            // 新人フラグを新たに付けた時点でnew_sinceをセット（join_dateとcreated_atの遅い方）
+            $jd = $cast->join_date ? \Illuminate\Support\Carbon::parse($cast->join_date) : null;
+            $cast->new_since = $jd && $jd->gt($cast->created_at ?? now()) ? $jd->toDateString() : now()->toDateString();
+        } elseif (!$cast->is_new) {
+            $cast->new_since = null;
+        }
         $cast->working_date   = $request->boolean('working_today') ? today() : null;
 
         if ($request->hasFile('photo')) {
@@ -105,12 +115,21 @@ class CastProfileController extends BaseController
             'message'        => ['nullable', 'string', 'max:2000'],
             'status'         => ['required', 'in:active,inactive'],
             'is_recommended' => ['boolean'],
+            'is_new'         => ['boolean'],
             'join_date'      => ['nullable', 'date'],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
 
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
+        $wasNew = $cast->is_new;
+        $cast->is_new = $request->boolean('is_new');
+        if ($cast->is_new && !$wasNew) {
+            $jd = $cast->join_date ? \Illuminate\Support\Carbon::parse($cast->join_date) : null;
+            $cast->new_since = $jd && $jd->gt($cast->created_at ?? now()) ? $jd->toDateString() : now()->toDateString();
+        } elseif (!$cast->is_new) {
+            $cast->new_since = null;
+        }
         $wasWorking = $cast->working_date && $cast->working_date->isToday();
         $cast->working_date = $request->boolean('working_today') ? today() : null;
         $nowWorking = $request->boolean('working_today');

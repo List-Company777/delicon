@@ -40,7 +40,7 @@
                 @if($cast->working_date && $cast->working_date->isToday())
                 <span class="absolute top-2 left-2 text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow">待機中</span>
                 @endif
-                @if($cast->join_date && $cast->join_date->gte(now()->subDays(14)))
+                @if($cast->isNew())
                 <span class="absolute top-2 right-2 text-xs font-bold bg-gold-500 text-white px-2.5 py-1 rounded-full shadow">NEW</span>
                 @endif
             </div>

@@ -95,9 +95,10 @@ class TopController extends Controller
         $newArrivalRaw = Cache::remember('delicon:top_new_arrival', 1800, function () {
             return Cast::with(['shop', 'castType'])
                 ->where('status', 'active')
-                ->whereNotNull('join_date')
-                ->whereDate('join_date', '>=', today()->subDays(30))
-                ->orderByDesc('join_date')
+                ->where('is_new', true)
+                ->whereNotNull('new_since')
+                ->whereRaw('DATE_ADD(new_since, INTERVAL 1 MONTH) > CURDATE()')
+                ->orderByDesc('new_since')
                 ->take(12)
                 ->get()
                 ->map(fn($cast) => [

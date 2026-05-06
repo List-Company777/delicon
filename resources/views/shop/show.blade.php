@@ -212,7 +212,7 @@
                     @forelse($casts as $cast)
                     @php
                         $isWorking = $cast->working_date && $cast->working_date->isToday();
-                        $isNew     = $cast->join_date && $cast->join_date->greaterThanOrEqualTo(today()->subDays(30));
+                        $isNew     = $cast->isNew();
                     @endphp
                     <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
                         <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : 'border-surface-300 group-hover:border-deli-500' }} transition">
