@@ -22,10 +22,25 @@ class NotifyNewCast implements ShouldQueue
         $cast = Cast::with(['shop'])->find($this->castId);
         if (!$cast) return;
 
+        $castTypeId = $cast->type_id;
+        $areaId     = $cast->shop?->area_id;
+
         User::where('notify_new_cast', true)
             ->whereNotNull('email')
             ->cursor()
-            ->each(function ($user) use ($cast) {
+            ->each(function (User $user) use ($cast, $castTypeId, $areaId) {
+                // タイプ設定がある場合: キャストのタイプが含まれているか確認
+                $typePrefs = $user->pref_cast_type_ids ?? [];
+                if (!empty($typePrefs) && $castTypeId && !in_array($castTypeId, $typePrefs)) {
+                    return;
+                }
+
+                // エリア設定がある場合: キャストの店舗エリアが含まれているか確認
+                $areaPrefs = $user->pref_area_ids ?? [];
+                if (!empty($areaPrefs) && $areaId && !in_array($areaId, $areaPrefs)) {
+                    return;
+                }
+
                 Mail::to($user->email)->send(new NewCastNoticeMail($cast, $user));
             });
     }

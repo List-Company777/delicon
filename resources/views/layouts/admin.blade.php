@@ -64,6 +64,10 @@
                        class="{{ request()->routeIs('admin.search-page-views.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         PV分析
                     </a>
+                    <a href="{{ route('admin.deletion-requests.index') }}"
+                       class="{{ request()->routeIs('admin.deletion-requests.*') ? 'text-red-400' : 'text-gray-400 hover:text-white' }} transition">
+                        削除依頼
+                    </a>
                 </nav>
             </div>
             <div class="flex items-center gap-3 text-sm">

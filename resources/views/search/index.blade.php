@@ -397,7 +397,7 @@
 
 <section class="bg-gray-50 border-b border-gray-200" aria-label="絞り込み検索">
     <div class="max-w-6xl mx-auto px-4 py-4"
-         x-data="{ detail: {{ $hasWageFilter ? 'true' : 'false' }} }">
+         x-data="{ detail: {{ $hasWageFilter ? 'true' : 'false' }}, shopType: {{ ($shopTypeIds ?? []) ? 'true' : 'false' }} }">
         <form action="{{ route('search') }}/" method="GET">
             <input type="hidden" name="gender" value="{{ $gender }}">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -581,6 +581,104 @@
                     @if($hasWageFilter)
                         <a href="{{ route('search', array_filter(['gender' => $gender, 'area' => $area ?? '', 'keyword' => $keyword ?? ''], fn($v) => $v !== '')) }}"
                            class="text-xs text-gray-400 hover:text-gray-600 underline">条件をリセット</a>
+                    @endif
+                </div>
+            </div>
+            @endif
+            {{-- 業種フィルター (female/yoasobi) --}}
+            @if($gender !== 'male')
+            @php
+                $shopTypes      = \App\Models\ShopType::orderBy('id')->get();
+                $activeTypeIds  = $shopTypeIds ?? [];
+                $hasTypeFilter  = count($activeTypeIds) > 0;
+                $hasAgeFilter   = ($ageRange ?? '') !== '';
+                $ageRanges = [
+                    '18-24' => '18〜24歳',
+                    '25-34' => '25〜34歳',
+                    '35-44' => '35〜44歳',
+                    '45+'   => '45歳以上',
+                ];
+                // フィルターURLベース生成
+                $baseQs = array_filter([
+                    'gender'            => $isLp ? null : $gender,
+                    'area'              => $isLp ? null : ($area ?? ''),
+                    'keyword'           => $isLp ? null : ($keyword ?? ''),
+                    'wage_type'         => $wageType ?: null,
+                    'wage_min'          => $wageMin ?: null,
+                    'arubaito'          => ($arubaito ?? false) ? 1 : null,
+                    'all_you_can_drink' => ($allYouCanDrink ?? false) ? 1 : null,
+                    'has_karaoke'       => ($hasKaraoke ?? false) ? 1 : null,
+                    'has_private_room'  => ($hasPrivateRoom ?? false) ? 1 : null,
+                    'discount_first_set'=> ($discountFirstSet ?? false) ? 1 : null,
+                    'age_range'         => $ageRange ?: null,
+                ], fn($v) => $v !== null && $v !== '');
+                $typeBaseQs = array_filter($baseQs + ['shop_type_ids' => array_values($activeTypeIds) ?: null], fn($v) => $v !== null);
+            @endphp
+
+            {{-- 年齢層チップ --}}
+            <div class="flex flex-nowrap overflow-x-auto gap-2 mt-3 pb-1 md:flex-wrap md:overflow-x-visible">
+                <span class="text-xs text-gray-400 self-center shrink-0">年齢層:</span>
+                @foreach($ageRanges as $rangeVal => $rangeLabel)
+                @php
+                    $isActive = ($ageRange ?? '') === $rangeVal;
+                    $qs = $isActive
+                        ? array_filter(array_merge($baseQs, ['age_range' => null, 'shop_type_ids' => $activeTypeIds ?: null]), fn($v) => $v !== null)
+                        : array_filter(array_merge($baseQs, ['age_range' => $rangeVal, 'shop_type_ids' => $activeTypeIds ?: null]), fn($v) => $v !== null);
+                    $chipUrl = ($isLp
+                        ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                        : url('/search/'))
+                        . ($qs ? '?' . http_build_query($qs) : '');
+                @endphp
+                <a href="{{ $chipUrl }}"
+                   class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
+                          {{ $isActive
+                              ? 'bg-deli-500 text-white border-transparent'
+                              : 'bg-white text-gray-500 border-gray-300 hover:border-deli-400 hover:text-deli-500' }}">
+                    @if($isActive)✓ @endif{{ $rangeLabel }}
+                </a>
+                @endforeach
+            </div>
+
+            {{-- 業種フィルター アコーディオン --}}
+            <div class="mt-2">
+                <button type="button" @click="shopType = !shopType"
+                        class="text-xs text-gray-500 hover:opacity-80 flex items-center gap-1">
+                    <span x-text="shopType ? '▲ 業種で絞り込みを閉じる' : '▼ 業種で絞り込む'">▼ 業種で絞り込む</span>
+                    @if($hasTypeFilter)
+                        <span class="ml-2 bg-deli-100 text-deli-600 border border-deli-200 rounded-full px-2 py-0.5 text-xs">{{ count($activeTypeIds) }}件選択中</span>
+                    @endif
+                </button>
+                <div class="mt-3 flex flex-wrap gap-2{{ $hasTypeFilter ? '' : ' hidden' }}" :class="{ 'hidden': !shopType }">
+                    @foreach($shopTypes as $st)
+                    @php
+                        $isActive  = in_array($st->id, $activeTypeIds);
+                        $newIds    = $isActive ? array_values(array_diff($activeTypeIds, [$st->id])) : [...$activeTypeIds, $st->id];
+                        $qs = array_filter(array_merge($baseQs, [
+                            'shop_type_ids' => $newIds ?: null,
+                            'age_range'     => $ageRange ?: null,
+                        ]), fn($v) => $v !== null);
+                        $url = ($isLp
+                            ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                            : url('/search/'))
+                            . ($qs ? '?' . http_build_query($qs) : '');
+                    @endphp
+                    <a href="{{ $url }}"
+                       class="text-xs border rounded-full px-3 py-1.5 transition whitespace-nowrap
+                              {{ $isActive
+                                  ? 'bg-deli-500 text-white border-transparent'
+                                  : 'bg-white text-gray-500 border-gray-300 hover:border-deli-400 hover:text-deli-500' }}">
+                        @if($isActive)✓ @endif{{ $st->name }}
+                    </a>
+                    @endforeach
+                    @if($hasTypeFilter)
+                    @php
+                        $resetQs = array_filter(array_merge($baseQs, ['shop_type_ids' => null]), fn($v) => $v !== null);
+                        $resetUrl = ($isLp
+                            ? route('search.directory', ['gender' => $gender, 'area_slug' => $area_slug, 'job_slug' => $job_slug]) . '/'
+                            : url('/search/'))
+                            . ($resetQs ? '?' . http_build_query($resetQs) : '');
+                    @endphp
+                    <a href="{{ $resetUrl }}" class="text-xs text-gray-400 hover:text-gray-600 underline self-center">業種リセット</a>
                     @endif
                 </div>
             </div>

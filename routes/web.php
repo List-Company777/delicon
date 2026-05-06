@@ -17,6 +17,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\CastController;
 use App\Http\Controllers\Manage\ShopInfoController;
+use App\Http\Controllers\Manage\ShopNewsController;
 use App\Http\Controllers\Manage\BusinessController;
 use App\Http\Controllers\Manage\CastJobController;
 use App\Http\Controllers\Manage\StaffJobController;
@@ -153,6 +154,12 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::post('/shop/image/',          [ShopInfoController::class, 'storeImage'])->name('shop.image.store');
     Route::delete('/shop/image/',        [ShopInfoController::class, 'destroyImage'])->name('shop.image.destroy');
 
+    // お知らせ管理
+    Route::get('/shop/news/',            [ShopNewsController::class, 'index'])->name('shop.news.index');
+    Route::post('/shop/news/',           [ShopNewsController::class, 'store'])->name('shop.news.store');
+    Route::patch('/shop/news/{news}/',   [ShopNewsController::class, 'togglePin'])->name('shop.news.pin');
+    Route::delete('/shop/news/{news}/',  [ShopNewsController::class, 'destroy'])->name('shop.news.destroy');
+
     // 営業情報
     Route::get('/business/edit/',        [BusinessController::class, 'edit'])->name('business.edit');
     Route::put('/business/',             [BusinessController::class, 'update'])->name('business.update');
@@ -170,6 +177,11 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/casts/create/',          [CastProfileController::class, 'create'])->name('cast-profile.create');
     Route::post('/casts/',                [CastProfileController::class, 'store'])->name('cast-profile.store');
     Route::get('/casts/{id}/edit/',       [CastProfileController::class, 'edit'])->name('cast-profile.edit')->where('id', '[0-9]+');
+    Route::get('/casts/{castId}/diaries/',        [\App\Http\Controllers\Manage\CastDiaryController::class, 'index'])->name('cast-diary.index')->where('castId', '[0-9]+');
+    Route::get('/casts/{castId}/diaries/create/', [\App\Http\Controllers\Manage\CastDiaryController::class, 'create'])->name('cast-diary.create')->where('castId', '[0-9]+');
+    Route::post('/casts/{castId}/diaries/',       [\App\Http\Controllers\Manage\CastDiaryController::class, 'store'])->name('cast-diary.store')->where('castId', '[0-9]+');
+    Route::delete('/diaries/{diary}/',            [\App\Http\Controllers\Manage\CastDiaryController::class, 'destroy'])->name('cast-diary.destroy');
+    Route::post('/casts/{castId}/diary-token/',    [\App\Http\Controllers\Manage\CastDiaryController::class, 'issueToken'])->name('cast-diary.issue-token')->where('castId', '[0-9]+');
     Route::put('/casts/{id}/',            [CastProfileController::class, 'update'])->name('cast-profile.update')->where('id', '[0-9]+');
     Route::delete('/casts/{id}/',         [CastProfileController::class, 'destroy'])->name('cast-profile.destroy')->where('id', '[0-9]+');
 
@@ -349,6 +361,8 @@ Route::get('/shops/{pref}/{area}/', [ShopController::class, 'byPrefArea'])->name
 // ユーザーダッシュボード・設定
 Route::middleware('auth')->group(function () {
     Route::get('/user/dashboard/', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/deletion-requests/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'index'])->name('deletion-requests.index');
+    Route::patch('/deletion-requests/{deletionRequest}/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'process'])->name('deletion-requests.process');
     Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
     Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
     Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
@@ -356,6 +370,11 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/cast/', [CastController::class, 'index'])->name('cast.index');
 Route::get('/cast/{cast}/', [CastController::class, 'show'])->name('cast.show')->where('cast', '[0-9]+');
+
+// キャスト写メ日記投稿（トークンURL）
+Route::get('/diary/post/{token}/',  [\App\Http\Controllers\DiaryPostController::class, 'show'])->name('diary.post.show');
+Route::post('/diary/post/{token}/', [\App\Http\Controllers\DiaryPostController::class, 'store'])->name('diary.post.store')->middleware('throttle:5,1');
+Route::post('/cast/{cast}/deletion-request/', [CastController::class, 'submitDeletionRequest'])->name('cast.deletion-request')->where('cast', '[0-9]+')->middleware('throttle:3,10');
 
 // コラム・ガイド記事（公開）
 Route::get('/article/',         [\App\Http\Controllers\ArticleController::class, 'index'])->name('article.index');

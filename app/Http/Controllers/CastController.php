@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cast;
+use App\Models\CastDeletionRequest;
 use App\Models\CastType;
 use App\Models\CastBodyType;
 use Illuminate\Http\Request;
 use App\Models\CastFavorite;
 use App\Models\CastView;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class CastController extends Controller
 {
@@ -61,18 +61,15 @@ class CastController extends Controller
         $cast->load([
             'shop', 'castType', 'bodyType',
             'charms', 'plays', 'personalities', 'tags',
-            'images', 'schedules', 'reviews',
+            'images', 'schedules', 'reviews', 'diaries.images',
         ]);
 
-        // 閲覧履歴を記録
         $this->recordView($cast);
 
-        // お気に入り状態（ログイン時）
         $isFavorited = auth()->check()
             ? CastFavorite::where('user_id', auth()->id())->where('cast_id', $cast->id)->exists()
             : false;
 
-        // 同体型・同年代スコア順（店舗問わず）
         $similarCasts = $this->getSimilarCasts($cast);
 
         $otherCasts = Cast::active()
@@ -86,11 +83,34 @@ class CastController extends Controller
         return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts'));
     }
 
+    public function submitDeletionRequest(Request $request, Cast $cast)
+    {
+        // ハニーポット（ボット対策）
+        if ($request->filled('website')) {
+            return redirect()->route('cast.show', $cast->id)->with('deletion_sent', true);
+        }
+
+        $request->validate([
+            'requester_name'  => ['required', 'string', 'max:50'],
+            'requester_email' => ['required', 'email', 'max:100'],
+            'reason'          => ['nullable', 'string', 'max:500'],
+        ]);
+
+        CastDeletionRequest::create([
+            'cast_id'         => $cast->id,
+            'requester_name'  => $request->requester_name,
+            'requester_email' => $request->requester_email,
+            'reason'          => $request->reason,
+        ]);
+
+        return redirect()->route('cast.show', $cast->id)->with('deletion_sent', true);
+    }
+
     private function recordView(Cast $cast): void
     {
         $data = [
-            'cast_id'    => $cast->id,
-            'viewed_at'  => now(),
+            'cast_id'   => $cast->id,
+            'viewed_at' => now(),
         ];
 
         if (auth()->check()) {
@@ -103,7 +123,6 @@ class CastController extends Controller
 
         CastView::create($data);
 
-        // セッション閲覧履歴（未ログインユーザー用・最新10件）
         if (!auth()->check()) {
             $viewed = session()->get('viewed_cast_ids', []);
             $viewed = array_values(array_unique(array_merge([$cast->id], $viewed)));
@@ -113,7 +132,6 @@ class CastController extends Controller
 
     private function getSimilarCasts(Cast $cast, int $limit = 6): \Illuminate\Support\Collection
     {
-        // スコア: 同body_id(+2) + 同type_id(+2) + 年齢±3歳(+1) で上位を取得
         return Cast::active()
             ->where('id', '!=', $cast->id)
             ->whereHas('shop', fn($q) => $q->where('status', 'active'))

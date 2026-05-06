@@ -162,6 +162,42 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     </div>
 </section>
 
+{{-- あなたにおすすめ（ログイン中かつ好み設定あり） --}}
+@auth
+@if($recommendations->isNotEmpty())
+<section class="bg-surface-700 py-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
+                <span class="w-1 h-6 bg-gold-500 rounded-full inline-block"></span>
+                あなたにおすすめ
+            </h2>
+            <a href="{{ route('user.settings') }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400 transition">設定を変更</a>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($recommendations as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-gold-500 transition">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+                    @if($cast->working_date && $cast->working_date->isToday())
+                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>
+                    @endif
+                    @if($cast->join_date && $cast->join_date->gte(now()->subDays(14)))
+                    <span class="absolute top-1 right-1 text-[9px] font-bold bg-gold-500 text-white px-1.5 py-0.5 rounded-full">NEW</span>
+                    @endif
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $cast->name }}</p>
+                @if($cast->castType)<p class="text-[10px] text-deli-400 truncate">{{ $cast->castType->name }}</p>@endif
+                @if($cast->shop)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop->name }}</p>@endif
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+@endauth
+
 {{-- 本日の出勤 --}}
 @if($workingToday->isNotEmpty())
 <section class="bg-surface-700 py-12">

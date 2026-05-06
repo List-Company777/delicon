@@ -84,4 +84,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(CastView::class);
     }
+
+    public function hasPreferences(): bool
+    {
+        return !empty($this->pref_cast_type_ids) || !empty($this->pref_area_ids);
+    }
 }

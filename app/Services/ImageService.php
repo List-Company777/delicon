@@ -213,4 +213,16 @@ class ImageService
         $thumb = str_replace('.jpg', '_thumb.jpg', $jpgPath);
         return Storage::disk('public')->exists($thumb) ? $thumb : $jpgPath;
     }
+
+    public function saveDiaryImage(\Illuminate\Http\UploadedFile $file, int $castId, int $diaryId, int $index): string
+    {
+        $dir  = "casts/{$castId}/diary";
+        $base = "{$dir}/d{$diaryId}_{$index}";
+        Storage::disk('public')->makeDirectory($dir);
+        $img = $this->manager->decode($file->getPathname())->scaleDown(width: 900);
+        Storage::disk('public')->put("{$base}.jpg",  (string) $img->encode(new JpegEncoder(quality: 85)));
+        Storage::disk('public')->put("{$base}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
+        return "{$base}.jpg";
+    }
+
 }

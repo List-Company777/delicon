@@ -159,7 +159,7 @@ class ShopController extends Controller
             ->orderBy('sort_order')
             ->paginate(24);
 
-        $news = $shop->news()->latest()->take(3)->get();
+        $news = $shop->news()->orderByDesc("is_pinned")->latest()->take(3)->get();
 
         return view('shop.show', compact('shop', 'casts', 'news'));
     }

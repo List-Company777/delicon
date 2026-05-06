@@ -97,9 +97,11 @@ class SearchController extends Controller
         $discountFirstSet  = $request->boolean('discount_first_set');
 
         // 結果取得
-        $results = $this->getResults($gender, $area, $keyword, wageType: $wageType, wageMin: $wageMin, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $shopTypeIds = array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
+        $ageRange    = request()->input('age_range', '');
+        $results = $this->getResults($gender, $area, $keyword, wageType: $wageType, wageMin: $wageMin, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
-        return view('search.index', compact('gender', 'area', 'keyword', 'wageType', 'wageMin', 'arubaito', 'results', 'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet'));
+        return view('search.index', compact('gender', 'area', 'keyword', 'wageType', 'wageMin', 'arubaito', 'results', 'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'shopTypeIds', 'ageRange'));
     }
 
     // 都道府県LP
@@ -113,7 +115,9 @@ class SearchController extends Controller
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
-        $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $shopTypeIds = array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
+        $ageRange    = request()->input('age_range', '');
+        $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
         $noindex = $results->total() <= 5;
         $status  = $results->total() === 0 ? 404 : 200;
@@ -139,7 +143,8 @@ class SearchController extends Controller
             'areaName', 'jobTypeName',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet', 'isPrefPage',
-            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles',
+            'shopTypeIds', 'ageRange'
         ), $status);
     }
 
@@ -172,9 +177,11 @@ class SearchController extends Controller
         $hasPrivateRoom   = $request->boolean('has_private_room');
         $discountFirstSet = $request->boolean('discount_first_set');
 
+        $shopTypeIds = array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
+        $ageRange    = request()->input('age_range', '');
         $results = $prefOnlyModel
-            ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet)
-            : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+            ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange)
+            : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
         $noindex = $results->total() <= 5;
         $status  = $results->total() === 0 ? 404 : 200;
@@ -190,7 +197,8 @@ class SearchController extends Controller
             'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles',
+            'shopTypeIds', 'ageRange'
         ), $status);
     }
 
@@ -231,7 +239,9 @@ class SearchController extends Controller
         $filterKeyword  = str_starts_with($rawFilter, 'shop:') ? '' : $rawFilter;
         $shopBoolFilter = str_starts_with($rawFilter, 'shop:') ? substr($rawFilter, 5) : '';
 
-        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterKeyword, shopBoolFilter: $shopBoolFilter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet);
+        $shopTypeIds = array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
+        $ageRange    = request()->input('age_range', '');
+        $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterKeyword, shopBoolFilter: $shopBoolFilter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
         $noindex = $results->total() <= 5;
         $status  = $results->total() === 0 ? 404 : 200;
@@ -247,11 +257,12 @@ class SearchController extends Controller
             'areaName', 'jobTypeName', 'filterName', 'prefModel',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'lpStats', 'lpRelated', 'relatedArticles'
+            'noindex', 'lpStats', 'lpRelated', 'relatedArticles',
+            'shopTypeIds', 'ageRange'
         ), $status);
     }
 
-    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $shopBoolFilter = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '')
+    private function getResults(string $gender, string $area, string $keyword, bool $useSlug = false, string $filterKeyword = '', string $shopBoolFilter = '', string $wageType = '', int $wageMin = 0, bool $arubaito = false, bool $allYouCanDrink = false, bool $hasKaraoke = false, bool $hasPrivateRoom = false, bool $discountFirstSet = false, string $prefSlug = '', array $shopTypeIds = [], string $ageRange = '')
     {
         $page    = (int) request()->input('page', 1);
         $perPage = $gender === 'yoasobi' ? 20 : 12;
@@ -260,13 +271,13 @@ class SearchController extends Controller
         $idsCacheKey = 'search_ids:' . md5(implode('|', [
             $gender, $area, $keyword, $useSlug, $filterKeyword, $shopBoolFilter,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
-            $hasPrivateRoom, $discountFirstSet, $prefSlug,
+            $hasPrivateRoom, $discountFirstSet, $prefSlug, implode(',', $shopTypeIds), $ageRange,
         ]));
 
         $allIds = Cache::remember($idsCacheKey, 1800, function () use (
             $gender, $area, $keyword, $useSlug, $filterKeyword, $shopBoolFilter,
             $wageType, $wageMin, $arubaito, $allYouCanDrink, $hasKaraoke,
-            $hasPrivateRoom, $discountFirstSet, $prefSlug
+            $hasPrivateRoom, $discountFirstSet, $prefSlug, $shopTypeIds, $ageRange
         ) {
         // 「新宿駅」→「新宿」のように末尾の「駅」を除いた語も駅名検索に使う
         $stationArea = preg_replace('/駅$/u', '', $area);
@@ -317,6 +328,11 @@ class SearchController extends Controller
                 ->when($hasKaraoke,     fn($q) => $q->where('has_karaoke', true))
                 ->when($hasPrivateRoom,  fn($q) => $q->where('has_private_room', true))
                 ->when($discountFirstSet, fn($q) => $q->where('discount_first_set', true))
+                ->when($shopTypeIds, fn($q) => $q->whereHas('shop', fn($s) => $s->whereIn('shop_type_id', $shopTypeIds)))
+                ->when($ageRange, function ($q) use ($ageRange) {
+                    [$min, $max] = $this->parseAgeRange($ageRange);
+                    return $q->whereHas('shop.castMembers', fn($c) => $c->whereBetween('age', [$min, $max]));
+                })
                 ->orderByDesc(fn($q) =>
                     $q->select('rank_score')->from('shops')->whereColumn('shops.id', 'shop_details.shop_id')
                 )
@@ -366,6 +382,11 @@ class SearchController extends Controller
             ->when($allYouCanDrink, fn($q) => $q->whereHas('detail', fn($s) => $s->where('all_you_can_drink', true)))
             ->when($hasPrivateRoom,  fn($q) => $q->whereHas('detail', fn($s) => $s->where('has_private_room', true)))
             ->when($discountFirstSet, fn($q) => $q->whereHas('detail', fn($s) => $s->where('discount_first_set', true)))
+            ->when($shopTypeIds, fn($q) => $q->whereIn('shop_type_id', $shopTypeIds))
+            ->when($ageRange, function ($q) use ($ageRange) {
+                [$min, $max] = $this->parseAgeRange($ageRange);
+                return $q->whereHas('castMembers', fn($c) => $c->whereBetween('age', [$min, $max]));
+            })
             ->orderByRaw('rank_score DESC, display_sort ASC')
             ->pluck('shops.id')->all();
         }
@@ -654,6 +675,18 @@ class SearchController extends Controller
      * jobs.title に対して MATCH AGAINST（ngram）を適用する。
      * ngram_token_size=2 のため2文字未満はLIKEにフォールバック。
      */
+    private function parseAgeRange(string $ageRange): array
+    {
+        if (str_ends_with($ageRange, '+')) {
+            return [(int) $ageRange, 120];
+        }
+        if (str_contains($ageRange, '-')) {
+            [$min, $max] = explode('-', $ageRange, 2);
+            return [(int) $min, (int) $max];
+        }
+        return [0, 120];
+    }
+
     private function whereTitleMatch(\Illuminate\Database\Eloquent\Builder $query, string $keyword): \Illuminate\Database\Eloquent\Builder
     {
         if (mb_strlen($keyword) >= 2) {

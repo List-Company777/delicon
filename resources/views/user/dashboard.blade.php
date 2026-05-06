@@ -11,8 +11,40 @@
 
     <div class="flex gap-4 mb-8 text-sm">
         <a href="{{ route('user.dashboard') }}/" class="text-deli-400 border-b border-deli-500 pb-1">お気に入り / 閲覧履歴</a>
-        <a href="{{ route('user.settings') }}/" class="text-[#6A6A7E] hover:text-[#C8C4BC] transition">通知設定</a>
+        <a href="{{ route('user.settings') }}/" class="text-[#6A6A7E] hover:text-[#C8C4BC] transition">通知設定・好み</a>
     </div>
+
+    {{-- あなたにおすすめ --}}
+    @if($recommendations->isNotEmpty())
+    <section class="mb-10">
+        <h2 class="font-bold text-[#E8E4DC] text-sm mb-1 flex items-center gap-2">
+            <span class="w-1 h-4 bg-gold-500 rounded-full"></span>
+            あなたにおすすめ
+        </h2>
+        <p class="text-xs text-[#6A6A7E] mb-4">好みの設定に合ったキャストです。<a href="{{ route('user.settings') }}/" class="text-deli-400 hover:underline">設定を変更する</a></p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            @foreach($recommendations as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-gold-500 transition">
+                    <img src="{{ $cast->img_url ?? '/img/no-cast.jpg' }}" alt="{{ $cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+                    @if($cast->working_date && $cast->working_date->isToday())
+                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>
+                    @endif
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $cast->name }}</p>
+                @if($cast->castType)<p class="text-[10px] text-deli-400 truncate">{{ $cast->castType->name }}</p>@endif
+                @if($cast->shop)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop->name }}</p>@endif
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @else
+    <section class="mb-10 bg-surface-500 border border-dashed border-surface-300 rounded-xl p-5 text-center">
+        <p class="text-sm text-[#9A96A0] mb-2">好みの設定をすると「あなたにおすすめ」が表示されます</p>
+        <a href="{{ route('user.settings') }}/" class="text-xs text-deli-400 hover:underline">好みを設定する →</a>
+    </section>
+    @endif
 
     {{-- お気に入りキャスト --}}
     <section class="mb-10">

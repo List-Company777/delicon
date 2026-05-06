@@ -34,7 +34,8 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        // Strict-Transport-Security: SSL設定後に有効化
+        // $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 
         return $response;
     }

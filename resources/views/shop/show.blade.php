@@ -248,7 +248,10 @@
                 <div class="space-y-3">
                     @foreach($news as $item)
                     <div class="border-b border-surface-300 pb-3 last:border-0">
-                        <p class="text-xs text-[#4A4A5E] mb-1">{{ $item->created_at?->format('Y/m/d') }}</p>
+                        <p class="text-xs text-[#4A4A5E] mb-1 flex items-center gap-1.5">
+                            @if($item->is_pinned)<span class="text-gold-400 text-xs" title="必ず表示">📌</span>@endif
+                            {{ $item->created_at?->format('Y/m/d') }}
+                        </p>
                         <p class="text-sm text-[#C8C4BC] leading-relaxed">{!! nl2br(e($item->body)) !!}</p>
                     </div>
                     @endforeach

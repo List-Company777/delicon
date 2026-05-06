@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CastDiary;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -72,6 +73,11 @@ class Cast extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(CastSchedule::class)->orderBy('work_date');
+    }
+
+    public function diaries(): HasMany
+    {
+        return $this->hasMany(CastDiary::class)->where('status','published')->latest();
     }
 
     public function reviews(): HasMany
