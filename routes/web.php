@@ -340,6 +340,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 // 店舗一覧・詳細
 Route::get('/shops/', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shops/{shop}/', [ShopController::class, 'show'])->name('shop.show')->where('shop', '[0-9]+');
+Route::get('/shops/{slug}/', [ShopController::class, 'byRegion'])->name('shop.region')->where('slug', '[a-z][a-z0-9-]+');
 
 // キャスト一覧・詳細
 Route::get('/cast/', [CastController::class, 'index'])->name('cast.index');
