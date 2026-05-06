@@ -78,7 +78,7 @@
     </script>
 </head>
 <body class="bg-surface-700 text-[#E8E4DC] antialiased">
-@php $fa = request()->route('area_slug') ?? 'all'; @endphp
+@php $fa = (isset($footerPrefSlug) && $footerPrefSlug) ? $footerPrefSlug : (request()->route('area_slug') ?? 'all'); @endphp
     <header class="bg-surface-800 border-b border-surface-400 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('top') }}/" class="text-lg font-bold tracking-widest hover:opacity-80 transition shrink-0">
@@ -237,12 +237,9 @@
                 <p class="text-gold-400 font-bold mb-3 text-xs tracking-widest uppercase">エリアから探す</p>
                 <div class="space-y-2">
                     @foreach($footerGenres as $genre)
-                    <div class="flex flex-wrap items-baseline gap-x-1 gap-y-1 text-xs">
-                        <a href="{{ route('shop.list.filter', ['area_slug' => $footerPrefSlug ?? $fa, 'filter_slug' => $genre->slug]) }}/" class="text-[#6A6A7E] hover:text-gold-400 transition font-medium shrink-0 mr-1">{{ $genre->name }}</a>
-                        @foreach($genre->areas as $area)
-                        <a href="{{ url('/' . $area->slug . '/shop-list/' . $genre->slug . '/') }}/" class="text-[#8A8A9E] hover:text-[#E8E4DC] transition">{{ $area->name }}</a>
-                        @endforeach
-                    </div>
+                    @foreach($genre->areas as $area)
+                    <a href="{{ url('/' . $area->slug . '/') }}/" class="text-[#8A8A9E] hover:text-[#E8E4DC] transition text-xs">{{ $area->name }}</a>
+                    @endforeach
                     @endforeach
                 </div>
             </div>
