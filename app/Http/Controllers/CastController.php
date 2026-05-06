@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cast;
-use App\Models\Shop;
 use App\Models\CastType;
 use App\Models\CastBodyType;
 use Illuminate\Http\Request;
@@ -13,12 +12,15 @@ class CastController extends Controller
 {
     public function index(Request $request)
     {
-        $castTypes = Cache::remember('cast_types_all', 3600, fn() =>
-            CastType::orderBy('id')->get()
+        $castTypesRaw = Cache::remember('delicon:cast_types', 3600, fn() =>
+            CastType::orderBy('id')->get()->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->all()
         );
-        $bodyTypes = Cache::remember('cast_body_types_all', 3600, fn() =>
-            CastBodyType::orderBy('id')->get()
+        $castTypes = collect($castTypesRaw)->map(fn($t) => (object) $t);
+
+        $bodyTypesRaw = Cache::remember('delicon:cast_body_types', 3600, fn() =>
+            CastBodyType::orderBy('id')->get()->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->all()
         );
+        $bodyTypes = collect($bodyTypesRaw)->map(fn($t) => (object) $t);
 
         $query = Cast::active()
             ->with(['shop', 'castType', 'bodyType', 'tags'])

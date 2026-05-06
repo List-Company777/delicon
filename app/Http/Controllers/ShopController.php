@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Shop;
 use App\Models\ShopType;
-use App\Models\Cast;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,9 +11,10 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $shopTypes = Cache::remember('shop_types_all', 3600, fn() =>
-            ShopType::orderBy('id')->get()
+        $shopTypesRaw = Cache::remember('delicon:shop_types', 3600, fn() =>
+            ShopType::orderBy('id')->get()->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->all()
         );
+        $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
 
         $query = Shop::where('status', 'active')
             ->with(['shopType'])

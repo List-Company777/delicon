@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $cast->name . ' | デリコン')
+@section('title', $cast->name)
 @section('description',
     $cast->name . '(' . ($cast->age ? $cast->age . '歳' : '') . ')' .
     ($cast->castType ? '・' . $cast->castType->name : '') .

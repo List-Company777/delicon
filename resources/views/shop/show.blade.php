@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $shop->name . ' | デリコン')
+@section('title', $shop->name)
 @section('description',
     ($shop->catche ?: $shop->name . 'の詳細情報。') .
     ($shop->price_60 ? '60分¥' . number_format($shop->price_60) . '〜。' : '') .
