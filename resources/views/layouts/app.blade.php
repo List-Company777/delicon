@@ -238,7 +238,7 @@
                 <div class="space-y-2">
                     @foreach($footerGenres as $genre)
                     @foreach($genre->areas as $area)
-                    <a href="{{ url('/' . $area->slug . '/') }}/" class="text-[#8A8A9E] hover:text-[#E8E4DC] transition text-xs">{{ $area->name }}</a>
+                    <a href="{{ url('/' . $area->slug . '/shop-list/') }}/" class="text-[#8A8A9E] hover:text-[#E8E4DC] transition text-xs">{{ $area->name }}</a>
                     @endforeach
                     @endforeach
                 </div>
