@@ -28,14 +28,33 @@ class ShopInfoController extends BaseController
             'nearest_station_name'  => ['nullable', 'string', 'max:100'],
             'nearest_station_walk'  => ['nullable', 'integer', 'min:1', 'max:99'],
             'line_id'               => ['nullable', 'string', 'max:50'],
+            // delicon-specific
+            'base'                  => ['nullable', 'string', 'max:100'],
+            'catche'                => ['nullable', 'string', 'max:200'],
+            'system_text'           => ['nullable', 'string', 'max:5000'],
+            'coupon'                => ['nullable', 'string', 'max:2000'],
+            'open_time'             => ['nullable', 'string', 'max:50'],
+            'close_time'            => ['nullable', 'string', 'max:50'],
+            'all_time'              => ['boolean'],
+            'rest_day'              => ['nullable', 'string', 'max:100'],
+            'price_60'              => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'price_90'              => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'price_120'             => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'price_high'            => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'eigyo_area'            => ['nullable', 'string', 'max:2000'],
+            'eigyo_space'           => ['nullable', 'string', 'max:200'],
+            'shop_type_id'          => ['nullable', 'integer', 'exists:shop_types,id'],
+            'shop_type_id2'         => ['nullable', 'integer', 'exists:shop_types,id'],
         ]);
 
-        // 業種・都道府県・エリアは管理者のみ変更可のため除外
         $shop->update($request->only([
             'name', 'kana', 'postal_code', 'address_locality', 'address', 'tel',
-            'nearest_line', 'nearest_station_name', 'nearest_station_walk',
-            'line_id',
-        ]));
+            'nearest_line', 'nearest_station_name', 'nearest_station_walk', 'line_id',
+            'base', 'catche', 'system_text', 'coupon',
+            'open_time', 'close_time', 'rest_day',
+            'price_60', 'price_90', 'price_120', 'price_high',
+            'eigyo_area', 'eigyo_space', 'shop_type_id', 'shop_type_id2',
+        ]) + ['all_time' => $request->boolean('all_time')]);
 
         return back()->with('success', '店舗基本情報を更新しました');
     }

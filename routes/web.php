@@ -114,6 +114,7 @@ use App\Http\Controllers\Manage\CastJobController;
 use App\Http\Controllers\Manage\StaffJobController;
 use App\Http\Controllers\Manage\ContactController;
 use App\Http\Controllers\Manage\ApplicationController as ManageApplicationController;
+use App\Http\Controllers\Manage\CastProfileController;
 
 Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->group(function () {
     Route::get('/dashboard/',            [DashboardController::class, 'index'])->name('dashboard');
@@ -145,6 +146,15 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/cast/{id}/edit/',       [CastJobController::class, 'edit'])->name('cast.edit')->where('id', '[0-9]+');
     Route::put('/cast/{id}/',            [CastJobController::class, 'update'])->name('cast.update')->where('id', '[0-9]+');
     Route::delete('/cast/{id}/',         [CastJobController::class, 'destroy'])->name('cast.destroy')->where('id', '[0-9]+');
+
+    // 在籍キャスト管理（deliconサイト専用）
+    Route::get('/casts/',                 [CastProfileController::class, 'index'])->name('cast-profile.index');
+    Route::get('/casts/create/',          [CastProfileController::class, 'create'])->name('cast-profile.create');
+    Route::post('/casts/',                [CastProfileController::class, 'store'])->name('cast-profile.store');
+    Route::get('/casts/{id}/edit/',       [CastProfileController::class, 'edit'])->name('cast-profile.edit')->where('id', '[0-9]+');
+    Route::put('/casts/{id}/',            [CastProfileController::class, 'update'])->name('cast-profile.update')->where('id', '[0-9]+');
+    Route::delete('/casts/{id}/',         [CastProfileController::class, 'destroy'])->name('cast-profile.destroy')->where('id', '[0-9]+');
+
 
     // 掲載申請
     Route::post('/apply/',               [\App\Http\Controllers\Manage\DashboardController::class, 'apply'])->name('apply');

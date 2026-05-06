@@ -57,8 +57,7 @@
                     'manage.shop.edit'          => '基本情報',
                     'manage.shop.image'         => 'メイン画像',
                     'manage.business.edit'      => '営業情報',
-                    'manage.cast.index'         => 'キャスト求人',
-                    'manage.staff.index'        => 'スタッフ求人',
+                    'manage.cast-profile.index' => '在籍キャスト',
                     'manage.applications.index' => '応募管理',
                     'manage.paid-plan'          => '掲載プラン',
                     'manage.contact'            => 'お問い合わせ',
@@ -69,8 +68,8 @@
                 <a href="{{ route($route) }}"
                    @class([
                        'whitespace-nowrap px-3 py-3 border-b-2 transition',
-                       'border-business-600 text-business-700 font-medium' => request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')),
-                       'border-transparent text-gray-500 hover:text-gray-700' => !(request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*'))),
+                       'border-business-600 text-business-700 font-medium' => request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')),
+                       'border-transparent text-gray-500 hover:text-gray-700' => !(request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*'))),
                    ])>
                     {{ $label }}
                     @if($route === 'manage.applications.index' && $unreadCount > 0)
