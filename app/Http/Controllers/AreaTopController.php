@@ -19,6 +19,11 @@ class AreaTopController extends Controller
             abort(404);
         }
 
+        // 小エリア（Area）は /{slug}/shop-list/ にリダイレクト
+        if ($areaModel && !$prefModel) {
+            return redirect("/{$area_slug}/shop-list/", 301);
+        }
+
         $areaName = $areaModel?->name ?? $prefModel?->name ?? '全国';
 
         // 有料店舗（plan 1-3）バナーあり
