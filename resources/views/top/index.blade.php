@@ -82,22 +82,20 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         @foreach($recommendedShops as $shop)
         <a href="{{ route('shop.show', $shop->id) }}/"
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group">
-            <div class="relative aspect-video bg-surface-400 overflow-hidden">
+            <div class="relative aspect-[5/2] bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
                 @if($shop->shop_file_name)
                 <img src="{{ $shop->shop_banner_url }}"
                      alt="{{ $shop->name }}のデリヘル情報"
                      loading="lazy"
-                     class="img-onerror-hide w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                     class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 @else
-                <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-surface-400 to-surface-600 px-3">
-                    <span class="text-gold-400 text-lg mb-1">✦</span>
-                    <p class="text-[#E8E4DC] text-xs font-semibold text-center line-clamp-2 leading-snug">{{ $shop->name }}</p>
-                </div>
+                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
                 @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-surface-900/70 via-transparent to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
                 @if($shop->shop_type_name ?? null)
                 <span class="absolute top-2 left-2 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
                 @endif
+                <p class="absolute bottom-2 left-2 right-2 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
             </div>
             <div class="p-3">
                 <h3 class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">
