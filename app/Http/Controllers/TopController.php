@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cast;
+use App\Models\Shop;
+use App\Models\ShopType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -9,65 +12,69 @@ class TopController extends Controller
 {
     public function index()
     {
-        // 人気エリア：search_page_views から過去30日のエリア別PV上位6件をgender別に取得
-        $popularAreasRaw = Cache::remember('top:popular_areas', 1800, fn() =>
-            DB::table('search_page_views as v')
-                ->selectRaw('v.gender, v.area_slug, SUM(v.count) as total, a.name as area_name')
-                ->join('areas as a', 'a.slug', '=', 'v.area_slug')
-                ->whereRaw('v.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
-                ->where('v.area_slug', '!=', 'all')
-                ->whereIn('v.gender', ['female', 'male', 'yoasobi'])
-                ->groupBy('v.gender', 'v.area_slug', 'a.name')
-                ->orderByDesc('total')
+        // 業種一覧（キャッシュ不要・件数少）
+        $shopTypesRaw = ShopType::orderBy('id')->get()
+            ->map(fn($t) => ['id' => $t->id, 'name' => $t->name])
+            ->all();
+        $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
+
+        // おすすめ店舗（ranking_count 降順・最大12件）
+        $recommendedShopsRaw = Cache::remember('delicon:top_recommended_shops', 1800, function () {
+            return Shop::with(['shopType', 'castMembers'])
+                ->where('status', 'active')
+                ->orderByDesc('ranking_count')
+                ->take(12)
                 ->get()
-                ->groupBy('gender')
-                ->map(fn($rows) => $rows->take(6)->map(fn($r) => (array) $r)->values()->all())
-                ->all()
-        );
-        $popularAreas = collect($popularAreasRaw)->map(fn($rows) => collect($rows)->map(fn($r) => (object) $r));
-
-        // よく検索されているキーワード：search_page_views から過去30日のエリア+職種別PV集計
-        $popularKeywordsRaw = Cache::remember('top:popular_keywords', 1800, function () {
-            // エリア単独（job_slug='all'）: areas と JOIN して日本語名を取得
-            $areaKws = DB::table('search_page_views as spv')
-                ->join('areas as a', 'a.slug', '=', 'spv.area_slug')
-                ->selectRaw("spv.gender, a.name as keyword, a.slug as area_slug, 'all' as job_slug, SUM(spv.count) as search_count")
-                ->whereRaw('spv.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
-                ->where('spv.area_slug', '!=', 'all')
-                ->where('spv.job_slug', 'all')
-                ->whereIn('spv.gender', ['female', 'male', 'yoasobi'])
-                ->groupBy('spv.gender', 'spv.area_slug', 'a.name', 'a.slug')
-                ->get();
-
-            // 職種単独（area_slug='all'）: job_types と JOIN して日本語名を取得
-            $jobKws = DB::table('search_page_views as spv')
-                ->join('job_types as jt', 'jt.slug', '=', 'spv.job_slug')
-                ->selectRaw("spv.gender, jt.name as keyword, 'all' as area_slug, jt.slug as job_slug, SUM(spv.count) as search_count")
-                ->whereRaw('spv.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)')
-                ->where('spv.job_slug', '!=', 'all')
-                ->where('spv.area_slug', 'all')
-                ->whereIn('spv.gender', ['female', 'male', 'yoasobi'])
-                ->groupBy('spv.gender', 'spv.job_slug', 'jt.name', 'jt.slug')
-                ->get();
-
-            return $areaKws->concat($jobKws)
-                ->sortByDesc('search_count')
-                ->take(20)
-                ->map(fn($kw) => [
-                    'keyword'       => $kw->keyword,
-                    'gender'        => $kw->gender,
-                    'search_count'  => $kw->search_count,
-                    'directory_url' => route('search.directory', [
-                        'gender'    => $kw->gender,
-                        'area_slug' => $kw->area_slug,
-                        'job_slug'  => $kw->job_slug,
-                    ]) . '/',
+                ->map(fn($shop) => [
+                    'id'             => $shop->id,
+                    'name'           => $shop->name,
+                    'catche'         => $shop->catche,
+                    'shop_file_name' => $shop->shop_file_name,
+                    'shop_type_name' => $shop->shopType?->name,
+                    'cast_count'     => $shop->castMembers->count(),
+                    'price_60'       => $shop->price_60,
                 ])
-                ->values()
                 ->all();
         });
-        $popularKeywords = collect($popularKeywordsRaw)->map(fn($kw) => (object) $kw);
+        $recommendedShops = collect($recommendedShopsRaw)->map(fn($s) => (object) $s);
 
-        return view('top.index', compact('popularKeywords', 'popularAreas'));
+        // 新着キャスト（id 降順・最大12件）
+        $newCastsRaw = Cache::remember('delicon:top_new_casts', 900, function () {
+            return Cast::with(['shop', 'castType'])
+                ->where('status', 'active')
+                ->orderByDesc('id')
+                ->take(12)
+                ->get()
+                ->map(fn($cast) => [
+                    'id'             => $cast->id,
+                    'name'           => $cast->name,
+                    'age'            => $cast->age,
+                    'cup'            => $cast->cup,
+                    'img_file_name'  => $cast->img_file_name,
+                    'cast_type_name' => $cast->castType?->name,
+                    'shop_id'        => $cast->shop_id,
+                    'shop_name'      => $cast->shop?->name,
+                ])
+                ->all();
+        });
+        $newCasts = collect($newCastsRaw)->map(fn($c) => (object) $c);
+
+        // 人気キーワード：業種別キャスト数 TOP8
+        $popularKeywordsRaw = Cache::remember('delicon:top_shop_types_count', 3600, function () {
+            return ShopType::withCount(['shops' => fn($q) => $q->where('status', 'active')])
+                ->orderByDesc('shops_count')
+                ->take(8)
+                ->get()
+                ->map(fn($t) => ['name' => $t->name, 'count' => $t->shops_count])
+                ->all();
+        });
+        $popularKeywords = collect($popularKeywordsRaw)->map(fn($k) => (object) $k);
+
+        return view('top.index', compact(
+            'shopTypes',
+            'recommendedShops',
+            'newCasts',
+            'popularKeywords'
+        ));
     }
 }

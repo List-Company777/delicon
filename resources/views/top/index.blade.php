@@ -1,285 +1,262 @@
 @extends('layouts.app')
 
-@section('title', 'ナイトワーク求人・夜遊び情報')
+@section('title', 'デリヘル情報サイト｜全国のデリヘル店・キャスト')
+@section('description', '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト「デリコン」。新着キャスト情報も随時更新中。')
 @section('canonical', route('top') . '/')
-@section('description', 'ナイトワーク求人・夜遊びスポット情報を掲載。キャバクラ・ホスト・ガールズバーなどの求人をエリア・職種から簡単検索。全国のナイトワーク情報はナイトワークリスト。')
+@section('robots', 'index, follow')
+@section('og_type', 'website')
 
 @push('head')
 @php
-$ldTop = [
+$ldWebsite = [
     '@context' => 'https://schema.org',
-    '@type'    => 'WebPage',
-    '@id'      => route('top') . '/#webpage',
-    'url'      => route('top') . '/',
-    'name'     => 'ナイトワークリスト | キャバクラ・ホスト・ガールズバーの求人・夜遊び情報',
+    '@type'    => 'WebSite',
+    '@id'      => url('/') . '#website',
+    'url'      => url('/') . '/',
+    'name'     => 'デリコン',
+    'description' => '全国のデリヘル情報サイト',
     'inLanguage'  => 'ja',
-    'description' => 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。',
-    'isPartOf'    => ['@id' => url('/') . '#website'],
-    'about'       => ['@id' => url('/') . '#org'],
-    'publisher'   => ['@id' => url('/') . '#org'],
+    'potentialAction' => [
+        '@type'       => 'SearchAction',
+        'target'      => ['@type' => 'EntryPoint', 'urlTemplate' => url('/shops/') . '?q={search_term_string}'],
+        'query-input' => 'required name=search_term_string',
+    ],
+];
+$ldPage = [
+    '@context'  => 'https://schema.org',
+    '@type'     => 'WebPage',
+    '@id'       => url('/') . '#webpage',
+    'url'       => url('/') . '/',
+    'name'      => 'デリヘル情報サイト｜全国のデリヘル店・キャスト - デリコン',
+    'inLanguage'=> 'ja',
+    'description' => '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャスト情報が検索できる総合情報サイト。',
+    'isPartOf'  => ['@id' => url('/') . '#website'],
 ];
 @endphp
-<script type="application/ld+json" @nonce>{!! json_encode($ldTop, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ldWebsite, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json" @nonce>{!! json_encode($ldPage, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG) !!}</script>
 @endpush
 
 @section('content')
 
-{{-- ヒーロー：年齢確認と検索グループ --}}
-<section class="bg-gray-900 text-white py-10 md:py-16">
-    <div class="max-w-6xl mx-auto px-4">
-
-        {{-- タイトル --}}
-        <div class="text-center mb-8">
-            <h1 class="text-2xl md:text-4xl font-bold mb-2">
-                ナイトワーク<span class="text-business-300">求人</span>・夜遊び情報
-            </h1>
-            <p class="text-gray-400 text-sm md:text-base">
-                ナイトワークリスト｜キャバクラ・ホスト・ガールズバーをエリア・職種から検索
-            </p>
-            <p class="text-gray-500 text-xs mt-2">
-                ※本サイトは18歳以上の方を対象としています
-            </p>
+{{-- ヒーロー --}}
+<section class="bg-gray-900 text-white py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-3xl md:text-5xl font-bold mb-3 tracking-tight leading-tight">
+            全国<span class="text-red-400">デリヘル</span>情報サイト
+        </h1>
+        <p class="text-gray-300 text-base md:text-lg mb-2">
+            デリヘル店のシステム・料金・在籍キャストを詳しく掲載
+        </p>
+        <p class="text-gray-400 text-sm mb-8">デリコン｜デリヘル・風俗総合情報</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <a href="{{ route('shop.index') }}/"
+               class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-xl text-lg transition shadow-lg">
+                デリヘル店舗を探す
+            </a>
+            <a href="{{ route('cast.index') }}/"
+               class="inline-block bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 px-10 rounded-xl text-lg transition shadow-lg">
+                キャストを探す
+            </a>
         </div>
-
-        {{-- 3グループの検索ボックス --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-            {{-- 夜遊びリスト（mobile:1位、desktop:1位） --}}
-            <div class="order-1 md:order-1 rounded-xl p-5 border border-business-700/40 bg-business-700/10">
-                <h2 class="flex items-center gap-2 mb-4 text-business-300 font-bold text-lg">
-                    <span class="w-3 h-3 rounded-full bg-business-300 shrink-0" aria-hidden="true"></span>
-                    夜遊びリスト<span class="text-sm font-normal ml-1 opacity-75">（ナイトスポット情報）</span>
-                </h2>
-                <p class="text-gray-400 text-xs mb-4">夜遊びスポット情報・セット料金を検索</p>
-                <form action="{{ route('search') }}/" method="GET">
-                    <input type="hidden" name="gender" value="yoasobi">
-                    <div class="space-y-2">
-                        <label class="sr-only" for="yoasobi-area">エリア・駅名</label>
-                        <input id="yoasobi-area" type="text" name="area"
-                               placeholder="エリア・駅名（例：新宿）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-business-300">
-                        <label class="sr-only" for="yoasobi-keyword">業種・店名</label>
-                        <input id="yoasobi-keyword" type="text" name="keyword"
-                               placeholder="業種・店名（例：キャバクラ）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-business-300">
-                        <button type="submit"
-                                class="w-full bg-business-700 hover:bg-business-600 text-white font-bold py-2 rounded-lg text-sm transition">
-                            夜遊び情報を検索
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- 男性ナイトワーク（mobile:3位、desktop:3位） --}}
-            <div class="order-3 md:order-3 rounded-xl p-5 border border-male-300/30 bg-male-800/30">
-                <h2 class="flex items-center gap-2 mb-4 text-male-300 font-bold text-lg">
-                    <span class="w-3 h-3 rounded-full bg-male-300 shrink-0" aria-hidden="true"></span>
-                    男性ナイトワーク
-                </h2>
-                <p class="text-gray-400 text-xs mb-4">ホスト・黒服・ボーイなどの男性ナイトワーク</p>
-                <form action="{{ route('search') }}/" method="GET">
-                    <input type="hidden" name="gender" value="male">
-                    <div class="space-y-2">
-                        <label class="sr-only" for="male-area">エリア・駅名</label>
-                        <input id="male-area" type="text" name="area"
-                               placeholder="エリア・駅名（例：歌舞伎町）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-male-300">
-                        <label class="sr-only" for="male-keyword">職種・業種</label>
-                        <input id="male-keyword" type="text" name="keyword"
-                               placeholder="職種・業種（例：黒服、キャバクラ）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-male-300">
-                        <button type="submit"
-                                class="w-full bg-male-600 hover:bg-male-700 text-white font-bold py-2 rounded-lg text-sm transition">
-                            男性ナイトワークを検索
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- 女性ナイトワーク（mobile:2位、desktop:2位） --}}
-            <div class="order-2 md:order-2 rounded-xl p-5 border border-female-500/40 bg-female-600/10">
-                <h2 class="flex items-center gap-2 mb-4 text-female-400 font-bold text-lg">
-                    <span class="w-3 h-3 rounded-full bg-female-500 shrink-0" aria-hidden="true"></span>
-                    女性ナイトワーク
-                </h2>
-                <p class="text-gray-400 text-xs mb-4">キャスト・ガールズバーなどの女性ナイトワーク</p>
-                <form action="{{ route('search') }}/" method="GET">
-                    <input type="hidden" name="gender" value="female">
-                    <div class="space-y-2">
-                        <label class="sr-only" for="female-area">エリア・駅名</label>
-                        <input id="female-area" type="text" name="area"
-                               placeholder="エリア・駅名（例：池袋）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-female-400">
-                        <label class="sr-only" for="female-keyword">職種・業種</label>
-                        <input id="female-keyword" type="text" name="keyword"
-                               placeholder="職種・業種（例：キャスト、ガールズバー）"
-                               class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-female-400">
-                        <button type="submit"
-                                class="w-full bg-female-600 hover:bg-female-500 text-white font-bold py-2 rounded-lg text-sm transition">
-                            女性ナイトワークを検索
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
+        <p class="text-xs text-gray-500">※本サイトは18歳以上の方を対象としています</p>
     </div>
 </section>
 
-{{-- 人気エリアのクイックリンク --}}
-<section class="max-w-6xl mx-auto px-4 py-10">
-    <h2 class="text-lg font-bold text-gray-700 mb-5">人気エリアから探す</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {{-- 夜遊びリスト --}}
-        <nav aria-label="夜遊びリスト エリア別">
-            <h3 class="text-sm font-bold text-business-700 border-b-2 border-business-300 pb-1 mb-3">
-                夜遊びリスト（ナイトスポット情報）
-            </h3>
-            <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('yoasobi', collect())->take(15) as $row)
-                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
-                    {{ $row->area_name }}
-                </a>
-                @empty
-                @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'nakasu' => '中洲'] as $slug => $name)
-                <a href="{{ route('search.directory', ['gender' => 'yoasobi', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-business-50 border border-business-300 text-business-700 rounded-full text-xs hover:bg-business-100 transition">
-                    {{ $name }}
-                </a>
-                @endforeach
-                @endforelse
-            </div>
-        </nav>
-
-        {{-- 女性向け --}}
-        <nav aria-label="女性ナイトワーク エリア別">
-            <h3 class="text-sm font-bold text-female-600 border-b-2 border-female-400 pb-1 mb-3">
-                女性ナイトワーク
-            </h3>
-            <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('female', collect())->take(15) as $row)
-                <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
-                    {{ $row->area_name }}
-                </a>
-                @empty
-                @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
-                <a href="{{ route('search.directory', ['gender' => 'female', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-female-50 border border-female-100 text-female-600 rounded-full text-xs hover:bg-female-100 transition">
-                    {{ $name }}
-                </a>
-                @endforeach
-                @endforelse
-            </div>
-        </nav>
-
-        {{-- 男性向け --}}
-        <nav aria-label="男性ナイトワーク エリア別">
-            <h3 class="text-sm font-bold text-male-600 border-b-2 border-male-300 pb-1 mb-3">
-                男性ナイトワーク
-            </h3>
-            <div class="flex flex-wrap gap-2">
-                @forelse($popularAreas->get('male', collect())->take(15) as $row)
-                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $row->area_slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
-                    {{ $row->area_name }}
-                </a>
-                @empty
-                @foreach(['shinjuku' => '新宿', 'ikebukuro' => '池袋', 'shibuya' => '渋谷', 'roppongi' => '六本木', 'ginza' => '銀座', 'namba' => '難波'] as $slug => $name)
-                <a href="{{ route('search.directory', ['gender' => 'male', 'area_slug' => $slug, 'job_slug' => 'all']) }}/"
-                   class="px-3 py-1 bg-male-50 border border-male-300 text-male-600 rounded-full text-xs hover:bg-male-100 transition">
-                    {{ $name }}
-                </a>
-                @endforeach
-                @endforelse
-            </div>
-        </nav>
-
-    </div>
-</section>
-
-{{-- 最近見た求人・店舗 --}}
-<div x-data="recentlyViewedTop()" x-init="init()">
-    <template x-if="items.length > 0">
-        <section class="max-w-6xl mx-auto px-4 py-8 border-t border-gray-100" aria-label="最近見た求人・店舗">
-            <h2 class="text-sm font-bold text-gray-500 mb-3">最近見た求人・店舗</h2>
-            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                <template x-for="item in items" :key="item.id + item.kind">
-                    <a :href="item.url"
-                       class="shrink-0 w-36 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition">
-                        <p class="text-xs mb-1"
-                           :class="item.kind === 'shop' ? 'text-business-600' : (item.group === 'male' ? 'text-male-600' : 'text-female-500')"
-                           x-text="item.type"></p>
-                        <p class="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1" x-text="item.title"></p>
-                        <p class="text-xs text-gray-400 truncate" x-text="item.shop || item.name"></p>
-                    </a>
-                </template>
-            </div>
-        </section>
-    </template>
-</div>
-
-{{-- みんなの検索ワード --}}
-@if($popularKeywords->count())
-<section class="bg-gray-100 py-8">
+{{-- 業種クイックフィルター --}}
+@if($shopTypes->isNotEmpty())
+<nav class="bg-gray-800 py-3" aria-label="デリヘル業種別">
     <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-sm font-bold text-gray-500 mb-3">よく検索されているキーワード</h2>
-        <div class="flex flex-wrap gap-2">
-            @foreach($popularKeywords as $kw)
-            @php
-                $kwStyle = match($kw->gender) {
-                    'female'  => 'bg-female-50 border-female-100 text-female-600 hover:bg-female-100',
-                    'male'    => 'bg-male-50 border-male-300 text-male-600 hover:bg-male-100',
-                    'yoasobi' => 'bg-business-50 border-business-300 text-business-700 hover:bg-business-100',
-                    default   => 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100',
-                };
-            @endphp
-            <a href="{{ $kw->directory_url ?? route('search', ['gender' => $kw->gender, 'keyword' => $kw->keyword]) }}"
-               class="px-3 py-1 border rounded-full text-xs transition {{ $kwStyle }}">
-                {{ $kw->keyword }}
-                <span class="opacity-60 ml-1">{{ number_format($kw->search_count) }}</span>
+        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <a href="{{ route('shop.index') }}/"
+               class="flex-shrink-0 bg-red-600 text-white text-sm px-4 py-1.5 rounded-full whitespace-nowrap">
+                全業種
+            </a>
+            @foreach($shopTypes as $type)
+            <a href="{{ route('shop.index') }}/?type={{ $type->id }}"
+               class="flex-shrink-0 bg-gray-700 hover:bg-red-600 text-white text-sm px-4 py-1.5 rounded-full transition whitespace-nowrap">
+                {{ $type->name }}
             </a>
             @endforeach
         </div>
     </div>
+</nav>
+@endif
+
+{{-- おすすめデリヘル店舗 --}}
+<section class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl md:text-2xl font-bold border-l-4 border-red-600 pl-3">
+            おすすめデリヘル店舗
+        </h2>
+        <a href="{{ route('shop.index') }}/" class="text-sm text-red-600 hover:underline">すべて見る &rsaquo;</a>
+    </div>
+    @if($recommendedShops->isNotEmpty())
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        @foreach($recommendedShops as $shop)
+        <a href="{{ route('shop.show', $shop->id) }}/"
+           class="bg-white rounded-xl shadow hover:shadow-md overflow-hidden transition group">
+            <div class="relative aspect-video bg-gray-200 overflow-hidden">
+                @if($shop->shop_file_name)
+                <img src="/img/{{ ltrim($shop->shop_file_name, '/') }}"
+                     alt="{{ $shop->name }}のデリヘル情報"
+                     loading="lazy"
+                     onerror="this.style.display='none'"
+                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                @endif
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            </div>
+            <div class="p-3">
+                @if($shop->shop_type_name)
+                <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
+                @endif
+                <h3 class="font-bold text-sm text-gray-900 mt-1 group-hover:text-red-600 transition line-clamp-1">
+                    {{ $shop->name }}
+                </h3>
+                @if($shop->catche)
+                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
+                @endif
+                <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
+                    <span>在籍{{ $shop->cast_count }}名</span>
+                    @if($shop->price_60)
+                    <span class="text-red-500 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
+                    @endif
+                </div>
+            </div>
+        </a>
+        @endforeach
+    </div>
+    @endif
+    <div class="mt-6 text-center">
+        <a href="{{ route('shop.index') }}/"
+           class="inline-block border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold px-10 py-3 rounded-xl transition">
+            デリヘル店舗をもっと見る
+        </a>
+    </div>
+</section>
+
+{{-- 新着キャスト --}}
+<section class="bg-gray-50 py-10">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl md:text-2xl font-bold border-l-4 border-pink-500 pl-3">
+                新着デリヘルキャスト
+            </h2>
+            <a href="{{ route('cast.index') }}/" class="text-sm text-pink-600 hover:underline">すべて見る &rsaquo;</a>
+        </div>
+        @if($newCasts->isNotEmpty())
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            @foreach($newCasts as $cast)
+            @php
+                $castImg = ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                    ? '/img/girl/00/' . ltrim($cast->img_file_name, '/')
+                    : '/img/no-cast.jpg';
+            @endphp
+            <a href="{{ route('cast.show', $cast->id) }}/"
+               class="bg-white rounded-xl shadow hover:shadow-md overflow-hidden transition group">
+                <div class="aspect-[3/4] overflow-hidden bg-gray-100">
+                    <img src="{{ $castImg }}"
+                         alt="{{ $cast->name }}（{{ $cast->shop_name ?? 'デリヘル' }}）のキャスト情報"
+                         loading="lazy"
+                         onerror="this.src='/img/no-cast.jpg'"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="p-2">
+                    <p class="font-bold text-xs text-gray-900 truncate">{{ $cast->name }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        {{ $cast->age ? $cast->age . '歳' : '' }}{{ ($cast->age && $cast->cup) ? '・' : '' }}{{ $cast->cup ? $cast->cup . 'カップ' : '' }}
+                    </p>
+                    @if($cast->shop_name)
+                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ $cast->shop_name }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+        <div class="mt-6 text-center">
+            <a href="{{ route('cast.index') }}/"
+               class="inline-block border-2 border-pink-500 text-pink-600 hover:bg-pink-500 hover:text-white font-bold px-10 py-3 rounded-xl transition">
+                キャストをもっと見る
+            </a>
+        </div>
+        @endif
+    </div>
+</section>
+
+{{-- 業種ランキング --}}
+@if($popularKeywords->isNotEmpty())
+<section class="max-w-6xl mx-auto px-4 py-10">
+    <h2 class="text-xl md:text-2xl font-bold mb-6 border-l-4 border-gray-400 pl-3">
+        デリヘルの業種から探す
+    </h2>
+    <div class="flex flex-wrap gap-3">
+        @foreach($popularKeywords as $kw)
+        <a href="{{ route('shop.index') }}/?type={{ $kw->id ?? '' }}"
+           class="bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50 text-gray-700 hover:text-red-700 rounded-full px-5 py-2 text-sm transition shadow-sm">
+            {{ $kw->name }}
+            @if(isset($kw->count) && $kw->count > 0)
+            <span class="text-gray-400 text-xs ml-1">{{ $kw->count }}店</span>
+            @endif
+        </a>
+        @endforeach
+    </div>
 </section>
 @endif
 
-@include('partials._promo-banner', ['wrapClass' => 'mt-2'])
+{{-- デリヘルとは（SEOテキスト） --}}
+<section class="bg-white border-t border-gray-100 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">デリヘルとは</h2>
+        <div class="prose prose-sm text-gray-600 max-w-none space-y-3 leading-relaxed">
+            <p>デリヘル（デリバリーヘルス）とは、派遣型の風俗サービスの一種で、キャストがお客様の指定する場所（ホテル・自宅など）に出張する形式の店舗です。店舗型ではないため比較的リーズナブルな料金設定が多く、全国各地で多くの店舗が営業しています。</p>
+            <p>デリコンでは、全国のデリヘル・風俗店情報を掲載しています。各店舗のシステム・料金・在籍キャストのプロフィールをまとめて確認できます。ホテヘル・素人系・人妻・SMなど業種ごとに絞り込み検索も可能です。</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+            <div class="bg-red-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-red-600 mb-1">{{ number_format(\App\Models\Shop::where('status','active')->count()) }}店舗</div>
+                <p class="text-xs text-gray-600">掲載中のデリヘル店舗</p>
+            </div>
+            <div class="bg-pink-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-pink-600 mb-1">{{ number_format(\App\Models\Cast::where('status','active')->count()) }}名</div>
+                <p class="text-xs text-gray-600">在籍キャスト数</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-gray-700 mb-1">全国</div>
+                <p class="text-xs text-gray-600">47都道府県の情報を掲載</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- よくある質問 --}}
+<section class="bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">よくある質問</h2>
+        <div class="space-y-4">
+            <details class="bg-white rounded-xl shadow-sm p-5 group">
+                <summary class="font-medium text-gray-800 cursor-pointer list-none flex justify-between items-center">
+                    <span>デリヘルの料金相場はどのくらいですか？</span>
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <p class="mt-3 text-sm text-gray-600 leading-relaxed">デリヘルの料金は店舗・地域・コースによって異なりますが、一般的に60分コースで10,000円〜30,000円程度が相場です。素人系・人妻系などの業種や指名料の有無によっても変わります。各店舗の詳細ページでシステム・料金を確認できます。</p>
+            </details>
+            <details class="bg-white rounded-xl shadow-sm p-5 group">
+                <summary class="font-medium text-gray-800 cursor-pointer list-none flex justify-between items-center">
+                    <span>デリヘルはどんな業種がありますか？</span>
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <p class="mt-3 text-sm text-gray-600 leading-relaxed">デリヘルにはホテヘル・素人系・人妻・熟女・SM・ニューハーフ・アロマエステ・イメクラなどさまざまな業種があります。デリコンでは業種ごとに絞り込み検索ができます。</p>
+            </details>
+            <details class="bg-white rounded-xl shadow-sm p-5 group">
+                <summary class="font-medium text-gray-800 cursor-pointer list-none flex justify-between items-center">
+                    <span>キャストの情報はどこで確認できますか？</span>
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <p class="mt-3 text-sm text-gray-600 leading-relaxed">各店舗の詳細ページに在籍キャスト一覧が掲載されています。また「キャストを探す」ページでは、タイプ・年齢・カップサイズなどの条件でキャストを横断検索することができます。</p>
+            </details>
+        </div>
+    </div>
+</section>
 
 @endsection
-
-@push('scripts')
-<script @nonce>
-function recentlyViewedTop() {
-    return {
-        items: [],
-        init() {
-            const buckets = [
-                { key: 'nw_recent_jobs_female',   kind: 'job',  group: 'female' },
-                { key: 'nw_recent_jobs_male',      kind: 'job',  group: 'male'   },
-                { key: 'nw_recent_shops_business', kind: 'shop', group: 'both'   },
-            ].map(b => {
-                let list = [];
-                try { list = JSON.parse(localStorage.getItem(b.key) || '[]'); } catch(e) {}
-                return { ...b, list };
-            });
-
-            // ラウンドロビン: 各バケットから1件ずつ交互に取り出す
-            const result = [];
-            const max = Math.max(...buckets.map(b => b.list.length));
-            for (let i = 0; i < max && result.length < 9; i++) {
-                buckets.forEach(b => {
-                    if (b.list[i] && result.length < 9) {
-                        result.push({ ...b.list[i], kind: b.kind, group: b.group });
-                    }
-                });
-            }
-            this.items = result;
-        }
-    };
-}
-</script>
-@endpush

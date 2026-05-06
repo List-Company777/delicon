@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'デリコン') | デリコン</title>
+    <title>@yield('title', 'デリヘル情報') | デリコン</title>
     <meta name="description" content="@yield('description', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。')">
     @hasSection('canonical')
     <link rel="canonical" href="@yield('canonical')">
@@ -16,7 +16,7 @@
     <meta property="og:site_name" content="デリコン">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('title', 'デリコン') | デリコン">
+    <meta property="og:title" content="@yield('title', 'デリヘル情報') | デリコン">
     <meta property="og:description" content="@yield('description', 'キャバクラ・ホスト・ガールズバーの求人・夜遊び情報を掲載。エリア・職種から簡単検索。')">
     <meta property="og:url" content="@hasSection('canonical')@yield('canonical')@else{{ url()->current() }}@endif">
     <meta property="og:image" content="@yield('ogp_image', asset('android-chrome-192x192.png'))">
