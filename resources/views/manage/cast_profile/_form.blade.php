@@ -143,14 +143,31 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">新人</th>
         <td class="px-4 py-3">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="is_new" value="1"
-                       @checked(old('is_new', $cast?->is_new))
-                       class="w-4 h-4 accent-red-600">
-                <span class="text-sm text-gray-700">新人バッジを表示する（フラグを付けた日または入店日の遅い方から1ヶ月間）</span>
-            </label>
-            @if($cast?->is_new && $cast?->new_since)
-                <p class="text-xs text-gray-400 mt-1">有効期限: {{ \Carbon\Carbon::parse($cast->new_since)->addMonth()->format('Y/m/d') }} まで</p>
+            @php
+                $canSetNew = !$cast || (is_null($cast->new_since) && $cast->created_at->gte(now()->subMonth()));
+            @endphp
+            @if($cast && !is_null($cast->new_since))
+                {{-- 既に使用済み --}}
+                <p class="text-sm text-gray-400">
+                    @if($cast->is_new)
+                        <span class="text-green-600 font-medium">新人バッジ表示中</span> &mdash;
+                        有効期限: {{ \Carbon\Carbon::parse($cast->new_since)->addMonth()->format('Y/m/d') }} まで
+                    @else
+                        新人バッジは使用済みです（再設定不可）
+                    @endif
+                </p>
+                <input type="hidden" name="is_new" value="{{ $cast->is_new ? '1' : '0' }}">
+            @elseif(!$canSetNew && $cast)
+                {{-- 登録から1ヶ月超過 --}}
+                <p class="text-sm text-gray-400">登録から1ヶ月以上経過しているため新人バッジを設定できません</p>
+                <input type="hidden" name="is_new" value="0">
+            @else
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="is_new" value="1"
+                           @checked(old('is_new', $cast?->is_new))
+                           class="w-4 h-4 accent-red-600">
+                    <span class="text-sm text-gray-700">新人バッジを表示する（フラグを付けた日または入店日の遅い方から1ヶ月間・1回限り）</span>
+                </label>
             @endif
         </td>
     </tr>

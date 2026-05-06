@@ -61,14 +61,11 @@ class CastProfileController extends BaseController
         $cast->shop_id = $shop->id;
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
-        $wasNew = $cast->is_new;
         $cast->is_new = $request->boolean('is_new');
-        if ($cast->is_new && !$wasNew) {
-            // 新人フラグを新たに付けた時点でnew_sinceをセット（join_dateとcreated_atの遅い方）
+        if ($cast->is_new) {
+            // 新規登録時: is_new が ON なら new_since をセット（join_dateと今日の遅い方）
             $jd = $cast->join_date ? \Illuminate\Support\Carbon::parse($cast->join_date) : null;
-            $cast->new_since = $jd && $jd->gt($cast->created_at ?? now()) ? $jd->toDateString() : now()->toDateString();
-        } elseif (!$cast->is_new) {
-            $cast->new_since = null;
+            $cast->new_since = $jd && $jd->gt(now()) ? $jd->toDateString() : now()->toDateString();
         }
         $cast->working_date   = $request->boolean('working_today') ? today() : null;
 
@@ -123,12 +120,19 @@ class CastProfileController extends BaseController
         $cast->fill($data);
         $cast->is_recommended = $request->boolean('is_recommended');
         $wasNew = $cast->is_new;
-        $cast->is_new = $request->boolean('is_new');
-        if ($cast->is_new && !$wasNew) {
-            $jd = $cast->join_date ? \Illuminate\Support\Carbon::parse($cast->join_date) : null;
-            $cast->new_since = $jd && $jd->gt($cast->created_at ?? now()) ? $jd->toDateString() : now()->toDateString();
-        } elseif (!$cast->is_new) {
-            $cast->new_since = null;
+        $wantNew = $request->boolean('is_new');
+        if ($wantNew && !$wasNew) {
+            // 制約: new_since が null（未使用）かつ created_at から1ヶ月以内のみ許可
+            $canSetNew = is_null($cast->new_since) && $cast->created_at->gte(now()->subMonth());
+            if ($canSetNew) {
+                $cast->is_new = true;
+                $jd = $cast->join_date ? \Illuminate\Support\Carbon::parse($cast->join_date) : null;
+                $cast->new_since = $jd && $jd->gt($cast->created_at) ? $jd->toDateString() : now()->toDateString();
+            }
+            // 条件を満たさない場合はフラグを変更しない（サイレントに無視）
+        } elseif (!$wantNew && $wasNew) {
+            $cast->is_new = false;
+            // new_since は消さない（使用済みの記録として保持）
         }
         $wasWorking = $cast->working_date && $cast->working_date->isToday();
         $cast->working_date = $request->boolean('working_today') ? today() : null;
