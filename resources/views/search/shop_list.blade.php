@@ -14,9 +14,21 @@
     $currentPage = (int) request()->input('page', 1);
     $pageSuffix  = $currentPage > 1 ? "（{$currentPage}ページ目）" : '';
     $pageTitle   = $baseTitle . $pageSuffix;
+
+    $totalStr = number_format($results->total());
+    if ($areaName && $jobTypeName) {
+        $pageDescription = "{$areaName}の{$jobTypeName}店舗{$totalStr}件を掲載。料金・システム・写真で比較できます。";
+    } elseif ($areaName) {
+        $pageDescription = "{$areaName}のデリヘル・風俗店舗{$totalStr}件を掲載。料金・システム・写真で比較できます。";
+    } elseif ($jobTypeName) {
+        $pageDescription = "全国の{$jobTypeName}店舗{$totalStr}件を掲載。料金・システム・写真で比較できます。";
+    } else {
+        $pageDescription = "全国のデリヘル・風俗店舗{$totalStr}件を掲載。料金・システム・写真で比較できます。";
+    }
 @endphp
 
 @section('title', $pageTitle)
+@section('description', $pageDescription)
 @section('robots', $noindex ? 'noindex,follow' : 'index,follow')
 @section('canonical', url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : '')) . '/')
 
