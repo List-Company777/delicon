@@ -4,9 +4,7 @@
     $tabLabels = ['all' => '女性一覧', 'standby' => '待機中', 'new' => '新人', 'diary' => '写メ日記', 'review' => '口コミ'];
     $tabLabel  = $cast_tab === 'type' ? ($typeName ?? '女性一覧') : ($tabLabels[$cast_tab] ?? '女性一覧');
     $suffix    = 'デリヘル・風俗';
-    $pageTitle = $areaName
-        ? "{$areaName}の{$tabLabel} | {$suffix}"
-        : "{$tabLabel}一覧 | {$suffix}";
+
     // アクティブなフィルターパラメータ
     $activeAge  = request('age');
     $activeTall = request('tall');
@@ -21,6 +19,52 @@
     ]);
     $filterCount = count($filterParams);
 
+    // フィルター定義（ラベル取得に先立って宣言）
+    $ageRanges = \App\Http\Controllers\GirlListController::ageRanges();
+    $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
+    $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
+
+    // フィルターの人間可読ラベル（title / description / H1 に使用）
+    $filterLabelParts = [];
+    if ($activeBody) {
+        $bt = collect($bodyTypes)->first(fn($b) => $b->id == (int)$activeBody);
+        if ($bt) $filterLabelParts[] = $bt->name;
+    }
+    if ($activeAge && isset($ageRanges[$activeAge]))   $filterLabelParts[] = $ageRanges[$activeAge][2];
+    if ($activeTall && isset($tallRanges[$activeTall])) $filterLabelParts[] = $tallRanges[$activeTall][2];
+    if ($activeCup && isset($cupGroups[$activeCup]))   $filterLabelParts[] = end($cupGroups[$activeCup]);
+    $filterLabel = implode('・', $filterLabelParts);
+
+    // title
+    if ($filterLabel) {
+        $pageTitle = $areaName
+            ? "{$areaName}の{$filterLabel}女性 | {$suffix}"
+            : "{$filterLabel}女性一覧 | {$suffix}";
+    } else {
+        $pageTitle = $areaName
+            ? "{$areaName}の{$tabLabel} | {$suffix}"
+            : "{$tabLabel}一覧 | {$suffix}";
+    }
+
+    // description
+    $totalStr = number_format($results->total());
+    if ($filterLabel && $areaName) {
+        $pageDescription = "{$areaName}で{$filterLabel}のデリヘル女性キャストを検索。{$totalStr}人掲載中。年齢・体型・スタイルで絞り込んで希望のキャストを見つけよう。";
+    } elseif ($filterLabel) {
+        $pageDescription = "{$filterLabel}のデリヘル女性一覧。全国{$totalStr}人掲載中。エリア・年齢・体型で絞り込み検索できます。";
+    } elseif ($areaName) {
+        $pageDescription = "{$areaName}のデリヘル女性キャスト{$totalStr}人を掲載。年齢・体型・スタイルで絞り込み検索できます。待機中・新人情報も確認できます。";
+    } else {
+        $pageDescription = "全国のデリヘル女性キャスト{$totalStr}人を掲載。エリア・年齢・体型・スタイルで絞り込み検索できます。";
+    }
+
+    // H1
+    if ($filterLabel) {
+        $h1Text = $areaName ? "{$areaName}の{$filterLabel}女性" : "{$filterLabel}女性一覧";
+    } else {
+        $h1Text = $areaName ? "{$areaName}の{$tabLabel}" : $tabLabel;
+    }
+
     // canonical URL: フィルターあり→フィルター付きURL（page除く）、なし→base URL
     $baseTabUrl = $cast_tab === 'type'
         ? url("/{$area_slug}/girl-list/type/{$type_slug}/") . '/'
@@ -33,11 +77,6 @@
 
     // noindex: 結果5件以下 OR フィルター2つ以上（フィルター1つ+5件超はindex）
     $noindex = $results->total() <= 5 || $filterCount >= 2;
-
-    // フィルター定義
-    $ageRanges = \App\Http\Controllers\GirlListController::ageRanges();
-    $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
-    $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
 
     $showFilters = in_array($cast_tab, ['all', 'standby', 'new']);
 
@@ -56,6 +95,7 @@
 @endphp
 
 @section('title', $pageTitle)
+@section('description', $pageDescription)
 @section('canonical', $canonicalUrl)
 @section('robots', $noindex ? 'noindex,follow' : 'index,follow')
 
@@ -171,9 +211,7 @@
 
     {{-- ヘッダー --}}
     <div class="mb-4 flex items-baseline gap-3">
-        <h1 class="text-lg font-bold text-[#E8E4DC]">
-            {{ $areaName ? "{$areaName}の{$tabLabel}" : $tabLabel }}
-        </h1>
+        <h1 class="text-lg font-bold text-[#E8E4DC]">{{ $h1Text }}</h1>
         <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
     </div>
 
