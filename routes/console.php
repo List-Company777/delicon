@@ -53,3 +53,6 @@ Schedule::command('report:monthly')->monthlyOn(1, '01:05');
 
 // フッター都道府県キャッシュ更新（毎日 02:00）
 Schedule::command('cache:warm-footer')->dailyAt('02:00');
+
+// girl-listフィルターサイトマップ（毎日 06:00）
+Schedule::command('sitemap:generate-girl-list')->dailyAt('06:00');

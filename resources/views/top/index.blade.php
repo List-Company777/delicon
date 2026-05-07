@@ -33,7 +33,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <p class="text-[#A0A0B8] text-base md:text-lg mb-2 max-w-xl">
             デリヘル店のシステム・料金・在籍キャストを詳しく掲載
         </p>
-        <p class="text-[#6A6A7E] text-sm mb-6">デリコン｜デリヘル・風俗総合情報</p>
+        <p class="text-[#8A8A9E] text-sm mb-6">デリコン｜デリヘル・風俗総合情報</p>
         <p class="text-sm font-semibold text-deli-400 mb-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
 
         {{-- エリアから探す --}}
@@ -53,7 +53,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             <h2 class="text-sm font-bold text-[#C8C4BC] tracking-wide">エリアから探す</h2>
             @foreach($heroRegions as $regionName => $slugs)
             <div>
-                <p class="text-xs text-[#6A6A7E] mb-1.5">{{ $regionName }}</p>
+                <p class="text-xs text-[#8A8A9E] mb-1.5">{{ $regionName }}</p>
                 <div class="flex flex-wrap gap-1.5">
                     @foreach($slugs as $slug)
                     @if($heroPrefMap->has($slug))
@@ -125,10 +125,10 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     {{ $shop->name }}
                 </h3>
                 @if($shop->catche)
-                <p class="text-xs text-[#8A8A9E] mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
+                <p class="text-xs text-[#B0AEAD] mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
                 @endif
                 <div class="flex items-center justify-between mt-2 text-xs">
-                    <span class="text-[#6A6A7E]">在籍{{ $shop->cast_count ?? 0 }}名</span>
+                    <span class="text-[#8A8A9E]">在籍{{ $shop->cast_count ?? 0 }}名</span>
                     @if($shop->price_60)
                     <span class="text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
                     @endif
@@ -169,7 +169,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                          class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 </div>
                 <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">
+                <p class="text-xs text-[#8A8A9E] mt-0.5">
                     {{ $cast->age ? $cast->age . '歳' : '' }}{{ ($cast->age && $cast->cup) ? ' · ' : '' }}{{ $cast->cup ? $cast->cup . 'カップ' : '' }}
                 </p>
             </a>
@@ -195,7 +195,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 <span class="w-1 h-6 bg-gold-500 rounded-full inline-block"></span>
                 あなたにおすすめ
             </h2>
-            <a href="{{ route('user.settings') }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400 transition">設定を変更</a>
+            <a href="{{ route('user.settings') }}/" class="text-xs text-[#8A8A9E] hover:text-deli-400 transition">設定を変更</a>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
             @foreach($recommendations as $cast)
@@ -212,7 +212,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 </div>
                 <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $cast->name }}</p>
                 @if($cast->castType)<p class="text-[10px] text-deli-400 truncate">{{ $cast->castType->name }}</p>@endif
-                @if($cast->shop)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop->name }}</p>@endif
+                @if($cast->shop)<p class="text-[10px] text-[#8A8A9E] truncate">{{ $cast->shop->name }}</p>@endif
             </a>
             @endforeach
         </div>
@@ -243,7 +243,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     <span class="absolute top-1.5 left-1.5 bg-deli-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">出勤中</span>
                 </div>
                 <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $cast->shop_name }}</p>
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $cast->shop_name }}</p>
             </a>
             @endforeach
         </div>
@@ -272,7 +272,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     <span class="absolute top-1.5 left-1.5 bg-gold-400 text-surface-800 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
                 </div>
                 <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $cast->join_date }}</p>
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $cast->join_date }}</p>
             </a>
             @endforeach
         </div>
@@ -293,7 +293,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
            class="bg-surface-500 border border-surface-300 hover:border-gold-400 text-[#B0AEAD] hover:text-gold-400 rounded-full px-5 py-2 text-sm transition">
             {{ $kw->name }}
             @if(isset($kw->count) && $kw->count > 0)
-            <span class="text-[#6A6A7E] text-xs ml-1">{{ $kw->count }}店</span>
+            <span class="text-[#8A8A9E] text-xs ml-1">{{ $kw->count }}店</span>
             @endif
         </a>
         @endforeach
@@ -335,21 +335,21 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
                 <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
                     <span>デリヘルの料金相場はどのくらいですか？</span>
-                    <span class="text-[#6A6A7E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルの料金は店舗・地域・コースによって異なりますが、一般的に60分コースで10,000円〜30,000円程度が相場です。素人系・人妻系などの業種や指名料の有無によっても変わります。各店舗の詳細ページでシステム・料金を確認できます。</p>
             </details>
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
                 <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
                     <span>デリヘルはどんな業種がありますか？</span>
-                    <span class="text-[#6A6A7E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルにはホテヘル・素人系・人妻・熟女・SM・ニューハーフ・アロマエステ・イメクラなどさまざまな業種があります。デリコンでは業種ごとに絞り込み検索ができます。</p>
             </details>
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
                 <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
                     <span>キャストの情報はどこで確認できますか？</span>
-                    <span class="text-[#6A6A7E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">各店舗の詳細ページに在籍キャスト一覧が掲載されています。また「キャストを探す」ページでは、タイプ・年齢・カップサイズなどの条件でキャストを横断検索することができます。</p>
             </details>

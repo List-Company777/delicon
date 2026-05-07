@@ -7,21 +7,37 @@
     $pageTitle = $areaName
         ? "{$areaName}の{$tabLabel} | {$suffix}"
         : "{$tabLabel}一覧 | {$suffix}";
-    $canonicalUrl = $cast_tab === 'type'
-        ? url("/{$area_slug}/girl-list/type/{$type_slug}/")
+    // アクティブなフィルターパラメータ
+    $activeAge  = request('age');
+    $activeTall = request('tall');
+    $activeCup  = request('cup');
+    $activeBody = request('body');
+
+    $filterParams = array_filter([
+        'age'  => $activeAge,
+        'tall' => $activeTall,
+        'cup'  => $activeCup,
+        'body' => $activeBody,
+    ]);
+    $filterCount = count($filterParams);
+
+    // canonical URL: フィルターあり→フィルター付きURL（page除く）、なし→base URL
+    $baseTabUrl = $cast_tab === 'type'
+        ? url("/{$area_slug}/girl-list/type/{$type_slug}/") . '/'
         : ($cast_tab === 'all'
-            ? url("/{$area_slug}/girl-list/")
-            : url("/{$area_slug}/girl-list/{$cast_tab}/"));
+            ? url("/{$area_slug}/girl-list/") . '/'
+            : url("/{$area_slug}/girl-list/{$cast_tab}/") . '/');
+    $canonicalUrl = $filterCount > 0
+        ? $baseTabUrl . '?' . http_build_query($filterParams)
+        : $baseTabUrl;
+
+    // noindex: 結果5件以下 OR フィルター2つ以上（フィルター1つ+5件超はindex）
+    $noindex = $results->total() <= 5 || $filterCount >= 2;
 
     // フィルター定義
     $ageRanges = \App\Http\Controllers\GirlListController::ageRanges();
     $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
     $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
-
-    $activeAge  = request('age');
-    $activeTall = request('tall');
-    $activeCup  = request('cup');
-    $activeBody = request('body');
 
     $showFilters = in_array($cast_tab, ['all', 'standby', 'new']);
 
@@ -34,9 +50,9 @@
             $params[$key] = $value;
         }
         unset($params['page']);
-        return request()->url() . ($params ? '?' . http_build_query($params) : '');
+        return request()->url() . '/' . ($params ? '?' . http_build_query($params) : '');
     };
-    $clearUrl = request()->url();
+    $clearUrl = request()->url() . '/';
 @endphp
 
 @section('title', $pageTitle)
@@ -63,12 +79,12 @@
                class="shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap
                       {{ $cast_tab === $tabKey
                           ? 'border-deli-500 text-deli-400'
-                          : 'border-transparent text-[#8A8A9E] hover:text-[#E8E4DC] hover:border-surface-200' }}">
+                          : 'border-transparent text-[#B0AEAD] hover:text-[#E8E4DC] hover:border-surface-200' }}">
                 {{ $tab['label'] }}
             </a>
             @endforeach
             <a href="{{ route('shop.list', ['area_slug' => $area_slug]) . '/' }}"
-               class="shrink-0 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-[#6A6A7E] hover:text-[#8A8A9E] transition whitespace-nowrap ml-auto">
+               class="shrink-0 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-[#8A8A9E] hover:text-[#B0AEAD] transition whitespace-nowrap ml-auto">
                 店舗一覧 →
             </a>
         </nav>
@@ -82,13 +98,13 @@
 
         {{-- 年齢 --}}
         <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#6A6A7E] shrink-0 w-10">年齢</span>
+            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">年齢</span>
             @foreach($ageRanges as $ageKey => $ageData)
             <a href="{{ $filterUrl('age', $ageKey) }}"
-               class="px-2.5 py-1 rounded-full text-xs border transition
+               class="px-3 py-1.5 rounded-full text-sm border transition
                       {{ $activeAge === $ageKey
                           ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                 {{ $ageData[2] }}
             </a>
             @endforeach
@@ -96,13 +112,13 @@
 
         {{-- 身長 --}}
         <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#6A6A7E] shrink-0 w-10">身長</span>
+            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">身長</span>
             @foreach($tallRanges as $tallKey => $tallData)
             <a href="{{ $filterUrl('tall', $tallKey) }}"
-               class="px-2.5 py-1 rounded-full text-xs border transition
+               class="px-3 py-1.5 rounded-full text-sm border transition
                       {{ $activeTall === $tallKey
                           ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                 {{ $tallData[2] }}
             </a>
             @endforeach
@@ -110,13 +126,13 @@
 
         {{-- カップ --}}
         <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#6A6A7E] shrink-0 w-10">カップ</span>
+            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">カップ</span>
             @foreach($cupGroups as $cupKey => $cupData)
             <a href="{{ $filterUrl('cup', $cupKey) }}"
-               class="px-2.5 py-1 rounded-full text-xs border transition
+               class="px-3 py-1.5 rounded-full text-sm border transition
                       {{ $activeCup === $cupKey
                           ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                 {{ $cupData[count($cupData) - 1] }}
             </a>
             @endforeach
@@ -125,13 +141,13 @@
         {{-- 体型 --}}
         @if(!empty($bodyTypes))
         <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#6A6A7E] shrink-0 w-10">体型</span>
+            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">体型</span>
             @foreach($bodyTypes as $bt)
             <a href="{{ $filterUrl('body', (string)$bt->id) }}"
-               class="px-2.5 py-1 rounded-full text-xs border transition
+               class="px-3 py-1.5 rounded-full text-sm border transition
                       {{ $activeBody == $bt->id
                           ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                 {{ $bt->name }}
             </a>
             @endforeach
@@ -141,7 +157,7 @@
         {{-- クリアボタン --}}
         @if($hasFilters)
         <div class="pt-0.5">
-            <a href="{{ $clearUrl }}" class="text-xs text-[#6A6A7E] hover:text-[#E8E4DC] transition underline">
+            <a href="{{ $clearUrl }}" class="text-xs text-[#8A8A9E] hover:text-[#E8E4DC] transition underline">
                 絞り込みをクリア
             </a>
         </div>
@@ -158,11 +174,11 @@
         <h1 class="text-lg font-bold text-[#E8E4DC]">
             {{ $areaName ? "{$areaName}の{$tabLabel}" : $tabLabel }}
         </h1>
-        <span class="text-sm text-[#8A8A9E]">{{ number_format($results->total()) }}件</span>
+        <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
     </div>
 
     @if($results->isEmpty())
-        <div class="text-center py-16 text-[#6A6A7E]">
+        <div class="text-center py-16 text-[#8A8A9E]">
             <p class="text-lg">
                 @if($cast_tab === 'standby') 現在待機中の女性はいません
                 @elseif($cast_tab === 'new') 新人女性は登録されていません
@@ -203,11 +219,11 @@
                             <span class="text-amber-400 text-sm leading-none tracking-wide">{{ str_repeat('★', $review->rating) }}<span class="text-surface-300">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
                             <a href="{{ route('cast.show', $cast) }}/" class="text-sm font-bold text-[#E8E4DC] hover:text-deli-400 truncate">{{ $cast?->name }}</a>
                             @if($shop)
-                            <span class="text-xs text-[#6A6A7E] truncate">{{ $shop->name }}</span>
+                            <span class="text-xs text-[#8A8A9E] truncate">{{ $shop->name }}</span>
                             @endif
                         </div>
                         <p class="text-sm text-[#B0AEAD] leading-relaxed mb-1">{{ $review->body }}</p>
-                        <p class="text-xs text-[#6A6A7E]">{{ $review->nickname }} · {{ $review->created_at->format('Y/m/d') }}</p>
+                        <p class="text-xs text-[#8A8A9E]">{{ $review->nickname }} · {{ $review->created_at->format('Y/m/d') }}</p>
                     </div>
                 </div>
             </article>
@@ -233,16 +249,16 @@
                     </div>
                     @else
                     <div class="aspect-square bg-surface-500 flex items-center justify-center">
-                        <span class="text-[#6A6A7E] text-3xl">📷</span>
+                        <span class="text-[#8A8A9E] text-3xl">📷</span>
                     </div>
                     @endif
                     <div class="p-2">
                         @if($diary->body)
-                        <p class="text-xs text-[#8A8A9E] line-clamp-2 mb-1">{{ $diary->body }}</p>
+                        <p class="text-xs text-[#B0AEAD] line-clamp-2 mb-1">{{ $diary->body }}</p>
                         @endif
                         <p class="text-xs font-medium text-[#E8E4DC] truncate">{{ $cast?->name }}</p>
-                        <p class="text-xs text-[#6A6A7E] truncate">{{ $shop?->name }}</p>
-                        <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $diary->created_at->diffForHumans() }}</p>
+                        <p class="text-xs text-[#8A8A9E] truncate">{{ $shop?->name }}</p>
+                        <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $diary->created_at->diffForHumans() }}</p>
                     </div>
                 </a>
             </article>
@@ -265,7 +281,7 @@
             @endphp
             <article class="bg-surface-600 border border-surface-400 hover:border-deli-400 rounded-xl overflow-hidden transition group">
                 <a href="{{ route('cast.show', $cast) }}/" class="block">
-                    <div class="aspect-square overflow-hidden bg-surface-500 relative">
+                    <div class="aspect-[3/4] overflow-hidden bg-surface-500 relative">
                         <img src="{{ $cast->img_url }}"
                              alt="{{ $cast->name }}"
                              loading="lazy"
@@ -282,13 +298,13 @@
                     <div class="p-2">
                         <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
                         @if($cast->age || $cast->tall)
-                        <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $cast->age ? $cast->age.'歳' : '' }}{{ ($cast->age && $cast->tall) ? ' ' : '' }}{{ $cast->tall ? $cast->tall.'cm' : '' }}</p>
+                        <p class="text-xs text-[#B0AEAD] mt-0.5">{{ $cast->age ? $cast->age.'歳' : '' }}{{ ($cast->age && $cast->tall) ? ' ' : '' }}{{ $cast->tall ? $cast->tall.'cm' : '' }}</p>
                         @endif
                         @if($bodyStr)
-                        <p class="text-xs text-[#6A6A7E]">{{ $bodyStr }}</p>
+                        <p class="text-xs text-[#8A8A9E]">{{ $bodyStr }}</p>
                         @endif
                         @if($shop)
-                        <p class="text-xs text-[#6A6A7E] mt-0.5 truncate">{{ $shop->name }}</p>
+                        <p class="text-xs text-[#8A8A9E] mt-0.5 truncate">{{ $shop->name }}</p>
                         @endif
                     </div>
                 </a>

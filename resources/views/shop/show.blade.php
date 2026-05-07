@@ -16,7 +16,7 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
 
     {{-- パンくず --}}
-    <nav class="text-xs text-[#6A6A7E] mb-4">
+    <nav class="text-xs text-[#8A8A9E] mb-4">
         <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">ホーム</a> &rsaquo;
         <a href="{{ route('shop.index') }}/" class="hover:text-gold-400 transition">店舗一覧</a> &rsaquo;
         <span class="text-[#B0AEAD]">{{ $shop->name }}</span>
@@ -44,7 +44,7 @@
                             <span class="text-xs bg-deli-500/20 text-deli-400 px-2 py-0.5 rounded-full border border-deli-500/30">{{ $shop->shopType->name }}</span>
                             @endif
                             @if($shop->shopType2)
-                            <span class="text-xs bg-surface-400 text-[#8A8A9E] px-2 py-0.5 rounded-full">{{ $shop->shopType2->name }}</span>
+                            <span class="text-xs bg-surface-400 text-[#B0AEAD] px-2 py-0.5 rounded-full">{{ $shop->shopType2->name }}</span>
                             @endif
                         </div>
                         <h1 class="text-xl font-bold text-[#F0ECE4] mb-1">{{ $shop->name }}</h1>
@@ -69,31 +69,31 @@
                 <table class="w-full text-sm">
                     @if($shop->price_60)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal w-32">60分料金</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">60分料金</th>
                         <td class="py-2.5 text-gold-400 font-bold">¥{{ number_format($shop->price_60) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_90)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal w-32">90分料金</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">90分料金</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_90) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_120)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal w-32">120分料金</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">120分料金</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_120) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_high)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal w-32">高級コース</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">高級コース</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_high) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->open_time || $shop->close_time || $shop->all_time)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">営業時間</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業時間</th>
                         <td class="py-2.5 text-[#C8C4BC]">
                             @if($shop->all_time) <span class="text-green-400 font-semibold">24時間営業</span>
                             @else {{ $shop->open_time }}{{ $shop->close_time ? ' 〜 ' . $shop->close_time : '' }} @endif
@@ -102,31 +102,31 @@
                     @endif
                     @if($shop->rest_day)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">定休日</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">定休日</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->rest_day }}</td>
                     </tr>
                     @endif
                     @if($shop->eigyo_area)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">営業エリア</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業エリア</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->eigyo_area }}</td>
                     </tr>
                     @endif
                     @if($shop->eigyo_space)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">プレイスペース</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">プレイスペース</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->eigyo_space }}</td>
                     </tr>
                     @endif
                     @if($shop->address)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">住所</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">住所</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->address }}</td>
                     </tr>
                     @endif
                     @if($shop->tel)
                     <tr>
-                        <th class="py-2.5 pr-3 text-left text-[#6A6A7E] font-normal">電話番号</th>
+                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">電話番号</th>
                         <td class="py-2.5"><a href="tel:{{ $shop->tel }}" class="text-gold-400 hover:underline font-medium">{{ $shop->tel }}</a></td>
                     </tr>
                     @endif
@@ -154,7 +154,7 @@
             {{-- タグ --}}
             @if(!empty($shop->tags))
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-4 mb-4">
-                <p class="text-xs text-[#6A6A7E] mb-2">特色・タグ</p>
+                <p class="text-xs text-[#8A8A9E] mb-2">特色・タグ</p>
                 <div class="flex flex-wrap gap-2">
                     @foreach($shop->tags as $tag)
                     <span class="text-xs bg-surface-400 text-[#B0AEAD] border border-surface-300 px-3 py-1 rounded-full">{{ $tag }}</span>
@@ -171,7 +171,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
                         <span class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
-                        口コミ <span class="text-[#6A6A7E] font-normal">({{ $approvedReviews->count() }}件)</span>
+                        口コミ <span class="text-[#8A8A9E] font-normal">({{ $approvedReviews->count() }}件)</span>
                     </h2>
                     @auth
                     <a href="{{ route('review.create') }}?shop_id={{ $shop->id }}" class="text-xs bg-deli-500 hover:bg-deli-400 text-white px-3 py-1.5 rounded-lg transition">口コミを書く</a>
@@ -180,14 +180,14 @@
                     @endauth
                 </div>
                 @if($approvedReviews->isEmpty())
-                <p class="text-sm text-[#6A6A7E] text-center py-4">まだ口コミがありません。最初の口コミを投稿してみましょう。</p>
+                <p class="text-sm text-[#8A8A9E] text-center py-4">まだ口コミがありません。最初の口コミを投稿してみましょう。</p>
                 @else
                 <div class="space-y-4">
                     @foreach($approvedReviews as $review)
                     <div class="border-b border-surface-300 pb-4 last:border-0">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-amber-400 text-sm">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
-                            <span class="text-xs text-[#6A6A7E]">{{ $review->user->name }}</span>
+                            <span class="text-xs text-[#8A8A9E]">{{ $review->user->name }}</span>
                             <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
                         </div>
                         @if($review->title)
@@ -205,7 +205,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
                         <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>
-                        在籍キャスト <span class="text-[#6A6A7E] font-normal">({{ $casts->total() }}名)</span>
+                        在籍キャスト <span class="text-[#8A8A9E] font-normal">({{ $casts->total() }}名)</span>
                     </h2>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -227,11 +227,11 @@
                         </div>
                         <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
                         @if($cast->age)
-                        <p class="text-xs text-[#6A6A7E]">{{ $cast->age }}歳</p>
+                        <p class="text-xs text-[#8A8A9E]">{{ $cast->age }}歳</p>
                         @endif
                     </a>
                     @empty
-                    <p class="col-span-3 text-sm text-[#6A6A7E] py-4 text-center">キャスト情報がありません</p>
+                    <p class="col-span-3 text-sm text-[#8A8A9E] py-4 text-center">キャスト情報がありません</p>
                     @endforelse
                 </div>
                 @if($casts->hasPages())
@@ -297,7 +297,7 @@
             </div>
             @else
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-4 text-center">
-                <p class="text-xs text-[#6A6A7E] font-medium mb-1">本日の出勤</p>
+                <p class="text-xs text-[#8A8A9E] font-medium mb-1">本日の出勤</p>
                 <p class="text-xs text-[#4A4A5E]">出勤情報は準備中です</p>
             </div>
             @endif
@@ -306,19 +306,19 @@
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-4 text-sm space-y-2">
                 @if($shop->price_60)
                 <div class="flex justify-between">
-                    <span class="text-[#6A6A7E]">60分〜</span>
+                    <span class="text-[#8A8A9E]">60分〜</span>
                     <span class="text-gold-400 font-bold">¥{{ number_format($shop->price_60) }}</span>
                 </div>
                 @endif
                 @if($shop->open_time || $shop->all_time)
                 <div class="flex justify-between">
-                    <span class="text-[#6A6A7E]">営業</span>
+                    <span class="text-[#8A8A9E]">営業</span>
                     <span class="text-[#C8C4BC]">{{ $shop->all_time ? '24時間' : $shop->open_time . '〜' }}</span>
                 </div>
                 @endif
                 @if($shop->area)
                 <div class="flex justify-between">
-                    <span class="text-[#6A6A7E]">エリア</span>
+                    <span class="text-[#8A8A9E]">エリア</span>
                     <span class="text-[#C8C4BC]">{{ $shop->area->name }}</span>
                 </div>
                 @endif
@@ -343,7 +343,7 @@
                     @endif
                     @if($shop->prefecture && $shop->prefecture->slug)
                     <a href="{{ route('shop.list', ['area_slug' => $shop->prefecture->slug]) }}/"
-                       class="flex items-center justify-between text-[#8A8A9E] hover:text-deli-400 transition">
+                       class="flex items-center justify-between text-[#B0AEAD] hover:text-deli-400 transition">
                         <span>{{ $shop->prefecture->name }}の店舗一覧</span>
                         <span class="opacity-60">&rsaquo;</span>
                     </a>

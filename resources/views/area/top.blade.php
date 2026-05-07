@@ -37,9 +37,9 @@
     <div class="max-w-6xl mx-auto px-4 py-4">
         <div class="flex items-baseline gap-3">
             <h1 class="text-xl font-bold text-[#E8E4DC]">{{ $pageTitle }}</h1>
-            <span class="text-sm text-[#8A8A9E]">{{ number_format($totalShops) }}件掲載</span>
+            <span class="text-sm text-[#B0AEAD]">{{ number_format($totalShops) }}件掲載</span>
         </div>
-        <nav class="text-xs text-[#6A6A7E] mt-1.5 flex items-center gap-1 flex-wrap">
+        <nav class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
             <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a>
             <span>›</span>
             @if($area_slug !== 'all')
@@ -110,7 +110,7 @@
             <a href="{{ route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $type->slug]) }}/"
                class="bg-surface-600 hover:bg-surface-500 border border-surface-400 hover:border-deli-400 rounded-lg px-4 py-3 transition group">
                 <p class="text-sm text-[#E8E4DC] group-hover:text-gold-400 transition font-medium">{{ $type->name }}</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ number_format($type->cnt) }}件</p>
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ number_format($type->cnt) }}件</p>
             </a>
             @endforeach
         </div>
@@ -137,7 +137,7 @@
                 ['slug'=>'iyashi',   'name'=>'癒し系'],
             ] as $type)
             <a href="{{ route('girl.list.type', ['area_slug' => $area_slug, 'type_slug' => $type['slug']]) }}/"
-               class="px-3 py-1.5 rounded-full text-xs border border-surface-400 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400 transition">
+               class="px-3 py-1.5 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
                 {{ $type['name'] }}
             </a>
             @endforeach
@@ -150,17 +150,17 @@
            class="flex items-center justify-between bg-surface-600 hover:bg-surface-500 border border-surface-400 hover:border-deli-400 rounded-xl px-5 py-4 transition group">
             <div>
                 <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition">店舗一覧</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $areaName }}のデリヘル・風俗店 {{ number_format($totalShops) }}件</p>
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $areaName }}のデリヘル・風俗店 {{ number_format($totalShops) }}件</p>
             </div>
-            <span class="text-[#6A6A7E] text-lg">›</span>
+            <span class="text-[#8A8A9E] text-lg">›</span>
         </a>
         <a href="{{ route('girl.list', ['area_slug' => $area_slug]) }}/"
            class="flex items-center justify-between bg-surface-600 hover:bg-surface-500 border border-surface-400 hover:border-deli-400 rounded-xl px-5 py-4 transition group">
             <div>
                 <p class="text-sm font-bold text-deli-400 group-hover:text-deli-300 transition">キャスト一覧</p>
-                <p class="text-xs text-[#6A6A7E] mt-0.5">{{ $areaName }}の在籍キャストを探す</p>
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $areaName }}の在籍キャストを探す</p>
             </div>
-            <span class="text-[#6A6A7E] text-lg">›</span>
+            <span class="text-[#8A8A9E] text-lg">›</span>
         </a>
     </section>
 

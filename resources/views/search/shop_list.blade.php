@@ -29,10 +29,10 @@
             <h1 class="text-xl font-bold text-[#E8E4DC]">
                 {{ $baseTitle }}
             </h1>
-            <span class="text-sm text-[#8A8A9E]">{{ number_format($results->total()) }}件</span>
+            <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
         </div>
         {{-- パンくず --}}
-        <nav class="text-xs text-[#6A6A7E] mt-1.5 flex items-center gap-1 flex-wrap">
+        <nav class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
             <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a>
             <span>›</span>
             <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国の店舗一覧</a>
@@ -56,7 +56,7 @@
            class="px-3 py-1 rounded-full text-xs border transition
                   {{ $job_slug === 'all'
                      ? 'bg-deli-500 border-deli-500 text-white'
-                     : 'border-surface-300 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                     : 'border-surface-300 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
             すべて
         </a>
         @foreach($shopTypes as $type)
@@ -64,7 +64,7 @@
            class="px-3 py-1 rounded-full text-xs border transition
                   {{ $job_slug === $type->slug
                      ? 'bg-deli-500 border-deli-500 text-white'
-                     : 'border-surface-300 text-[#8A8A9E] hover:border-deli-400 hover:text-deli-400' }}">
+                     : 'border-surface-300 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
             {{ $type->name }}
         </a>
         @endforeach
@@ -76,20 +76,20 @@
         $baseUrl    = url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : ''));
     @endphp
     <div class="flex flex-wrap items-center gap-2 mb-6">
-        <span class="text-xs text-[#6A6A7E]">年齢層:</span>
+        <span class="text-xs text-[#8A8A9E]">年齢層:</span>
         @foreach($ageGroups as $val => $label)
         <a href="{{ $baseUrl }}{{ $val ? '?age_range=' . $val : '' }}"
            class="px-3 py-1 rounded-full text-xs border transition
                   {{ $ageRange === $val
                      ? 'bg-surface-400 border-surface-300 text-[#E8E4DC]'
-                     : 'border-surface-500 text-[#6A6A7E] hover:border-surface-300 hover:text-[#B0AEAD]' }}">
+                     : 'border-surface-500 text-[#8A8A9E] hover:border-surface-300 hover:text-[#B0AEAD]' }}">
             {{ $label }}
         </a>
         @endforeach
     </div>
 
     @if($results->isEmpty())
-    <div class="text-center py-16 text-[#6A6A7E]">
+    <div class="text-center py-16 text-[#8A8A9E]">
         <p class="text-lg mb-4">条件に合う店舗が見つかりませんでした</p>
         <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="text-sm text-deli-400 hover:underline">← 全国の店舗一覧へ</a>
     </div>
@@ -122,16 +122,16 @@
                     {{ $shop->name }}
                 </p>
                 @if($shop->catche)
-                <p class="text-xs text-[#8A8A9E] mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
+                <p class="text-xs text-[#B0AEAD] mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
                 @endif
                 <div class="flex items-center justify-between mt-2 text-xs">
-                    <span class="text-[#6A6A7E]">在籍{{ $shop->castMembers->count() }}名</span>
+                    <span class="text-[#8A8A9E]">在籍{{ $shop->castMembers->count() }}名</span>
                     @if($shop->price_60)
                     <span class="text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
                     @endif
                 </div>
                 @if($shop->area)
-                <p class="text-xs text-[#6A6A7E] mt-1 truncate">{{ $shop->area->name }}</p>
+                <p class="text-xs text-[#8A8A9E] mt-1 truncate">{{ $shop->area->name }}</p>
                 @endif
             </div>
         </a>
@@ -143,7 +143,7 @@
     @php $freeShops = $results->getCollection()->filter(fn($s) => $s->plan >= 4); @endphp
     @if($freeShops->isNotEmpty())
     <div class="border-t border-surface-400 pt-4">
-        <p class="text-xs text-[#6A6A7E] mb-3">その他の掲載店舗</p>
+        <p class="text-xs text-[#8A8A9E] mb-3">その他の掲載店舗</p>
         <div class="divide-y divide-surface-500">
             @foreach($freeShops as $shop)
             @if($shop->plan === 4)
@@ -155,15 +155,15 @@
                     <span class="text-sm text-[#B0AEAD] group-hover:text-gold-400 transition truncate block">{{ $shop->name }}</span>
                     <div class="flex items-center gap-2 mt-0.5">
                         @if($shop->shopType)
-                        <span class="text-xs text-[#6A6A7E]">{{ $shop->shopType->name }}</span>
+                        <span class="text-xs text-[#8A8A9E]">{{ $shop->shopType->name }}</span>
                         @endif
                         @if($shop->area)
-                        <span class="text-xs text-[#6A6A7E]">{{ $shop->area->name }}</span>
+                        <span class="text-xs text-[#8A8A9E]">{{ $shop->area->name }}</span>
                         @endif
                     </div>
                 </div>
                 @if($shop->castMembers->count() > 0)
-                <span class="text-xs text-[#6A6A7E] shrink-0">在籍{{ $shop->castMembers->count() }}名</span>
+                <span class="text-xs text-[#8A8A9E] shrink-0">在籍{{ $shop->castMembers->count() }}名</span>
                 @endif
             </a>
             @else
@@ -171,7 +171,7 @@
             <div class="flex items-center gap-3 py-2.5 px-2">
                 <div class="w-2 h-2 rounded-full bg-surface-500 shrink-0"></div>
                 <div class="flex-1 min-w-0">
-                    <span class="text-sm text-[#6A6A7E] truncate block">{{ $shop->name }}</span>
+                    <span class="text-sm text-[#8A8A9E] truncate block">{{ $shop->name }}</span>
                     <div class="flex items-center gap-2 mt-0.5">
                         @if($shop->shopType)
                         <span class="text-xs text-[#4A4A5E]">{{ $shop->shopType->name }}</span>

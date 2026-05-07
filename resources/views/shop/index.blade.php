@@ -29,14 +29,14 @@
         </div>
         <button type="submit" class="bg-deli-500 hover:bg-deli-400 text-white px-5 py-1.5 rounded text-sm transition font-medium">検索</button>
         @if(request()->hasAny(['type','q']))
-        <a href="{{ route('shop.index') }}/" class="text-xs text-[#6A6A7E] hover:text-[#B0AEAD] self-center">リセット</a>
+        <a href="{{ route('shop.index') }}/" class="text-xs text-[#8A8A9E] hover:text-[#B0AEAD] self-center">リセット</a>
         @endif
     </form>
 
     {{-- エリアで探す --}}
     @if($areas->isNotEmpty())
     <div class="mb-6">
-        <p class="text-xs font-bold text-[#8A8A9E] mb-2 uppercase tracking-wider">エリアで探す</p>
+        <p class="text-xs font-bold text-[#B0AEAD] mb-2 uppercase tracking-wider">エリアで探す</p>
         <div class="flex flex-wrap gap-2">
             @foreach($areas as $area)
             <a href="{{ $area->pref_slug ? route('shop.pref_area', ['pref' => $area->pref_slug, 'area' => $area->slug]) . '/' : route('shop.index') . '?area_id=' . $area->id }}"
@@ -48,7 +48,7 @@
     </div>
     @endif
 
-    <p class="text-xs text-[#6A6A7E] mb-5">{{ $shops->total() }}件</p>
+    <p class="text-xs text-[#8A8A9E] mb-5">{{ $shops->total() }}件</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         @forelse($shops as $shop)
@@ -72,10 +72,10 @@
                     <h2 class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">{{ $shop->name }}</h2>
                 </div>
                 @if($shop->catche)
-                <p class="text-xs text-[#8A8A9E] mt-1 line-clamp-2">{{ $shop->catche }}</p>
+                <p class="text-xs text-[#B0AEAD] mt-1 line-clamp-2">{{ $shop->catche }}</p>
                 @endif
                 <div class="mt-3 flex items-center justify-between text-xs">
-                    <span class="text-[#6A6A7E]">在籍: {{ $shop->cast_members_count }}名</span>
+                    <span class="text-[#8A8A9E]">在籍: {{ $shop->cast_members_count }}名</span>
                     @if($shop->price_60)
                     <span class="text-gold-400 font-medium">60分 ¥{{ number_format($shop->price_60) }}〜</span>
                     @endif
@@ -83,7 +83,7 @@
             </div>
         </a>
         @empty
-        <div class="col-span-3 text-center py-16 text-[#6A6A7E]">
+        <div class="col-span-3 text-center py-16 text-[#8A8A9E]">
             <p>該当する店舗が見つかりませんでした</p>
         </div>
         @endforelse

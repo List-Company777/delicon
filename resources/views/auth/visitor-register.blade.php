@@ -4,7 +4,7 @@
 <div class="max-w-md mx-auto px-4 py-12">
     <div class="bg-surface-500 border border-surface-300 rounded-2xl p-8">
         <h1 class="text-xl font-bold text-[#F0ECE4] mb-2">会員登録</h1>
-        <p class="text-sm text-[#8A8A9E] mb-6">口コミを投稿するには無料会員登録が必要です</p>
+        <p class="text-sm text-[#B0AEAD] mb-6">口コミを投稿するには無料会員登録が必要です</p>
 
         @if($errors->any())
         <div class="mb-4 bg-deli-500/10 border border-deli-500/30 rounded p-3 text-sm text-deli-400">
@@ -43,7 +43,7 @@
                 無料登録する
             </button>
         </form>
-        <p class="text-center text-sm text-[#6A6A7E] mt-4">
+        <p class="text-center text-sm text-[#8A8A9E] mt-4">
             すでに登録済みの方は <a href="{{ route('login') }}/" class="text-gold-400 hover:underline">ログイン</a>
         </p>
     </div>

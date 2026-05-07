@@ -20,6 +20,7 @@ Disallow: /track/
 Disallow: /*/apply/
 Disallow: /apply/
 
-Sitemap: https://nightwork-list.com/sitemap.xml
-Sitemap: https://nightwork-list.com/sitemap-detail.xml
-Sitemap: https://nightwork-list.com/sitemap-pages.xml
+Sitemap: https://www.delicon.jp/sitemap.xml
+Sitemap: https://www.delicon.jp/sitemap-detail.xml
+Sitemap: https://www.delicon.jp/sitemap-pages.xml
+Sitemap: https://www.delicon.jp/sitemap-girl.xml
