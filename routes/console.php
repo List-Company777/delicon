@@ -57,3 +57,6 @@ Schedule::command('cache:warm-footer')->dailyAt('02:00');
 // girl-listフィルターサイトマップ（毎日 06:00）
 Schedule::command("sitemap:generate-girl-list")->dailyAt("06:00");
 Schedule::command("sitemap:generate-shop-list")->dailyAt("06:30");
+
+// お気に入りキャストの新着シフト通知（毎日18:00）
+Schedule::command('notify:schedules')->dailyAt('18:00');

@@ -22,6 +22,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'partner_id', 'line_user_id', 'line_name', 'last_login_at',
+        'notify_new_cast', 'notify_working',
+        'pref_cast_type_ids', 'pref_area_ids', 'preferred_days', 'preferred_times',
+        'pref_age_min', 'pref_age_max',
     ];
 
     protected $hidden = [
@@ -31,11 +34,13 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'last_login_at'     => 'datetime',
-            'password'          => 'hashed',
-            'preferred_days'    => 'array',
-            'preferred_times'   => 'array',
+            'email_verified_at'  => 'datetime',
+            'last_login_at'      => 'datetime',
+            'password'           => 'hashed',
+            'preferred_days'     => 'array',
+            'preferred_times'    => 'array',
+            'pref_cast_type_ids' => 'array',
+            'pref_area_ids'      => 'array',
         ];
     }
 
@@ -87,8 +92,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(CastView::class);
     }
 
+    public function shopNotifications(): HasMany
+    {
+        return $this->hasMany(ShopNotification::class);
+    }
+
     public function hasPreferences(): bool
     {
-        return !empty($this->pref_cast_type_ids) || !empty($this->pref_area_ids);
+        return !empty($this->pref_cast_type_ids) || !empty($this->pref_area_ids)
+            || $this->pref_age_min !== null || $this->pref_age_max !== null;
     }
 }

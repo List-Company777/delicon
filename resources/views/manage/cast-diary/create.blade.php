@@ -54,6 +54,49 @@
     </div>
     @endif
 
+    {{-- ファン個人リスト --}}
+    @if(isset($fanList) && $fanList->isNotEmpty())
+    @php
+        $dlabels = ['mon'=>'月','tue'=>'火','wed'=>'水','thu'=>'木','fri'=>'金','sat'=>'土','sun'=>'日'];
+        $tlabels = ['morning'=>'午前','afternoon'=>'昼間','evening'=>'夕方','night'=>'夜','midnight'=>'深夜'];
+    @endphp
+    <div class="bg-surface-600 border border-surface-300 rounded-xl p-4 mb-6" x-data="{ open: false }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between text-left">
+            <p class="text-xs font-bold text-[#E8E4DC]">お気に入り登録者 {{ $fanList->count() }}名</p>
+            <svg x-show="!open" class="w-4 h-4 text-[#6A6A7E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <svg x-show="open" class="w-4 h-4 text-deli-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </button>
+        <div x-show="open" x-transition class="mt-3 overflow-x-auto">
+            <table class="w-full text-xs text-[#C8C4BC]">
+                <thead>
+                    <tr class="border-b border-surface-400 text-[#6A6A7E] text-left">
+                        <th class="pb-2 pr-3 font-medium">お名前</th>
+                        <th class="pb-2 pr-3 font-medium">遊びやすい曜日</th>
+                        <th class="pb-2 font-medium">時間帯</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-500">
+                    @foreach($fanList as $fan)
+                    <tr>
+                        <td class="py-1.5 pr-3">{{ $fan->user_name }}</td>
+                        <td class="py-1.5 pr-3">
+                            @if(!empty($fan->preferred_days))
+                                {{ collect($fan->preferred_days)->map(fn($d) => $dlabels[$d] ?? $d)->join('・') }}
+                            @else<span class="text-surface-400">未設定</span>@endif
+                        </td>
+                        <td class="py-1.5">
+                            @if(!empty($fan->preferred_times))
+                                {{ collect($fan->preferred_times)->map(fn($t) => $tlabels[$t] ?? $t)->join('・') }}
+                            @else<span class="text-surface-400">未設定</span>@endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <form method="POST" action="{{ route('cast-diary.store', $cast->id) }}/" enctype="multipart/form-data">
         @csrf
         <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 space-y-5">

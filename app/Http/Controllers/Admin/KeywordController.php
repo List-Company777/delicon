@@ -34,7 +34,7 @@ class KeywordController extends Controller
 
         $areas       = Area::orderBy('sort_order')->get();
         $jobTypes    = JobType::orderBy('sort_order')->get();
-        $prefectures = Prefecture::orderBy('sort_order')->get();
+        $prefectures = Prefecture::orderBy("id")->get();
         $genres      = Genre::orderBy('sort_order')->get();
         $filterTypes = JobType::whereNotNull('keyword_filter')->orderBy('sort_order')->get();
 

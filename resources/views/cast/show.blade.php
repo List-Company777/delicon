@@ -286,24 +286,105 @@
     @endif
 
     {{-- キャスト口コミ --}}
-    @if($cast->reviews->where('is_approved', true)->count() > 0)
+    @php $approvedReviews = $cast->reviews->where('is_approved', true); @endphp
+    @if($approvedReviews->count() > 0 || true)
     <section class="mt-10">
         <h2 class="text-lg font-bold text-[#F0ECE4] mb-5 flex items-center gap-3">
             <span class="w-1 h-6 bg-gold-500 rounded-full inline-block"></span>
-            口コミ <span class="text-sm text-[#6A6A7E] font-normal">({{ $cast->reviews->where('is_approved', true)->count() }}件)</span>
+            口コミ @if($approvedReviews->count() > 0)<span class="text-sm text-[#6A6A7E] font-normal">({{ $approvedReviews->count() }}件)</span>@endif
         </h2>
-        <div class="space-y-4">
-            @foreach($cast->reviews->where('is_approved', true)->take(5) as $review)
-            <div class="bg-surface-500 border border-surface-300 rounded-xl p-5">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-amber-400 text-sm tracking-widest">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
-                    <span class="text-xs text-[#6A6A7E]">{{ $review->nickname }}</span>
-                    <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
+
+        @if($approvedReviews->count() > 0)
+        <div class="relative">
+            {{-- 未ログイン時はぼかし + ログイン誘導 --}}
+            @guest
+            <div class="space-y-4 blur-sm select-none pointer-events-none" aria-hidden="true">
+                @foreach($approvedReviews->take(3) as $review)
+                <div class="bg-surface-500 border border-surface-300 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-amber-400 text-sm tracking-widest">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
+                        <span class="text-xs text-[#6A6A7E]">{{ $review->nickname }}</span>
+                    </div>
+                    <p class="text-sm text-[#C8C4BC] leading-relaxed">{{ $review->body }}</p>
                 </div>
-                <p class="text-sm text-[#C8C4BC] leading-relaxed">{{ $review->body }}</p>
+                @endforeach
             </div>
-            @endforeach
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-900/60 rounded-xl">
+                <p class="text-sm text-[#B0AEAD] font-medium">口コミを見るには会員登録 / ログインが必要です</p>
+                <div class="flex gap-2">
+                    <a href="{{ route('visitor.register') }}?redirect={{ urlencode(request()->path()) }}"
+                       class="px-5 py-2 bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold rounded-lg transition">無料会員登録</a>
+                    <a href="{{ route('login') }}?redirect={{ urlencode(request()->path()) }}"
+                       class="px-5 py-2 bg-surface-400 hover:bg-surface-300 text-[#E8E4DC] text-sm font-bold rounded-lg transition">ログイン</a>
+                </div>
+            </div>
+            @endguest
+
+            {{-- ログイン済みは全件表示 --}}
+            @auth
+            <div class="space-y-4">
+                @foreach($approvedReviews->take(5) as $review)
+                <div class="bg-surface-500 border border-surface-300 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-amber-400 text-sm tracking-widest">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
+                        <span class="text-xs text-[#6A6A7E]">{{ $review->nickname }}</span>
+                        <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
+                    </div>
+                    <p class="text-sm text-[#C8C4BC] leading-relaxed">{{ $review->body }}</p>
+                </div>
+                @endforeach
+            </div>
+            @endauth
         </div>
+        @else
+        <p class="text-sm text-[#6A6A7E]">まだ口コミはありません。最初の口コミを投稿しませんか？</p>
+        @endif
+
+        {{-- 口コミ投稿フォーム（ログイン済みのみ） --}}
+        @auth
+        <div class="mt-8 bg-surface-500 border border-surface-300 rounded-2xl p-6">
+            <h3 class="text-base font-bold text-[#F0ECE4] mb-4">口コミを投稿する</h3>
+            @if(session('review_success'))
+            <p class="mb-4 text-sm text-deli-400 bg-deli-500/10 border border-deli-500/30 rounded-lg px-4 py-2">{{ session('review_success') }}</p>
+            @endif
+            @if($errors->hasBag('cast_review'))
+            <div class="mb-4 text-sm text-deli-400 bg-deli-500/10 border border-deli-500/30 rounded-lg px-4 py-2">
+                @foreach($errors->getBag('cast_review')->all() as $e)<p>{{ $e }}</p>@endforeach
+            </div>
+            @endif
+            <form action="{{ route('cast.review.store', $cast->id) }}/" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm text-[#B0AEAD] mb-1">評価 <span class="text-deli-400">*</span></label>
+                    <div class="flex gap-2">
+                        @for($i = 5; $i >= 1; $i--)
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rating" value="{{ $i }}" class="sr-only peer" {{ old('rating') == $i ? 'checked' : ($i == 5 ? 'checked' : '') }}>
+                            <span class="text-2xl peer-checked:text-amber-400 text-[#3A3A4E] hover:text-amber-300 transition select-none">★</span>
+                        </label>
+                        @endfor
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-[#B0AEAD] mb-1">本文 <span class="text-deli-400">*</span><span class="text-xs text-[#6A6A7E] ml-2">20〜2000文字</span></label>
+                    <textarea name="body" rows="4" required minlength="20" maxlength="2000"
+                              placeholder="接客・雰囲気・おすすめポイントなど..."
+                              class="w-full bg-surface-400 border border-surface-300 rounded-lg px-4 py-2.5 text-[#E8E4DC] text-sm focus:outline-none focus:border-deli-500 resize-none">{{ old('body') }}</textarea>
+                </div>
+                <p class="text-xs text-[#6A6A7E] leading-relaxed">口コミはサービスの評価についてのみ受け付けます。個人攻撃や法的に問題のあるコンテンツは削除します。良識に従ったご利用をお願いします。</p>
+                <button type="submit"
+                        class="w-full bg-deli-500 hover:bg-deli-400 text-white font-bold py-2.5 rounded-lg transition text-sm">
+                    投稿する（承認制）
+                </button>
+            </form>
+        </div>
+        @else
+        <div class="mt-6 text-center">
+            <p class="text-sm text-[#8A8A9E] mb-3">口コミを投稿するには会員登録が必要です</p>
+            <a href="{{ route('visitor.register') }}?redirect={{ urlencode(request()->path()) }}"
+               class="inline-block px-6 py-2.5 bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold rounded-lg transition">無料会員登録して投稿する</a>
+        </div>
+        @endauth
     </section>
     @endif
 
@@ -364,7 +445,8 @@
             </summary>
             <div class="mt-4 bg-surface-600 border border-surface-400 rounded-xl p-5">
                 <h3 class="text-sm font-bold text-[#E8E4DC] mb-1">削除依頼フォーム</h3>
-                <p class="text-xs text-[#6A6A7E] mb-4">ご本人様またはご関係者からの削除依頼を受け付けています。内容を確認後、速やかに対応いたします。</p>
+                <p class="text-xs text-[#6A6A7E] mb-3">ご本人様またはご関係者からの削除依頼を受け付けています。内容を確認後、速やかに対応いたします。</p>
+                <p class="text-xs text-[#8A8A9E] bg-surface-500 border border-surface-300 rounded-lg px-3 py-2.5 leading-relaxed mb-4">削除理由が明確でないもの、削除を要請する事情などが不明な場合、相当な理由と認められない場合には対応しないことがあります。必ず身分と理由を明確にしてフォーム送信をしてください。</p>
                 <form method="POST" action="{{ route('cast.deletion-request', $cast->id) }}/">
                     @csrf
                     <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true">

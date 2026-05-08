@@ -26,6 +26,7 @@ use App\Http\Controllers\Auth\VisitorRegisterController;
 use App\Http\Controllers\Manage\CastProfileController;
 use App\Http\Controllers\Manage\ReviewManageController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\CastReviewController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/reviews/create/',  [ReviewController::class, 'create'])->name('review.create');
     Route::post('/reviews/',        [ReviewController::class, 'store'])->name('review.store')->middleware('throttle:10,60');
+    Route::post('/casts/{castId}/reviews/', [CastReviewController::class, 'store'])->name('cast.review.store')->middleware('throttle:5,60')->where('castId', '[0-9]+');
 });
 
 // メール認証
@@ -180,6 +182,9 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::post('/casts/{castId}/diary-token/',    [\App\Http\Controllers\Manage\CastDiaryController::class, 'issueToken'])->name('cast-diary.issue-token')->where('castId', '[0-9]+');
     Route::put('/casts/{id}/',            [CastProfileController::class, 'update'])->name('cast-profile.update')->where('id', '[0-9]+');
     Route::delete('/casts/{id}/',         [CastProfileController::class, 'destroy'])->name('cast-profile.destroy')->where('id', '[0-9]+');
+    Route::get('/casts/{castId}/schedules/',             [\App\Http\Controllers\Manage\CastScheduleController::class, 'index'])->name('cast-schedule.index')->where('castId', '[0-9]+');
+    Route::post('/casts/{castId}/schedules/',            [\App\Http\Controllers\Manage\CastScheduleController::class, 'store'])->name('cast-schedule.store')->where('castId', '[0-9]+');
+    Route::delete('/casts/{castId}/schedules/{scheduleId}/', [\App\Http\Controllers\Manage\CastScheduleController::class, 'destroy'])->name('cast-schedule.destroy')->where(['castId' => '[0-9]+', 'scheduleId' => '[0-9]+']);
 
     // 口コミ管理
     Route::get('/reviews/',                            [ReviewManageController::class, 'index'])->name('review.index');
@@ -356,6 +361,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/deletion-requests/{deletionRequest}/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'process'])->name('deletion-requests.process');
     Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
     Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
+    Route::post('/user/notify-working/', [UserDashboardController::class, 'toggleNotifyWorking'])->name('user.notify-working.toggle');
     Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
     Route::post('/shops/{shop}/notify/', [\App\Http\Controllers\ShopNotificationController::class, 'toggle'])->name('shop.notify.toggle');
 });

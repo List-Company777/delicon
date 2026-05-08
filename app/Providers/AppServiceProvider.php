@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
 
         // admin レイアウト全体に都道府県リストを共有
         View::composer('layouts.admin', function ($view) {
-            $view->with('prefectures', Prefecture::orderBy('sort_order')->get());
+            $view->with('prefectures', Prefecture::orderBy("id")->get());
             $view->with('allAreas', Area::with('prefecture')->orderBy('prefecture_id')->orderBy('sort_order')->get());
         });
 

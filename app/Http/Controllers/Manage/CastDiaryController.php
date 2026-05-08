@@ -5,6 +5,8 @@ use App\Models\Cast;
 use App\Models\CastDiary;
 use App\Models\CastDiaryImage;
 use App\Models\CastDiaryToken;
+use App\Models\CastFavorite;
+use App\Models\User;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
@@ -20,8 +22,19 @@ class CastDiaryController extends BaseController
     public function create(int $castId)
     {
         $cast = Cast::findOrFail($castId);
-        $scheduleStats = \App\Http\Controllers\Manage\DashboardController::scheduleStats();
-        return view('manage.cast-diary.create', compact('cast', 'scheduleStats'));
+
+        // このキャストのお気に入り登録者
+        $fanList = CastFavorite::where('cast_id', $castId)
+            ->join('users', 'cast_favorites.user_id', '=', 'users.id')
+            ->select('users.name as user_name', 'users.preferred_days', 'users.preferred_times')
+            ->get();
+
+        $scheduleStats = $this->buildScheduleStats($fanList->map(fn($r) => (object)[
+            'preferred_days'  => is_string($r->preferred_days)  ? json_decode($r->preferred_days, true)  : ($r->preferred_days ?? []),
+            'preferred_times' => is_string($r->preferred_times) ? json_decode($r->preferred_times, true) : ($r->preferred_times ?? []),
+        ]));
+
+        return view('manage.cast-diary.create', compact('cast', 'scheduleStats', 'fanList'));
     }
 
     public function store(Request $request, int $castId, ImageService $imgSvc)
@@ -62,5 +75,21 @@ class CastDiaryController extends BaseController
         Cast::findOrFail($castId);
         CastDiaryToken::generateFor($castId);
         return back()->with('token_issued', true);
+    }
+
+    public static function buildScheduleStats(\Illuminate\Support\Collection $users): array
+    {
+        $total = $users->count();
+        if ($total === 0) return ['total' => 0, 'days' => [], 'times' => []];
+
+        $days  = array_fill_keys(['mon','tue','wed','thu','fri','sat','sun'], 0);
+        $times = array_fill_keys(['morning','afternoon','evening','night','midnight'], 0);
+
+        foreach ($users as $user) {
+            foreach ($user->preferred_days  ?? [] as $d) { if (isset($days[$d]))  $days[$d]++; }
+            foreach ($user->preferred_times ?? [] as $t) { if (isset($times[$t])) $times[$t]++; }
+        }
+
+        return ['total' => $total, 'days' => $days, 'times' => $times];
     }
 }

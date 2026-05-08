@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Manage;
 use App\Jobs\NotifyFavoritedCastWorking;
 use App\Jobs\NotifyNewCast;
 use App\Models\Cast;
+use App\Models\CastFavorite;
 use App\Models\CastType;
 use App\Models\CastBodyType;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
@@ -23,7 +25,34 @@ class CastProfileController extends BaseController
             ->orderBy('sort_order')
             ->orderByDesc('id')
             ->get();
-        return view('manage.cast_profile.index', compact('shop', 'casts'));
+
+        $castIds = $casts->pluck('id')->all();
+
+        // キャストごとのお気に入り数
+        $favoriteCounts = CastFavorite::whereIn('cast_id', $castIds)
+            ->selectRaw('cast_id, count(*) as cnt')
+            ->groupBy('cast_id')
+            ->pluck('cnt', 'cast_id');
+
+        // 店舗全キャストのお気に入り登録者一覧（名前・対象キャスト名・希望曜日・時間帯）
+        $shopFanList = CastFavorite::whereIn('cast_favorites.cast_id', $castIds)
+            ->join('users', 'cast_favorites.user_id', '=', 'users.id')
+            ->join('casts', 'cast_favorites.cast_id', '=', 'casts.id')
+            ->select(
+                'users.name as user_name',
+                'casts.name as cast_name',
+                'users.preferred_days',
+                'users.preferred_times'
+            )
+            ->orderBy('casts.name')
+            ->get()
+            ->map(function($r) {
+                $r->preferred_days  = is_string($r->preferred_days)  ? json_decode($r->preferred_days, true)  : ($r->preferred_days ?? []);
+                $r->preferred_times = is_string($r->preferred_times) ? json_decode($r->preferred_times, true) : ($r->preferred_times ?? []);
+                return $r;
+            });
+
+        return view('manage.cast_profile.index', compact('shop', 'casts', 'favoriteCounts', 'shopFanList'));
     }
 
     public function create()

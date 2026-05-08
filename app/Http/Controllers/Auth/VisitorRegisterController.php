@@ -40,6 +40,6 @@ class VisitorRegisterController extends Controller
         Auth::login($user);
 
         $redirect = $request->input('redirect');
-        return redirect($redirect ?: route('top'))->with('success', '登録が完了しました。口コミを投稿できます。');
+        return redirect($redirect ?: route('user.dashboard'))->with('success', '登録が完了しました。口コミを投稿できます。');
     }
 }
