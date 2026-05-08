@@ -30,9 +30,22 @@
     @endforeach
 </div>
 
+{{-- 小エリア未設定警告 --}}
+@if($noAreaCount > 0)
+<div class="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between text-sm">
+    <span class="text-orange-700">⚠ 小エリア未設定の店舗が <strong>{{ $noAreaCount }}件</strong> あります</span>
+    @if($noArea)
+        <a href="{{ route('admin.shops.index', ['status' => $status]) }}/" class="text-orange-600 underline hover:text-orange-800 text-xs">絞り込み解除</a>
+    @else
+        <a href="{{ route('admin.shops.index', ['status' => $status, 'no_area' => 1]) }}/" class="text-orange-600 underline hover:text-orange-800 text-xs">この店舗を表示</a>
+    @endif
+</div>
+@endif
+
 {{-- 店舗名検索 --}}
 <form method="GET" action="{{ route('admin.shops.index') }}/" class="mb-4 flex gap-2">
     <input type="hidden" name="status" value="{{ $status }}">
+    @if($noArea)<input type="hidden" name="no_area" value="1">@endif
     <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
     <button type="submit" class="px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">検索</button>
@@ -63,7 +76,7 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
             @foreach($shops as $shop)
-            <tr class="hover:bg-gray-50 transition">
+            <tr class="{{ $shop->area_id ? 'hover:bg-gray-50' : 'bg-orange-50 hover:bg-orange-100' }} transition">
                 <td class="px-4 py-3 text-gray-400 text-xs">{{ $shop->id }}</td>
                 <td class="px-4 py-3 font-medium">
                     <a href="{{ route('admin.shops.show', $shop->id) }}/" class="text-gray-800 hover:text-business-700 hover:underline">{{ $shop->name }}</a>

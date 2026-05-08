@@ -123,7 +123,7 @@ class SearchController extends Controller
         $ageRange    = request()->input('age_range', '');
         $results = $this->getResults($gender, '', '', prefSlug: $pref_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
-        $noindex = $results->total() <= 5;
+        $noindex = $results->total() < 5;
         $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $pref_slug, 'all');
@@ -193,7 +193,7 @@ class SearchController extends Controller
             ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange)
             : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
-        $noindex = $results->total() <= 5;
+        $noindex = $results->total() < 5;
         $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $area_slug, $job_slug);
@@ -255,7 +255,7 @@ class SearchController extends Controller
         $ageRange    = request()->input('age_range', '');
         $results = $this->getResults($gender, $area, $keyword, useSlug: true, filterKeyword: $filterKeyword, shopBoolFilter: $shopBoolFilter, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
-        $noindex = $results->total() <= 5;
+        $noindex = $results->total() < 5;
         $status  = $results->total() === 0 ? 404 : 200;
 
         SearchPageView::record($gender, $area_slug, $job_slug);
@@ -350,7 +350,8 @@ class SearchController extends Controller
                         ->where('age', '>', 0)
                         ->groupBy('shop_id')
                         ->havingRaw("SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) >= GREATEST(
-                    SUM(CASE WHEN age BETWEEN 18 AND 24 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN age BETWEEN 18 AND 19 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN age BETWEEN 20 AND 24 THEN 1 ELSE 0 END),
                     SUM(CASE WHEN age BETWEEN 25 AND 34 THEN 1 ELSE 0 END),
                     SUM(CASE WHEN age BETWEEN 35 AND 44 THEN 1 ELSE 0 END),
                     SUM(CASE WHEN age >= 45 THEN 1 ELSE 0 END)
@@ -402,7 +403,8 @@ class SearchController extends Controller
                         ->where('age', '>', 0)
                         ->groupBy('shop_id')
                         ->havingRaw("SUM(CASE WHEN age BETWEEN ? AND ? THEN 1 ELSE 0 END) >= GREATEST(
-                        SUM(CASE WHEN age BETWEEN 18 AND 24 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN age BETWEEN 18 AND 19 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN age BETWEEN 20 AND 24 THEN 1 ELSE 0 END),
                         SUM(CASE WHEN age BETWEEN 25 AND 34 THEN 1 ELSE 0 END),
                         SUM(CASE WHEN age BETWEEN 35 AND 44 THEN 1 ELSE 0 END),
                         SUM(CASE WHEN age >= 45 THEN 1 ELSE 0 END)
@@ -434,6 +436,7 @@ class SearchController extends Controller
             $items = Shop::with(['area', 'genre', 'prefecture', 'detail', 'shopType',
                 'castMembers' => fn($c) => $c->where('status', 'active')->orderByRaw('working_date = CURDATE() DESC')->orderBy('sort_order')->take(5),
             ])
+            ->withCount(['castMembers as active_cast_count' => fn($c) => $c->where('status', 'active')])
             ->whereIn('id', $pageIds)
             ->orderByRaw("FIELD(id, {$idOrder})")
             ->get();

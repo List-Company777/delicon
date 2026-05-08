@@ -7,25 +7,32 @@
     'キャスト・システム・料金などをご紹介。'
 )
 @section('canonical', route('shop.show', $shop->id) . '/')
-@if($shop->banner_url)
-@section('ogp_image', $shop->banner_url)
+@if($shop->main_image_url)
+@section('ogp_image', $shop->main_image_url)
 @section('twitter_card', 'summary_large_image')
 @endif
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 py-8">
+<div class="max-w-5xl mx-auto px-4 py-8 pb-20 md:pb-8">
 
     {{-- パンくず --}}
     <nav class="text-xs text-[#8A8A9E] mb-4">
         <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">ホーム</a> &rsaquo;
-        <a href="{{ route('shop.index') }}/" class="hover:text-gold-400 transition">店舗一覧</a> &rsaquo;
+        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">店舗一覧</a> &rsaquo;
+        @if($shop->prefecture)
+        <a href="{{ route('shop.list', ['area_slug' => $shop->prefecture->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->prefecture->name }}</a> &rsaquo;
+        @endif
+        @if($shop->area)
+        <a href="{{ route('shop.list', ['area_slug' => $shop->area->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->area->name }}</a> &rsaquo;
+        @endif
         <span class="text-[#B0AEAD]">{{ $shop->name }}</span>
     </nav>
 
-    {{-- 店舗バナー（5:2 比率） --}}
-    @if($shop->banner_url)
-    <div class="relative w-full aspect-[5/2] rounded-xl overflow-hidden mb-6 bg-surface-600">
-        <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
+    {{-- 店舗メイン画像 --}}
+    @if($shop->main_image_url)
+    <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-6 bg-surface-600">
+        <img src="{{ $shop->main_image_url }}" alt="{{ $shop->name }}"
+             fetchpriority="high"
              class="absolute inset-0 w-full h-full object-cover img-onerror-hide">
     </div>
     @endif
@@ -69,31 +76,31 @@
                 <table class="w-full text-sm">
                     @if($shop->price_60)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">60分料金</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">60分料金</th>
                         <td class="py-2.5 text-gold-400 font-bold">¥{{ number_format($shop->price_60) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_90)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">90分料金</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">90分料金</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_90) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_120)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">120分料金</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">120分料金</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_120) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->price_high)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">高級コース</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal w-32">高級コース</th>
                         <td class="py-2.5 text-[#C8C4BC]">¥{{ number_format($shop->price_high) }}〜</td>
                     </tr>
                     @endif
                     @if($shop->open_time || $shop->close_time || $shop->all_time)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業時間</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業時間</th>
                         <td class="py-2.5 text-[#C8C4BC]">
                             @if($shop->all_time) <span class="text-green-400 font-semibold">24時間営業</span>
                             @else {{ $shop->open_time }}{{ $shop->close_time ? ' 〜 ' . $shop->close_time : '' }} @endif
@@ -102,31 +109,31 @@
                     @endif
                     @if($shop->rest_day)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">定休日</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">定休日</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->rest_day }}</td>
                     </tr>
                     @endif
                     @if($shop->eigyo_area)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業エリア</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">営業エリア</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->eigyo_area }}</td>
                     </tr>
                     @endif
                     @if($shop->eigyo_space)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">プレイスペース</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">プレイスペース</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->eigyo_space }}</td>
                     </tr>
                     @endif
                     @if($shop->address)
                     <tr class="border-b border-surface-300">
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">住所</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">住所</th>
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->address }}</td>
                     </tr>
                     @endif
                     @if($shop->tel)
                     <tr>
-                        <th class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">電話番号</th>
+                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">電話番号</th>
                         <td class="py-2.5"><a href="tel:{{ $shop->tel }}" class="text-gold-400 hover:underline font-medium">{{ $shop->tel }}</a></td>
                     </tr>
                     @endif
@@ -264,8 +271,7 @@
         <div class="space-y-4">
             @if($shop->tel)
             <div class="bg-deli-500 rounded-xl p-5 text-center">
-                <p class="text-white text-xs mb-1 opacity-80">お電話でのご予約</p>
-                <a href="tel:{{ $shop->tel }}" class="block text-white text-xl font-bold tracking-widest hover:opacity-90 transition">{{ $shop->tel }}</a>
+                <a href="tel:{{ $shop->tel }}" class="block text-white text-base font-bold hover:opacity-90 transition">この店舗に問い合わせする</a>
             </div>
             @endif
 
@@ -355,17 +361,114 @@
 
     </div>
 </div>
+
+{{-- フロートバー（スマホのみ） --}}
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-50 p-3 bg-surface-900/95 backdrop-blur border-t border-surface-500">
+    <div class="flex gap-2">
+
+        {{-- 新人通知ボタン --}}
+        <button id="notify-btn"
+                data-shop="{{ $shop->id }}"
+                data-subscribed="{{ $isSubscribed ? 'true' : 'false' }}"
+                class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border text-xs font-medium transition
+                       {{ $isSubscribed
+                           ? 'bg-deli-500/20 border-deli-500 text-deli-400'
+                           : 'bg-surface-700 border-surface-400 text-[#B0AEAD]' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span id="notify-label">{{ $isSubscribed ? '通知登録済み' : '新人通知を受け取る' }}</span>
+        </button>
+
+        {{-- 電話ボタン --}}
+        @if($shop->tel)
+        <a href="tel:{{ $shop->tel }}"
+           class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-deli-500 hover:bg-deli-600 active:bg-deli-700 text-white text-xs font-bold transition">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+            このお店に電話する
+        </a>
+        @else
+        <div class="flex-1"></div>
+        @endif
+
+    </div>
+</div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var btn = document.getElementById('notify-btn');
+    if (!btn) return;
+    @auth
+    btn.addEventListener('click', function() {
+        fetch('/shops/' + btn.dataset.shop + '/notify/', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            }
+        }).then(function(r){ return r.json(); }).then(function(data) {
+            btn.dataset.subscribed = data.subscribed ? 'true' : 'false';
+            document.getElementById('notify-label').textContent = data.subscribed ? '通知登録済み' : '新人通知を受け取る';
+            if (data.subscribed) {
+                btn.classList.add('bg-deli-500/20','border-deli-500','text-deli-400');
+                btn.classList.remove('bg-surface-700','border-surface-400','text-[#B0AEAD]');
+            } else {
+                btn.classList.remove('bg-deli-500/20','border-deli-500','text-deli-400');
+                btn.classList.add('bg-surface-700','border-surface-400','text-[#B0AEAD]');
+            }
+        });
+    });
+    @else
+    btn.addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.remove('hidden');
+    });
+    document.getElementById('auth-modal-close').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    document.getElementById('auth-modal-backdrop').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    @endauth
+})();
+</script>
+@endpush
+
+{{-- 非ログイン通知モーダル --}}
+<div id="auth-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div id="auth-modal-backdrop" class="absolute inset-0 bg-black/60"></div>
+    <div class="relative bg-surface-700 border border-surface-400 rounded-2xl p-6 mx-4 max-w-sm w-full shadow-xl">
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-5 h-5 text-deli-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <p class="text-[#E8E4DC] font-bold text-sm">ログインが必要です</p>
+        </div>
+        <p class="text-[#B0AEAD] text-sm mb-5">出勤通知を受け取るにはログインが必要です。</p>
+        <div class="flex gap-2">
+            <button id="auth-modal-close" class="flex-1 py-2.5 rounded-xl border border-surface-400 text-[#B0AEAD] text-sm transition hover:border-surface-300">閉じる</button>
+            <a href="{{ route('login') }}/" class="flex-1 py-2.5 rounded-xl bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold text-center transition">ログインする</a>
+        </div>
+    </div>
+</div>
 @endsection
 @push('head')
 @php
     $ld_breadcrumb = [
         '@context' => 'https://schema.org',
         '@type'    => 'BreadcrumbList',
-        'itemListElement' => [
-            ['@type'=>'ListItem','position'=>1,'name'=>'ホーム','item'=>route('top').'/'],
-            ['@type'=>'ListItem','position'=>2,'name'=>'店舗一覧','item'=>route('shop.index').'/'],
-            ['@type'=>'ListItem','position'=>3,'name'=>$shop->name,'item'=>route('shop.show',$shop->id).'/'],
-        ],
+        'itemListElement' => (function() use ($shop) {
+            $items = [
+                ['name'=>'ホーム',   'item'=>route('top').'/'],
+                ['name'=>'店舗一覧','item'=>route('shop.list',['area_slug'=>'all']).'/'],
+            ];
+            if ($shop->prefecture) $items[] = ['name'=>$shop->prefecture->name,'item'=>route('shop.list',['area_slug'=>$shop->prefecture->slug]).'/'];
+            if ($shop->area)       $items[] = ['name'=>$shop->area->name,      'item'=>route('shop.list',['area_slug'=>$shop->area->slug]).'/'];
+            $items[] = ['name'=>$shop->name,'item'=>route('shop.show',$shop->id).'/'];
+            return array_map(fn($item,$i)=>array_merge(['@type'=>'ListItem','position'=>$i+1],$item),array_values($items),array_keys($items));
+        })(),
     ];
     $ld_local = [
         '@context'    => 'https://schema.org',
@@ -380,7 +483,7 @@
             'postalCode'      => $shop->postal_code ?? null,
             'addressCountry'  => 'JP',
         ] : null,
-        'image'       => $shop->banner_url ? [$shop->banner_url] : null,
+        'image'       => $shop->main_image_url ? [$shop->main_image_url] : null,
         'openingHours' => $shop->all_time ? ['Mo-Su 00:00-23:59'] : null,
     ];
     // null を取り除く

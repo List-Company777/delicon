@@ -20,7 +20,8 @@ class CastDiaryController extends BaseController
     public function create(int $castId)
     {
         $cast = Cast::findOrFail($castId);
-        return view('manage.cast-diary.create', compact('cast'));
+        $scheduleStats = \App\Http\Controllers\Manage\DashboardController::scheduleStats();
+        return view('manage.cast-diary.create', compact('cast', 'scheduleStats'));
     }
 
     public function store(Request $request, int $castId, ImageService $imgSvc)

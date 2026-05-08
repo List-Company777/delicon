@@ -173,6 +173,10 @@ class ShopController extends Controller
             );
         }
 
-        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug'));
+        $isSubscribed = auth()->check()
+            ? \App\Models\ShopNotification::where('user_id', auth()->id())->where('shop_id', $shop->id)->exists()
+            : false;
+
+        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug', 'isSubscribed'));
     }
 }

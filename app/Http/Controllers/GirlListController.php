@@ -130,20 +130,38 @@ class GirlListController extends Controller
             $results = $this->getCasts($request, $area_slug, $areaModel, $prefOnlyModel, $cast_tab);
         }
 
-        $hasFilters = $this->hasActiveFilters($request);
+        $filterCount = collect(['age', 'tall', 'cup', 'body'])->filter(fn($k) => $request->filled($k))->count();
+        $hasFilters = $filterCount > 0;
         $bodyTypesRaw = Cache::remember('delicon:cast_body_types', 86400,
             fn() => DB::table('cast_body_types')->orderBy('sort_order')->orderBy('id')->get(['id', 'name'])
                 ->map(fn($b) => ['id' => $b->id, 'name' => $b->name])->all()
         );
         $bodyTypes = collect($bodyTypesRaw)->map(fn($b) => (object) $b)->all();
 
-        $noindex = $results->total() <= 5 || $hasFilters;
+        $prefecturesRaw = $area_slug === 'all'
+            ? Cache::remember('delicon:prefectures_with_casts', 3600, fn() =>
+                DB::table('prefectures')
+                    ->join('areas', 'areas.prefecture_id', '=', 'prefectures.id')
+                    ->join('shops', 'shops.area_id', '=', 'areas.id')
+                    ->join('casts', 'casts.shop_id', '=', 'shops.id')
+                    ->where('shops.status', 'active')
+                    ->where('casts.status', 'active')
+                    ->whereNotNull('prefectures.slug')
+                    ->select('prefectures.slug', 'prefectures.prefecture as name')
+                    ->groupBy('prefectures.id', 'prefectures.slug', 'prefectures.prefecture')
+                    ->orderBy('prefectures.id')
+                    ->get()->map(fn($p) => ['slug' => $p->slug, 'name' => $p->name])->all()
+              )
+            : [];
+        $prefectureLinks = collect($prefecturesRaw)->map(fn($p) => (object) $p)->all();
+
+        $noindex = $results->total() < 5 || $filterCount >= 2;
         $status  = $results->total() === 0 ? 404 : 200;
 
         return response()->view('search.girl_list', compact(
             'area_slug', 'cast_tab', 'areaName', 'prefModel',
             'areaModel', 'prefOnlyModel', 'results', 'noindex',
-            'hasFilters', 'bodyTypes'
+            'hasFilters', 'bodyTypes', 'prefectureLinks'
         ), $status);
     }
 

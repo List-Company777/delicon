@@ -5,6 +5,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LineAuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Manage\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
@@ -48,6 +49,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/', [RegisterController::class, 'store'])->middleware('throttle:5,30');
     // www.up-stage.info連携店舗の引き継ぎ検索（登録フォームのAJAX）
     Route::get('/api/xml-shops/search/', [RegisterController::class, 'xmlShopSearch'])->name('api.xml-shops.search');
+    Route::get('/auth/line/',          [LineAuthController::class, 'redirect'])->name('auth.line');
+    Route::get('/auth/line/callback/', [LineAuthController::class, 'callback'])->name('auth.line.callback');
+    Route::get('/auth/line/connect/',  [LineAuthController::class, 'connectRedirect'])->middleware('auth')->name('auth.line.connect');
     // パスワードリセット
     Route::get('/forgot-password/',        [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'show'])->name('password.request');
     Route::post('/forgot-password/',       [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'send'])->middleware('throttle:5,60')->name('password.email');
@@ -122,11 +126,11 @@ Route::get('/suggest', [\App\Http\Controllers\SuggestController::class, 'search'
 
 // お問い合わせ（一般）
 Route::get('/inquiry/',  [\App\Http\Controllers\InquiryController::class, 'show'])->name('inquiry');
-Route::post('/inquiry/', [\App\Http\Controllers\InquiryController::class, 'send'])->name('inquiry.send')->middleware('throttle:5,10');
+Route::post('/inquiry/', [\App\Http\Controllers\InquiryController::class, 'send'])->name('inquiry.send');
 
 // 求人アラート登録（Web）
 Route::get('/alert/',          [\App\Http\Controllers\AlertRegistrationController::class, 'show'])->name('alert.register');
-Route::post('/alert/',         [\App\Http\Controllers\AlertRegistrationController::class, 'store'])->name('alert.store')->middleware('throttle:5,10');
+Route::post('/alert/',         [\App\Http\Controllers\AlertRegistrationController::class, 'store'])->name('alert.store');
 Route::get('/alert/{token}/',  [\App\Http\Controllers\AlertRegistrationController::class, 'complete'])->name('alert.complete');
 
 // 店舗管理（要ログイン）
@@ -217,7 +221,13 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/staff/{id}/edit/',      [StaffJobController::class, 'edit'])->name('staff.edit')->where('id', '[0-9]+');
     Route::put('/staff/{id}/',           [StaffJobController::class, 'update'])->name('staff.update')->where('id', '[0-9]+');
     Route::delete('/staff/{id}/',        [StaffJobController::class, 'destroy'])->name('staff.destroy')->where('id', '[0-9]+');
+
+    // LINE通知設定
+    Route::delete('/line-notify/', [\App\Http\Controllers\Manage\LineNotifyController::class, 'remove'])->name('line-notify.remove');
 });
+
+// LINE Messaging API Webhook（CSRF除外 → bootstrap/app.phpで設定済み）
+Route::post('/line/webhook/', [\App\Http\Controllers\LineWebhookController::class, 'handle'])->name('line.webhook');
 
 // 検索（クエリ文字列ベース）
 Route::get('/search/', [SearchController::class, 'index'])->name('search');
@@ -227,7 +237,7 @@ Route::get('/job/{id}/', [JobController::class, 'show'])->name('job.show')->wher
 
 
 // 通報フォーム
-Route::post('/report/', [\App\Http\Controllers\ReportController::class, 'send'])->name('report.send')->middleware('throttle:10,10');
+Route::post('/report/', [\App\Http\Controllers\ReportController::class, 'send'])->name('report.send');
 
 // ホットリンククリック計測
 Route::get('/click/{id}/', [JobController::class, 'click'])->name('click')->where('id', '[0-9]+');
@@ -357,7 +367,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
     Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
     Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
-    Route::post('/shops/{shop}/notify/', [\App\Http\Controllers\ShopNotificationController::class, 'toggle'])->name('shop.notify.toggle');
 });
 
 Route::get('/cast/', fn() => redirect('/all/girl-list/', 301))->name('cast.index');

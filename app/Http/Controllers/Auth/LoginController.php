@@ -51,7 +51,7 @@ class LoginController extends Controller
                 ? route('admin.dashboard')
                 : ($user->isPartner()
                     ? route('manage.partner.index')
-                    : route('manage.dashboard'));
+                    : ($user->role === 'visitor' ? route('user.dashboard') : route('manage.dashboard')));
             return redirect()->intended($destination);
         }
 

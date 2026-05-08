@@ -44,8 +44,29 @@
                     <td class="px-5 py-3 text-gray-700">{{ $shop->genre?->name ?? '—' }}</td>
                 </tr>
                 <tr>
-                    <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">都道府県 / エリア</th>
-                    <td class="px-5 py-3 text-gray-700">{{ $shop->prefecture?->name ?? '—' }} / {{ $shop->area?->name ?? '—' }}</td>
+                    <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">都道府県 / 小エリア</th>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-gray-500 text-sm">{{ $shop->prefecture?->name ?? '—' }}</span>
+                            <form method="POST" action="{{ route('admin.shops.updateArea', $shop->id) }}/" class="flex items-center gap-2">
+                                @csrf @method('PATCH')
+                                <select name="area_id" class="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-yellow-400 w-52">
+                                    <option value="">— 未設定 —</option>
+                                    @php $currentPrefId = null; @endphp
+                                    @foreach($areas as $area)
+                                        @if($area->prefecture_id !== $currentPrefId)
+                                            @if($currentPrefId !== null)</optgroup>@endif
+                                            <optgroup label="{{ $area->prefecture->name }}">
+                                            @php $currentPrefId = $area->prefecture_id; @endphp
+                                        @endif
+                                        <option value="{{ $area->id }}" {{ $shop->area_id == $area->id ? 'selected' : '' }}>{{ $area->name }}</option>
+                                    @endforeach
+                                    @if($currentPrefId !== null)</optgroup>@endif
+                                </select>
+                                <button type="submit" class="px-3 py-1 bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-600 transition">設定</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">住所</th>

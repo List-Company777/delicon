@@ -19,7 +19,7 @@ class RegisterController extends Controller
     public function show(Request $request)
     {
         $genres      = Genre::orderBy('id')->get();
-        $prefectures = Prefecture::orderBy('sort_order')->get();
+        $prefectures = Prefecture::orderBy('id')->get();
         $areas       = Area::orderBy('id')->get(['id', 'prefecture_id', 'name']);
         $partner     = null;
 
@@ -70,6 +70,7 @@ class RegisterController extends Controller
             'password.min'              => 'パスワードは8文字以上で入力してください。',
             'shop_name.required'        => '店舗名を入力してください。',
             'genre_id.required'         => '業種を選択してください。',
+            'prefecture_id.required'    => '都道府県を選択してください。',
             'agree_terms.accepted'      => 'サービス利用規約への同意が必要です。',
             'agree_advertiser.accepted' => '掲載規約への同意が必要です。',
             'agree_privacy.accepted'    => 'プライバシーポリシーへの同意が必要です。',

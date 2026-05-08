@@ -261,79 +261,6 @@
             </div>
 
         </div>
-
-        {{-- LINE通知設定 --}}
-        @if($shop->status === 'active')
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 relative {{ !$shop->hasBudget() && !$shop->isXmlActive() ? 'opacity-60 pointer-events-none select-none' : '' }}" x-data>
-            @if(!$shop->hasBudget() && !$shop->isXmlActive())
-                <div class="absolute inset-0 flex items-center justify-center rounded-xl z-10">
-                    <span class="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-full">有料プランのみ</span>
-                </div>
-            @endif
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold text-gray-700">LINE応募通知</h3>
-                @if($shop->line_notify_user_id)
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">設定済み</span>
-                @else
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">未設定</span>
-                @endif
-            </div>
-
-            @if($shop->line_notify_user_id)
-                <p class="text-xs text-gray-500 mb-3">応募があるとこのLINEアカウントに通知が届きます。</p>
-                <form method="POST" action="{{ route('manage.line-notify.remove') }}/"
-                      onsubmit="return confirm('LINE通知設定を解除しますか？')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-xs text-red-500 hover:underline">解除する</button>
-                </form>
-            @else
-                <p class="text-xs text-gray-500 mb-4">設定すると、応募があったときにLINEで通知を受け取れます。</p>
-
-                @if(config('services.line.bot_add_friend_url'))
-                <div class="space-y-4">
-                    {{-- STEP 1: コードをコピー --}}
-                    <div class="flex items-start gap-3">
-                        <span class="shrink-0 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background-color:#06C755">1</span>
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-600 mb-2">以下のコードをコピーしてください</p>
-                            <div class="flex items-center gap-2">
-                                <code class="bg-gray-100 text-gray-800 text-sm font-mono px-3 py-1.5 rounded select-all">NW-{{ $shop->id }}</code>
-                                <button type="button"
-                                        @click="navigator.clipboard.writeText('NW-{{ $shop->id }}').then(() => { $el.textContent = 'コピーしました'; setTimeout(() => $el.textContent = 'コピー', 1500) })"
-                                        class="text-xs text-business-600 border border-business-200 px-2 py-1 rounded hover:bg-business-50 transition">
-                                    コピー
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- STEP 2: 友だち追加してコードを送る --}}
-                    <div class="flex items-start gap-3">
-                        <span class="shrink-0 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background-color:#06C755">2</span>
-                        <div>
-                            <p class="text-xs text-gray-600 mb-2">公式LINEを友だち追加して、コードをトークに送ってください</p>
-                            <a href="{{ config('services.line.bot_add_friend_url') }}"
-                               target="_blank" rel="noopener"
-                               class="flex items-center justify-center gap-2 text-white text-sm font-bold px-4 py-1 rounded-lg hover:opacity-90 transition w-full"
-                               style="background-color:#06C755">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-                                LINEで友だち追加
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @else
-                    <p class="text-xs text-gray-400">LINE通知は現在準備中です。</p>
-                @endif
-            @endif
-
-            @if(session('line_notify_removed'))
-                <p class="text-xs text-green-600 mt-2">LINE通知設定を解除しました。</p>
-            @endif
-            <p class="text-xs text-gray-400 mt-4">※ LINE関連機能は、LINEの仕様変更等により予告なく停止となる場合がございます。あらかじめご了承ください。</p>
-        </div>
-        @endif
-
         {{-- 有料掲載にすると変わること（無料店のみ） --}}
         @if(!$shop->hasBudget() && !$shop->isXmlActive())
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -403,6 +330,84 @@
                         <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>検索エンジン・クローラーによるアクセス</li>
                         <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>記事ページ下部の関連リンクからのクリック</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+        @endif
+
+
+
+        {{-- 新人通知登録人数 --}}
+        @if($shop)
+        <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2">
+                        <span class="w-1 h-4 bg-deli-500 rounded-full"></span>
+                        新人通知の登録者数
+                    </h2>
+                    <p class="text-xs text-[#6A6A7E] mt-1">「この店舗の新人通知を受け取る」を登録しているユーザー数です。</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-3xl font-bold text-deli-400">{{ number_format($notifyCount) }}</p>
+                    <p class="text-xs text-[#6A6A7E]">人</p>
+                </div>
+            </div>
+            @if($notifyCount > 0)
+            <p class="text-xs text-[#8A8A9E] mt-3 border-t border-surface-400 pt-3">
+                新人キャストを登録すると、このユーザーに通知が届きます（通知機能は準備中）。
+            </p>
+            @else
+            <p class="text-xs text-[#6A6A7E] mt-3 border-t border-surface-400 pt-3">
+                まだ登録者はいません。魅力的な店舗ページを充実させて登録を増やしましょう。
+            </p>
+            @endif
+        </div>
+        @endif
+
+        {{-- ユーザーの遊びやすい曜日・時間帯 --}}
+        @if(!empty($scheduleStats) && $scheduleStats['total'] > 0)
+        @php
+            $dayLabels  = ['mon'=>'月','tue'=>'火','wed'=>'水','thu'=>'木','fri'=>'金','sat'=>'土','sun'=>'日'];
+            $timeLabels = ['morning'=>'午前','afternoon'=>'昼間','evening'=>'夕方','night'=>'夜','midnight'=>'深夜'];
+            $maxDay  = max($scheduleStats['days'])  ?: 1;
+            $maxTime = max($scheduleStats['times']) ?: 1;
+        @endphp
+        <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-6">
+            <h2 class="text-sm font-bold text-[#E8E4DC] mb-1 flex items-center gap-2">
+                <span class="w-1 h-4 bg-gold-500 rounded-full"></span>
+                ユーザーの遊びやすい曜日・時間帯
+            </h2>
+            <p class="text-xs text-[#6A6A7E] mb-4">{{ number_format($scheduleStats['total']) }}名の登録ユーザーが回答した集計です。出勤を組む際の参考にどうぞ。</p>
+
+            <div class="mb-4">
+                <p class="text-xs font-bold text-[#9A96A0] mb-2">曜日</p>
+                <div class="flex gap-1.5 items-end">
+                    @foreach($scheduleStats['days'] as $day => $cnt)
+                    @php $pct = $maxDay > 0 ? round($cnt / $maxDay * 100) : 0; @endphp
+                    <div class="flex-1 flex flex-col items-center gap-1">
+                        <span class="text-[10px] text-[#6A6A7E]">{{ $cnt > 0 ? $cnt : '' }}</span>
+                        <div class="w-full rounded-t transition" style="height:{{ max(4, $pct * 0.4) }}px; background:{{ $pct >= 80 ? '#E05A5A' : ($pct >= 50 ? '#E09050' : '#4A6A8A') }}"></div>
+                        <span class="text-xs {{ $pct >= 80 ? 'text-deli-400 font-bold' : 'text-[#6A6A7E]' }}">{{ $dayLabels[$day] }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold text-[#9A96A0] mb-2">時間帯</p>
+                <div class="space-y-1.5">
+                    @foreach($scheduleStats['times'] as $time => $cnt)
+                    @php $pct = $maxTime > 0 ? round($cnt / $maxTime * 100) : 0; @endphp
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-[#8A8A9E] w-12 shrink-0">{{ $timeLabels[$time] }}</span>
+                        <div class="flex-1 bg-surface-600 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all"
+                                 style="width:{{ $pct }}%; background:{{ $pct >= 80 ? '#E05A5A' : ($pct >= 50 ? '#E09050' : '#4A6A8A') }}"></div>
+                        </div>
+                        <span class="text-xs text-[#6A6A7E] w-6 text-right">{{ $cnt }}</span>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>

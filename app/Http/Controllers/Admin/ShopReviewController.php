@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\ShopApproved;
 use App\Mail\ShopRejected;
+use App\Models\Area;
 use App\Models\Partner;
 use App\Models\Shop;
 use Illuminate\Http\Request;
@@ -14,12 +15,14 @@ class ShopReviewController extends Controller
 {
     public function index()
     {
-        $status = request('status', 'pending');
-        $keyword = request('keyword', '');
+        $status   = request('status', 'pending');
+        $keyword  = request('keyword', '');
+        $noArea   = request()->boolean('no_area');
 
         $shops = Shop::with(['genre', 'area', 'users' => fn($q) => $q->wherePivot('role', 'owner')])
             ->when($status !== 'all', fn($q) => $q->where('status', $status))
             ->when($keyword !== '', fn($q) => $q->where('name', 'like', '%' . $keyword . '%'))
+            ->when($noArea, fn($q) => $q->whereNull('area_id'))
             ->orderByRaw("FIELD(status, 'pending', 'inactive', 'active')")
             ->orderByDesc('updated_at')
             ->paginate(30);
@@ -30,8 +33,9 @@ class ShopReviewController extends Controller
             'inactive' => Shop::where('status', 'inactive')->count(),
             'all'      => Shop::count(),
         ];
+        $noAreaCount = Shop::whereNull('area_id')->count();
 
-        return view('admin.shops.index', compact('shops', 'status', 'counts', 'keyword'));
+        return view('admin.shops.index', compact('shops', 'status', 'counts', 'keyword', 'noArea', 'noAreaCount'));
     }
 
     public function show(int $id)
@@ -49,7 +53,24 @@ class ShopReviewController extends Controller
             ->orderBy('company_name')
             ->get(['id', 'company_name', 'type']);
 
-        return view('admin.shops.show', compact('shop', 'partners'));
+        $areas = Area::with('prefecture')
+            ->orderBy('prefecture_id')
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'prefecture_id']);
+
+        return view('admin.shops.show', compact('shop', 'partners', 'areas'));
+    }
+
+    public function updateArea(Request $request, int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        $request->validate([
+            'area_id' => ['nullable', 'exists:areas,id'],
+        ]);
+        $areaId = $request->input('area_id') ?: null;
+        $shop->update(['area_id' => $areaId]);
+
+        return back()->with('success', 'エリアを更新しました');
     }
 
     public function approve(int $id)

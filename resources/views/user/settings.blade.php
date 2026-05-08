@@ -49,6 +49,48 @@
             </div>
         </div>
 
+
+        {{-- 遊びやすい曜日・時間帯 --}}
+        <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 mb-5">
+            <h2 class="text-sm font-bold text-[#E8E4DC] mb-1 flex items-center gap-2">
+                <span class="w-1 h-4 bg-gold-500 rounded-full"></span>
+                遊びやすい曜日・時間帯
+            </h2>
+            <p class="text-xs text-[#6A6A7E] mb-4">登録すると、店舗やキャストがあなたのような方が多い時間に出勤を組みやすくなります。</p>
+
+            <p class="text-xs font-bold text-[#9A96A0] mb-2">曜日</p>
+            <div class="flex flex-wrap gap-2 mb-5">
+                @php $days = ['mon'=>'月','tue'=>'火','wed'=>'水','thu'=>'木','fri'=>'金','sat'=>'土','sun'=>'日']; @endphp
+                @foreach($days as $val => $label)
+                <label class="cursor-pointer">
+                    <input type="checkbox" name="preferred_days[]" value="{{ $val }}"
+                           @checked(in_array($val, $user->preferred_days ?? []))
+                           class="sr-only peer">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full border text-sm font-medium transition
+                                 border-surface-300 text-[#6A6A7E]
+                                 peer-checked:bg-deli-500 peer-checked:border-deli-500 peer-checked:text-white
+                                 hover:border-deli-400 hover:text-deli-400">{{ $label }}</span>
+                </label>
+                @endforeach
+            </div>
+
+            <p class="text-xs font-bold text-[#9A96A0] mb-2">時間帯</p>
+            <div class="flex flex-wrap gap-2">
+                @php $times = ['morning'=>'午前（〜13時）','afternoon'=>'昼間（13〜17時）','evening'=>'夕方（17〜20時）','night'=>'夜（20〜24時）','midnight'=>'深夜（0〜5時）']; @endphp
+                @foreach($times as $val => $label)
+                <label class="cursor-pointer">
+                    <input type="checkbox" name="preferred_times[]" value="{{ $val }}"
+                           @checked(in_array($val, $user->preferred_times ?? []))
+                           class="sr-only peer">
+                    <span class="px-3 py-1.5 rounded-full border text-xs font-medium transition
+                                 border-surface-300 text-[#6A6A7E]
+                                 peer-checked:bg-deli-500 peer-checked:border-deli-500 peer-checked:text-white
+                                 hover:border-deli-400 hover:text-deli-400">{{ $label }}</span>
+                </label>
+                @endforeach
+            </div>
+        </div>
+
         {{-- タイプ好み --}}
         <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 mb-5">
             <h2 class="text-sm font-bold text-[#E8E4DC] mb-1 flex items-center gap-2">

@@ -27,10 +27,29 @@
     }
 @endphp
 
+@php
+    $shopBase        = url("/{$area_slug}/shop-list" . ($job_slug !== 'all' ? "/{$job_slug}" : '')) . '/';
+    $shopCanonical   = $ageRange ? $shopBase . '?age_range=' . $ageRange : $shopBase;
+    $multiFilter     = $job_slug !== 'all' && $ageRange !== '';
+    $shopNoindex     = $noindex || $multiFilter;
+    // multi-filter時はage_rangeなしbaseへcanonical
+    $shopCanonical   = $multiFilter ? $shopBase : $shopCanonical;
+@endphp
 @section('title', $pageTitle)
 @section('description', $pageDescription)
-@section('robots', $noindex ? 'noindex,follow' : 'index,follow')
-@section('canonical', url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : '')) . '/')
+@section('robots', $shopNoindex ? 'noindex,follow' : 'index,follow')
+@section('canonical', $shopCanonical)
+
+@push('head')
+@php
+    $sbItems = [['name' => 'ホーム', 'item' => route('top') . '/'], ['name' => '店舗一覧', 'item' => route('shop.list', ['area_slug' => 'all']) . '/']];
+    if ($areaName) $sbItems[] = ['name' => $areaName, 'item' => route('shop.list', ['area_slug' => $area_slug]) . '/'];
+    if ($jobTypeName) $sbItems[] = ['name' => $jobTypeName, 'item' => $shopBase];
+    $sbSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' =>
+        array_map(fn($item, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $item['name'], 'item' => $item['item']], array_values($sbItems), array_keys($sbItems))];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($sbSchema, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endpush
 
 @section('content')
 
@@ -84,7 +103,7 @@
 
     {{-- 年齢層フィルター --}}
     @php
-        $ageGroups  = ['' => 'すべて', '18-24' => '10〜20代', '25-34' => '25〜34歳', '35-44' => '35〜44歳', '45+' => '45歳〜'];
+        $ageGroups  = ['' => 'すべて', '18-19' => '10代', '20-24' => '20〜24歳', '25-34' => '25〜34歳', '35-44' => '35〜44歳', '45+' => '45歳〜'];
         $baseUrl    = url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : ''));
     @endphp
     <div class="flex flex-wrap items-center gap-2 mb-6">
@@ -114,11 +133,11 @@
         @foreach($paidShops as $shop)
         <a href="{{ route('shop.show', $shop->id) }}/"
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group block">
-            <div class="relative aspect-[5/2] bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
-                @if($shop->banner_url)
-                <img src="{{ $shop->banner_url }}"
+            <div class="relative h-40 bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
+                @if($shop->main_image_url)
+                <img src="{{ $shop->main_image_url }}"
                      alt="{{ $shop->name }}のデリヘル情報"
-                     loading="lazy"
+                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                      class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 @else
                 <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
@@ -137,7 +156,7 @@
                 <p class="text-xs text-[#B0AEAD] mt-0.5 line-clamp-2">{{ $shop->catche }}</p>
                 @endif
                 <div class="flex items-center justify-between mt-2 text-xs">
-                    <span class="text-[#8A8A9E]">在籍{{ $shop->castMembers->count() }}名</span>
+                    <span class="text-[#8A8A9E]">在籍{{ $shop->active_cast_count }}名</span>
                     @if($shop->price_60)
                     <span class="text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
                     @endif
@@ -174,8 +193,8 @@
                         @endif
                     </div>
                 </div>
-                @if($shop->castMembers->count() > 0)
-                <span class="text-xs text-[#8A8A9E] shrink-0">在籍{{ $shop->castMembers->count() }}名</span>
+                @if($shop->active_cast_count > 0)
+                <span class="text-xs text-[#8A8A9E] shrink-0">在籍{{ $shop->active_cast_count }}名</span>
                 @endif
             </a>
             @else

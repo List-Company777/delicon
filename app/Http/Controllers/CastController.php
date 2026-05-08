@@ -145,14 +145,16 @@ class CastController extends Controller
     private function getSimilarCasts(Cast $cast, int $limit = 6): \Illuminate\Support\Collection
     {
         return Cast::active()
-            ->where('id', '!=', $cast->id)
-            ->whereHas('shop', fn($q) => $q->where('status', 'active'))
+            ->where('casts.id', '!=', $cast->id)
+            ->join('shops', 'casts.shop_id', '=', 'shops.id')
+            ->where('shops.status', 'active')
             ->with(['shop'])
             ->select('casts.*')
             ->selectRaw('
-                (CASE WHEN body_id = ? THEN 2 ELSE 0 END) +
-                (CASE WHEN type_id = ? THEN 2 ELSE 0 END) +
-                (CASE WHEN age IS NOT NULL AND ABS(CAST(age AS SIGNED) - ?) <= 3 THEN 1 ELSE 0 END)
+                (CASE WHEN casts.body_id = ? THEN 2 ELSE 0 END) +
+                (CASE WHEN casts.type_id = ? THEN 2 ELSE 0 END) +
+                (CASE WHEN casts.age IS NOT NULL AND ABS(CAST(casts.age AS SIGNED) - ?) <= 3 THEN 1 ELSE 0 END) +
+                (CASE WHEN shops.plan <= 3 THEN 1 ELSE 0 END)
                 AS similarity_score',
                 [$cast->body_id ?? 0, $cast->type_id ?? 0, $cast->age ?? 0]
             )

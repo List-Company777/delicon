@@ -200,6 +200,14 @@ class Shop extends Model
         return $path;
     }
 
+    public function getMainImageUrlAttribute(): ?string
+    {
+        if ($this->main_image) {
+            return Storage::url($this->main_image);
+        }
+        return $this->shop_file_name ?: null;
+    }
+
     /**
      * 店舗詳細ページ用バナー画像URL（5:2）
      * main_image（新規アップロード）→ shop_file_name（レガシー）の順で優先

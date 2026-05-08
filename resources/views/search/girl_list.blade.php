@@ -71,12 +71,13 @@
         : ($cast_tab === 'all'
             ? url("/{$area_slug}/girl-list/") . '/'
             : url("/{$area_slug}/girl-list/{$cast_tab}/") . '/');
-    $canonicalUrl = $filterCount > 0
+    // 1フィルター→自身のURL、2フィルター以上（noindex）→フィルターなしbaseへ
+    $canonicalUrl = ($filterCount === 1)
         ? $baseTabUrl . '?' . http_build_query($filterParams)
         : $baseTabUrl;
 
-    // noindex: 結果5件以下 OR フィルター2つ以上（フィルター1つ+5件超はindex）
-    $noindex = $results->total() <= 5 || $filterCount >= 2;
+    // noindex: 結果5件未満 OR フィルター2つ以上（フィルター1つ+5件以上はindex）
+    $noindex = $results->total() < 5 || $filterCount >= 2;
 
     $showFilters = in_array($cast_tab, ['all', 'standby', 'new']);
 
@@ -98,6 +99,23 @@
 @section('description', $pageDescription)
 @section('canonical', $canonicalUrl)
 @section('robots', $noindex ? 'noindex,follow' : 'index,follow')
+
+@push('head')
+@php
+    $glItems = [['name' => 'ホーム', 'item' => route('top') . '/']];
+    if ($area_slug === 'all') {
+        $glItems[] = ['name' => '女性一覧', 'item' => url('/all/girl-list/') . '/'];
+    } else {
+        $glItems[] = ['name' => '女性一覧', 'item' => url('/all/girl-list/') . '/'];
+        if ($prefModel) $glItems[] = ['name' => $prefModel->prefecture ?? $areaName, 'item' => url("/{$prefModel->slug}/girl-list/") . '/'];
+        if ($areaModel) $glItems[] = ['name' => $areaName, 'item' => url("/{$area_slug}/girl-list/") . '/'];
+    }
+    if ($filterLabel ?? '') $glItems[] = ['name' => $filterLabel, 'item' => $canonicalUrl];
+    $glSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' =>
+        array_map(fn($item, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $item['name'], 'item' => $item['item']], array_values($glItems), array_keys($glItems))];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($glSchema, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endpush
 
 @section('content')
 
@@ -131,78 +149,128 @@
     </div>
 </div>
 
-{{-- フィルターパネル --}}
-@if($showFilters)
-<div class="bg-surface-700 border-b border-surface-400">
-    <div class="max-w-6xl mx-auto px-4 py-3 space-y-2.5">
+{{-- フィルターアコーディオン --}}
+@if($showFilters || ($area_slug === 'all' && !empty($prefectureLinks)))
+<div class="bg-surface-700 border-b border-surface-400"
+     x-data="{ open: window.innerWidth >= 768{{ $hasFilters ? ' || true' : '' }} }">
+    <div class="max-w-6xl mx-auto px-4">
 
-        {{-- 年齢 --}}
-        <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">年齢</span>
-            @foreach($ageRanges as $ageKey => $ageData)
-            <a href="{{ $filterUrl('age', $ageKey) }}"
-               class="px-3 py-1.5 rounded-full text-sm border transition
-                      {{ $activeAge === $ageKey
-                          ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
-                {{ $ageData[2] }}
-            </a>
-            @endforeach
+        {{-- トグルボタン --}}
+        <button type="button" @click="open = !open"
+                class="flex w-full items-center gap-2 py-3 text-left select-none">
+            <svg class="w-4 h-4 text-[#8A8A9E] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 12h10M11 20h2"/>
+            </svg>
+            <span class="text-sm font-medium text-[#B0AEAD]">絞り込み</span>
+            @if($hasFilters)
+            <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 bg-deli-500 text-white text-xs rounded-full font-bold">{{ $filterCount }}</span>
+            <span class="text-xs text-[#8A8A9E] truncate flex-1">{{ $filterLabel }}</span>
+            @else
+            <span class="flex-1"></span>
+            @endif
+            <svg class="w-4 h-4 text-[#8A8A9E] shrink-0 transition-transform duration-200" :class="open ? 'rotate-180' : ''"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        {{-- フィルター内容 --}}
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="pb-3 space-y-2.5">
+
+            {{-- 都道府県（全国ページのみ） --}}
+            @if($area_slug === 'all' && !empty($prefectureLinks))
+            @php
+                $prefFilterParams = array_filter(['age' => $activeAge, 'tall' => $activeTall, 'cup' => $activeCup, 'body' => $activeBody]);
+            @endphp
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-16">都道府県</span>
+                @foreach($prefectureLinks as $pref)
+                @php
+                    $prefUrl = url("/{$pref->slug}/girl-list/") . '/' . ($prefFilterParams ? '?' . http_build_query($prefFilterParams) : '');
+                @endphp
+                <a href="{{ $prefUrl }}"
+                   class="px-3 py-1 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition whitespace-nowrap">
+                    {{ $pref->name }}
+                </a>
+                @endforeach
+            </div>
+            @endif
+
+            @if($showFilters)
+            {{-- 年齢 --}}
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-10">年齢</span>
+                @foreach($ageRanges as $ageKey => $ageData)
+                <a href="{{ $filterUrl('age', $ageKey) }}"
+                   class="px-3 py-1.5 rounded-full text-sm border transition
+                          {{ $activeAge === $ageKey
+                              ? 'bg-deli-500 border-deli-500 text-white'
+                              : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+                    {{ $ageData[2] }}
+                </a>
+                @endforeach
+            </div>
+
+            {{-- 身長 --}}
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-10">身長</span>
+                @foreach($tallRanges as $tallKey => $tallData)
+                <a href="{{ $filterUrl('tall', $tallKey) }}"
+                   class="px-3 py-1.5 rounded-full text-sm border transition
+                          {{ $activeTall === $tallKey
+                              ? 'bg-deli-500 border-deli-500 text-white'
+                              : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+                    {{ $tallData[2] }}
+                </a>
+                @endforeach
+            </div>
+
+            {{-- カップ --}}
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-10">カップ</span>
+                @foreach($cupGroups as $cupKey => $cupData)
+                <a href="{{ $filterUrl('cup', $cupKey) }}"
+                   class="px-3 py-1.5 rounded-full text-sm border transition
+                          {{ $activeCup === $cupKey
+                              ? 'bg-deli-500 border-deli-500 text-white'
+                              : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+                    {{ $cupData[count($cupData) - 1] }}
+                </a>
+                @endforeach
+            </div>
+
+            {{-- 体型 --}}
+            @if(!empty($bodyTypes))
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-10">体型</span>
+                @foreach($bodyTypes as $bt)
+                <a href="{{ $filterUrl('body', (string)$bt->id) }}"
+                   class="px-3 py-1.5 rounded-full text-sm border transition
+                          {{ $activeBody == $bt->id
+                              ? 'bg-deli-500 border-deli-500 text-white'
+                              : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+                    {{ $bt->name }}
+                </a>
+                @endforeach
+            </div>
+            @endif
+            @endif
+
+            {{-- クリアボタン --}}
+            @if($hasFilters)
+            <div class="pt-0.5">
+                <a href="{{ $clearUrl }}" class="text-xs text-[#8A8A9E] hover:text-[#E8E4DC] transition underline">絞り込みをクリア</a>
+            </div>
+            @endif
+
         </div>
-
-        {{-- 身長 --}}
-        <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">身長</span>
-            @foreach($tallRanges as $tallKey => $tallData)
-            <a href="{{ $filterUrl('tall', $tallKey) }}"
-               class="px-3 py-1.5 rounded-full text-sm border transition
-                      {{ $activeTall === $tallKey
-                          ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
-                {{ $tallData[2] }}
-            </a>
-            @endforeach
-        </div>
-
-        {{-- カップ --}}
-        <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">カップ</span>
-            @foreach($cupGroups as $cupKey => $cupData)
-            <a href="{{ $filterUrl('cup', $cupKey) }}"
-               class="px-3 py-1.5 rounded-full text-sm border transition
-                      {{ $activeCup === $cupKey
-                          ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
-                {{ $cupData[count($cupData) - 1] }}
-            </a>
-            @endforeach
-        </div>
-
-        {{-- 体型 --}}
-        @if(!empty($bodyTypes))
-        <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs text-[#8A8A9E] shrink-0 w-10">体型</span>
-            @foreach($bodyTypes as $bt)
-            <a href="{{ $filterUrl('body', (string)$bt->id) }}"
-               class="px-3 py-1.5 rounded-full text-sm border transition
-                      {{ $activeBody == $bt->id
-                          ? 'bg-deli-500 border-deli-500 text-white'
-                          : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
-                {{ $bt->name }}
-            </a>
-            @endforeach
-        </div>
-        @endif
-
-        {{-- クリアボタン --}}
-        @if($hasFilters)
-        <div class="pt-0.5">
-            <a href="{{ $clearUrl }}" class="text-xs text-[#8A8A9E] hover:text-[#E8E4DC] transition underline">
-                絞り込みをクリア
-            </a>
-        </div>
-        @endif
-
     </div>
 </div>
 @endif
@@ -322,7 +390,7 @@
                     <div class="aspect-[3/4] overflow-hidden bg-surface-500 relative">
                         <img src="{{ $cast->img_url }}"
                              alt="{{ $cast->name }}"
-                             loading="lazy"
+                             @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                              class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
                         <div class="absolute top-1.5 left-1.5 flex flex-col gap-1">
                             @if($isStandby)

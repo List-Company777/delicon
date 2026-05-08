@@ -8,6 +8,52 @@
         <a href="{{ route('cast-diary.index', $cast->id) }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400">← 一覧に戻る</a>
     </div>
 
+
+    {{-- ユーザーの遊びやすい曜日・時間帯ヒント --}}
+    @if(!empty($scheduleStats) && $scheduleStats['total'] > 0)
+    @php
+        $dayLabels  = ['mon'=>'月','tue'=>'火','wed'=>'水','thu'=>'木','fri'=>'金','sat'=>'土','sun'=>'日'];
+        $timeLabels = ['morning'=>'午前','afternoon'=>'昼間','evening'=>'夕方','night'=>'夜','midnight'=>'深夜'];
+        $maxDay  = max($scheduleStats['days'])  ?: 1;
+        $maxTime = max($scheduleStats['times']) ?: 1;
+        $topDays  = collect($scheduleStats['days'])->sortDesc()->take(2)->keys()->map(fn($k) => $dayLabels[$k])->join('・');
+        $topTimes = collect($scheduleStats['times'])->sortDesc()->take(2)->keys()->map(fn($k) => $timeLabels[$k])->join('・');
+    @endphp
+    <div class="bg-surface-600 border border-gold-700/40 rounded-xl p-4 mb-6">
+        <p class="text-xs font-bold text-gold-400 mb-1">💡 ファンが遊びやすい時間帯</p>
+        <p class="text-xs text-[#B0AEAD] mb-3">登録ユーザー {{ number_format($scheduleStats['total']) }}名の回答データです。この時間帯の投稿は反応を得やすいかもしれません。</p>
+        <div class="flex gap-4">
+            <div>
+                <p class="text-[10px] text-[#6A6A7E] mb-1.5">曜日</p>
+                <div class="flex gap-1 items-end">
+                    @foreach($scheduleStats['days'] as $day => $cnt)
+                    @php $pct = round($cnt / $maxDay * 100); @endphp
+                    <div class="flex flex-col items-center gap-0.5">
+                        <div class="w-5 rounded-t" style="height:{{ max(3, $pct * 0.28) }}px; background:{{ $pct >= 80 ? '#E05A5A' : ($pct >= 50 ? '#E09050' : '#3A5A7A') }}"></div>
+                        <span class="text-[9px] {{ $pct >= 80 ? 'text-gold-400 font-bold' : 'text-[#6A6A7E]' }}">{{ $dayLabels[$day] }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="flex-1">
+                <p class="text-[10px] text-[#6A6A7E] mb-1.5">時間帯</p>
+                <div class="space-y-1">
+                    @foreach($scheduleStats['times'] as $time => $cnt)
+                    @php $pct = round($cnt / $maxTime * 100); @endphp
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] text-[#6A6A7E] w-10 shrink-0">{{ $timeLabels[$time] }}</span>
+                        <div class="flex-1 bg-surface-700 rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full" style="width:{{ $pct }}%; background:{{ $pct >= 80 ? '#E05A5A' : ($pct >= 50 ? '#E09050' : '#3A5A7A') }}"></div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        <p class="text-[10px] text-[#6A6A7E] mt-2">人気: {{ $topDays }} ／ {{ $topTimes }}</p>
+    </div>
+    @endif
+
     <form method="POST" action="{{ route('cast-diary.store', $cast->id) }}/" enctype="multipart/form-data">
         @csrf
         <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 space-y-5">

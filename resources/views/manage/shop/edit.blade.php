@@ -54,10 +54,19 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">エリア</th>
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">小エリア</th>
                 <td class="px-4 py-3">
-                    <span class="text-gray-700">{{ $shop->area?->name ?? '—' }}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    @if($shop->area)
+                        <span class="text-gray-700">{{ $shop->area->name }}</span>
+                    @else
+                        <span class="text-orange-500 font-medium">未設定</span>
+                        <p class="text-xs text-orange-600 mt-1 leading-relaxed">
+                            小エリアが未設定です。検索結果に正しく表示されるよう、ご希望の小エリアを<a href="{{ route('manage.contact') }}/" class="underline hover:text-orange-800">お問い合わせフォーム</a>よりお知らせください。
+                        </p>
+                    @endif
+                    @if($shop->area)
+                        <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    @endif
                 </td>
             </tr>
             <tr class="border-b border-gray-100">

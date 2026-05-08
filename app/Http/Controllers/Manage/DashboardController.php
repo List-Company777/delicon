@@ -32,7 +32,33 @@ class DashboardController extends BaseController
                 ->get()
             : collect();
 
-        return view('manage.dashboard', compact('shop', 'pendingApplication', 'ownedShops', 'unreadThreads'));
+        $scheduleStats = self::scheduleStats();
+        $notifyCount = $shop ? \App\Models\ShopNotification::where('shop_id', $shop->id)->count() : 0;
+
+        return view('manage.dashboard', compact('shop', 'pendingApplication', 'ownedShops', 'unreadThreads', 'scheduleStats', 'notifyCount'));
+    }
+
+    public static function scheduleStats(): array
+    {
+        $users = \App\Models\User::whereNotNull('preferred_days')
+            ->orWhereNotNull('preferred_times')
+            ->get(['preferred_days', 'preferred_times']);
+
+        $total = $users->count();
+        if ($total === 0) return ['total' => 0, 'days' => [], 'times' => []];
+
+        $dayKeys  = ['mon','tue','wed','thu','fri','sat','sun'];
+        $timeKeys = ['morning','afternoon','evening','night','midnight'];
+
+        $days  = array_fill_keys($dayKeys, 0);
+        $times = array_fill_keys($timeKeys, 0);
+
+        foreach ($users as $user) {
+            foreach ($user->preferred_days ?? [] as $d)  { if (isset($days[$d]))  $days[$d]++; }
+            foreach ($user->preferred_times ?? [] as $t) { if (isset($times[$t])) $times[$t]++; }
+        }
+
+        return ['total' => $total, 'days' => $days, 'times' => $times];
     }
 
     public function switchShop(Request $request, int $shopId)

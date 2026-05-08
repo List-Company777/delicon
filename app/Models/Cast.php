@@ -97,7 +97,7 @@ class Cast extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('casts.status', 'active');
     }
 
     public function getImgUrlAttribute(): string

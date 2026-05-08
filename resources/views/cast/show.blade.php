@@ -31,7 +31,7 @@
 @endpush
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 py-8">
+<div class="max-w-5xl mx-auto px-4 py-8 pb-20 md:pb-8">
 
     {{-- パンくず --}}
     <nav class="text-xs text-[#6A6A7E] mb-5 flex flex-wrap items-center gap-1">
@@ -417,6 +417,7 @@
                 btn.classList.add('bg-deli-500','border-deli-500','text-white');
                 btn.classList.remove('bg-surface-600','border-surface-300','text-[#6A6A7E]');
                 svg.setAttribute('fill','currentColor');
+                document.getElementById('fav-success-modal').classList.remove('hidden');
             } else {
                 btn.classList.remove('bg-deli-500','border-deli-500','text-white');
                 btn.classList.add('bg-surface-600','border-surface-300','text-[#6A6A7E]');
@@ -426,10 +427,151 @@
     });
     @else
     btn.addEventListener('click', function() {
-        window.location.href = '{{ route("visitor.register") }}/';
+        document.getElementById('auth-modal').classList.remove('hidden');
+    });
+    document.getElementById('auth-modal-close').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    document.getElementById('auth-modal-backdrop').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    document.getElementById('fav-success-close').addEventListener('click', function() {
+        document.getElementById('fav-success-modal').classList.add('hidden');
+    });
+    document.getElementById('fav-success-backdrop').addEventListener('click', function() {
+        document.getElementById('fav-success-modal').classList.add('hidden');
     });
     @endauth
 })();
 </script>
 @endpush
+
+{{-- フロートバー（スマホのみ） --}}
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-50 p-3 bg-surface-900/95 backdrop-blur border-t border-surface-500">
+    <div class="flex gap-2">
+
+        {{-- お気に入りボタン --}}
+        <button id="fav-float-btn"
+                data-cast="{{ $cast->id }}"
+                data-favorited="{{ $isFavorited ? 'true' : 'false' }}"
+                class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border text-xs font-medium transition
+                       {{ $isFavorited
+                           ? 'bg-deli-500/20 border-deli-500 text-deli-400'
+                           : 'bg-surface-700 border-surface-400 text-[#B0AEAD]' }}">
+            <svg class="w-4 h-4 shrink-0" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+            </svg>
+            <span id="fav-float-label">{{ $isFavorited ? 'お気に入り登録済み' : 'この女性をお気に入り登録' }}</span>
+        </button>
+
+        {{-- 電話ボタン --}}
+        @if($cast->shop?->tel)
+        <a href="tel:{{ $cast->shop->tel }}"
+           class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-deli-500 hover:bg-deli-600 active:bg-deli-700 text-white text-xs font-bold transition">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+            このお店に電話する
+        </a>
+        @else
+        <div class="flex-1"></div>
+        @endif
+
+    </div>
+</div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var btn = document.getElementById('fav-float-btn');
+    if (!btn) return;
+    @auth
+    btn.addEventListener('click', function() {
+        fetch('/favorites/' + btn.dataset.cast + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            }
+        }).then(function(r){ return r.json(); }).then(function(data) {
+            btn.dataset.favorited = data.favorited ? 'true' : 'false';
+            document.getElementById('fav-float-label').textContent = data.favorited ? 'お気に入り登録済み' : 'この女性をお気に入り登録';
+            var svg = btn.querySelector('svg');
+            if (data.favorited) {
+                btn.classList.add('bg-deli-500/20','border-deli-500','text-deli-400');
+                btn.classList.remove('bg-surface-700','border-surface-400','text-[#B0AEAD]');
+                svg.setAttribute('fill','currentColor');
+                document.getElementById('fav-success-modal').classList.remove('hidden');
+            } else {
+                btn.classList.remove('bg-deli-500/20','border-deli-500','text-deli-400');
+                btn.classList.add('bg-surface-700','border-surface-400','text-[#B0AEAD]');
+                svg.setAttribute('fill','none');
+            }
+            // ヘッダーのハートボタンにも反映
+            var headerBtn = document.getElementById('fav-btn');
+            if (headerBtn) {
+                headerBtn.dataset.favorited = btn.dataset.favorited;
+                var hSvg = headerBtn.querySelector('svg');
+                if (data.favorited) {
+                    headerBtn.classList.add('bg-deli-500','border-deli-500','text-white');
+                    headerBtn.classList.remove('bg-surface-600','border-surface-300','text-[#6A6A7E]');
+                    hSvg.setAttribute('fill','currentColor');
+                } else {
+                    headerBtn.classList.remove('bg-deli-500','border-deli-500','text-white');
+                    headerBtn.classList.add('bg-surface-600','border-surface-300','text-[#6A6A7E]');
+                    hSvg.setAttribute('fill','none');
+                }
+            }
+        });
+    });
+    @else
+    btn.addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.remove('hidden');
+    });
+    document.getElementById('auth-modal-close').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    document.getElementById('auth-modal-backdrop').addEventListener('click', function() {
+        document.getElementById('auth-modal').classList.add('hidden');
+    });
+    @endauth
+})();
+</script>
+@endpush
+
+{{-- お気に入り登録成功モーダル --}}
+<div id="fav-success-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div id="fav-success-backdrop" class="absolute inset-0 bg-black/60"></div>
+    <div class="relative bg-surface-700 border border-surface-400 rounded-2xl p-6 mx-4 max-w-sm w-full shadow-xl">
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-5 h-5 text-deli-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+            <p class="text-[#E8E4DC] font-bold text-sm">お気に入りに登録しました</p>
+        </div>
+        <p class="text-[#B0AEAD] text-sm mb-5">マイページでこの女性の出勤通知の設定ができます。</p>
+        <div class="flex gap-2">
+            <button id="fav-success-close" class="flex-1 py-2.5 rounded-xl border border-surface-400 text-[#B0AEAD] text-sm transition hover:border-surface-300">閉じる</button>
+            <a href="{{ route('user.settings') }}/" class="flex-1 py-2.5 rounded-xl bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold text-center transition">マイページへ</a>
+        </div>
+    </div>
+</div>
+
+{{-- 非ログイン通知モーダル --}}
+<div id="auth-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div id="auth-modal-backdrop" class="absolute inset-0 bg-black/60"></div>
+    <div class="relative bg-surface-700 border border-surface-400 rounded-2xl p-6 mx-4 max-w-sm w-full shadow-xl">
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-5 h-5 text-deli-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+            <p class="text-[#E8E4DC] font-bold text-sm">ログインが必要です</p>
+        </div>
+        <p class="text-[#B0AEAD] text-sm mb-5">お気に入り登録するにはログインが必要です。</p>
+        <div class="flex gap-2">
+            <button id="auth-modal-close" class="flex-1 py-2.5 rounded-xl border border-surface-400 text-[#B0AEAD] text-sm transition hover:border-surface-300">閉じる</button>
+            <a href="{{ route('login') }}/" class="flex-1 py-2.5 rounded-xl bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold text-center transition">ログインする</a>
+        </div>
+    </div>
+</div>
 @endsection

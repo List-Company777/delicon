@@ -64,6 +64,10 @@ class UserDashboardController extends Controller
             'pref_cast_type_ids.*' => ['integer'],
             'pref_area_ids'        => ['nullable', 'array'],
             'pref_area_ids.*'      => ['integer'],
+            'preferred_days'       => ['nullable', 'array'],
+            'preferred_days.*'     => ['in:mon,tue,wed,thu,fri,sat,sun'],
+            'preferred_times'      => ['nullable', 'array'],
+            'preferred_times.*'    => ['in:morning,afternoon,evening,night,midnight'],
         ]);
 
         auth()->user()->update([
@@ -71,6 +75,8 @@ class UserDashboardController extends Controller
             'notify_working'     => $request->boolean('notify_working'),
             'pref_cast_type_ids' => $request->input('pref_cast_type_ids', []),
             'pref_area_ids'      => $request->input('pref_area_ids', []),
+            'preferred_days'     => $request->input('preferred_days', []),
+            'preferred_times'    => $request->input('preferred_times', []),
         ]);
 
         return back()->with('success', '設定を保存しました');
