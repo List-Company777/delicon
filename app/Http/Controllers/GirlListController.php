@@ -225,12 +225,14 @@ class GirlListController extends Controller
     public function byType(Request $request, string $area_slug, string $type_slug)
     {
         $girlTypeRaw = Cache::remember("slug:girl_type:{$type_slug}", 86400,
-            fn() => DB::table('girl_types')->where('slug', $type_slug)->first(['id', 'name', 'slug'])
+            fn() => (array) DB::table('girl_types')->where('slug', $type_slug)->first(['id', 'name', 'slug', 'age_min', 'age_max'])
         );
 
-        if (!$girlTypeRaw) abort(404);
-        $typeId   = $girlTypeRaw->id;
-        $typeName = $girlTypeRaw->name;
+        if (!($girlTypeRaw['id'] ?? null)) abort(404);
+        $typeId   = $girlTypeRaw['id'];
+        $typeName = $girlTypeRaw['name'];
+        $ageMin   = $girlTypeRaw['age_min'];
+        $ageMax   = $girlTypeRaw['age_max'];
 
         [$areaModel, $prefOnlyModel] = $this->resolveArea($area_slug);
         $areaName  = $areaModel?->name ?? $prefOnlyModel?->name ?? '全国';
@@ -238,11 +240,17 @@ class GirlListController extends Controller
 
         $query = Cast::with(['shop'])
             ->where('status', 'active')
-            ->where('type_id', $typeId)
             ->whereHas('shop', function ($q) use ($area_slug, $areaModel, $prefOnlyModel) {
                 $q->where('status', 'active');
                 $this->applyAreaScope($q, $areaModel, $prefOnlyModel, $area_slug);
             });
+
+        if ($ageMin !== null || $ageMax !== null) {
+            if ($ageMin !== null) $query->where('age', '>=', $ageMin);
+            if ($ageMax !== null) $query->where('age', '<=', $ageMax);
+        } else {
+            $query->where('type_id', $typeId);
+        }
 
         $results = $query->orderBy('sort_order')->orderByDesc('updated_at')
             ->paginate(self::PER_PAGE)
@@ -253,13 +261,15 @@ class GirlListController extends Controller
         $cast_tab = 'type';
         $hasFilters = false;
         $bodyTypes  = [];
+        $prefectureLinks = [];
 
         return response()->view('search.girl_list', compact(
             'area_slug', 'cast_tab', 'areaName', 'prefModel',
             'areaModel', 'prefOnlyModel', 'results', 'noindex',
-            'typeName', 'type_slug', 'hasFilters', 'bodyTypes'
+            'typeName', 'type_slug', 'hasFilters', 'bodyTypes', 'prefectureLinks'
         ), $status);
     }
+
 
     public static function ageRanges(): array  { return self::AGE_RANGES; }
     public static function tallRanges(): array { return self::TALL_RANGES; }

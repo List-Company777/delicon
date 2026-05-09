@@ -19,7 +19,7 @@
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-6 py-4 whitespace-nowrap">所在地</th>
-                <td class="px-6 py-4 text-gray-700">東京都中央区銀座　KEC銀座ビル701</td>
+                <td class="px-6 py-4 text-gray-700">〒112-0005 東京都文京区水道2-4-3 オフィス大岩201</td>
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-6 py-4 whitespace-nowrap">電話番号</th>

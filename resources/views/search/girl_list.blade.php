@@ -36,7 +36,13 @@
     $filterLabel = implode('・', $filterLabelParts);
 
     // title
-    if ($filterLabel) {
+    $totalStr = number_format($results->total());
+    $areaPrefix = $areaName ? "{$areaName}の" : '';
+    if ($cast_tab === 'type' && isset($typeName)) {
+        $pageTitle = $areaName
+            ? "{$areaName}の{$typeName}風俗・デリヘル | {$totalStr}人掲載"
+            : "{$typeName}のデリヘル・風俗女性一覧 | {$totalStr}人掲載";
+    } elseif ($filterLabel) {
         $pageTitle = $areaName
             ? "{$areaName}の{$filterLabel}女性 | {$suffix}"
             : "{$filterLabel}女性一覧 | {$suffix}";
@@ -47,8 +53,11 @@
     }
 
     // description
-    $totalStr = number_format($results->total());
-    if ($filterLabel && $areaName) {
+    if ($cast_tab === 'type' && isset($typeName)) {
+        $pageDescription = $areaName
+            ? "{$areaName}で{$typeName}のデリヘル・風俗女性を探すなら「デリコン」。{$totalStr}人掲載中。エリア・体型・スタイルで絞り込み検索できます。"
+            : "{$typeName}のデリヘル・風俗女性一覧。全国{$totalStr}人掲載中。エリア・体型で絞り込み検索できます。";
+    } elseif ($filterLabel && $areaName) {
         $pageDescription = "{$areaName}で{$filterLabel}のデリヘル女性キャストを検索。{$totalStr}人掲載中。年齢・体型・スタイルで絞り込んで希望のキャストを見つけよう。";
     } elseif ($filterLabel) {
         $pageDescription = "{$filterLabel}のデリヘル女性一覧。全国{$totalStr}人掲載中。エリア・年齢・体型で絞り込み検索できます。";
@@ -59,7 +68,9 @@
     }
 
     // H1
-    if ($filterLabel) {
+    if ($cast_tab === 'type' && isset($typeName)) {
+        $h1Text = $areaName ? "{$areaName}の{$typeName}" : "{$typeName}の女性一覧";
+    } elseif ($filterLabel) {
         $h1Text = $areaName ? "{$areaName}の{$filterLabel}女性" : "{$filterLabel}女性一覧";
     } else {
         $h1Text = $areaName ? "{$areaName}の{$tabLabel}" : $tabLabel;
@@ -110,7 +121,11 @@
         if ($prefModel) $glItems[] = ['name' => $prefModel->prefecture ?? $areaName, 'item' => url("/{$prefModel->slug}/girl-list/") . '/'];
         if ($areaModel) $glItems[] = ['name' => $areaName, 'item' => url("/{$area_slug}/girl-list/") . '/'];
     }
-    if ($filterLabel ?? '') $glItems[] = ['name' => $filterLabel, 'item' => $canonicalUrl];
+    if ($cast_tab === 'type' && isset($typeName)) {
+        $glItems[] = ['name' => $typeName, 'item' => $canonicalUrl];
+    } elseif ($filterLabel ?? '') {
+        $glItems[] = ['name' => $filterLabel, 'item' => $canonicalUrl];
+    }
     $glSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' =>
         array_map(fn($item, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $item['name'], 'item' => $item['item']], array_values($glItems), array_keys($glItems))];
 @endphp

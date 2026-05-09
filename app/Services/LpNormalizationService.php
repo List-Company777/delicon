@@ -8,6 +8,7 @@ use App\Models\JobType;
 use App\Models\KeywordNormalization;
 use App\Models\Prefecture;
 use App\Models\SearchKeyword;
+use Illuminate\Support\Facades\DB;
 
 class LpNormalizationService
 {
@@ -81,6 +82,16 @@ class LpNormalizationService
                     ['area_id' => $area->id, 'filter_slug' => $jt->slug]
                 );
             }
+        }
+
+        // ⑥ エリア名 + girl_type名（年齢・タイプ系 → girl-list/type/ LP）
+        $girlTypes = DB::table('girl_types')->get(['id', 'name']);
+        foreach ($girlTypes as $gt) {
+            $this->upsert(
+                $area->name . ' ' . $gt->name,
+                'female',
+                ['area_id' => $area->id, 'girl_type_id' => $gt->id]
+            );
         }
 
     }

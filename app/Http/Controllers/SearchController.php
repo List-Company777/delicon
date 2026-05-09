@@ -66,6 +66,16 @@ class SearchController extends Controller
                 }
                 $areaSlug    = $norm->area?->slug ?? $norm->prefecture?->slug ?? 'all';
                 $jobTypeSlug = $norm->jobType?->slug ?? $norm->genre?->slug ?? 'all';
+                // girl_type_id が設定されている場合 → girl-list/type/ LP へ
+                if ($norm->girl_type_id) {
+                    $gt = DB::table('girl_types')->find($norm->girl_type_id);
+                    if ($gt) {
+                        return redirect()->route('girl.list.type', [
+                            'area_slug'  => $areaSlug,
+                            'type_slug'  => $gt->slug,
+                        ], 301);
+                    }
+                }
                 // filter_slug が設定されていればフィルター付きLPへ
                 if ($norm->filter_slug) {
                     return redirect()->route('shop.list.filter', [

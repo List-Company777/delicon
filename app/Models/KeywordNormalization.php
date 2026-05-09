@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class KeywordNormalization extends Model
 {
-    protected $fillable = ['keyword', 'gender', 'area_id', 'prefecture_id', 'job_type_id', 'genre_id', 'search_keyword', 'filter_slug', 'is_active'];
+    protected $fillable = ['keyword', 'gender', 'area_id', 'prefecture_id', 'job_type_id', 'genre_id', 'girl_type_id', 'search_keyword', 'filter_slug', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
