@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Area;
+use App\Models\Cast;
+use App\Observers\CastObserver;
 use App\Models\Job;
 use App\Models\Prefecture;
 use App\Observers\JobObserver;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        Cast::observe(CastObserver::class);
         Job::observe(JobObserver::class);
 
         // admin レイアウト全体に都道府県リストを共有

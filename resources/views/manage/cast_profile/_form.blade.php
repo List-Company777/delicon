@@ -88,12 +88,13 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">体型</th>
         <td class="px-4 py-3">
-            <select name="body_id" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
-                <option value="">選択してください</option>
-                @foreach($bodyTypes as $t)
-                    <option value="{{ $t->id }}" @selected(old('body_id', $cast?->body_id) == $t->id)>{{ $t->name }}</option>
-                @endforeach
-            </select>
+            <p class="text-sm text-gray-500">
+                カップ・身長から自動設定されます
+                @if($cast?->bodyType)
+                    &mdash; 現在: <span class="font-medium text-gray-700">{{ $cast->bodyType->name }}</span>
+                @endif
+            </p>
+            <p class="text-xs text-gray-400 mt-1">Aカップ→貧乳 / E〜Gカップ→巨乳 / H〜→爆乳 / 170cm〜→長身 / 〜150cm→小柄</p>
         </td>
     </tr>
     <tr class="border-b border-gray-100">
