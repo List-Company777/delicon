@@ -105,8 +105,24 @@ class GirlListController extends Controller
         return $request->hasAny(['age', 'tall', 'cup', 'body']);
     }
 
+    // ?age / ?tall / ?body パラメータに対応するLPがあればリダイレクト
+    private const PARAM_TO_TYPE = [
+        'age'  => ['50s' => 'isoji',    '60s' => 'kanreki', '70s' => 'obaachan'],
+        'tall' => ['super' => 'tyoshin', 'short' => 'kogara'],
+        'body' => [1 => 'kyonyuu', 2 => 'hinnyuu', 5 => 'slender', 6 => 'choipocha', 7 => 'gekipocha', 8 => 'glamour', 16 => 'bakunyuu', 3 => 'tyoshin', 4 => 'kogara'],
+    ];
+
     public function index(Request $request, string $area_slug)
     {
+        foreach (self::PARAM_TO_TYPE as $param => $map) {
+            $val = $param === 'body' ? (int) $request->input($param) : $request->input($param);
+            if ($val && isset($map[$val])) {
+                return redirect()->route('girl.list.type', [
+                    'area_slug' => $area_slug,
+                    'type_slug' => $map[$val],
+                ], 301);
+            }
+        }
         return $this->render($request, $area_slug, 'all');
     }
 
