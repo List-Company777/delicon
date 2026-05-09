@@ -19,3 +19,7 @@ yarn-error.log
 /.vscode
 /public/img/
 /public/storage/
+
+# 生成ファイル
+/public/sitemap*.xml
+*.bak
