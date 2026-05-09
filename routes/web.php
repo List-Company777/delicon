@@ -108,6 +108,7 @@ Route::get('/email/verify/{id}/{hash}/', function (\Illuminate\Http\Request $req
 
 // 夜ビズ LP
 Route::view('/yorubiz/', 'lp.yorubiz')->name('lp.yorubiz');
+Route::view('/features/', 'features')->name('features');
 
 // 法的ページ・会社情報
 Route::view('/privacy/',    'legal.privacy')->name('privacy');
