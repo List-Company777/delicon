@@ -93,6 +93,10 @@
                    class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
                     コラム
                 </a>
+                <a href="{{ route('ranking.index') }}/"
+                   class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
+                    ランキング
+                </a>
                 @auth
                     @if(auth()->user()->role === 'visitor')
                     <a href="{{ route('user.dashboard') }}/"

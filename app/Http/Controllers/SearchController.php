@@ -422,7 +422,7 @@ class SearchController extends Controller
                         ->pluck('shop_id')
                     );
                 })
-                ->orderByRaw('plan ASC, rank_score DESC, display_sort ASC')
+                ->orderByRaw("plan DESC, COALESCE(paid_since, '9999-12-31') ASC, id ASC")
                 ->pluck('id')->all();
         }
 

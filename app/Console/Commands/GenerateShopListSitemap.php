@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class GenerateShopListSitemap extends Command
 {
     protected $signature   = 'sitemap:generate-shop-list';
-    protected $description = 'shop-list 年齢フィルターページ（1フィルター×5件以上）のサイトマップを生成';
+    protected $description = 'shop-list ページ（ベース・年齢フィルター、5件以上）のサイトマップを生成';
 
     private const MIN_RESULTS = 5;
 
@@ -25,15 +25,63 @@ class GenerateShopListSitemap extends Command
         $base = rtrim(config('app.url'), '/');
         $urls = [];
 
+        $this->info('shop-list ベースページ集計中...');
+        $urls = array_merge($urls, $this->baseUrls($base));
+
         $this->info('shop-list age_range フィルター集計中...');
         $urls = array_merge($urls, $this->ageRangeUrls($base));
 
+        $urls = array_unique($urls);
         $this->writeXml($urls);
         $this->info('sitemap-shop.xml 生成完了: ' . count($urls) . ' 件');
 
         return 0;
     }
 
+    // ── ベースページ（フィルターなし） ───────────────────────────
+    private function baseUrls(string $base): array
+    {
+        $urls = [];
+
+        // 全国
+        $allCount = DB::table('shops')->where('status', 'active')->count();
+        if ($allCount >= self::MIN_RESULTS) {
+            $urls[] = "{$base}/all/shop-list/";
+        }
+
+        // エリア別
+        $areaRows = DB::table('shops')
+            ->join('areas', 'shops.area_id', '=', 'areas.id')
+            ->where('shops.status', 'active')
+            ->whereNotNull('areas.slug')
+            ->select('areas.slug', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('areas.id', 'areas.slug')
+            ->having('cnt', '>=', self::MIN_RESULTS)
+            ->get();
+
+        foreach ($areaRows as $row) {
+            $urls[] = "{$base}/{$row->slug}/shop-list/";
+        }
+
+        // 都道府県別
+        $prefRows = DB::table('shops')
+            ->join('areas', 'shops.area_id', '=', 'areas.id')
+            ->join('prefectures', 'areas.prefecture_id', '=', 'prefectures.id')
+            ->where('shops.status', 'active')
+            ->whereNotNull('prefectures.slug')
+            ->select('prefectures.slug', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('prefectures.id', 'prefectures.slug')
+            ->having('cnt', '>=', self::MIN_RESULTS)
+            ->get();
+
+        foreach ($prefRows as $row) {
+            $urls[] = "{$base}/{$row->slug}/shop-list/";
+        }
+
+        return array_unique($urls);
+    }
+
+    // ── age_range フィルター ─────────────────────────────────────
     private function dominantAgeShopIds(int $min, int $max): array
     {
         return DB::table('casts')
@@ -60,7 +108,6 @@ class GenerateShopListSitemap extends Command
 
         foreach (self::AGE_RANGES as $rangeKey => [$min, $max]) {
             $shopIds = $this->dominantAgeShopIds($min, $max);
-
             if (empty($shopIds)) continue;
 
             // 全国

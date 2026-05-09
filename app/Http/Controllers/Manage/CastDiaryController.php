@@ -42,7 +42,7 @@ class CastDiaryController extends BaseController
         $request->validate([
             'title'    => ['nullable', 'string', 'max:100'],
             'body'     => ['nullable', 'string', 'max:2000'],
-            'status'   => ['required', 'in:draft,published'],
+            'status'   => ['nullable', 'in:draft,published,pending'],
             'images'   => ['nullable', 'array', 'max:8'],
             'images.*' => ['image', 'max:5120'],
         ]);
@@ -51,7 +51,7 @@ class CastDiaryController extends BaseController
             'cast_id' => $castId,
             'title'   => $request->title,
             'body'    => $request->body,
-            'status'  => $request->status,
+            'status'  => 'published',
         ]);
 
         if ($request->hasFile('images')) {
@@ -62,6 +62,18 @@ class CastDiaryController extends BaseController
         }
 
         return redirect()->route('cast-diary.index', $castId)->with('success', '日記を投稿しました');
+    }
+
+    public function shopDiaries()
+    {
+        $shop    = $this->shopOrFail();
+        $castIds = $shop->casts()->pluck('id');
+        $diaries = CastDiary::with(['cast', 'images'])
+            ->whereIn('cast_id', $castIds)
+            ->latest()
+            ->paginate(30);
+
+        return view('manage.cast-diary.shop-index', compact('shop', 'diaries'));
     }
 
     public function destroy(CastDiary $diary)

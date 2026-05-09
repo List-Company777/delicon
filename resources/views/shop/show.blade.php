@@ -7,6 +7,9 @@
     'キャスト・システム・料金などをご紹介。'
 )
 @section('canonical', route('shop.show', $shop->id) . '/')
+@if($noindex)
+@section('robots', 'noindex,follow')
+@endif
 @if($shop->main_image_url)
 @section('ogp_image', $shop->main_image_url)
 @section('twitter_card', 'summary_large_image')

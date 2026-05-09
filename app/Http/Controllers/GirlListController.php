@@ -194,13 +194,17 @@ class GirlListController extends Controller
 
         if ($cast_tab === 'standby') {
             $query->whereDate('working_date', today());
-            $query->orderBy('sort_order')->orderByDesc('updated_at');
+            $query->orderByDesc('cast_score')
+                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+                  ->orderBy('casts.id');
         } elseif ($cast_tab === 'new') {
             $query->where('is_new', true)
                   ->where(fn($q) => $q->whereNull('new_since')->orWhere('new_since', '>=', now()->subDays(30)));
             $query->orderByDesc('new_since')->orderByDesc('created_at');
         } else {
-            $query->orderBy('sort_order')->orderByDesc('updated_at');
+            $query->orderByDesc('cast_score')
+                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+                  ->orderBy('casts.id');
         }
 
         return $query->paginate(self::PER_PAGE)->withQueryString();
@@ -280,7 +284,9 @@ class GirlListController extends Controller
             $query->where('type_id', $typeId);
         }
 
-        $results = $query->orderBy('sort_order')->orderByDesc('updated_at')
+        $results = $query->orderByDesc('cast_score')
+            ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+            ->orderBy('casts.id')
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 

@@ -8,6 +8,9 @@
     ($cast->comment ? '。' . mb_strimwidth(strip_tags($cast->comment), 0, 60, '…') : '')
 )
 @section('canonical', route('cast.show', $cast->id) . '/')
+@if($noindex)
+@section('robots', 'noindex,follow')
+@endif
 @if($cast->img_url !== '/img/no-cast.jpg')
 @section('ogp_image', url($cast->img_url))
 @section('twitter_card', 'summary_large_image')
@@ -227,20 +230,44 @@
             </div>
             @endif
 
-            {{-- 出勤スケジュール --}}
-            @if($cast->schedules->count() > 0)
+            {{-- 出勤スケジュール（2週間カレンダー） --}}
+            @php
+                $today = \Illuminate\Support\Carbon::today();
+                $scheduleByDate = $cast->schedules
+                    ->filter(fn($s) => $s->work_date->gte($today))
+                    ->keyBy(fn($s) => $s->work_date->format('Y-m-d'));
+                $dowLabels = ['日','月','火','水','木','金','土'];
+            @endphp
+            @if($scheduleByDate->isNotEmpty())
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-5">
-                <h2 class="font-bold text-[#E8E4DC] mb-3 text-sm flex items-center gap-2">
+                <h2 class="font-bold text-[#E8E4DC] mb-4 text-sm flex items-center gap-2">
                     <span class="w-1 h-4 bg-emerald-500 rounded-full"></span>出勤スケジュール
                 </h2>
-                <div class="space-y-1.5 text-sm">
-                    @foreach($cast->schedules->take(7) as $schedule)
-                    <div class="flex items-center gap-3 py-1 border-b border-surface-400 last:border-0">
-                        <span class="text-[#6A6A7E] w-24 shrink-0">{{ $schedule->work_date->format('m/d(D)') }}</span>
-                        <span class="text-[#E8E4DC]">{{ $schedule->start_time }}〜{{ $schedule->end_time }}</span>
-                        @if($schedule->note)<span class="text-[#6A6A7E] text-xs">{{ $schedule->note }}</span>@endif
+                <div class="grid grid-cols-7 gap-1 text-center">
+                    @for($i = 0; $i < 14; $i++)
+                    @php
+                        $day     = $today->copy()->addDays($i);
+                        $key     = $day->format('Y-m-d');
+                        $sch     = $scheduleByDate->get($key);
+                        $isToday = $i === 0;
+                        $dow     = (int)$day->format('w');
+                    @endphp
+                    <div class="rounded-lg py-2 px-0.5 {{ $sch ? 'bg-emerald-900/50 border border-emerald-700/60' : 'bg-surface-600 border border-surface-400' }}">
+                        <p class="text-[10px] font-bold mb-0.5 {{ $isToday ? 'text-deli-400' : ($dow === 0 ? 'text-red-400' : ($dow === 6 ? 'text-blue-400' : 'text-[#6A6A7E]')) }}">
+                            {{ $dowLabels[$dow] }}
+                        </p>
+                        <p class="text-xs font-bold {{ $isToday ? 'text-deli-400' : 'text-[#C8C4BC]' }}">
+                            {{ $day->format('j') }}
+                        </p>
+                        @if($sch)
+                        <p class="text-[9px] text-emerald-400 mt-1 leading-tight">
+                            {{ substr($sch->start_time, 0, 5) }}<br>〜{{ substr($sch->end_time, 0, 5) }}
+                        </p>
+                        @else
+                        <p class="text-[10px] text-[#3A3A4E] mt-1">—</p>
+                        @endif
                     </div>
-                    @endforeach
+                    @endfor
                 </div>
             </div>
             @endif
@@ -279,6 +306,31 @@
                 @if($diary->body)
                 <p class="text-sm text-[#C8C4BC] leading-relaxed">{!! nl2br(e($diary->body)) !!}</p>
                 @endif
+                {{-- いいねボタン --}}
+                <div class="flex items-center justify-end mt-3 pt-3 border-t border-surface-400">
+                    @auth
+                    @if(auth()->user()->role === 'visitor')
+                    <button type="button"
+                            data-diary-id="{{ $diary->id }}"
+                            data-liked="{{ in_array($diary->id, $likedDiaryIds) ? '1' : '0' }}"
+                            onclick="toggleDiaryLike(this)"
+                            class="diary-like-btn flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition
+                                   {{ in_array($diary->id, $likedDiaryIds) ? 'bg-deli-500/20 border-deli-500/60 text-deli-400' : 'border-surface-300 text-[#6A6A7E] hover:border-deli-400 hover:text-deli-400' }}">
+                        <svg class="w-3.5 h-3.5" fill="{{ in_array($diary->id, $likedDiaryIds) ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span class="like-count">{{ $diary->likes->count() }}</span>
+                    </button>
+                    @endif
+                    @else
+                    <span class="flex items-center gap-1.5 text-xs text-[#6A6A7E]">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        {{ $diary->likes->count() }}
+                    </span>
+                    @endauth
+                </div>
             </article>
             @endforeach
         </div>
@@ -433,7 +485,8 @@
     </section>
     @endif
 
-    {{-- 削除依頼フォーム --}}
+    {{-- 削除依頼フォーム（有料プランのみ） --}}
+    @if($cast->shop?->isPaid())
     <div class="mt-10 pt-6 border-t border-surface-400">
         @if(session('deletion_sent'))
         <div class="mb-3 bg-emerald-900/40 border border-emerald-600/40 text-emerald-400 text-sm px-4 py-3 rounded-lg">削除依頼を受け付けました。確認後ご連絡いたします。</div>
@@ -476,6 +529,7 @@
             </div>
         </details>
     </div>
+    @endif
 
 </div>
 
@@ -549,6 +603,8 @@
         {{-- 電話ボタン --}}
         @if($cast->shop?->tel)
         <a href="tel:{{ $cast->shop->tel }}"
+           data-cast-id="{{ $cast->id }}"
+           onclick="fetch('/ranking/tel/'+this.dataset.castId+'/',{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}})"
            class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-deli-500 hover:bg-deli-600 active:bg-deli-700 text-white text-xs font-bold transition">
             <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -656,4 +712,33 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script @nonce>
+function toggleDiaryLike(btn) {
+    var diaryId = btn.dataset.diaryId;
+    var csrf = document.querySelector('meta[name=csrf-token]').content;
+    fetch('/diary/' + diaryId + '/like/', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        btn.dataset.liked = data.liked ? '1' : '0';
+        btn.querySelector('.like-count').textContent = data.count;
+        var svg = btn.querySelector('svg');
+        if (data.liked) {
+            btn.classList.remove('border-surface-300','text-[#6A6A7E]','hover:border-deli-400','hover:text-deli-400');
+            btn.classList.add('bg-deli-500/20','border-deli-500/60','text-deli-400');
+            svg.setAttribute('fill','currentColor');
+        } else {
+            btn.classList.add('border-surface-300','text-[#6A6A7E]','hover:border-deli-400','hover:text-deli-400');
+            btn.classList.remove('bg-deli-500/20','border-deli-500/60','text-deli-400');
+            svg.setAttribute('fill','none');
+        }
+    });
+}
+</script>
+@endpush
+
 @endsection

@@ -97,6 +97,9 @@
     </div>
     @endif
 
+    <div class="bg-amber-900/30 border border-amber-700/50 rounded-xl px-4 py-3 mb-5 text-xs text-amber-300 leading-relaxed">
+        <span class="font-bold">⚠ 写メ日記についてのご案内</span>：写メ日記は女性の人柄を知ってもらうための機能です。アダルトな内容については控えていただくよう、在籍女性にもご指導ください。
+    </div>
     <form method="POST" action="{{ route('cast-diary.store', $cast->id) }}/" enctype="multipart/form-data">
         @csrf
         <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 space-y-5">

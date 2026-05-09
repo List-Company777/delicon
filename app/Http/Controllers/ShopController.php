@@ -177,6 +177,9 @@ class ShopController extends Controller
             ? \App\Models\ShopNotification::where('user_id', auth()->id())->where('shop_id', $shop->id)->exists()
             : false;
 
-        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug', 'isSubscribed'));
+        $shopTextLen = mb_strlen($shop->base ?? '') + mb_strlen($shop->system_text ?? '');
+        $noindex = $shopTextLen < 100;
+
+        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug', 'isSubscribed', 'noindex'));
     }
 }

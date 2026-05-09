@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class GenerateGirlListSitemap extends Command
 {
     protected $signature   = 'sitemap:generate-girl-list';
-    protected $description = 'girl-list フィルターページ（1フィルター×5件以上）のサイトマップを生成';
+    protected $description = 'girl-list ページ（ベース・タイプ別・フィルター、5件以上）のサイトマップを生成';
 
     private const MIN_RESULTS = 5;
 
@@ -44,6 +44,12 @@ class GenerateGirlListSitemap extends Command
         $base = rtrim(config('app.url'), '/');
         $urls = [];
 
+        $this->info('ベースページ集計中...');
+        $urls = array_merge($urls, $this->baseUrls($base));
+
+        $this->info('タイプ別ページ集計中...');
+        $urls = array_merge($urls, $this->typeUrls($base));
+
         $this->info('body フィルター集計中...');
         $urls = array_merge($urls, $this->bodyUrls($base));
 
@@ -56,17 +62,131 @@ class GenerateGirlListSitemap extends Command
         $this->info('cup フィルター集計中...');
         $urls = array_merge($urls, $this->cupUrls($base));
 
+        $urls = array_unique($urls);
         $this->writeXml($urls);
         $this->info('sitemap-girl.xml 生成完了: ' . count($urls) . ' 件');
 
         return 0;
     }
 
+    // ── ベースページ（フィルターなし） ───────────────────────────
+    private function baseUrls(string $base): array
+    {
+        $urls = [];
+
+        // 全国
+        $allCount = DB::table('casts')
+            ->join('shops', 'casts.shop_id', '=', 'shops.id')
+            ->where('casts.status', 'active')
+            ->where('shops.status', 'active')
+            ->count();
+        if ($allCount >= self::MIN_RESULTS) {
+            $urls[] = "{$base}/all/girl-list/";
+        }
+
+        // エリア別
+        $areaRows = DB::select("
+            SELECT a.slug, COUNT(*) AS cnt
+            FROM casts c
+            JOIN shops s ON c.shop_id = s.id
+            JOIN areas a ON s.area_id = a.id
+            WHERE c.status = 'active' AND s.status = 'active'
+            GROUP BY a.id, a.slug
+            HAVING cnt >= ?
+        ", [self::MIN_RESULTS]);
+
+        foreach ($areaRows as $row) {
+            $urls[] = "{$base}/{$row->slug}/girl-list/";
+        }
+
+        // 都道府県別
+        $prefRows = DB::select("
+            SELECT p.slug, COUNT(*) AS cnt
+            FROM casts c
+            JOIN shops s ON c.shop_id = s.id
+            JOIN areas a ON s.area_id = a.id
+            JOIN prefectures p ON a.prefecture_id = p.id
+            WHERE c.status = 'active' AND s.status = 'active'
+            GROUP BY p.id, p.slug
+            HAVING cnt >= ?
+        ", [self::MIN_RESULTS]);
+
+        foreach ($prefRows as $row) {
+            $urls[] = "{$base}/{$row->slug}/girl-list/";
+        }
+
+        return array_unique($urls);
+    }
+
+    // ── タイプ別ページ ───────────────────────────────────────────
+    private function typeUrls(string $base): array
+    {
+        $girlTypes = DB::table('girl_types')
+            ->get(['id', 'slug', 'age_min', 'age_max', 'tall_min', 'tall_max', 'body_type_id', 'cast_type_id'])
+            ->all();
+
+        $urls = [];
+
+        foreach ($girlTypes as $type) {
+            $where  = "c.status = 'active' AND s.status = 'active'";
+            $binds  = [];
+
+            if ($type->age_min !== null) { $where .= ' AND c.age >= ?'; $binds[] = $type->age_min; }
+            if ($type->age_max !== null) { $where .= ' AND c.age <= ?'; $binds[] = $type->age_max; }
+            if ($type->tall_min !== null) { $where .= ' AND c.tall >= ?'; $binds[] = $type->tall_min; }
+            if ($type->tall_max !== null) { $where .= ' AND c.tall <= ?'; $binds[] = $type->tall_max; }
+            if ($type->body_type_id !== null) { $where .= ' AND c.body_id = ?'; $binds[] = $type->body_type_id; }
+            if ($type->cast_type_id !== null) { $where .= ' AND c.type_id = ?'; $binds[] = $type->cast_type_id; }
+
+            // 全国
+            $allRows = DB::select("
+                SELECT COUNT(*) AS cnt
+                FROM casts c
+                JOIN shops s ON c.shop_id = s.id
+                WHERE {$where}
+            ", $binds);
+            if (($allRows[0]->cnt ?? 0) >= self::MIN_RESULTS) {
+                $urls[] = "{$base}/all/girl-list/type/{$type->slug}/";
+            }
+
+            // エリア別
+            $areaRows = DB::select("
+                SELECT a.slug, COUNT(*) AS cnt
+                FROM casts c
+                JOIN shops s ON c.shop_id = s.id
+                JOIN areas a ON s.area_id = a.id
+                WHERE {$where}
+                GROUP BY a.id, a.slug
+                HAVING cnt >= ?
+            ", array_merge($binds, [self::MIN_RESULTS]));
+
+            foreach ($areaRows as $row) {
+                $urls[] = "{$base}/{$row->slug}/girl-list/type/{$type->slug}/";
+            }
+
+            // 都道府県別
+            $prefRows = DB::select("
+                SELECT p.slug, COUNT(*) AS cnt
+                FROM casts c
+                JOIN shops s ON c.shop_id = s.id
+                JOIN areas a ON s.area_id = a.id
+                JOIN prefectures p ON a.prefecture_id = p.id
+                WHERE {$where}
+                GROUP BY p.id, p.slug
+                HAVING cnt >= ?
+            ", array_merge($binds, [self::MIN_RESULTS]));
+
+            foreach ($prefRows as $row) {
+                $urls[] = "{$base}/{$row->slug}/girl-list/type/{$type->slug}/";
+            }
+        }
+
+        return array_unique($urls);
+    }
+
     // ── body フィルター ──────────────────────────────────────────
     private function bodyUrls(string $base): array
     {
-        $bodyTypes = DB::table('cast_body_types')->pluck('id')->all();
-
         // エリア別集計
         $areaRows = DB::select("
             SELECT a.slug AS slug, c.body_id, COUNT(*) AS cnt
@@ -115,7 +235,6 @@ class GenerateGirlListSitemap extends Command
     {
         $urls = [];
         foreach (self::AGE_RANGES as $key => [$min, $max]) {
-            // エリア別
             $areaRows = DB::select("
                 SELECT a.slug AS slug, COUNT(*) AS cnt
                 FROM casts c
@@ -127,7 +246,6 @@ class GenerateGirlListSitemap extends Command
                 HAVING cnt >= ?
             ", [$min, $max, self::MIN_RESULTS]);
 
-            // 都道府県別
             $prefRows = DB::select("
                 SELECT p.slug AS slug, COUNT(*) AS cnt
                 FROM casts c
@@ -140,7 +258,6 @@ class GenerateGirlListSitemap extends Command
                 HAVING cnt >= ?
             ", [$min, $max, self::MIN_RESULTS]);
 
-            // 全国
             $allCnt = DB::table('casts')
                 ->join('shops', 'casts.shop_id', '=', 'shops.id')
                 ->where('casts.status', 'active')->where('shops.status', 'active')
@@ -200,7 +317,6 @@ class GenerateGirlListSitemap extends Command
     // ── cup フィルター ───────────────────────────────────────────
     private function cupUrls(string $base): array
     {
-        // cup 値ごとに集計してからグループにまとめる
         $areaRows = DB::select("
             SELECT a.slug AS slug, c.cup, COUNT(*) AS cnt
             FROM casts c
@@ -227,7 +343,6 @@ class GenerateGirlListSitemap extends Command
             GROUP BY c.cup
         ");
 
-        // cup値→グループキーのマップ
         $cupToGroup = [];
         foreach (self::CUP_GROUPS as $groupKey => $cups) {
             foreach ($cups as $cup) {
@@ -235,7 +350,6 @@ class GenerateGirlListSitemap extends Command
             }
         }
 
-        // slug × group_key ごとに cnt を集計
         $slugGroupCnt = [];
         foreach (array_merge($areaRows, $prefRows) as $row) {
             $g = $cupToGroup[$row->cup] ?? null;

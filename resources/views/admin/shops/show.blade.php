@@ -272,6 +272,28 @@
             </div>
             <div class="p-5 space-y-4">
 
+                {{-- 届出書 --}}
+                @if($shop->permit_type)
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-1">
+                    <p class="text-xs font-bold text-blue-700 mb-1">届出書情報</p>
+                    @if($shop->permit_type === 'uploaded')
+                        <p class="text-xs text-blue-600 mb-1">📄 届出書アップロード済み</p>
+                        @if($shop->permit_document_path)
+                        <a href="{{ route('admin.shops.permit-download', $shop->id) }}/"
+                           class="text-xs text-blue-700 underline hover:text-blue-900 font-medium" target="_blank">
+                            届出書を確認する →
+                        </a>
+                        @endif
+                    @else
+                        <p class="text-xs text-blue-600">✅ 「届出・許可は不要」と申告済み</p>
+                    @endif
+                </div>
+                @else
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-1">
+                    <p class="text-xs text-amber-700">⚠ 届出書情報なし（古い申請 or 未申請）</p>
+                </div>
+                @endif
+
                 {{-- 承認 --}}
                 @if($shop->status !== 'active')
                 <form action="{{ route('admin.shops.approve', $shop->id) }}/" method="POST">
@@ -298,6 +320,29 @@
                     </button>
                 </form>
                 @endif
+
+                {{-- プラン変更 --}}
+                <div class="border-t border-gray-100 pt-4">
+                    <p class="text-xs text-gray-400 mb-2">掲載プラン</p>
+                    @php
+                        $planLabels = [1=>'1：無料（リンクなし）', 2=>'2：無料（リンクあり）', 3=>'3：基本有料', 4=>'4：ミドル有料', 5=>'5：VIP有料'];
+                    @endphp
+                    <form action="{{ route('admin.shops.updatePlan', $shop->id) }}/" method="POST" class="flex items-center gap-2">
+                        @csrf @method('PATCH')
+                        <select name="plan" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                            @foreach($planLabels as $val => $label)
+                            <option value="{{ $val }}" {{ $shop->plan == $val ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="text-sm text-business-700 hover:underline"
+                                onclick="return confirm('プランを変更しますか？有料→無料に変更すると掲載期間カウントがリセットされます。')">
+                            変更
+                        </button>
+                    </form>
+                    @if($shop->paid_since)
+                    <p class="text-xs text-gray-400 mt-1">有料継続開始日：{{ $shop->paid_since }}</p>
+                    @endif
+                </div>
 
                 {{-- 入札単価（active時） --}}
                 @if($shop->status === 'active')

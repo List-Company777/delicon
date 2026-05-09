@@ -68,6 +68,14 @@
                        class="{{ request()->routeIs('admin.deletion-requests.*') ? 'text-red-400' : 'text-gray-400 hover:text-white' }} transition">
                         削除依頼
                     </a>
+                    <a href="{{ route('admin.cast-reviews.index') }}/"
+                       class="{{ request()->routeIs('admin.cast-reviews.*') ? 'text-deli-400' : 'text-gray-400 hover:text-white' }} transition">
+                        口コミ管理
+                    </a>
+                    <a href="{{ route('admin.cast-diaries.index') }}/"
+                       class="{{ request()->routeIs('admin.cast-diaries.*') ? 'text-deli-400' : 'text-gray-400 hover:text-white' }} transition">
+                        写メ日記
+                    </a>
                 </nav>
             </div>
             <div class="flex items-center gap-3 text-sm">

@@ -154,14 +154,10 @@
                 <div class="flex items-center gap-3">
                     <span class="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500">非公開</span>
                     @if($applyReady)
-                    <form action="{{ route('manage.apply') }}/" method="POST">
-                        @csrf
-                        <button type="submit"
-                                class="text-xs px-4 py-1.5 bg-business-700 hover:bg-business-600 text-white rounded-full font-medium transition"
-                                onclick="return confirm('掲載申請を送信しますか？')">
-                            掲載申請
-                        </button>
-                    </form>
+                    <button type="button" onclick="document.getElementById('permit-modal').classList.remove('hidden')"
+                            class="text-xs px-4 py-1.5 bg-business-700 hover:bg-business-600 text-white rounded-full font-medium transition">
+                        掲載申請
+                    </button>
                     @else
                     <a href="{{ route('manage.shop.edit') }}/"
                        class="text-xs px-4 py-1.5 bg-gray-300 text-gray-500 rounded-full font-medium cursor-not-allowed"
@@ -426,4 +422,93 @@
 
     @endif
 </div>
+
+{{-- 届出書モーダル --}}
+<div id="permit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-4 hidden"
+     onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+        <h2 class="text-base font-bold text-gray-800 mb-1">掲載申請</h2>
+        <p class="text-xs text-gray-500 mb-5">以下のいずれかを選択して申請してください。</p>
+
+        <form action="{{ route('manage.apply') }}/" method="POST" enctype="multipart/form-data" id="permit-form">
+            @csrf
+
+            <div class="space-y-3 mb-5">
+                {{-- 届出書アップロード --}}
+                <label class="flex gap-3 p-4 border-2 rounded-xl cursor-pointer transition has-[:checked]:border-business-600 has-[:checked]:bg-business-50 border-gray-200"
+                       id="label-uploaded">
+                    <input type="radio" name="permit_type" value="uploaded" class="mt-0.5 shrink-0 accent-business-600"
+                           onchange="document.getElementById('upload-area').classList.remove('hidden');document.getElementById('agree-area').classList.add('hidden')">
+                    <div>
+                        <p class="text-sm font-bold text-gray-700">届出書・許可証を添付して申請</p>
+                        <p class="text-xs text-gray-500 mt-0.5">警察への届出受理証や許可証のコピーをPDF・画像でアップロードしてください。</p>
+                    </div>
+                </label>
+
+                <div id="upload-area" class="hidden pl-4">
+                    <label class="block text-xs text-gray-600 mb-1">ファイルを選択（PDF / JPG / PNG、10MBまで）</label>
+                    <input type="file" name="permit_file" accept=".pdf,.jpg,.jpeg,.png"
+                           class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-business-100 file:text-business-700 hover:file:bg-business-200">
+                    @error('permit_file')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- 届出不要チェック --}}
+                <label class="flex gap-3 p-4 border-2 rounded-xl cursor-pointer transition has-[:checked]:border-business-600 has-[:checked]:bg-business-50 border-gray-200"
+                       id="label-not-required">
+                    <input type="radio" name="permit_type" value="not_required" class="mt-0.5 shrink-0 accent-business-600"
+                           onchange="document.getElementById('agree-area').classList.remove('hidden');document.getElementById('upload-area').classList.add('hidden')">
+                    <div>
+                        <p class="text-sm font-bold text-gray-700">当店の営業形態では届出・許可は不要です</p>
+                        <p class="text-xs text-gray-500 mt-0.5">無店舗型性風俗特殊営業の届出が不要な業種など、法令上届出義務がない場合に選択してください。</p>
+                    </div>
+                </label>
+
+                <div id="agree-area" class="hidden pl-4">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" name="permit_agree" value="1" class="mt-0.5 accent-business-600">
+                        <span class="text-xs text-gray-600">当店の営業形態において、関係法令に基づく届出・許可は不要であることを確認しました。虚偽の申告は掲載停止の対象となる場合があります。</span>
+                    </label>
+                    @error('permit_agree')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            @error('permit_type')
+            <p class="text-xs text-red-600 mb-3">{{ $message }}</p>
+            @enderror
+
+            <div class="flex gap-3">
+                <button type="submit"
+                        class="flex-1 bg-business-700 hover:bg-business-600 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                    申請する
+                </button>
+                <button type="button" onclick="document.getElementById('permit-modal').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition">
+                    キャンセル
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script @nonce>
+// バリデーションエラー時はモーダルを自動で開く
+@if($errors->has('permit_type') || $errors->has('permit_file') || $errors->has('permit_agree'))
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('permit-modal').classList.remove('hidden');
+    @if(old('permit_type') === 'uploaded')
+    document.querySelector('input[value="uploaded"]').checked = true;
+    document.getElementById('upload-area').classList.remove('hidden');
+    @elseif(old('permit_type') === 'not_required')
+    document.querySelector('input[value="not_required"]').checked = true;
+    document.getElementById('agree-area').classList.remove('hidden');
+    @endif
+});
+@endif
+</script>
+@endpush
 @endsection

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新デリヘルリストの新機能・改善点 | デリヘルリスト</title>
-    <meta name="description" content="デリヘルリストがリニューアル。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
+    <title>デリコンが全面リニューアル | デリヘルリスト</title>
+    <meta name="description" content="デリコンが全面リニューアル。サイト名もデリヘルリストに変わります。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
     <meta name="robots" content="noindex,follow">
     @vite(['resources/css/app.css'])
     <style>
@@ -36,16 +36,16 @@
             RENEWED
         </div>
         <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6">
-            デリヘルリスト、<span class="text-deli-400">全面リニューアル</span>。
+            デリコンが<span class="text-deli-400">全面リニューアル</span>。
         </h1>
         <p class="text-[#B0AEAD] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
             ユーザー向けの会員機能・充実した検索・店舗管理ツール・SEO強化など、<br class="hidden md:inline">
-            旧サイトから大幅にパワーアップしました。主な追加・改善点をご紹介します。
+            旧サイトから大幅にパワーアップしました。主な追加・改善点をご紹介します。<br class="hidden md:inline">なお、サイト名も<strong class="text-white">「デリヘルリスト」</strong>に変わります。
         </p>
     </div>
 </section>
 
-<div class="max-w-4xl mx-auto px-4 py-12 space-y-20">
+<div class="max-w-4xl mx-auto px-4 py-12 space-y-28">
 
     {{-- ① ユーザー登録機能 --}}
     <section id="user">
@@ -64,10 +64,10 @@
             @php
                 $userFeatures = [
                     ['icon' => '♡', 'title' => 'お気に入り登録',       'desc' => '気になる女性をお気に入り保存。マイページからすぐ確認できます。'],
-                    ['icon' => '🔔', 'title' => '新人通知メール',       'desc' => '好みのタイプ・体型・エリアに合う新人が登録されたら自動でメール通知。'],
+                    ['icon' => '🔔', 'title' => '新人通知メール',       'desc' => '好みのタイプ・体型・エリアに合う新人が登録されたら自動でメール通知。お気に入り店舗の新人も通知されます。'],
                     ['icon' => '📅', 'title' => 'お気に入り出勤通知',   'desc' => 'お気に入りの女性がシフトを登録したら出勤予定をメールでお知らせ。'],
-                    ['icon' => '👁', 'title' => '閲覧履歴',             'desc' => '過去に見た女性・店舗の履歴をマイページで確認できます。'],
-                    ['icon' => '⭐', 'title' => '口コミの閲覧',         'desc' => '未登録ユーザーには口コミがぼかし表示。登録後にフル閲覧できます。'],
+                    ['icon' => '👁', 'title' => '閲覧履歴',             'desc' => '過去に見た女性の履歴をマイページで確認できます。'],
+                    ['icon' => '⭐', 'title' => '口コミの投稿・閲覧',         'desc' => '未登録ユーザーには口コミがぼかし表示。登録後に投稿・閲覧ができるようになります。'],
                     ['icon' => '⚙', 'title' => '好み設定',             'desc' => '年齢・タイプ・体型・エリア・曜日・時間帯の好みを設定してレコメンド表示。'],
                     ['icon' => '📍', 'title' => '店舗新人通知',         'desc' => '気になる店舗を通知登録。その店舗に新人が加わったらメールでお知らせ。'],
                 ];
@@ -84,10 +84,8 @@
         </div>
     </section>
 
-    <hr class="border-[#2A2A3E]">
-
     {{-- ② 検索機能 --}}
-    <section id="search">
+    <section id="search" class="mt-9">
         <div class="flex items-center gap-4 mb-8">
             <span class="flex-shrink-0 w-10 h-10 rounded-full bg-deli-500 text-white font-black text-lg flex items-center justify-center">②</span>
             <div>
@@ -109,6 +107,7 @@
                     ['icon' => '✨', 'title' => '新人',       'desc' => '入店から30日以内の新人女性を一覧。フレッシュな顔ぶれを見逃さない。'],
                     ['icon' => '📷', 'title' => '写メ日記',   'desc' => '女性が投稿した写メ日記を一覧表示。素顔や雰囲気が伝わりファン化しやすい。'],
                     ['icon' => '💬', 'title' => '口コミ',     'desc' => '会員が投稿した体験談・口コミを一覧で確認。信頼性の高い情報で選択できます。'],
+                    ['icon' => '🏆', 'title' => '人気ランキング', 'desc' => '独自の基準で算出したスコアによる人気ランキングTOP30を掲載。今一番注目されている女性が一目でわかります。'],
                 ];
             @endphp
             @foreach($searchTabs as $t)
@@ -145,10 +144,8 @@
         </div>
     </section>
 
-    <hr class="border-[#2A2A3E]">
-
     {{-- ③ 店舗向け機能 --}}
-    <section id="shop">
+    <section id="shop" class="mt-9">
         <div class="flex items-center gap-4 mb-8">
             <span class="flex-shrink-0 w-10 h-10 rounded-full bg-deli-500 text-white font-black text-lg flex items-center justify-center">③</span>
             <div>
@@ -163,11 +160,12 @@
         <div class="grid sm:grid-cols-2 gap-4">
             @php
                 $shopFeatures = [
-                    ['icon' => '📋', 'title' => '出勤登録・シフト管理',   'desc' => '出勤日・時間帯をカレンダー形式で登録。「待機中」タブに自動で表示されます。'],
+                    ['icon' => '📋', 'title' => '出勤登録・シフト管理',   'desc' => '出勤日・時間帯をカレンダー形式で登録。「出勤中」タブに自動で表示されます。女性からの出勤申請を受け付けることも可能です。'],
                     ['icon' => '✨', 'title' => '新人登録',               'desc' => '新人フラグを立てると新人タブに掲載。入店から30日間は新人バッジが表示されます。入店予定日を事前に設定しておくと、登録ユーザーに入店前からメールが届くため、体験入店の客付きが良くなり継続率アップにつながります。'],
                     ['icon' => '📷', 'title' => '写メ日記投稿',           'desc' => '女性ごとに写メ日記を投稿できます。ファン化・リピート促進に効果的です。女性本人にURLを渡して直接投稿してもらうことも可能です。'],
                     ['icon' => '♡',  'title' => 'お気に入り登録者の分析', 'desc' => '管理画面で在籍女性のファン一覧と遊びやすい曜日・時間帯を確認。出勤計画に活用できます。女性の写メ日記投稿画面にも表示されるので、女性のモチベーションアップや、出勤時間の調整相談の資料にもなります。'],
                     ['icon' => '💬', 'title' => '口コミ管理',             'desc' => '寄せられた口コミを管理画面で確認。有料プランの店舗は不当な書き込みへの削除申請が可能です。'],
+                    ['icon' => '📷', 'title' => '写メ日記管理',           'desc' => '在籍女性が投稿した写メ日記を管理画面で一覧確認。不適切な投稿はすぐに削除できます。'],
                     ['icon' => '🔔', 'title' => 'ユーザーへの自動通知',   'desc' => '新人登録・シフト登録でお気に入りユーザーに自動メール通知。集客コストゼロで呼び込めます。'],
                 ];
             @endphp
@@ -183,10 +181,8 @@
         </div>
     </section>
 
-    <hr class="border-[#2A2A3E]">
-
     {{-- ④ SEO・スマホ最適化 --}}
-    <section id="seo">
+    <section id="seo" class="mt-9">
         <div class="flex items-center gap-4 mb-8">
             <span class="flex-shrink-0 w-10 h-10 rounded-full bg-deli-500 text-white font-black text-lg flex items-center justify-center">④</span>
             <div>
@@ -221,10 +217,8 @@
         </div>
     </section>
 
-    <hr class="border-[#2A2A3E]">
-
     {{-- ⑤ エリア別サブドメインサイトの統合 --}}
-    <section id="subdomain">
+    <section id="subdomain" class="mt-9">
         <div class="flex items-center gap-4 mb-8">
             <span class="flex-shrink-0 w-10 h-10 rounded-full bg-[#3A3A4E] text-[#8A8A9E] font-black text-lg flex items-center justify-center">⑤</span>
             <div>

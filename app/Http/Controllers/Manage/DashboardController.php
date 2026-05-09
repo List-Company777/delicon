@@ -85,7 +85,28 @@ class DashboardController extends BaseController
             return back()->withErrors(['apply' => '掲載申請には ' . implode('・', $missing) . ' の入力が必要です。店舗情報ページから入力してください。']);
         }
 
-        $shop->update(['status' => 'pending']);
+        $validated = $request->validate([
+            'permit_type' => ['required', 'in:uploaded,not_required'],
+            'permit_file' => ['required_if:permit_type,uploaded', 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'permit_agree' => ['required_if:permit_type,not_required', 'nullable', 'accepted'],
+        ], [
+            'permit_type.required'   => '届出書の選択は必須です。',
+            'permit_file.required_if' => '届出書ファイルを添付してください。',
+            'permit_file.mimes'      => 'PDF・JPG・PNGのみ添付可能です。',
+            'permit_file.max'        => 'ファイルサイズは10MB以下にしてください。',
+            'permit_agree.required_if' => '届出不要の確認にチェックが必要です。',
+        ]);
+
+        $permitPath = null;
+        if ($validated['permit_type'] === 'uploaded' && $request->hasFile('permit_file')) {
+            $permitPath = $request->file('permit_file')->store('permits/' . $shop->id, 'local');
+        }
+
+        $shop->update([
+            'status'              => 'pending',
+            'permit_type'         => $validated['permit_type'],
+            'permit_document_path' => $permitPath,
+        ]);
 
         return back()->with('applied', true);
     }

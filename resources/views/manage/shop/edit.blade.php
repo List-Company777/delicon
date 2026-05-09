@@ -157,9 +157,15 @@
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">システム説明</th>
                 <td class="px-4 py-3">
-                    <textarea name="system_text" rows="4" maxlength="5000"
+                    <textarea name="system_text" id="shop-system-text" rows="4" maxlength="5000"
                               class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('system_text', $shop->system_text) }}</textarea>
                     <p class="text-xs text-gray-400 mt-0.5">デリヘルのシステム・サービス内容の説明</p>
+                    @php $shopTextLen = mb_strlen($shop->base ?? '') + mb_strlen($shop->system_text ?? ''); @endphp
+                    @if($shopTextLen < 100)
+                    <p id="shop-noindex-warning" class="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                        ⚠ 店舗紹介文（拠点＋システム説明）の合計が100文字未満のため、店舗詳細ページは現在<strong>検索エンジンの対象外（noindex）</strong>になっています。合計100文字以上になると検索対象になります。（現在 <span id="shop-text-len">{{ $shopTextLen }}</span>文字）
+                    </p>
+                    @endif
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -337,4 +343,25 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var baseEl   = document.querySelector('[name="base"]');
+    var sysEl    = document.getElementById('shop-system-text');
+    var lenEl    = document.getElementById('shop-text-len');
+    var warn     = document.getElementById('shop-noindex-warning');
+    if (!sysEl) return;
+
+    function update() {
+        var len = [...(baseEl ? baseEl.value : '')].length + [...sysEl.value].length;
+        if (lenEl) lenEl.textContent = len;
+        if (warn) warn.style.display = len >= 100 ? 'none' : '';
+    }
+
+    sysEl.addEventListener('input', update);
+    if (baseEl) baseEl.addEventListener('input', update);
+})();
+</script>
+@endpush
 @endsection

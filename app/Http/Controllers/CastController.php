@@ -62,7 +62,7 @@ class CastController extends Controller
         $cast->load([
             'shop', 'castType', 'bodyType',
             'charms', 'plays', 'personalities', 'tags',
-            'images', 'schedules', 'reviews', 'diaries.images',
+            'images', 'schedules', 'reviews', 'diaries.images', 'diaries.likes',
         ]);
 
         $this->recordView($cast);
@@ -92,7 +92,15 @@ class CastController extends Controller
             );
         }
 
-        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts', 'footerPrefSlug'));
+        $likedDiaryIds = auth()->check()
+            ? \App\Models\DiaryLike::where('user_id', auth()->id())
+                ->whereIn('diary_id', $cast->diaries->pluck('id'))
+                ->pluck('diary_id')->all()
+            : [];
+
+        $noindex = mb_strlen($cast->comment ?? '') < 100;
+
+        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts', 'footerPrefSlug', 'likedDiaryIds', 'noindex'));
     }
 
     public function submitDeletionRequest(Request $request, Cast $cast)
@@ -100,6 +108,9 @@ class CastController extends Controller
         // ハニーポット（ボット対策）
         if ($request->filled('website')) {
             return redirect()->route('cast.show', $cast->id)->with('deletion_sent', true);
+        }
+        if (!($cast->shop?->isPaid() ?? false)) {
+            abort(403);
         }
 
         $request->validate([

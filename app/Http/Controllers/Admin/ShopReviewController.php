@@ -142,6 +142,41 @@ class ShopReviewController extends Controller
         return back()->with('success', $msg);
     }
 
+    public function updatePlan(\Illuminate\Http\Request $request, int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        $request->validate(['plan' => ['required', 'integer', 'min:1', 'max:5']]);
+
+        $newPlan = (int) $request->plan;
+        $oldPlan = (int) $shop->plan;
+
+        $update = ['plan' => $newPlan];
+
+        if ($newPlan > $oldPlan) {
+            // アップグレード（無料→有料 / 有料→上位有料）：paid_since をリセット
+            $update['paid_since'] = $newPlan >= 3 ? now()->toDateString() : null;
+        } elseif ($newPlan < $oldPlan && $newPlan < 3) {
+            // 有料→無料へのダウングレード：paid_since をリセット
+            $update['paid_since'] = null;
+        }
+        // 有料→有料のダウングレード：paid_since はそのまま維持
+
+        $shop->update($update);
+
+        return back()->with('success', "プランを {$newPlan} に変更しました。");
+    }
+
+    public function downloadPermit(int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        abort_if(! $shop->permit_document_path, 404);
+
+        $path = storage_path('app/' . $shop->permit_document_path);
+        abort_if(! file_exists($path), 404);
+
+        return response()->file($path);
+    }
+
     public function destroy(int $id)
     {
         $shop = Shop::findOrFail($id);

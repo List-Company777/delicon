@@ -62,6 +62,8 @@
                     'manage.paid-plan'          => '掲載プラン',
                     'manage.contact'            => 'お問い合わせ',
                     'manage.shop.news.index'    => 'お知らせ',
+                    'manage.diaries.index'      => '写メ日記',
+                    'manage.shift-requests.index' => 'シフト申請',
                     'manage.review.index'       => '口コミ管理',
                     'manage.password.edit'      => 'パスワード変更',
                 ];
@@ -70,8 +72,8 @@
                 <a href="{{ route($route) }}/"
                    @class([
                        'whitespace-nowrap px-3 py-3 border-b-2 transition',
-                       'border-business-600 text-business-700 font-medium' => request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')) || ($route === 'manage.shop.news.index' && request()->routeIs('manage.shop.news.*')),
-                       'border-transparent text-gray-500 hover:text-gray-700' => !(request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')) || ($route === 'manage.shop.news.index' && request()->routeIs('manage.shop.news.*'))),
+                       'border-business-600 text-business-700 font-medium' => request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')) || ($route === 'manage.shop.news.index' && request()->routeIs('manage.shop.news.*')) || ($route === 'manage.diaries.index' && request()->routeIs('manage.diaries.*')) || ($route === 'manage.shift-requests.index' && request()->routeIs('manage.shift-requests.*')),
+                       'border-transparent text-gray-500 hover:text-gray-700' => !(request()->routeIs($route) || ($route === 'manage.applications.index' && request()->routeIs('manage.applications.*')) || ($route === 'manage.cast-profile.index' && request()->routeIs('manage.cast-profile.*')) || ($route === 'manage.shop.news.index' && request()->routeIs('manage.shop.news.*')) || ($route === 'manage.diaries.index' && request()->routeIs('manage.diaries.*')) || ($route === 'manage.shift-requests.index' && request()->routeIs('manage.shift-requests.*'))),
                    ])>
                     {{ $label }}
                     @if($route === 'manage.applications.index' && $unreadCount > 0)

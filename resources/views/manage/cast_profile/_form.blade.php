@@ -100,8 +100,15 @@
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">コメント</th>
         <td class="px-4 py-3">
-            <textarea name="comment" rows="4" maxlength="2000"
+            <textarea name="comment" id="cast-comment" rows="4" maxlength="2000"
                       class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('comment', $cast?->comment) }}</textarea>
+            @if($cast && mb_strlen($cast->comment ?? '') < 100)
+            <p id="noindex-warning" class="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                ⚠ コメントが100文字未満のため、この女性の詳細ページは現在<strong>検索エンジンの対象外（noindex）</strong>になっています。100文字以上入力すると検索対象になります。（現在 <span id="comment-len">{{ mb_strlen($cast->comment ?? '') }}</span>文字）
+            </p>
+            @elseif(!$cast)
+            <p class="mt-1 text-xs text-gray-400">100文字以上入力すると検索エンジンの対象になります。</p>
+            @endif
         </td>
     </tr>
     <tr class="border-b border-gray-100">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginLog;
 use App\Mail\AdminLoginAlertMail;
 use App\Mail\UserLoginAlertMail;
 use Illuminate\Http\Request;
@@ -40,6 +41,7 @@ class LoginController extends Controller
             $user = Auth::user();
             $user->timestamps = false;
             $user->update(['last_login_at' => now()]);
+            LoginLog::create(['user_id' => $user->id, 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
 
             if ($user->isAdmin()) {
                 Mail::to(config('mail.admin_address'))->queue(new AdminLoginAlertMail($request->ip()));

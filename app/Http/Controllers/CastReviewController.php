@@ -23,6 +23,7 @@ class CastReviewController extends Controller
         CastReview::create([
             'cast_id'    => $cast->id,
             'shop_id'    => $cast->shop_id,
+            'user_id'    => Auth::id(),
             'nickname'   => Auth::user()->name,
             'rating'     => $request->rating,
             'body'       => $request->body,

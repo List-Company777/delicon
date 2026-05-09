@@ -35,4 +35,21 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var ta = document.getElementById('cast-comment');
+    var lenEl = document.getElementById('comment-len');
+    var warn = document.getElementById('noindex-warning');
+    if (!ta) return;
+
+    ta.addEventListener('input', function() {
+        var len = [...this.value].length;
+        if (lenEl) lenEl.textContent = len;
+        if (warn) warn.style.display = len >= 100 ? 'none' : '';
+    });
+})();
+</script>
+@endpush
 @endsection

@@ -8,13 +8,9 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// ディレクトリURLサイトマップを毎日午前3時に再生成
-Schedule::command('sitemap:generate')->dailyAt('03:00');
-
-// 詳細ページサイトマップを毎日午前4時30分に再生成（負荷分散）
-Schedule::command('sitemap:generate-detail')->dailyAt('04:30');
-
-// 固定ページ・記事・店舗サイトマップを毎日午前5時に再生成
+// 詳細ページサイトマップ（毎日 04:00〜05:30 に順次生成）
+Schedule::command('sitemap:generate-detail')->dailyAt('04:00');
+Schedule::command('sitemap:generate-cast-detail')->dailyAt('04:30');
 Schedule::command('sitemap:generate-pages')->dailyAt('05:30');
 
 // 生存確認メール送信・期限切れ非公開処理（毎日午前10時）
@@ -54,9 +50,15 @@ Schedule::command('report:monthly')->monthlyOn(1, '01:05');
 // フッター都道府県キャッシュ更新（毎日 02:00）
 Schedule::command('cache:warm-footer')->dailyAt('02:00');
 
-// girl-listフィルターサイトマップ（毎日 06:00）
+// girl-list・shop-listサイトマップ（毎日 06:00〜06:30）
 Schedule::command("sitemap:generate-girl-list")->dailyAt("06:00");
 Schedule::command("sitemap:generate-shop-list")->dailyAt("06:30");
 
+// サイトマップインデックス（全サブサイトマップ完了後 07:00）
+Schedule::command("sitemap:generate")->dailyAt("07:00");
+
 // お気に入りキャストの新着シフト通知（毎日18:00）
 Schedule::command('notify:schedules')->dailyAt('18:00');
+
+// キャスト掲載スコア更新（毎日午前1時）
+Schedule::command('casts:update-scores')->dailyAt('01:00');

@@ -23,6 +23,8 @@ class Shop extends Model
         'xml_source', 'xml_id', 'xml_enabled',
         'xml_bid_price', 'xml_monthly_budget', 'xml_plan_activated_at', 'xml_disabled_at', 'xml_image_url',
         'line_notify_user_id',
+        'permit_type', 'permit_document_path',
+        'paid_since',
         'alive_check_token', 'alive_check_sent_at', 'alive_confirmed_at',
         'base', 'catche', 'system_text', 'coupon', 'open_time', 'close_time', 'all_time', 'rest_day',
         'price_60', 'price_90', 'price_120', 'price_high', 'eigyo_area', 'eigyo_space',
@@ -76,6 +78,12 @@ class Shop extends Model
     public function commissions(): HasMany
     {
         return $this->hasMany(PartnerCommission::class);
+    }
+
+
+    public function isPaid(): bool
+    {
+        return ($this->plan ?? 0) >= 3;
     }
 
     public function planApplications(): HasMany
