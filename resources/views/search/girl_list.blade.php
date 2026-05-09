@@ -25,7 +25,7 @@
     $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
     $ageToTypeSlug  = ['50s' => 'isoji', '60s' => 'kanreki', '70s' => 'obaachan'];
     $tallToTypeSlug = ['super' => 'tyoshin', 'short' => 'kogara'];
-    $bodyToTypeSlug = [1 => 'kyonyuu', 2 => 'hinnyuu', 5 => 'slender', 6 => 'choipocha', 7 => 'gekipocha', 8 => 'glamour', 16 => 'bakunyuu', 3 => 'joshin', 4 => 'kogara'];
+    $bodyToTypeSlug = [1 => 'kyonyuu', 2 => 'hinnyuu', 5 => 'slender', 6 => 'choipocha', 7 => 'gekipocha', 8 => 'glamour', 16 => 'bakunyuu', 3 => 'tyoshin', 4 => 'kogara'];
 
     // フィルターの人間可読ラベル（title / description / H1 に使用）
     $filterLabelParts = [];
@@ -306,6 +306,33 @@
                 @endforeach
             </div>
             @endif
+
+            {{-- 特集LP（タイプ別） --}}
+            @php
+                $featuredLps = [
+                    ['slug' => 'jukujo',    'label' => '熟女系'],
+                    ['slug' => 'chojukujo', 'label' => '超熟女'],
+                    ['slug' => 'hitozuma',  'label' => '人妻系'],
+                    ['slug' => 'model',     'label' => 'モデル系'],
+                    ['slug' => 'newhalfu',  'label' => 'ニューハーフ'],
+                    ['slug' => 'doemu',     'label' => 'ドM'],
+                    ['slug' => 'gal',       'label' => 'ギャル'],
+                    ['slug' => 'seiso',     'label' => '清楚系'],
+                    ['slug' => 'av',        'label' => 'AV女優'],
+                ];
+            @endphp
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-10">特集</span>
+                @foreach($featuredLps as $lp)
+                <a href="{{ url("/{$area_slug}/girl-list/type/{$lp['slug']}/") }}"
+                   class="px-3 py-1.5 rounded-full text-sm border transition
+                          {{ (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $lp['slug'])
+                              ? 'bg-deli-500 border-deli-500 text-white'
+                              : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+                    {{ $lp['label'] }}
+                </a>
+                @endforeach
+            </div>
             @endif
 
             {{-- クリアボタン --}}
