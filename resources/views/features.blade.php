@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新デリコンの新機能・改善点 | デリコン</title>
-    <meta name="description" content="デリコンがリニューアル。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
+    <title>新デリヘルリストの新機能・改善点 | デリヘルリスト</title>
+    <meta name="description" content="デリヘルリストがリニューアル。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
     <meta name="robots" content="noindex,follow">
     @vite(['resources/css/app.css'])
     <style>
@@ -19,7 +19,7 @@
 <header class="bg-[#12121E]/90 backdrop-blur-sm border-b border-[#2A2A3E] sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <a href="{{ url('/') }}/" class="text-xl font-black tracking-tight text-white">デリコン</a>
+            <a href="{{ url('/') }}/" class="text-xl font-black tracking-tight text-white">デリヘルリスト</a>
             <span class="text-xs text-[#8A8A9E] border border-[#2A2A3E] rounded px-2 py-0.5 hidden sm:inline">新機能のご紹介</span>
         </div>
         <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/"
@@ -36,7 +36,7 @@
             RENEWED
         </div>
         <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6">
-            デリコン、<span class="text-deli-400">全面リニューアル</span>。
+            デリヘルリスト、<span class="text-deli-400">全面リニューアル</span>。
         </h1>
         <p class="text-[#B0AEAD] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
             ユーザー向けの会員機能・充実した検索・店舗管理ツール・SEO強化など、<br class="hidden md:inline">
@@ -267,7 +267,7 @@
 
 {{-- フッター --}}
 <footer class="border-t border-[#2A2A3E] mt-16 py-8 text-center text-xs text-[#6A6A7E]">
-    <p>&copy; {{ date('Y') }} デリコン</p>
+    <p>&copy; {{ date('Y') }} デリヘルリスト</p>
 </footer>
 
 </body>
