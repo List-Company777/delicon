@@ -225,14 +225,18 @@ class GirlListController extends Controller
     public function byType(Request $request, string $area_slug, string $type_slug)
     {
         $girlTypeRaw = Cache::remember("slug:girl_type:{$type_slug}", 86400,
-            fn() => (array) DB::table('girl_types')->where('slug', $type_slug)->first(['id', 'name', 'slug', 'age_min', 'age_max'])
+            fn() => (array) DB::table('girl_types')->where('slug', $type_slug)
+                ->first(['id', 'name', 'slug', 'age_min', 'age_max', 'tall_min', 'tall_max', 'body_type_id'])
         );
 
         if (!($girlTypeRaw['id'] ?? null)) abort(404);
-        $typeId   = $girlTypeRaw['id'];
-        $typeName = $girlTypeRaw['name'];
-        $ageMin   = $girlTypeRaw['age_min'];
-        $ageMax   = $girlTypeRaw['age_max'];
+        $typeId     = $girlTypeRaw['id'];
+        $typeName   = $girlTypeRaw['name'];
+        $ageMin     = $girlTypeRaw['age_min'];
+        $ageMax     = $girlTypeRaw['age_max'];
+        $tallMin    = $girlTypeRaw['tall_min'];
+        $tallMax    = $girlTypeRaw['tall_max'];
+        $bodyTypeId = $girlTypeRaw['body_type_id'];
 
         [$areaModel, $prefOnlyModel] = $this->resolveArea($area_slug);
         $areaName  = $areaModel?->name ?? $prefOnlyModel?->name ?? '全国';
@@ -248,6 +252,11 @@ class GirlListController extends Controller
         if ($ageMin !== null || $ageMax !== null) {
             if ($ageMin !== null) $query->where('age', '>=', $ageMin);
             if ($ageMax !== null) $query->where('age', '<=', $ageMax);
+        } elseif ($tallMin !== null || $tallMax !== null) {
+            if ($tallMin !== null) $query->where('tall', '>=', $tallMin);
+            if ($tallMax !== null) $query->where('tall', '<=', $tallMax);
+        } elseif ($bodyTypeId !== null) {
+            $query->where('body_id', $bodyTypeId);
         } else {
             $query->where('type_id', $typeId);
         }

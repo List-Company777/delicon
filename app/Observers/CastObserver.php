@@ -6,21 +6,23 @@ use App\Models\Cast;
 
 class CastObserver
 {
-    // cup → cast_body_types.id
     private const CUP_TO_BODY = [
-        'A' => 2,   // 貧乳・ちっぱい
-        'E' => 1, 'F' => 1, 'G' => 1,                          // 巨乳
-        'H' => 16, 'I' => 16, 'J' => 16, 'K' => 16,
-        'L' => 16, 'M' => 16, 'N' => 16,                       // 爆乳
+        'A'  => 2,                                               // 貧乳・ちっぱい
+        'E'  => 1,  'F'  => 1,  'G'  => 1,                     // 巨乳
+        'H'  => 16, 'I'  => 16, 'J'  => 16, 'K'  => 16,
+        'L'  => 16, 'M'  => 16, 'N'  => 16,                    // 爆乳
     ];
 
-    // cast_tag_masters.id の自動管理対象
     private const AUTO_TAG_JUKUJO = 57;  // 熟女系
     private const AUTO_TAG_TALL   = 25;  // 長身
 
     public function saving(Cast $cast): void
     {
-        $cast->body_id = $this->computeBodyId($cast->cup, $cast->tall);
+        $computed = $this->computeBodyId($cast->cup, $cast->tall);
+        // cup/tallから確定できた場合のみ上書き。不明な場合は既存値を維持。
+        if ($computed !== null) {
+            $cast->body_id = $computed;
+        }
     }
 
     public function saved(Cast $cast): void
@@ -33,7 +35,6 @@ class CastObserver
             $autoTags[] = self::AUTO_TAG_TALL;
         }
 
-        // 手動タグは維持しつつ、自動管理タグだけ差し替え
         $manualTags = $cast->tags()
             ->wherePivotNotIn('tag_id', [self::AUTO_TAG_JUKUJO, self::AUTO_TAG_TALL])
             ->pluck('cast_tag_masters.id')

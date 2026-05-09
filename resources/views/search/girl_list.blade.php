@@ -23,7 +23,9 @@
     $ageRanges = \App\Http\Controllers\GirlListController::ageRanges();
     $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
     $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
-    $ageToTypeSlug = ['50s' => 'isoji', '60s' => 'kanreki', '70s' => 'obaachan'];
+    $ageToTypeSlug  = ['50s' => 'isoji', '60s' => 'kanreki', '70s' => 'obaachan'];
+    $tallToTypeSlug = ['super' => 'joshin', 'short' => 'kogara'];
+    $bodyToTypeSlug = [1 => 'kyonyuu', 2 => 'hinnyuu', 5 => 'slender', 6 => 'choipocha', 7 => 'gekipocha', 8 => 'glamour', 16 => 'bakunyuu', 3 => 'joshin', 4 => 'kogara'];
 
     // フィルターの人間可読ラベル（title / description / H1 に使用）
     $filterLabelParts = [];
@@ -247,9 +249,18 @@
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-[#8A8A9E] shrink-0 w-10">身長</span>
                 @foreach($tallRanges as $tallKey => $tallData)
-                <a href="{{ $filterUrl('tall', $tallKey) }}"
+                @php
+                    $tallTypeSlug = $tallToTypeSlug[$tallKey] ?? null;
+                    $tallHref     = $tallTypeSlug
+                        ? url("/{$area_slug}/girl-list/type/{$tallTypeSlug}/")
+                        : $filterUrl('tall', $tallKey);
+                    $tallActive   = $tallTypeSlug
+                        ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $tallTypeSlug)
+                        : $activeTall === $tallKey;
+                @endphp
+                <a href="{{ $tallHref }}"
                    class="px-3 py-1.5 rounded-full text-sm border transition
-                          {{ $activeTall === $tallKey
+                          {{ $tallActive
                               ? 'bg-deli-500 border-deli-500 text-white'
                               : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                     {{ $tallData[2] }}
@@ -276,9 +287,18 @@
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-[#8A8A9E] shrink-0 w-10">体型</span>
                 @foreach($bodyTypes as $bt)
-                <a href="{{ $filterUrl('body', (string)$bt->id) }}"
+                @php
+                    $btTypeSlug = $bodyToTypeSlug[$bt->id] ?? null;
+                    $btHref     = $btTypeSlug
+                        ? url("/{$area_slug}/girl-list/type/{$btTypeSlug}/")
+                        : $filterUrl('body', (string)$bt->id);
+                    $btActive   = $btTypeSlug
+                        ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $btTypeSlug)
+                        : $activeBody == $bt->id;
+                @endphp
+                <a href="{{ $btHref }}"
                    class="px-3 py-1.5 rounded-full text-sm border transition
-                          {{ $activeBody == $bt->id
+                          {{ $btActive
                               ? 'bg-deli-500 border-deli-500 text-white'
                               : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                     {{ $bt->name }}
