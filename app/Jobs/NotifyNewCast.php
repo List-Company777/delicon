@@ -24,11 +24,13 @@ class NotifyNewCast implements ShouldQueue
 
         $castTypeId = $cast->type_id;
         $areaId     = $cast->shop?->area_id;
+        $bodyId     = $cast->body_id;
+        $age        = $cast->age;
 
         User::where('notify_new_cast', true)
             ->whereNotNull('email')
             ->cursor()
-            ->each(function (User $user) use ($cast, $castTypeId, $areaId) {
+            ->each(function (User $user) use ($cast, $castTypeId, $areaId, $bodyId, $age) {
                 // タイプ設定がある場合: キャストのタイプが含まれているか確認
                 $typePrefs = $user->pref_cast_type_ids ?? [];
                 if (!empty($typePrefs) && $castTypeId && !in_array($castTypeId, $typePrefs)) {
@@ -38,6 +40,20 @@ class NotifyNewCast implements ShouldQueue
                 // エリア設定がある場合: キャストの店舗エリアが含まれているか確認
                 $areaPrefs = $user->pref_area_ids ?? [];
                 if (!empty($areaPrefs) && $areaId && !in_array($areaId, $areaPrefs)) {
+                    return;
+                }
+
+                // 体型設定がある場合: キャストの体型が含まれているか確認
+                $bodyPrefs = $user->pref_body_type_ids ?? [];
+                if (!empty($bodyPrefs) && $bodyId && !in_array($bodyId, $bodyPrefs)) {
+                    return;
+                }
+
+                // 年齢設定がある場合: キャストの年齢が範囲内か確認
+                if ($user->pref_age_min !== null && $age !== null && $age < $user->pref_age_min) {
+                    return;
+                }
+                if ($user->pref_age_max !== null && $age !== null && $age > $user->pref_age_max) {
                     return;
                 }
 
