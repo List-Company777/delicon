@@ -23,6 +23,7 @@
     $ageRanges = \App\Http\Controllers\GirlListController::ageRanges();
     $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
     $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
+    $ageToTypeSlug = ['50s' => 'isoji', '60s' => 'kanreki', '70s' => 'obaachan'];
 
     // フィルターの人間可読ラベル（title / description / H1 に使用）
     $filterLabelParts = [];
@@ -223,9 +224,18 @@
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-[#8A8A9E] shrink-0 w-10">年齢</span>
                 @foreach($ageRanges as $ageKey => $ageData)
-                <a href="{{ $filterUrl('age', $ageKey) }}"
+                @php
+                    $ageTypeSlug = $ageToTypeSlug[$ageKey] ?? null;
+                    $ageHref     = $ageTypeSlug
+                        ? url("/{$area_slug}/girl-list/type/{$ageTypeSlug}/")
+                        : $filterUrl('age', $ageKey);
+                    $ageActive   = $ageTypeSlug
+                        ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $ageTypeSlug)
+                        : $activeAge === $ageKey;
+                @endphp
+                <a href="{{ $ageHref }}"
                    class="px-3 py-1.5 rounded-full text-sm border transition
-                          {{ $activeAge === $ageKey
+                          {{ $ageActive
                               ? 'bg-deli-500 border-deli-500 text-white'
                               : 'border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
                     {{ $ageData[2] }}
