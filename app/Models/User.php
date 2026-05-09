@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name', 'email', 'password', 'role', 'partner_id', 'line_user_id', 'line_name', 'last_login_at',
         'notify_new_cast', 'notify_working',
-        'pref_cast_type_ids', 'pref_area_ids', 'preferred_days', 'preferred_times',
+        'pref_cast_type_ids', 'pref_area_ids', 'pref_body_type_ids', 'preferred_days', 'preferred_times',
         'pref_age_min', 'pref_age_max',
     ];
 
@@ -39,8 +39,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'password'           => 'hashed',
             'preferred_days'     => 'array',
             'preferred_times'    => 'array',
-            'pref_cast_type_ids' => 'array',
-            'pref_area_ids'      => 'array',
+            'pref_cast_type_ids'  => 'array',
+            'pref_area_ids'       => 'array',
+            'pref_body_type_ids'  => 'array',
         ];
     }
 
@@ -100,6 +101,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasPreferences(): bool
     {
         return !empty($this->pref_cast_type_ids) || !empty($this->pref_area_ids)
+            || !empty($this->pref_body_type_ids)
             || $this->pref_age_min !== null || $this->pref_age_max !== null;
     }
 }

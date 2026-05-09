@@ -87,7 +87,7 @@
             <div class="flex items-center gap-3">
                 <div class="flex-1">
                     <label class="text-xs text-[#9A96A0] block mb-1">下限（歳）</label>
-                    <input type="number" name="pref_age_min" min="18" max="60"
+                    <input type="number" name="pref_age_min" min="18" max="80"
                            value="{{ $user->pref_age_min }}"
                            placeholder="例: 18"
                            class="w-full bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-sm text-[#E8E4DC] focus:outline-none focus:ring-1 focus:ring-deli-500">
@@ -95,7 +95,7 @@
                 <span class="text-[#6A6A7E] mt-5">〜</span>
                 <div class="flex-1">
                     <label class="text-xs text-[#9A96A0] block mb-1">上限（歳）</label>
-                    <input type="number" name="pref_age_max" min="18" max="60"
+                    <input type="number" name="pref_age_max" min="18" max="80"
                            value="{{ $user->pref_age_max }}"
                            placeholder="例: 35"
                            class="w-full bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-sm text-[#E8E4DC] focus:outline-none focus:ring-1 focus:ring-deli-500">
@@ -117,6 +117,25 @@
                            @checked(in_array($type->id, $user->pref_cast_type_ids ?? []))
                            class="rounded border-surface-300 bg-surface-600 text-deli-500 focus:ring-deli-500">
                     <span class="text-sm text-[#C8C4BC] group-hover:text-[#E8E4DC] transition">{{ $type->name }}</span>
+                </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- 体型好み --}}
+        <div class="bg-surface-500 border border-surface-300 rounded-xl p-6 mb-5">
+            <h2 class="text-sm font-bold text-[#E8E4DC] mb-1 flex items-center gap-2">
+                <span class="w-1 h-4 bg-gold-500 rounded-full"></span>
+                好みの体型
+            </h2>
+            <p class="text-xs text-[#6A6A7E] mb-4">未選択の場合はすべての体型が対象です。</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                @foreach($bodyTypes as $bt)
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="pref_body_type_ids[]" value="{{ $bt->id }}"
+                           @checked(in_array($bt->id, $user->pref_body_type_ids ?? []))
+                           class="rounded border-surface-300 bg-surface-600 text-deli-500 focus:ring-deli-500">
+                    <span class="text-sm text-[#C8C4BC] group-hover:text-[#E8E4DC] transition">{{ $bt->name }}</span>
                 </label>
                 @endforeach
             </div>

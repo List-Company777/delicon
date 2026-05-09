@@ -8,6 +8,7 @@ use App\Models\CastType;
 use App\Models\CastView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserDashboardController extends Controller
 {
@@ -60,11 +61,14 @@ class UserDashboardController extends Controller
         $user = auth()->user();
         $notifyShops = $user->shopNotifications()->with('shop')->get();
 
+        $bodyTypes = DB::table('cast_body_types')->orderBy('sort_order')->orderBy('id')->get(['id', 'name']);
+
         return view('user.settings', [
             'user'        => $user,
             'castTypes'   => $castTypes,
             'areas'       => $areas,
             'notifyShops' => $notifyShops,
+            'bodyTypes'   => $bodyTypes,
         ]);
     }
 
@@ -80,14 +84,17 @@ class UserDashboardController extends Controller
             'preferred_days.*'     => ['in:mon,tue,wed,thu,fri,sat,sun'],
             'preferred_times'      => ['nullable', 'array'],
             'preferred_times.*'    => ['in:morning,afternoon,evening,night,midnight'],
-            'pref_age_min'         => ['nullable', 'integer', 'min:18', 'max:60'],
-            'pref_age_max'         => ['nullable', 'integer', 'min:18', 'max:60'],
+            'pref_age_min'          => ['nullable', 'integer', 'min:18', 'max:80'],
+            'pref_age_max'          => ['nullable', 'integer', 'min:18', 'max:80'],
+            'pref_body_type_ids'    => ['nullable', 'array'],
+            'pref_body_type_ids.*'  => ['integer'],
         ]);
 
         auth()->user()->update([
             'notify_new_cast'    => $request->boolean('notify_new_cast'),
             'pref_cast_type_ids' => $request->input('pref_cast_type_ids', []),
             'pref_area_ids'      => $request->input('pref_area_ids', []),
+            'pref_body_type_ids' => $request->input('pref_body_type_ids', []),
             'preferred_days'     => $request->input('preferred_days', []),
             'preferred_times'    => $request->input('preferred_times', []),
             'pref_age_min'       => $request->filled('pref_age_min') ? (int)$request->pref_age_min : null,
@@ -99,8 +106,9 @@ class UserDashboardController extends Controller
 
     private function getRecommendedCasts(\App\Models\User $user, int $limit = 12): \Illuminate\Support\Collection
     {
-        $typeIds = $user->pref_cast_type_ids ?? [];
-        $areaIds = $user->pref_area_ids ?? [];
+        $typeIds     = $user->pref_cast_type_ids  ?? [];
+        $areaIds     = $user->pref_area_ids        ?? [];
+        $bodyTypeIds = $user->pref_body_type_ids   ?? [];
 
         $query = Cast::with(['shop', 'castType'])
             ->where('status', 'active')
@@ -113,6 +121,9 @@ class UserDashboardController extends Controller
         }
         if (!empty($areaIds)) {
             $query->whereHas('shop', fn($q) => $q->whereIn('area_id', $areaIds));
+        }
+        if (!empty($bodyTypeIds)) {
+            $query->whereIn('body_id', $bodyTypeIds);
         }
         if ($user->pref_age_min !== null) {
             $query->where('age', '>=', $user->pref_age_min);
