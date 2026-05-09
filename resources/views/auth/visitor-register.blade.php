@@ -27,21 +27,25 @@
                 <input type="text" name="name" value="{{ old('name') }}" required maxlength="50"
                        placeholder="表示名（例：田中さん）"
                        class="w-full bg-surface-400 border border-surface-300 rounded-lg px-4 py-2.5 text-[#E8E4DC] text-sm focus:outline-none focus:border-deli-500">
+                <p class="text-xs text-[#6A6A7E] mt-1">実名ではなくハンドルネームを推奨します。店舗の管理画面にお気に入り登録者として表示されることがあります。</p>
             </div>
             <div>
                 <label class="block text-sm text-[#B0AEAD] mb-1">メールアドレス <span class="text-deli-400">*</span></label>
                 <input type="email" name="email" value="{{ old('email') }}" required maxlength="200"
                        class="w-full bg-surface-400 border border-surface-300 rounded-lg px-4 py-2.5 text-[#E8E4DC] text-sm focus:outline-none focus:border-deli-500">
+                <p class="text-xs text-[#6A6A7E] mt-1">実名ではなくハンドルネームを推奨します。店舗の管理画面にお気に入り登録者として表示されることがあります。</p>
             </div>
             <div>
                 <label class="block text-sm text-[#B0AEAD] mb-1">パスワード <span class="text-deli-400">*</span></label>
                 <input type="password" name="password" required minlength="8"
                        class="w-full bg-surface-400 border border-surface-300 rounded-lg px-4 py-2.5 text-[#E8E4DC] text-sm focus:outline-none focus:border-deli-500">
+                <p class="text-xs text-[#6A6A7E] mt-1">実名ではなくハンドルネームを推奨します。店舗の管理画面にお気に入り登録者として表示されることがあります。</p>
             </div>
             <div>
                 <label class="block text-sm text-[#B0AEAD] mb-1">パスワード確認 <span class="text-deli-400">*</span></label>
                 <input type="password" name="password_confirmation" required minlength="8"
                        class="w-full bg-surface-400 border border-surface-300 rounded-lg px-4 py-2.5 text-[#E8E4DC] text-sm focus:outline-none focus:border-deli-500">
+                <p class="text-xs text-[#6A6A7E] mt-1">実名ではなくハンドルネームを推奨します。店舗の管理画面にお気に入り登録者として表示されることがあります。</p>
             </div>
             <button type="submit"
                     class="w-full bg-deli-500 hover:bg-deli-400 text-white font-bold py-3 rounded-lg transition mt-2">
