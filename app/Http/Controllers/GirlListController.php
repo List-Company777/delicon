@@ -226,7 +226,7 @@ class GirlListController extends Controller
     {
         $girlTypeRaw = Cache::remember("slug:girl_type:{$type_slug}", 86400,
             fn() => (array) DB::table('girl_types')->where('slug', $type_slug)
-                ->first(['id', 'name', 'slug', 'age_min', 'age_max', 'tall_min', 'tall_max', 'body_type_id'])
+                ->first(['id', 'name', 'slug', 'age_min', 'age_max', 'tall_min', 'tall_max', 'body_type_id', 'cast_type_id'])
         );
 
         if (!($girlTypeRaw['id'] ?? null)) abort(404);
@@ -237,6 +237,7 @@ class GirlListController extends Controller
         $tallMin    = $girlTypeRaw['tall_min'];
         $tallMax    = $girlTypeRaw['tall_max'];
         $bodyTypeId = $girlTypeRaw['body_type_id'];
+        $castTypeId = $girlTypeRaw['cast_type_id'];
 
         [$areaModel, $prefOnlyModel] = $this->resolveArea($area_slug);
         $areaName  = $areaModel?->name ?? $prefOnlyModel?->name ?? '全国';
@@ -257,6 +258,8 @@ class GirlListController extends Controller
             if ($tallMax !== null) $query->where('tall', '<=', $tallMax);
         } elseif ($bodyTypeId !== null) {
             $query->where('body_id', $bodyTypeId);
+        } elseif ($castTypeId !== null) {
+            $query->where('type_id', $castTypeId);
         } else {
             $query->where('type_id', $typeId);
         }

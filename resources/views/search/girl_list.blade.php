@@ -24,7 +24,7 @@
     $tallRanges = \App\Http\Controllers\GirlListController::tallRanges();
     $cupGroups  = \App\Http\Controllers\GirlListController::cupGroups();
     $ageToTypeSlug  = ['50s' => 'isoji', '60s' => 'kanreki', '70s' => 'obaachan'];
-    $tallToTypeSlug = ['super' => 'joshin', 'short' => 'kogara'];
+    $tallToTypeSlug = ['super' => 'tyoshin', 'short' => 'kogara'];
     $bodyToTypeSlug = [1 => 'kyonyuu', 2 => 'hinnyuu', 5 => 'slender', 6 => 'choipocha', 7 => 'gekipocha', 8 => 'glamour', 16 => 'bakunyuu', 3 => 'joshin', 4 => 'kogara'];
 
     // フィルターの人間可読ラベル（title / description / H1 に使用）
