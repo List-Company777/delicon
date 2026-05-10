@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'デリヘル情報') | デリヘルリスト</title>
-    <meta name="description" content="@yield('description', '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
+    <title>@yield('title', 'デリヘル・風俗情報') | delicon</title>
+    <meta name="description" content="@yield('description', '全国のデリヘル・風俗情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
     @hasSection('canonical')
     <link rel="canonical" href="@yield('canonical')">
     @endif
     @hasSection('robots')
     <meta name="robots" content="@yield('robots')">
     @endif
-    <meta property="og:site_name" content="デリヘルリスト">
+    <meta property="og:site_name" content="delicon">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('title', 'デリヘル情報') | デリヘルリスト">
-    <meta property="og:description" content="@yield('description', '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
+    <meta property="og:title" content="@yield('title', 'デリヘル・風俗情報') | delicon">
+    <meta property="og:description" content="@yield('description', '全国のデリヘル・風俗情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
     <meta property="og:url" content="@hasSection('canonical')@yield('canonical')@else{{ url()->current() }}@endif">
     <meta property="og:image" content="@yield('ogp_image', asset('android-chrome-192x192.png'))">
     <meta name="twitter:card" content="@yield('twitter_card', 'summary')">
@@ -31,7 +31,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="デリヘルリスト">
+    <meta name="apple-mobile-web-app-title" content="delicon">
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
@@ -46,7 +46,7 @@
             [
                 '@type'           => 'Organization',
                 '@id'             => url('/') . '#org',
-                'name'            => 'デリヘルリスト',
+                'name'            => 'delicon',
                 'url'             => url('/') . '/',
                 'foundingDate'    => '2026',
                 'logo'            => ['@type' => 'ImageObject', '@id' => url('/') . '#logo', 'url' => asset('images/logo.svg'), 'width' => 600, 'height' => 120],
@@ -56,7 +56,7 @@
                 '@type'           => 'WebSite',
                 '@id'             => url('/') . '#website',
                 'url'             => url('/') . '/',
-                'name'            => 'デリヘルリスト',
+                'name'            => 'delicon',
                 'inLanguage'      => 'ja',
                 'publisher'       => ['@id' => url('/') . '#org'],
                 'isAccessibleForFree' => true,
@@ -262,7 +262,7 @@
             </div>
             <div class="border-t border-surface-400 pt-6 text-center text-xs text-[#8A8A9E]">
                 <p class="text-[#E8E4DC] font-bold tracking-widest mb-2">デリヘル<span class="text-gold-400">リスト</span></p>
-                <p>© {{ date('Y') }} デリヘルリスト All Rights Reserved.</p>
+                <p>© {{ date('Y') }} delicon All Rights Reserved.</p>
                 <p class="mt-2 text-deli-400 font-semibold">⚠ 本サイトは18歳以上の方を対象としています。</p>
             </div>
         </div>
