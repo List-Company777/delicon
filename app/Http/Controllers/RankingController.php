@@ -10,7 +10,7 @@ class RankingController extends Controller
 {
     public function index()
     {
-        $ranking = Cache::remember('delicon:ranking', 3600, function () {
+        $rankingIds = Cache::remember('delicon:ranking', 3600, function () {
             $since = now()->subDays(7);
 
             $planBonus = "
@@ -20,7 +20,7 @@ class RankingController extends Controller
                      ELSE 0 END
             ";
 
-            return Cast::with(['shop', 'castType'])
+            return Cast::query()
                 ->join('shops', 'shops.id', '=', 'casts.shop_id')
                 ->where('casts.status', 'active')
                 ->where('shops.status', 'active')
@@ -40,21 +40,25 @@ class RankingController extends Controller
                     DB::raw("(SELECT cast_id, COUNT(*) AS view_count FROM cast_views WHERE viewed_at >= '{$since}' GROUP BY cast_id) vc"),
                     'vc.cast_id', '=', 'casts.id'
                 )
-                ->select(
-                    'casts.*',
-                    DB::raw("
-                        COALESCE(tc.tel_clicks, 0) * 10
-                        + COALESCE(fc.fav_count, 0) * 3
-                        + COALESCE(rc.review_count, 0) * 5
-                        + COALESCE(vc.view_count, 0) * 1
-                        + {$planBonus}
-                        AS ranking_score
-                    ")
-                )
+                ->selectRaw("casts.id, (
+                    COALESCE(tc.tel_clicks, 0) * 10
+                    + COALESCE(fc.fav_count, 0) * 3
+                    + COALESCE(rc.review_count, 0) * 5
+                    + COALESCE(vc.view_count, 0) * 1
+                    + {$planBonus}
+                ) AS ranking_score")
                 ->orderByDesc('ranking_score')
                 ->take(30)
-                ->get();
+                ->pluck('casts.id')
+                ->toArray();
         });
+
+        $ranking = empty($rankingIds)
+            ? collect()
+            : Cast::with(['shop', 'castType'])
+                ->whereIn('id', $rankingIds)
+                ->orderByRaw('FIELD(id, ' . implode(',', $rankingIds) . ')')
+                ->get();
 
         return view('ranking.index', compact('ranking'));
     }
