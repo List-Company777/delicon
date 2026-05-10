@@ -13,12 +13,12 @@ class RankingController extends Controller
         $ranking = Cache::remember('delicon:ranking', 3600, function () {
             $since = now()->subDays(7);
 
-            $planBonus = DB::raw("
+            $planBonus = "
                 CASE WHEN shops.plan = 1 THEN 50
                      WHEN shops.plan = 2 THEN 30
                      WHEN shops.plan = 3 THEN 15
                      ELSE 0 END
-            ");
+            ";
 
             return Cast::with(['shop', 'castType'])
                 ->join('shops', 'shops.id', '=', 'casts.shop_id')

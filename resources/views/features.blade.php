@@ -229,7 +229,7 @@
         <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-xl p-6 space-y-4">
             <p class="text-[#B0AEAD] leading-relaxed">
                 従来は <code class="bg-[#2A2A3E] text-deli-300 px-1.5 py-0.5 rounded text-sm">shinjuku.delicon.jp</code> のようなエリア別のサブドメインサイトが個別に存在していましたが、
-                新サイトでは <strong class="text-[#E8E4DC]">1つのサイト内でエリア別ページ（例：<code class="bg-[#2A2A3E] text-deli-300 px-1.5 py-0.5 rounded text-sm">delicon.jp/shinjuku/girl-list/</code>）</strong> として統合しました。
+                新サイトでは <strong class="text-[#E8E4DC]">1つのサイト内でエリア別ページ（例：<code class="bg-[#2A2A3E] text-deli-300 px-1.5 py-0.5 rounded text-sm">delicon.jp/tokyo/</code>）</strong> として統合しました。
             </p>
             <ul class="space-y-2 text-sm text-[#8A8A9E]">
                 <li class="flex gap-2"><span class="text-emerald-400 shrink-0">✓</span> 各サブドメインのURLは新サイトの対応エリアページへ自動転送（301リダイレクト）されます</li>
