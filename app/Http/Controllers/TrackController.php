@@ -46,14 +46,10 @@ class TrackController extends Controller
         return redirect()->route('job.show', $id, 302);
     }
 
-    /** 店舗クリック（検索結果 → 店舗詳細 or hotlink） */
+    /** 店舗クリック（検索結果 → 店舗詳細） */
     public function shop(Request $request, int $id): RedirectResponse
     {
-        $shop = Shop::with('partner', 'detail')->where('status', 'active')->findOrFail($id);
-
-        if ($shop->detail && $shop->detail->is_hotlink && $shop->detail->hotlink_url) {
-            return $this->hotlinkShopRedirect($request, $shop);
-        }
+        $shop = Shop::with('partner')->where('status', 'active')->findOrFail($id);
 
         if (! $this->isCrawler($request)) {
             $first = Cache::add("track:shop:{$id}:{$request->ip()}", 1, 3600);
@@ -73,34 +69,6 @@ class TrackController extends Controller
         }
 
         return redirect()->route('shop.show', $id, 302);
-    }
-
-    private function hotlinkShopRedirect(Request $request, Shop $shop): RedirectResponse
-    {
-        if (! $this->isCrawler($request)) {
-            $first = Cache::add("track:shop:{$shop->id}:{$request->ip()}", 1, 3600);
-            if ($first) {
-                ShopAccessLog::create([
-                    'shop_id'    => $shop->id,
-                    'ip'         => $request->ip(),
-                    'user_agent' => mb_substr($request->userAgent() ?? '', 0, 300),
-                    'referrer'   => mb_substr($request->headers->get('referer') ?? '', 0, 500),
-                ]);
-
-                $shop->detail->increment('click_count');
-
-                $reset = $shop->consumeBudget(20);
-                if ($reset) {
-                    $this->notifyBudgetDepleted($shop);
-                }
-                if ($shop->xml_source) {
-                    $feed = $this->findXmlFeed($shop->xml_source);
-                    $feed?->consumeBudget($shop->bid_price + 20);
-                }
-            }
-        }
-
-        return redirect()->away($shop->detail->hotlink_url, 302);
     }
 
     private function findXmlFeed(string $slug): ?XmlFeed

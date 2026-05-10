@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Mail\BudgetDepleted;
 use App\Models\Job;
 use App\Models\JobAccessLog;
-use App\Models\XmlFeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -17,11 +16,6 @@ class JobController extends Controller
         $job = Job::with(['shop.genre', 'shop.area', 'shop.detail', 'shop.partner', 'jobType', 'area', 'station'])
             ->where('status', 'active')
             ->findOrFail($id);
-
-        // ホットリンクは直接リダイレクト（課金 + 転送）
-        if ($job->is_hotlink && $job->hotlink_url) {
-            return $this->hotlinkRedirect($request, $job);
-        }
 
         // 詳細PV記録
         $this->recordAccess($request, $job, 'view');
@@ -37,7 +31,6 @@ class JobController extends Controller
             ->where('shop_id', $job->shop_id)
             ->where('id', '!=', $job->id)
             ->where('status', 'active')
-            ->orderByDesc('is_hotlink')
             ->limit(4)
             ->get();
 
@@ -81,38 +74,6 @@ class JobController extends Controller
         }
 
         return view('job.show', compact('job', 'gender', 'sameShopJobs', 'relatedJobs'));
-    }
-
-    public function click(Request $request, int $id)
-    {
-        $job = Job::with('shop.partner')
-            ->where('status', 'active')
-            ->where('is_hotlink', true)
-            ->findOrFail($id);
-
-        return $this->hotlinkRedirect($request, $job);
-    }
-
-    private function hotlinkRedirect(Request $request, Job $job)
-    {
-        $isDuplicate = ! Cache::add("track:job-click:{$job->id}:{$request->ip()}", 1, 3600);
-
-        $this->recordAccess($request, $job, 'click');
-        $job->increment('click_count');
-
-        if (! $isDuplicate) {
-            $reset = $job->shop->consumeBudget();
-            if ($reset) {
-                $this->notifyBudgetDepleted($job->shop);
-            }
-
-            if ($job->xml_source) {
-                $feed = XmlFeed::where('slug', $job->xml_source)->first();
-                $feed?->consumeBudget($job->shop->bid_price);
-            }
-        }
-
-        return redirect()->away($job->hotlink_url, 302);
     }
 
     private function recordAccess(Request $request, Job $job, string $type): void

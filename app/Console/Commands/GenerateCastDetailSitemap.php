@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Cast;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class GenerateCastDetailSitemap extends Command
 {
@@ -14,8 +15,28 @@ class GenerateCastDetailSitemap extends Command
 
     public function handle(): void
     {
-        $base = rtrim(config('app.url'), '/');
-        $now  = now()->toAtomString();
+        $base      = rtrim(config('app.url'), '/');
+        $now       = now()->toAtomString();
+        $threshold = now()->subDays(30)->toDateString();
+
+        // 直近30日以内に出勤があるキャストID
+        $recentWorking = DB::table('casts')
+            ->where('status', 'active')
+            ->where('working_date', '>=', $threshold)
+            ->pluck('id')
+            ->flip()
+            ->all();
+
+        // 直近30日以内に日記を投稿したキャストID
+        $recentDiary = DB::table('cast_diaries')
+            ->where('status', 'published')
+            ->where('created_at', '>=', $threshold)
+            ->distinct()
+            ->pluck('cast_id')
+            ->flip()
+            ->all();
+
+        $highPriority = $recentWorking + $recentDiary;
 
         // 既存の分割ファイルをリセット
         foreach (glob(public_path('sitemap-cast-*.xml')) ?: [] as $old) {
@@ -30,11 +51,12 @@ class GenerateCastDetailSitemap extends Command
             ->whereRaw("CHAR_LENGTH(COALESCE(comment,'')) >= 100")
             ->select('id', 'updated_at')
             ->orderBy('id')
-            ->chunk(1000, function ($casts) use ($base, $now, &$urls, &$fileIndex, &$totalCount) {
+            ->chunk(1000, function ($casts) use ($base, $now, $highPriority, &$urls, &$fileIndex, &$totalCount) {
                 foreach ($casts as $cast) {
                     $urls[] = [
-                        'loc'     => "{$base}/cast/{$cast->id}/",
-                        'lastmod' => $cast->updated_at?->toAtomString() ?? $now,
+                        'loc'      => "{$base}/cast/{$cast->id}/",
+                        'lastmod'  => $cast->updated_at?->toAtomString() ?? $now,
+                        'priority' => isset($highPriority[$cast->id]) ? '0.7' : '0.4',
                     ];
                     $totalCount++;
 
@@ -57,7 +79,6 @@ class GenerateCastDetailSitemap extends Command
 
     private function writeXml(array $urls, int $index): void
     {
-        $now  = now()->toAtomString();
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         foreach ($urls as $url) {
@@ -65,7 +86,7 @@ class GenerateCastDetailSitemap extends Command
             $xml .= "    <loc>" . htmlspecialchars($url['loc']) . "</loc>\n";
             $xml .= "    <lastmod>{$url['lastmod']}</lastmod>\n";
             $xml .= "    <changefreq>weekly</changefreq>\n";
-            $xml .= "    <priority>0.5</priority>\n";
+            $xml .= "    <priority>{$url['priority']}</priority>\n";
             $xml .= "  </url>\n";
         }
         $xml .= '</urlset>';

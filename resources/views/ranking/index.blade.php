@@ -1,6 +1,28 @@
 @extends('layouts.app')
 @section('title', '人気女性ランキング | デリヘルリスト')
 @section('description', '電話・お気に入り・口コミ・閲覧数から算出した人気女性ランキングTOP30。')
+@section('canonical', route('ranking.index') . '/')
+
+@push('head')
+@if($ranking->isNotEmpty())
+@php
+    $ld_list = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        'name'            => '人気女性ランキング',
+        'url'             => route('ranking.index') . '/',
+        'numberOfItems'   => $ranking->count(),
+        'itemListElement' => $ranking->map(fn($cast, $i) => [
+            '@type'    => 'ListItem',
+            'position' => $i + 1,
+            'url'      => route('cast.show', $cast->id) . '/',
+            'name'     => $cast->name,
+        ])->values()->all(),
+    ];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endif
+@endpush
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8">

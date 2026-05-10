@@ -273,7 +273,7 @@
         var t = e.target;
         if (t.tagName !== 'IMG') return;
         if (t.classList.contains('img-onerror-hide')) { t.style.display='none'; }
-        if (t.classList.contains('img-onerror-cast')) { if (t.src !== location.origin+'/img/no-cast.jpg') t.src='/img/no-cast.jpg'; }
+        if (t.classList.contains('img-onerror-cast')) { if (t.src !== location.origin+'/img/no-cast.svg') t.src='/img/no-cast.svg'; }
     }, true);
     </script>
     @stack('scripts')

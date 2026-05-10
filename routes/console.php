@@ -60,5 +60,8 @@ Schedule::command("sitemap:generate")->dailyAt("07:00");
 // お気に入りキャストの新着シフト通知（毎日18:00）
 Schedule::command('notify:schedules')->dailyAt('18:00');
 
+// 新人キャスト登録通知（毎日10:00）
+Schedule::command('notify:new-casts')->dailyAt('10:00');
+
 // キャスト掲載スコア更新（毎日午前1時）
 Schedule::command('casts:update-scores')->dailyAt('01:00');

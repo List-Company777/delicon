@@ -27,7 +27,7 @@
             @foreach($recommendations as $cast)
             <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
                 <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-gold-500 transition">
-                    <img src="{{ $cast->img_url ?? '/img/no-cast.jpg' }}" alt="{{ $cast->name }}"
+                    <img src="{{ $cast->img_url ?? '/img/no-cast.svg' }}" alt="{{ $cast->name }}"
                          class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
                     @if($cast->working_date && $cast->working_date->isToday())
                     <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>

@@ -13,6 +13,7 @@ use App\Models\Shop;
 use App\Models\ShopDetail;
 use App\Models\SearchKeyword;
 use App\Models\KeywordNormalization;
+use Illuminate\Support\Facades\DB;
 use App\Models\SearchPageView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -215,12 +216,32 @@ class SearchController extends Controller
         );
         $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
 
+        // 小エリア絞り込み（都道府県ページのみ）
+        $subAreas = collect();
+        if ($isPrefPage && $prefOnlyModel) {
+            $subAreasRaw = Cache::remember("pref:sub_areas_shops:{$area_slug}", 1800, function () use ($prefOnlyModel) {
+                $areaIds = DB::table('areas')->where('prefecture_id', $prefOnlyModel->id)->pluck('id');
+                $counts  = DB::table('shops')
+                    ->where('status', 'active')->whereIn('area_id', $areaIds)
+                    ->groupBy('area_id')->selectRaw('area_id, COUNT(*) as cnt')
+                    ->pluck('cnt', 'area_id');
+                return DB::table('areas')
+                    ->where('prefecture_id', $prefOnlyModel->id)->whereNull('parent_id')
+                    ->get(['id', 'name', 'slug'])
+                    ->filter(fn($a) => ($counts[$a->id] ?? 0) > 0)
+                    ->sortByDesc(fn($a) => $counts[$a->id] ?? 0)->values()
+                    ->map(fn($a) => ['name' => $a->name, 'slug' => $a->slug, 'cnt' => $counts[$a->id] ?? 0])
+                    ->all();
+            });
+            $subAreas = collect($subAreasRaw)->map(fn($a) => (object) $a);
+        }
+
         return response()->view('search.shop_list', compact(
             'gender', 'area_slug', 'job_slug', 'results',
             'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'shopTypes', 'shopTypeIds', 'ageRange'
+            'noindex', 'shopTypes', 'shopTypeIds', 'ageRange', 'subAreas'
         ), $status);
     }
 
@@ -422,7 +443,7 @@ class SearchController extends Controller
                         ->pluck('shop_id')
                     );
                 })
-                ->orderByRaw("plan DESC, COALESCE(paid_since, '9999-12-31') ASC, id ASC")
+                ->orderByRaw("plan ASC, COALESCE(paid_since, '9999-12-31') ASC, id ASC")
                 ->pluck('id')->all();
         }
 

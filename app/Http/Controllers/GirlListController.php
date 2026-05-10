@@ -114,13 +114,17 @@ class GirlListController extends Controller
 
     public function index(Request $request, string $area_slug)
     {
-        foreach (self::PARAM_TO_TYPE as $param => $map) {
-            $val = $param === 'body' ? (int) $request->input($param) : $request->input($param);
-            if ($val && isset($map[$val])) {
-                return redirect()->route('girl.list.type', [
-                    'area_slug' => $area_slug,
-                    'type_slug' => $map[$val],
-                ], 301);
+        $activeFilterCount = collect(['age', 'tall', 'body'])->filter(fn($k) => $request->filled($k))->count();
+
+        if ($activeFilterCount === 1) {
+            foreach (self::PARAM_TO_TYPE as $param => $map) {
+                $val = $param === 'body' ? (int) $request->input($param) : $request->input($param);
+                if ($val && isset($map[$val])) {
+                    return redirect()->route('girl.list.type', [
+                        'area_slug' => $area_slug,
+                        'type_slug' => $map[$val],
+                    ], 301);
+                }
             }
         }
         return $this->render($request, $area_slug, 'all');
@@ -174,10 +178,32 @@ class GirlListController extends Controller
         $noindex = $results->total() < 5 || $filterCount >= 2;
         $status  = $results->total() === 0 ? 404 : 200;
 
+        // 小エリア絞り込み（都道府県ページのみ）
+        $subAreas = collect();
+        if ($prefOnlyModel) {
+            $subAreasRaw = Cache::remember("pref:sub_areas_casts:{$area_slug}", 1800, function () use ($prefOnlyModel) {
+                $areaIds = DB::table('areas')->where('prefecture_id', $prefOnlyModel->id)->pluck('id');
+                $counts  = DB::table('casts')
+                    ->join('shops', 'shops.id', '=', 'casts.shop_id')
+                    ->where('casts.status', 'active')->where('shops.status', 'active')
+                    ->whereIn('shops.area_id', $areaIds)
+                    ->groupBy('shops.area_id')->selectRaw('shops.area_id, COUNT(casts.id) as cnt')
+                    ->pluck('cnt', 'shops.area_id');
+                return DB::table('areas')
+                    ->where('prefecture_id', $prefOnlyModel->id)->whereNull('parent_id')
+                    ->get(['id', 'name', 'slug'])
+                    ->filter(fn($a) => ($counts[$a->id] ?? 0) > 0)
+                    ->sortByDesc(fn($a) => $counts[$a->id] ?? 0)->values()
+                    ->map(fn($a) => ['name' => $a->name, 'slug' => $a->slug, 'cnt' => $counts[$a->id] ?? 0])
+                    ->all();
+            });
+            $subAreas = collect($subAreasRaw)->map(fn($a) => (object) $a);
+        }
+
         return response()->view('search.girl_list', compact(
             'area_slug', 'cast_tab', 'areaName', 'prefModel',
             'areaModel', 'prefOnlyModel', 'results', 'noindex',
-            'hasFilters', 'bodyTypes', 'prefectureLinks'
+            'hasFilters', 'bodyTypes', 'prefectureLinks', 'subAreas'
         ), $status);
     }
 
@@ -195,7 +221,7 @@ class GirlListController extends Controller
         if ($cast_tab === 'standby') {
             $query->whereDate('working_date', today());
             $query->orderByDesc('cast_score')
-                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
                   ->orderBy('casts.id');
         } elseif ($cast_tab === 'new') {
             $query->where('is_new', true)
@@ -203,7 +229,7 @@ class GirlListController extends Controller
             $query->orderByDesc('new_since')->orderByDesc('created_at');
         } else {
             $query->orderByDesc('cast_score')
-                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
                   ->orderBy('casts.id');
         }
 
@@ -285,7 +311,7 @@ class GirlListController extends Controller
         }
 
         $results = $query->orderByDesc('cast_score')
-            ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) DESC')
+            ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
             ->orderBy('casts.id')
             ->paginate(self::PER_PAGE)
             ->withQueryString();

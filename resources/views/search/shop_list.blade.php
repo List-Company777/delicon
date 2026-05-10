@@ -81,6 +81,21 @@
 
 <div class="max-w-6xl mx-auto px-4 py-6">
 
+    {{-- 小エリア絞り込み（都道府県ページのみ） --}}
+    @if(isset($subAreas) && $subAreas->isNotEmpty())
+    <div class="mb-5">
+        <p class="text-xs text-[#8A8A9E] mb-2">エリアで絞り込む</p>
+        <div class="flex flex-wrap gap-1.5">
+            @foreach($subAreas as $subArea)
+            <a href="{{ route('shop.list', ['area_slug' => $subArea->slug]) }}/"
+               class="px-3 py-1 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition whitespace-nowrap">
+                {{ $subArea->name }}<span class="text-[#6A6A7E] ml-0.5">{{ number_format($subArea->cnt) }}</span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- 店種フィルター --}}
     <div class="flex flex-wrap gap-2 mb-5">
         <a href="{{ route('shop.list', ['area_slug' => $area_slug]) }}/"
@@ -134,8 +149,8 @@
         <a href="{{ route('shop.show', $shop->id) }}/"
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group block">
             <div class="relative h-40 bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
-                @if($shop->main_image_url)
-                <img src="{{ $shop->main_image_url }}"
+                @if($shop->main_image)
+                <img src="{{ Storage::url($shop->main_image) }}"
                      alt="{{ $shop->name }}のデリヘル情報"
                      @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                      class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">

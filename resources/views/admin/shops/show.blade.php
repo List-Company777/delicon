@@ -325,7 +325,7 @@
                 <div class="border-t border-gray-100 pt-4">
                     <p class="text-xs text-gray-400 mb-2">掲載プラン</p>
                     @php
-                        $planLabels = [1=>'1：無料（リンクなし）', 2=>'2：無料（リンクあり）', 3=>'3：基本有料', 4=>'4：ミドル有料', 5=>'5：VIP有料'];
+                        $planLabels = [1=>'1：VIP有料', 2=>'2：ミドル有料', 3=>'3：基本有料'];
                     @endphp
                     <form action="{{ route('admin.shops.updatePlan', $shop->id) }}/" method="POST" class="flex items-center gap-2">
                         @csrf @method('PATCH')

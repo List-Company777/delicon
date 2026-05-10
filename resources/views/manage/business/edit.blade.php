@@ -114,29 +114,7 @@
                     </div>
                 </td>
             </tr>
-            @if($shop->hasBudget())
-            <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap align-top">外部サイト誘導</th>
-                <td class="px-4 py-3 space-y-3" x-data="{ hotlink: {{ old('is_hotlink', $detail->is_hotlink ?? false) ? 'true' : 'false' }} }">
-                    <label class="inline-flex items-start gap-2">
-                        <input type="checkbox" name="is_hotlink" value="1"
-                               x-model="hotlink"
-                               {{ old('is_hotlink', $detail->is_hotlink ?? false) ? 'checked' : '' }}
-                               class="mt-0.5">
-                        <span>有効にする</span>
-                    </label>
-                    <p class="text-xs text-gray-400">有効にすると、検索結果や店舗ページのボタンクリック時に指定したURLへ直接移動します。クリック課金は入札単価＋20円/クリックになります。有料プランへの加入が必要です。</p>
-                    <div x-show="hotlink" x-cloak>
-                        <input type="url" name="hotlink_url"
-                               value="{{ old('hotlink_url', $detail->hotlink_url ?? '') }}"
-                               placeholder="https://example.com/shop/..."
-                               maxlength="500"
-                               class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                        <p class="text-xs text-gray-400 mt-1">誘導先のURL（500文字以内）</p>
-                    </div>
-                </td>
-            </tr>
-            @endif
+
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">カラオケ</th>
                 <td class="px-4 py-3">
@@ -388,6 +366,7 @@
                     </div>
                 </template>
                 <p x-show="rows.length === 0" class="text-xs text-gray-400">「追加」ボタンでSNSや公式サイトのURLを登録できます（最大3件）</p>
+            <p class="text-xs text-amber-600 mt-2">⚠ 別サイトと短縮URLへの誘導は禁止されています。</p>
             </div>
         </div>
 

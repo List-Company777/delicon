@@ -8,6 +8,7 @@ use App\Models\ShopSetPrice;
 use App\Models\ShopPricePlan;
 use App\Models\ShopExtensionPrice;
 use App\Models\ShopOtherCharge;
+use App\Rules\AllowedExternalUrl;
 use Illuminate\Http\Request;
 
 class BusinessController extends BaseController
@@ -42,8 +43,6 @@ class BusinessController extends BaseController
             'has_private_room'                   => ['boolean'],
             'discount_first_set'                 => ['boolean'],
             'discount_custom'                    => ['nullable', 'string', 'max:200'],
-            'is_hotlink'                         => ['boolean'],
-            'hotlink_url'                        => ['nullable', 'url', 'max:500'],
             'opening_hours'                      => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
             'closing_hours'                      => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
             'opening_days'                       => ['nullable', 'array'],
@@ -64,7 +63,7 @@ class BusinessController extends BaseController
             'other_charges.*.price'              => ['nullable', 'string', 'max:50'],
             'external_urls'                      => ['nullable', 'array', 'max:3'],
             'external_urls.*.url_type'           => ['nullable', 'in:' . implode(',', array_keys(ShopExternalUrl::TYPES))],
-            'external_urls.*.url'                => ['nullable', 'url', 'max:500'],
+            'external_urls.*.url'                => ['nullable', 'url', 'max:500', new AllowedExternalUrl()],
             'faq'                                => ['nullable', 'array', 'max:3'],
             'faq.*.q'                            => ['nullable', 'string', 'max:100'],
             'faq.*.a'                            => ['nullable', 'string', 'max:300'],
@@ -87,8 +86,6 @@ class BusinessController extends BaseController
                 'has_private_room'   => $request->boolean('has_private_room'),
                 'discount_first_set' => $request->boolean('discount_first_set'),
                 'discount_custom'    => $request->input('discount_custom'),
-                'is_hotlink'         => $shop->hasBudget() ? $request->boolean('is_hotlink') : ($detail->is_hotlink ?? false),
-                'hotlink_url'        => $shop->hasBudget() ? ($request->boolean('is_hotlink') ? $request->input('hotlink_url') : null) : ($detail->hotlink_url ?? null),
                 'opening_hours'     => $request->opening_hours,
                 'closing_hours'     => $request->closing_hours,
                 'opening_days'      => $request->input('opening_days', []),

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cast;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -13,8 +14,8 @@ class RankingController extends Controller
             $since = now()->subDays(7);
 
             $planBonus = DB::raw("
-                CASE WHEN shops.plan = 5 THEN 50
-                     WHEN shops.plan = 4 THEN 30
+                CASE WHEN shops.plan = 1 THEN 50
+                     WHEN shops.plan = 2 THEN 30
                      WHEN shops.plan = 3 THEN 15
                      ELSE 0 END
             ");
@@ -58,14 +59,37 @@ class RankingController extends Controller
         return view('ranking.index', compact('ranking'));
     }
 
-    public function recordTelClick(int $castId)
+    public function recordTelClick(Request $request, int $castId)
     {
+        if ($this->isCrawler($request)) {
+            return response()->noContent();
+        }
+
+        $cacheKey = "tel_click:{$castId}:{$request->ip()}";
+        if (!Cache::add($cacheKey, 1, 3600)) {
+            return response()->noContent();
+        }
+
         DB::table('cast_tel_clicks')->insert([
             'cast_id'    => $castId,
-            'ip_address' => request()->ip(),
+            'ip_address' => $request->ip(),
             'created_at' => now(),
         ]);
         Cache::forget('delicon:ranking');
         return response()->noContent();
+    }
+
+    private function isCrawler(Request $request): bool
+    {
+        $ua = strtolower($request->userAgent() ?? '');
+        if ($ua === '') return true;
+
+        foreach (['bot','crawl','spider','slurp','mediapartners','facebookexternalhit',
+                  'twitterbot','linkedinbot','whatsapp','applebot','pinterest',
+                  'semrush','ahrefsbot','mj12bot','dotbot','bingpreview',
+                  'yandex','baiduspider','duckduckbot'] as $p) {
+            if (str_contains($ua, $p)) return true;
+        }
+        return false;
     }
 }

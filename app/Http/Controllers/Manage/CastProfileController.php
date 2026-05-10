@@ -58,7 +58,7 @@ class CastProfileController extends BaseController
     public function create()
     {
         $shop = $this->shopOrFail();
-        $limit = $this->castLimit($shop->plan ?? 5);
+        $limit = $this->castLimit($shop->plan ?? 99);
         $currentCount = Cast::where('shop_id', $shop->id)->where('status', 'active')->count();
         $castTypes = CastType::orderBy('id')->get();
         $bodyTypes = CastBodyType::orderBy('id')->get();
@@ -67,11 +67,7 @@ class CastProfileController extends BaseController
 
     private function castLimit(int $plan): ?int
     {
-        return match($plan) {
-            5       => 10,
-            4       => 20,
-            default => null,
-        };
+        return null;
     }
 
     public function store(Request $request)
@@ -79,7 +75,7 @@ class CastProfileController extends BaseController
         $shop = $this->shopOrFail();
 
         // プラン別登録上限チェック
-        $limit = $this->castLimit($shop->plan ?? 5);
+        $limit = $this->castLimit($shop->plan ?? 99);
         if ($limit !== null) {
             $current = Cast::where('shop_id', $shop->id)->where('status', 'active')->count();
             if ($current >= $limit) {

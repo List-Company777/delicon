@@ -20,6 +20,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 @endpush
 
 @section('content')
+<main>
 
 {{-- ヒーロー --}}
 <section class="relative bg-surface-800 overflow-hidden">
@@ -49,10 +50,9 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             ];
             $heroPrefMap = $prefectures->keyBy('slug');
         @endphp
-        <div class="space-y-4">
-            <h2 class="text-sm font-bold text-[#C8C4BC] tracking-wide">エリアから探す</h2>
+        <h2 class="text-sm font-bold text-[#C8C4BC] tracking-wide mb-4">エリアから探す</h2>
             @foreach($heroRegions as $regionName => $slugs)
-            <div>
+            <div class="mb-3">
                 <p class="text-xs text-[#8A8A9E] mb-1.5">{{ $regionName }}</p>
                 <div class="flex flex-wrap gap-1.5">
                     @foreach($slugs as $slug)
@@ -66,7 +66,6 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 </div>
             </div>
             @endforeach
-        </div>
         @endif
     </div>
 </section>
@@ -95,7 +94,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 <section class="max-w-6xl mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
-            <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
+            <span aria-hidden="true" class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
             おすすめデリヘル店舗
         </h2>
         <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
@@ -106,19 +105,19 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <a href="{{ route('shop.show', $shop->id) }}/"
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group">
             <div class="relative aspect-[5/2] bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
-                @if($shop->shop_file_name)
-                <img src="{{ $shop->shop_banner_url }}"
+                @if($shop->shop_image_url)
+                <img src="{{ $shop->shop_image_url }}"
                      alt="{{ $shop->name }}のデリヘル情報"
                      loading="lazy"
                      class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 @else
                 <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
                 @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
+                <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
                 @if($shop->shop_type_name ?? null)
-                <span class="absolute top-2 left-2 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
+                <span class="absolute top-2 left-2 z-10 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
                 @endif
-                <p class="absolute bottom-2 left-2 right-2 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
+                <p aria-hidden="true" class="absolute bottom-2 left-2 right-2 z-10 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
             </div>
             <div class="p-3">
                 <h3 class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">
@@ -151,7 +150,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
-                <span class="w-1 h-6 bg-deli-400 rounded-full inline-block"></span>
+                <span aria-hidden="true" class="w-1 h-6 bg-deli-400 rounded-full inline-block"></span>
                 新着デリヘルキャスト
             </h2>
             <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
@@ -192,7 +191,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
-                <span class="w-1 h-6 bg-gold-500 rounded-full inline-block"></span>
+                <span aria-hidden="true" class="w-1 h-6 bg-gold-500 rounded-full inline-block"></span>
                 あなたにおすすめ
             </h2>
             <a href="{{ route('user.settings') }}/" class="text-xs text-[#8A8A9E] hover:text-deli-400 transition">設定を変更</a>
@@ -226,7 +225,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 <section class="bg-surface-700 py-12">
     <div class="max-w-6xl mx-auto px-4">
         <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
-            <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
+            <span aria-hidden="true" class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
             本日の出勤
             <span class="text-sm font-normal text-deli-400 ml-1">{{ today()->format('m月d日') }}</span>
         </h2>
@@ -256,7 +255,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 <section class="bg-surface-600 border-y border-surface-400 py-12">
     <div class="max-w-6xl mx-auto px-4">
         <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
-            <span class="w-1 h-6 bg-gold-400 rounded-full inline-block"></span>
+            <span aria-hidden="true" class="w-1 h-6 bg-gold-400 rounded-full inline-block"></span>
             新人キャスト
         </h2>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
@@ -284,7 +283,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 @if($popularKeywords->isNotEmpty())
 <section class="max-w-6xl mx-auto px-4 py-12">
     <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] mb-6 flex items-center gap-3">
-        <span class="w-1 h-6 bg-gold-400 rounded-full inline-block"></span>
+        <span aria-hidden="true" class="w-1 h-6 bg-gold-400 rounded-full inline-block"></span>
         デリヘルの業種から探す
     </h2>
     <div class="flex flex-wrap gap-3">
@@ -310,20 +309,20 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             <p>デリコンでは、全国のデリヘル・風俗店情報を掲載しています。各店舗のシステム・料金・在籍キャストのプロフィールをまとめて確認できます。ホテヘル・素人系・人妻・SMなど業種ごとに絞り込み検索も可能です。</p>
         </div>
 
-        <div class="grid grid-cols-3 gap-4">
+        <dl class="grid grid-cols-3 gap-4">
             <div class="bg-surface-600 border border-surface-400 rounded-xl p-5 text-center">
-                <div class="text-2xl font-bold text-deli-400 mb-1">{{ number_format(\App\Models\Shop::where('status','active')->count()) }}<span class="text-base">店</span></div>
-                <p class="text-xs text-[#7A7A8E]">掲載中の店舗数</p>
+                <dd class="text-2xl font-bold text-deli-400 mb-1">{{ number_format(\App\Models\Shop::where('status','active')->count()) }}<span class="text-base">店</span></dd>
+                <dt class="text-xs text-[#7A7A8E]">掲載中の店舗数</dt>
             </div>
             <div class="bg-surface-600 border border-surface-400 rounded-xl p-5 text-center">
-                <div class="text-2xl font-bold text-deli-400 mb-1">{{ number_format(\App\Models\Cast::where('status','active')->count()) }}<span class="text-base">名</span></div>
-                <p class="text-xs text-[#7A7A8E]">在籍キャスト数</p>
+                <dd class="text-2xl font-bold text-deli-400 mb-1">{{ number_format(\App\Models\Cast::where('status','active')->count()) }}<span class="text-base">名</span></dd>
+                <dt class="text-xs text-[#7A7A8E]">在籍キャスト数</dt>
             </div>
             <div class="bg-surface-600 border border-surface-400 rounded-xl p-5 text-center">
-                <div class="text-2xl font-bold text-gold-400 mb-1">47</div>
-                <p class="text-xs text-[#7A7A8E]">都道府県対応</p>
+                <dd class="text-2xl font-bold text-gold-400 mb-1">47</dd>
+                <dt class="text-xs text-[#7A7A8E]">都道府県対応</dt>
             </div>
-        </div>
+        </dl>
     </div>
 </section>
 
@@ -333,27 +332,29 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <h2 class="text-xl font-bold text-[#F0ECE4] mb-6">よくある質問</h2>
         <div class="space-y-3">
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
-                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
-                    <span>デリヘルの料金相場はどのくらいですか？</span>
-                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center gap-3">
+                    デリヘルの料金相場はどのくらいですか？
+                    <span aria-hidden="true" class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm shrink-0">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルの料金は店舗・地域・コースによって異なりますが、一般的に60分コースで10,000円〜30,000円程度が相場です。素人系・人妻系などの業種や指名料の有無によっても変わります。各店舗の詳細ページでシステム・料金を確認できます。</p>
             </details>
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
-                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
-                    <span>デリヘルはどんな業種がありますか？</span>
-                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center gap-3">
+                    デリヘルはどんな業種がありますか？
+                    <span aria-hidden="true" class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm shrink-0">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルにはホテヘル・素人系・人妻・熟女・SM・ニューハーフ・アロマエステ・イメクラなどさまざまな業種があります。デリコンでは業種ごとに絞り込み検索ができます。</p>
             </details>
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
-                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center">
-                    <span>キャストの情報はどこで確認できますか？</span>
-                    <span class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm">▼</span>
+                <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center gap-3">
+                    キャストの情報はどこで確認できますか？
+                    <span aria-hidden="true" class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm shrink-0">▼</span>
                 </summary>
                 <p class="mt-3 text-sm text-[#9090A4] leading-7">各店舗の詳細ページに在籍キャスト一覧が掲載されています。また「キャストを探す」ページでは、タイプ・年齢・カップサイズなどの条件でキャストを横断検索することができます。</p>
             </details>
         </div>
     </div>
 </section>
+
+</main>
 @endsection

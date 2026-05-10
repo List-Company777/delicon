@@ -109,6 +109,8 @@ class UserDashboardController extends Controller
         $typeIds     = $user->pref_cast_type_ids  ?? [];
         $areaIds     = $user->pref_area_ids        ?? [];
         $bodyTypeIds = $user->pref_body_type_ids   ?? [];
+        $days        = $user->preferred_days       ?? [];
+        $times       = $user->preferred_times      ?? [];
 
         $query = Cast::with(['shop', 'castType'])
             ->where('status', 'active')
@@ -130,6 +132,45 @@ class UserDashboardController extends Controller
         }
         if ($user->pref_age_max !== null) {
             $query->where('age', '<=', $user->pref_age_max);
+        }
+
+        if (!empty($days) || !empty($times)) {
+            $filteredQuery = clone $query;
+            $filteredQuery->whereHas('schedules', function ($sq) use ($days, $times) {
+                $sq->where('work_date', '>=', today())
+                   ->where('work_date', '<=', today()->addDays(14));
+
+                if (!empty($days)) {
+                    // MySQLのDAYOFWEEK: 1=日,2=月,3=火,4=水,5=木,6=金,7=土
+                    $dayMap = ['sun'=>1,'mon'=>2,'tue'=>3,'wed'=>4,'thu'=>5,'fri'=>6,'sat'=>7];
+                    $dayNums = collect($days)->map(fn($d) => $dayMap[$d] ?? null)->filter()->values()->all();
+                    if (!empty($dayNums)) {
+                        $sq->whereIn(DB::raw('DAYOFWEEK(work_date)'), $dayNums);
+                    }
+                }
+
+                if (!empty($times)) {
+                    $timeRanges = [
+                        'morning'   => ['06:00', '11:59'],
+                        'afternoon' => ['12:00', '17:59'],
+                        'evening'   => ['18:00', '21:59'],
+                        'night'     => ['22:00', '23:59'],
+                        'midnight'  => ['00:00', '05:59'],
+                    ];
+                    $sq->where(function ($tq) use ($times, $timeRanges) {
+                        foreach ($times as $time) {
+                            if (!isset($timeRanges[$time])) continue;
+                            [$from, $to] = $timeRanges[$time];
+                            $tq->orWhere(fn($r) => $r->where('start_time', '<=', $to)->where('end_time', '>=', $from));
+                        }
+                    });
+                }
+            });
+
+            $results = $filteredQuery->take($limit)->get();
+            if ($results->count() >= 3) {
+                return $results;
+            }
         }
 
         return $query->take($limit)->get();

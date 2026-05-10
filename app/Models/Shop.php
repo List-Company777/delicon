@@ -83,7 +83,7 @@ class Shop extends Model
 
     public function isPaid(): bool
     {
-        return ($this->plan ?? 0) >= 3;
+        return ($this->plan ?? 99) <= 3;
     }
 
     public function planApplications(): HasMany
@@ -213,7 +213,11 @@ class Shop extends Model
         if ($this->main_image) {
             return Storage::url($this->main_image);
         }
-        return $this->shop_file_name ?: null;
+        $file = $this->shop_file_name;
+        if ($file && str_starts_with($file, "/") && !str_starts_with($file, "http")) {
+            return $file;
+        }
+        return null;
     }
 
     /**

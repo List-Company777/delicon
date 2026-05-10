@@ -20,7 +20,8 @@ Disallow: /track/
 Disallow: /*/apply/
 Disallow: /apply/
 
+# 写メ日記個別URL・オートコンプリート
+Disallow: /diary/post/
+Disallow: /suggest
+
 Sitemap: https://www.delicon.jp/sitemap.xml
-Sitemap: https://www.delicon.jp/sitemap-detail.xml
-Sitemap: https://www.delicon.jp/sitemap-pages.xml
-Sitemap: https://www.delicon.jp/sitemap-girl.xml

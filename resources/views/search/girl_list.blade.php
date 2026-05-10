@@ -221,6 +221,22 @@
             </div>
             @endif
 
+            {{-- 小エリア絞り込み（都道府県ページのみ） --}}
+            @if(isset($subAreas) && $subAreas->isNotEmpty())
+            <div class="flex flex-wrap items-start gap-1.5">
+                <span class="text-xs text-[#8A8A9E] shrink-0 w-16 pt-1">エリア</span>
+                <div class="flex flex-wrap gap-1.5 flex-1">
+                    @foreach($subAreas as $subArea)
+                    @php $subUrl = url("/{$subArea->slug}/girl-list/") . '/' . ($filterParams ? '?' . http_build_query($filterParams) : ''); @endphp
+                    <a href="{{ $subUrl }}"
+                       class="px-3 py-1 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition whitespace-nowrap">
+                        {{ $subArea->name }}<span class="text-[#6A6A7E] ml-0.5">{{ number_format($subArea->cnt) }}</span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             @if($showFilters)
             {{-- 年齢 --}}
             <div class="flex flex-wrap items-center gap-1.5">

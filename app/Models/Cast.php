@@ -105,6 +105,6 @@ class Cast extends Model
         if ($this->img_file_name && !str_starts_with($this->img_file_name, '/img/common/')) {
             return $this->img_file_name . 'big.jpg';
         }
-        return '/img/no-cast.jpg';
+        return '/img/no-cast.svg';
     }
 }

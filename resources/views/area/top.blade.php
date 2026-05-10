@@ -28,9 +28,29 @@
     }
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@if($featuredShops->isNotEmpty() && !$noindex)
+@php
+    $ld_list = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        'name'            => "{$areaName}のデリヘル・風俗店舗",
+        'url'             => url("/{$area_slug}/") . '/',
+        'numberOfItems'   => $totalShops,
+        'itemListElement' => $featuredShops->map(fn($shop, $i) => [
+            '@type'    => 'ListItem',
+            'position' => $i + 1,
+            'url'      => route('shop.show', $shop->id) . '/',
+            'name'     => $shop->name,
+        ])->values()->all(),
+    ];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endif
 @endpush
 
 @section('content')
+
+<main>
 
 {{-- ヘッダー --}}
 <div class="bg-surface-800 border-b border-surface-400">
@@ -39,12 +59,12 @@
             <h1 class="text-xl font-bold text-[#E8E4DC]">{{ $pageTitle }}</h1>
             <span class="text-sm text-[#B0AEAD]">{{ number_format($totalShops) }}件掲載</span>
         </div>
-        <nav class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
+        <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
             <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a>
-            <span>›</span>
+            <span aria-hidden="true">›</span>
             @if($area_slug !== 'all')
             <a href="{{ route('area.top', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国</a>
-            <span>›</span>
+            <span aria-hidden="true">›</span>
             <span>{{ $areaName }}</span>
             @else
             <span>全国</span>
@@ -53,14 +73,105 @@
     </div>
 </div>
 
+{{-- ① ピックアップ店舗（plan 1-2 横並び大カード） --}}
+@if($pickupShops->isNotEmpty())
+<div class="bg-surface-700 border-b border-surface-500">
+    <div class="max-w-6xl mx-auto px-4 py-5">
+        <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
+            <span aria-hidden="true" class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
+            ピックアップ
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            @foreach($pickupShops as $loop_shop => $shop)
+            <a href="{{ route('shop.show', $shop->id) }}/"
+               class="group flex bg-surface-600 border border-surface-400 hover:border-gold-400 rounded-xl overflow-hidden transition">
+                <div class="w-28 flex-shrink-0 overflow-hidden">
+                    <img src="{{ $shop->main_image_url }}" alt="{{ $shop->name }}"
+                         @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" @endif
+                         class="img-onerror-hide w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="p-3 flex flex-col justify-between min-w-0">
+                    <div>
+                        @if($shop->shop_type_name)
+                        <span class="text-[10px] text-deli-400 font-medium">{{ $shop->shop_type_name }}</span>
+                        @endif
+                        <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1 mt-0.5">{{ $shop->name }}</p>
+                        @if($shop->catche)
+                        <p class="text-xs text-[#8A8A9E] line-clamp-2 mt-1">{{ $shop->catche }}</p>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-3 mt-2 flex-wrap">
+                        @if($shop->price_60)
+                        <span class="text-xs text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
+                        @endif
+                        <span class="text-xs text-[#8A8A9E]">{{ $shop->cast_count }}名在籍</span>
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- ⑥ バナー広告（横3列） --}}
+@if($bannerShops->isNotEmpty())
+<div class="bg-surface-700 border-b border-surface-500">
+    <div class="max-w-6xl mx-auto px-4 py-5">
+        <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
+            <span aria-hidden="true" class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>
+            広告
+        </h2>
+        <div class="grid grid-cols-3 gap-2">
+            @foreach($bannerShops as $shop)
+            <a href="{{ route('shop.show', $shop->id) }}/"
+               class="block hover:opacity-80 transition rounded overflow-hidden"
+               title="{{ $shop->name }}">
+                <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
+                     loading="lazy" width="468" height="60"
+                     class="img-onerror-hide w-full h-auto">
+            </a>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-10">
 
-    {{-- 有料店舗バナーグリッド --}}
+    {{-- ⑤ 新人デビュー --}}
+    @if($recentCasts->isNotEmpty())
+    <section>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2">
+                <span aria-hidden="true" class="w-1 h-5 bg-gold-400 rounded-full inline-block"></span>
+                新人デビュー
+            </h2>
+            <a href="{{ route('girl.list', ['area_slug' => $area_slug]) }}/" class="text-xs text-deli-400 hover:text-deli-300 transition">もっと見る →</a>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($recentCasts as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-gold-400 transition">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         loading="lazy"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <span class="absolute top-1.5 left-1.5 bg-gold-400 text-surface-800 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                <p class="text-xs text-[#8A8A9E]">{{ $cast->join_date }}</p>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- ③ 掲載店舗グリッド --}}
     @if($featuredShops->isNotEmpty())
     <section>
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2">
-                <span class="w-1 h-5 bg-deli-500 rounded-full inline-block"></span>
+                <span aria-hidden="true" class="w-1 h-5 bg-deli-500 rounded-full inline-block"></span>
                 掲載店舗
             </h2>
             <a href="{{ route('shop.list', ['area_slug' => $area_slug]) }}/" class="text-xs text-deli-400 hover:text-deli-300 transition">
@@ -72,19 +183,19 @@
             <a href="{{ route('shop.show', $shop->id) }}/"
                class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group block">
                 <div class="relative aspect-[5/2] bg-gradient-to-br from-surface-400 to-surface-600 overflow-hidden">
-                    @if($shop->banner_url)
-                    <img src="{{ $shop->banner_url }}"
+                    @if($shop->main_image)
+                    <img src="{{ Storage::url($shop->main_image) }}"
                          alt="{{ $shop->name }}のデリヘル情報"
                          loading="lazy"
                          class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                     @else
-                    <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
+                    <span aria-hidden="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
                     @endif
-                    <div class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
-                    @if($shop->shopType)
-                    <span class="absolute top-2 left-2 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shopType->name }}</span>
+                    <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
+                    @if($shop->shop_type_name)
+                    <span class="absolute top-2 left-2 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
                     @endif
-                    <p class="absolute bottom-2 left-2 right-2 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
+                    <p aria-hidden="true" class="absolute bottom-2 left-2 right-2 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
                 </div>
                 <div class="p-3">
                     <p class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">{{ $shop->name }}</p>
@@ -98,11 +209,90 @@
     </section>
     @endif
 
+    {{-- ⑥ 本日出勤中（横一列） --}}
+    @if($workingCasts->isNotEmpty())
+    <section>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2">
+                <span aria-hidden="true" class="w-1 h-5 bg-deli-500 rounded-full inline-block"></span>
+                本日の出勤
+                <span class="text-xs font-normal text-deli-400 ml-1">{{ today()->format('m月d日') }}</span>
+            </h2>
+            <a href="{{ route('girl.list', ['area_slug' => $area_slug]) }}/" class="text-xs text-deli-400 hover:text-deli-300 transition">もっと見る →</a>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($workingCasts as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-500 transition">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         loading="lazy"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <span class="absolute top-1.5 left-1.5 bg-deli-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">出勤中</span>
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                <p class="text-xs text-[#8A8A9E] truncate">{{ $cast->shop_name }}</p>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- ④ 新着日記 --}}
+    @if($recentDiaries->isNotEmpty())
+    <section>
+        <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
+            <span aria-hidden="true" class="w-1 h-5 bg-deli-400 rounded-full inline-block"></span>
+            新着日記
+        </h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($recentDiaries as $diary)
+            <a href="{{ route('cast.show', $diary->cast_id) }}/" class="group min-w-0">
+                <div class="relative aspect-square overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-400 transition">
+                    @if($diary->img_url)
+                    <img src="{{ $diary->img_url }}" alt="{{ $diary->title }}"
+                         loading="lazy"
+                         class="img-onerror-hide w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    @else
+                    <span aria-hidden="true" class="absolute inset-0 flex items-center justify-center text-2xl text-deli-500 opacity-30">✦</span>
+                    @endif
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $diary->title }}</p>
+                <p class="text-xs text-[#8A8A9E] truncate">{{ $diary->cast_name }}</p>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- 入店予定 --}}
+    @if($comingSoonCasts->isNotEmpty())
+    <section>
+        <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
+            <span aria-hidden="true" class="w-1 h-5 bg-deli-400 rounded-full inline-block"></span>
+            入店予定
+        </h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            @foreach($comingSoonCasts as $cast)
+            <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
+                <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-400 transition">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         loading="lazy"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <span class="absolute top-1.5 left-1.5 bg-deli-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">予定</span>
+                </div>
+                <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                <p class="text-xs text-deli-400">{{ $cast->new_since }}</p>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
     {{-- ジャンルから探す --}}
     @if($shopTypeCounts->isNotEmpty())
     <section>
         <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
-            <span class="w-1 h-5 bg-gold-400 rounded-full inline-block"></span>
+            <span aria-hidden="true" class="w-1 h-5 bg-gold-400 rounded-full inline-block"></span>
             ジャンルから探す
         </h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -117,10 +307,28 @@
     </section>
     @endif
 
+    {{-- エリアで探す（都道府県ページのみ） --}}
+    @if(isset($subAreas) && $subAreas->isNotEmpty())
+    <section>
+        <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
+            <span aria-hidden="true" class="w-1 h-5 bg-deli-400 rounded-full inline-block"></span>
+            エリアで探す
+        </h2>
+        <div class="flex flex-wrap gap-2">
+            @foreach($subAreas as $subArea)
+            <a href="{{ route('shop.list', ['area_slug' => $subArea->slug]) }}/"
+               class="px-3 py-1.5 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
+                {{ $subArea->name }}<span class="text-[#6A6A7E] ml-1">{{ number_format($subArea->cnt) }}</span>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
     {{-- タイプで探す --}}
     <section>
         <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
-            <span class="w-1 h-5 bg-surface-200 rounded-full inline-block"></span>
+            <span aria-hidden="true" class="w-1 h-5 bg-surface-200 rounded-full inline-block"></span>
             タイプで探す
         </h2>
         <div class="flex flex-wrap gap-2">
@@ -152,7 +360,7 @@
                 <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition">店舗一覧</p>
                 <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $areaName }}のデリヘル・風俗店 {{ number_format($totalShops) }}件</p>
             </div>
-            <span class="text-[#8A8A9E] text-lg">›</span>
+            <span aria-hidden="true" class="text-[#8A8A9E] text-lg">›</span>
         </a>
         <a href="{{ route('girl.list', ['area_slug' => $area_slug]) }}/"
            class="flex items-center justify-between bg-surface-600 hover:bg-surface-500 border border-surface-400 hover:border-deli-400 rounded-xl px-5 py-4 transition group">
@@ -160,9 +368,11 @@
                 <p class="text-sm font-bold text-deli-400 group-hover:text-deli-300 transition">キャスト一覧</p>
                 <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $areaName }}の在籍キャストを探す</p>
             </div>
-            <span class="text-[#8A8A9E] text-lg">›</span>
+            <span aria-hidden="true" class="text-[#8A8A9E] text-lg">›</span>
         </a>
     </section>
 
 </div>
+
+</main>
 @endsection

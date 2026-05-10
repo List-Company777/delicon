@@ -8,6 +8,7 @@ use App\Models\Shop;
 use App\Models\ShopType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class TopController extends Controller
 {
@@ -25,14 +26,11 @@ class TopController extends Controller
                 ->take(12)
                 ->get()
                 ->map(fn($shop) => [
-                    'id'              => $shop->id,
-                    'name'            => $shop->name,
-                    'catche'          => $shop->catche,
-                    'shop_file_name'  => $shop->shop_file_name,
-                    'shop_banner_url' => $shop->shop_file_name
-                        ? ($shop->shop_file_name . (!pathinfo($shop->shop_file_name, PATHINFO_EXTENSION) ? '.jpg' : ''))
-                        : null,
-                    'shop_type_name'  => $shop->shopType?->name,
+                    'id'             => $shop->id,
+                    'name'           => $shop->name,
+                    'catche'         => $shop->catche,
+                    'shop_image_url' => $shop->main_image ? Storage::url($shop->main_image) : null,
+                    'shop_type_name' => $shop->shopType?->name,
                     'cast_count'      => $shop->castMembers->count(),
                     'price_60'        => $shop->price_60,
                 ])
@@ -53,7 +51,7 @@ class TopController extends Controller
                     'cup'            => $cast->cup,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
                         ? $cast->img_file_name . 'big.jpg'
-                        : '/img/no-cast.jpg',
+                        : '/img/no-cast.svg',
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
@@ -84,7 +82,7 @@ class TopController extends Controller
                 ->where('status', 'active')
                 ->whereDate('working_date', today())
                 ->orderByDesc('is_recommended')
-                ->take(12)
+                ->take(9)
                 ->get()
                 ->map(fn($cast) => [
                     'id'             => $cast->id,
@@ -92,7 +90,7 @@ class TopController extends Controller
                     'age'            => $cast->age,
                     'cup'            => $cast->cup,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
-                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.jpg',
+                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.svg',
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
@@ -107,7 +105,7 @@ class TopController extends Controller
                 ->whereNotNull('new_since')
                 ->whereRaw('DATE_ADD(new_since, INTERVAL 1 MONTH) > CURDATE()')
                 ->orderByDesc('new_since')
-                ->take(12)
+                ->take(9)
                 ->get()
                 ->map(fn($cast) => [
                     'id'             => $cast->id,
@@ -115,7 +113,7 @@ class TopController extends Controller
                     'age'            => $cast->age,
                     'cup'            => $cast->cup,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
-                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.jpg',
+                        ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.svg',
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,

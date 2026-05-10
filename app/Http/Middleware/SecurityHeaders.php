@@ -22,7 +22,7 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob: https:",
             "font-src 'self'",
-            "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com",
+            "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://region1.google-analytics.com",
             "frame-ancestors 'none'",
             "form-action 'self'",
             "base-uri 'self'",

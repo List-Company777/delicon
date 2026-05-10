@@ -17,8 +17,8 @@ class UpdateCastScores extends Command
             UPDATE casts c
             JOIN shops s ON s.id = c.shop_id
             SET c.cast_score = (
-                /* 店舗プランボーナス: (plan-1)*10 → 0/10/20/30/40 */
-                (s.plan - 1) * 10
+                /* 店舗プランボーナス: (4-plan)*10 → plan1=30/plan2=20/plan3=10 */
+                (4 - s.plan) * 10
 
                 /* プロフィール文字数（100文字以上でプラス） */
                 + CASE WHEN CHAR_LENGTH(COALESCE(c.comment, '')) >= 100 THEN 10 ELSE -10 END

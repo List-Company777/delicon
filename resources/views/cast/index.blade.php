@@ -58,7 +58,7 @@
             <div class="relative overflow-hidden rounded-xl mb-2 border border-surface-300 group-hover:border-deli-500 transition bg-surface-500">
                 <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                      class="w-full aspect-[3/4] object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-300"
-                     loading="lazy" onerror="this.src='/img/no-cast.jpg'">
+                     loading="lazy" onerror="this.src='/img/no-cast.svg'">
                 @if($cast->is_recommended)
                 <span class="absolute top-2 right-2 bg-deli-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">おすすめ</span>
                 @endif

@@ -11,7 +11,7 @@
 @if($noindex)
 @section('robots', 'noindex,follow')
 @endif
-@if($cast->img_url !== '/img/no-cast.jpg')
+@if($cast->img_url !== '/img/no-cast.svg')
 @section('ogp_image', url($cast->img_url))
 @section('twitter_card', 'summary_large_image')
 @endif
@@ -29,8 +29,28 @@
         $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>3,'name'=>$cast->shop->name,'item'=>route('shop.show',$cast->shop->id).'/'];
     }
     $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>count($bc['itemListElement'])+1,'name'=>$cast->name,'item'=>route('cast.show',$cast->id).'/'];
+
+    $approvedReviews = $cast->reviews->where('is_approved', true);
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@if($approvedReviews->count() > 0 && !$noindex)
+@php
+    $ld_person = [
+        '@context' => 'https://schema.org',
+        '@type'    => 'Person',
+        'name'     => $cast->name,
+        'url'      => route('cast.show', $cast->id) . '/',
+        'aggregateRating' => [
+            '@type'       => 'AggregateRating',
+            'ratingValue' => round($approvedReviews->avg('rating'), 1),
+            'bestRating'  => 5,
+            'worstRating' => 1,
+            'ratingCount' => $approvedReviews->count(),
+        ],
+    ];
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_person, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -602,7 +622,7 @@
 
         {{-- 電話ボタン --}}
         @if($cast->shop?->tel)
-        <a href="tel:{{ $cast->shop->tel }}"
+        <a href="tel:{{ $cast->shop->tel }}" rel="nofollow"
            data-cast-id="{{ $cast->id }}"
            onclick="fetch('/ranking/tel/'+this.dataset.castId+'/',{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}})"
            class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-deli-500 hover:bg-deli-600 active:bg-deli-700 text-white text-xs font-bold transition">

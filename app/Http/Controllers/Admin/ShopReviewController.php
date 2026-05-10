@@ -145,21 +145,21 @@ class ShopReviewController extends Controller
     public function updatePlan(\Illuminate\Http\Request $request, int $id)
     {
         $shop = Shop::findOrFail($id);
-        $request->validate(['plan' => ['required', 'integer', 'min:1', 'max:5']]);
+        $request->validate(['plan' => ['required', 'integer', 'min:1', 'max:3']]);
 
         $newPlan = (int) $request->plan;
         $oldPlan = (int) $shop->plan;
 
         $update = ['plan' => $newPlan];
 
-        if ($newPlan > $oldPlan) {
-            // アップグレード（無料→有料 / 有料→上位有料）：paid_since をリセット
-            $update['paid_since'] = $newPlan >= 3 ? now()->toDateString() : null;
-        } elseif ($newPlan < $oldPlan && $newPlan < 3) {
+        if ($newPlan < $oldPlan) {
+            // アップグレード（上位プランへ）：paid_since をリセット
+            $update['paid_since'] = $newPlan <= 3 ? now()->toDateString() : null;
+        } elseif ($newPlan > $oldPlan && $newPlan > 3) {
             // 有料→無料へのダウングレード：paid_since をリセット
             $update['paid_since'] = null;
         }
-        // 有料→有料のダウングレード：paid_since はそのまま維持
+        // 有料内のダウングレード：paid_since はそのまま維持
 
         $shop->update($update);
 

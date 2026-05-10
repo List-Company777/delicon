@@ -24,6 +24,7 @@ use App\Http\Controllers\Manage\ContactController;
 use App\Http\Controllers\Manage\ApplicationController as ManageApplicationController;
 use App\Http\Controllers\Auth\VisitorRegisterController;
 use App\Http\Controllers\Manage\CastProfileController;
+use App\Http\Controllers\Manage\CastAnalyticsController;
 use App\Http\Controllers\Manage\ReviewManageController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CastReviewController;
@@ -179,6 +180,7 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/casts/create/',          [CastProfileController::class, 'create'])->name('cast-profile.create');
     Route::post('/casts/',                [CastProfileController::class, 'store'])->name('cast-profile.store');
     Route::get('/casts/{id}/edit/',       [CastProfileController::class, 'edit'])->name('cast-profile.edit')->where('id', '[0-9]+');
+    Route::get('/casts/analytics/',       [CastAnalyticsController::class, 'index'])->name('cast-analytics.index');
     Route::get('/diaries/',                       [\App\Http\Controllers\Manage\CastDiaryController::class, 'shopDiaries'])->name('diaries.index');
     Route::get('/shift-requests/',                [\App\Http\Controllers\Manage\ShiftRequestController::class, 'index'])->name('shift-requests.index');
     Route::patch('/shift-requests/{id}/approve/', [\App\Http\Controllers\Manage\ShiftRequestController::class, 'approve'])->name('shift-requests.approve')->where('id', '[0-9]+');
@@ -243,7 +245,6 @@ Route::get('/job/{id}/', [JobController::class, 'show'])->name('job.show')->wher
 Route::post('/report/', [\App\Http\Controllers\ReportController::class, 'send'])->name('report.send')->middleware('throttle:10,10');
 
 // ホットリンククリック計測
-Route::get('/click/{id}/', [JobController::class, 'click'])->name('click')->where('id', '[0-9]+');
 
 // 応募フォーム
 Route::get('/job/{jobId}/apply/', [ApplicationController::class, 'create'])->name('apply.create')->where('jobId', '[0-9]+');

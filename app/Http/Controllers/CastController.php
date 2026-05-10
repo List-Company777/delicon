@@ -131,6 +131,26 @@ class CastController extends Controller
 
     private function recordView(Cast $cast): void
     {
+        $request = request();
+
+        // クローラー除外
+        $ua = strtolower($request->userAgent() ?? '');
+        if ($ua === '') return;
+        foreach (['bot','crawl','spider','slurp','mediapartners','facebookexternalhit',
+                  'twitterbot','linkedinbot','whatsapp','applebot','pinterest',
+                  'semrush','ahrefsbot','mj12bot','dotbot','bingpreview',
+                  'yandex','baiduspider','duckduckbot'] as $p) {
+            if (str_contains($ua, $p)) return;
+        }
+
+        // 同一IP 1時間以内の重複排除（ログイン済みはユーザーIDで、非ログインはIPで）
+        if (auth()->check()) {
+            $cacheKey = "cast_view:{$cast->id}:u" . auth()->id();
+        } else {
+            $cacheKey = "cast_view:{$cast->id}:{$request->ip()}";
+        }
+        if (!Cache::add($cacheKey, 1, 3600)) return;
+
         $data = [
             'cast_id'   => $cast->id,
             'viewed_at' => now(),
