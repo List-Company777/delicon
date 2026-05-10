@@ -16,7 +16,7 @@ class GenerateArticle extends Command
     protected $signature = 'articles:generate
                             {--topic= : 記事テーマを直接指定（1件のみ）}
                             {--gender=shop : female/male/business/shop}
-                            {--count=5 : 生成する記事数}
+                            {--count=10 : 生成する記事数}
                             {--dry-run : DBに保存せず内容を表示するだけ}';
 
     protected $description = 'Claude APIで記事を自動生成してDraftとして保存する';
@@ -143,6 +143,14 @@ class GenerateArticle extends Command
 
         $currentYear = now()->year;
 
+        $existingTitles = Article::where('gender', $gender)
+            ->where('is_published', true)
+            ->pluck('title');
+        $existingList = $existingTitles->isNotEmpty()
+            ? $existingTitles->map(fn($t) => '- ' . $t)->implode("
+")
+            : '（なし）';
+
         return <<<PROMPT
 あなたはナイトワーク・夜遊び情報サイト「ナイトワークリスト」の編集者です。
 以下のテーマでSEOを意識した高品質なコラム記事を日本語で書いてください。
@@ -150,6 +158,9 @@ class GenerateArticle extends Command
 テーマ: {$topic}
 対象読者: {$genderNote}
 現在の年: {$currentYear}年
+
+## 既存公開記事（同じテーマ・切り口での記事は作成しない）
+{$existingList}
 
 ## 品質要件（必ず守ること）
 - タイトルに具体的な数字・年・地名を入れてクリック率を上げる（例: 「{$currentYear}年最新」「東京・大阪」など）
