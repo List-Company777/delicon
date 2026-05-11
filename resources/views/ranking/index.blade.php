@@ -23,9 +23,12 @@
         ])->values()->all(),
     ];
     $lcpImg = $ranking->first()->img_url ?? null;
+    $lcpWebpImg = $ranking->first()->img_webp_url ?? null;
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
-@if($lcpImg)
+@if($lcpWebpImg)
+<link rel="preload" as="image" href="{{ $lcpWebpImg }}" type="image/webp" fetchpriority="high">
+@elseif($lcpImg)
 <link rel="preload" as="image" href="{{ $lcpImg }}" fetchpriority="high">
 @endif
 @endif
@@ -103,10 +106,15 @@
                 </div>
                 @endif
                 <div class="aspect-[3/4] overflow-hidden bg-surface-500">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }} ({{ $rank }}位)"
-                         loading="{{ $i === 0 ? 'eager' : ($i < 5 ? 'eager' : 'lazy') }}"
-                         fetchpriority="{{ $i === 0 ? 'high' : 'auto' }}"
-                         class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
+                    <picture>
+                        @if($cast->img_webp_url)
+                        <source srcset="{{ $cast->img_webp_url }}" type="image/webp">
+                        @endif
+                        <img src="{{ $cast->img_url }}" alt="{{ $cast->name }} ({{ $rank }}位)"
+                             loading="{{ $i === 0 ? 'eager' : ($i < 5 ? 'eager' : 'lazy') }}"
+                             fetchpriority="{{ $i === 0 ? 'high' : 'auto' }}"
+                             class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
+                    </picture>
                 </div>
                 <div class="p-2">
                     <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>

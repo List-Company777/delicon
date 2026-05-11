@@ -107,4 +107,12 @@ class Cast extends Model
         }
         return '/img/no-cast.svg';
     }
+
+    public function getImgWebpUrlAttribute(): ?string
+    {
+        if ($this->img_file_name && !str_starts_with($this->img_file_name, '/img/common/')) {
+            return $this->img_file_name . 'big.jpg.webp';
+        }
+        return null;
+    }
 }
