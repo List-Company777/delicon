@@ -1,16 +1,19 @@
 @extends('layouts.app')
-@section('title', '人気女性ランキング | デリヘルリスト')
-@section('description', '電話・お気に入り・口コミ・閲覧数から算出した人気女性ランキングTOP30。')
-@section('canonical', route('ranking.index') . '/')
+@section('title', $pageTitle . ' | デリヘルリスト')
+@section('description', $pageDesc)
+@section('canonical', $canonical)
+@if($noindex)
+@section('robots', 'noindex, nofollow')
+@endif
 
 @push('head')
-@if($ranking->isNotEmpty())
+@if($ranking->isNotEmpty() && !$noindex)
 @php
     $ld_list = [
         '@context'        => 'https://schema.org',
         '@type'           => 'ItemList',
-        'name'            => '人気女性ランキング',
-        'url'             => route('ranking.index') . '/',
+        'name'            => $pageTitle,
+        'url'             => $canonical,
         'numberOfItems'   => $ranking->count(),
         'itemListElement' => $ranking->map(fn($cast, $i) => [
             '@type'    => 'ListItem',
@@ -27,17 +30,32 @@
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8">
 
-    <div class="mb-8">
+    {{-- パンくず --}}
+    <nav class="text-xs text-[#6A6A7E] mb-4 flex items-center gap-1">
+        <a href="/" class="hover:text-deli-400">TOP</a>
+        <span>/</span>
+        <a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">人気女性ランキング</a>
+        @if($pageType === 'pref' || $pageType === 'area')
+            <span>/</span>
+            @if($pageType === 'area')
+                <a href="{{ route('ranking.area', $prefModel->slug) }}/" class="hover:text-deli-400">{{ $prefModel->name }}</a>
+                <span>/</span>
+            @endif
+            <span class="text-[#9A96A0]">{{ $pageTitle }}</span>
+        @endif
+    </nav>
+
+    <div class="mb-6">
         <h1 class="text-2xl font-black text-[#F0ECE4] flex items-center gap-3">
-            <span class="text-2xl">🏆</span> 人気女性ランキング
+            <span class="text-2xl">🏆</span> {{ $pageTitle }}
         </h1>
         <p class="text-xs text-[#6A6A7E] mt-1">電話・お気に入り・口コミ・閲覧数をもとに算出（直近7日間）</p>
     </div>
 
     @if($ranking->isEmpty())
-    <p class="text-sm text-[#6A6A7E]">まだランキングデータがありません。</p>
+    <p class="text-sm text-[#6A6A7E] mb-8">まだランキングデータがありません。</p>
     @else
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-10">
         @foreach($ranking as $i => $cast)
         @php
             $shop    = $cast->shop;
@@ -56,13 +74,11 @@
         @endphp
         <article class="bg-surface-600 border border-surface-400 hover:border-deli-400 rounded-xl overflow-hidden transition group relative">
             <a href="{{ route('cast.show', $cast) }}/" class="block">
-                {{-- 順位バッジ --}}
                 <div class="absolute top-1.5 left-1.5 z-10">
                     <span class="text-xs font-black px-1.5 py-0.5 rounded {{ $medalColor }}">
                         {{ $rank }}位
                     </span>
                 </div>
-                {{-- NEW バッジ --}}
                 @if($cast->isNew())
                 <div class="absolute top-1.5 right-1.5 z-10">
                     <span class="text-xs bg-pink-500 text-white font-bold px-1.5 py-0.5 rounded leading-tight">NEW</span>
@@ -90,5 +106,30 @@
         @endforeach
     </div>
     @endif
+
+    {{-- ナビゲーションリンク --}}
+    @if(!empty($navLinks))
+    <section class="mt-4">
+        <h2 class="text-sm font-bold text-[#9A96A0] mb-3">{{ $navLabel }}</h2>
+        <div class="flex flex-wrap gap-2">
+            @foreach($navLinks as $link)
+            <a href="{{ route('ranking.area', $link['slug']) }}/"
+               class="text-xs px-3 py-1.5 rounded-full bg-surface-600 border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
+                {{ $link['name'] }}
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- 全国ページへの戻りリンク（都道府県・エリアページ） --}}
+    @if($pageType !== 'all')
+    <div class="mt-6 text-center">
+        <a href="{{ route('ranking.index') }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400 transition">
+            ← 全国ランキングに戻る
+        </a>
+    </div>
+    @endif
+
 </div>
 @endsection

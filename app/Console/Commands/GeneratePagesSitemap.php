@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class GeneratePagesSitemap extends Command
 {
     protected $signature   = 'sitemap:generate-pages';
-    protected $description = '固定ページ・都道府県トップのサイトマップを生成';
+    protected $description = '固定ページ・都道府県トップ・ランキングのサイトマップを生成';
 
     private const MIN_RESULTS = 5;
 
@@ -35,7 +35,7 @@ class GeneratePagesSitemap extends Command
             $urls[] = ['loc' => $base . '/all/', 'lastmod' => $now, 'changefreq' => 'daily', 'priority' => '0.9'];
         }
 
-        // 都道府県トップページ（小エリアはリダイレクトなので都道府県のみ）
+        // 都道府県トップページ
         $prefRows = DB::select("
             SELECT p.slug, COUNT(DISTINCT s.id) as cnt
             FROM prefectures p
@@ -52,6 +52,46 @@ class GeneratePagesSitemap extends Command
                 'lastmod'    => $now,
                 'changefreq' => 'daily',
                 'priority'   => '0.8',
+            ];
+        }
+
+        // 都道府県ランキングページ（キャスト5人以上）
+        $prefRankingRows = DB::select("
+            SELECT p.slug, COUNT(DISTINCT c.id) as cnt
+            FROM prefectures p
+            JOIN shops s ON s.prefecture_id = p.id
+            JOIN casts c ON c.shop_id = s.id
+            WHERE s.status = 'active' AND c.status = 'active'
+            GROUP BY p.id, p.slug
+            HAVING cnt >= ?
+        ", [self::MIN_RESULTS]);
+
+        foreach ($prefRankingRows as $row) {
+            $urls[] = [
+                'loc'        => "{$base}/{$row->slug}/ranking/",
+                'lastmod'    => $now,
+                'changefreq' => 'daily',
+                'priority'   => '0.7',
+            ];
+        }
+
+        // 小エリアランキングページ（キャスト5人以上）
+        $areaRankingRows = DB::select("
+            SELECT a.slug, COUNT(DISTINCT c.id) as cnt
+            FROM areas a
+            JOIN shops s ON s.area_id = a.id
+            JOIN casts c ON c.shop_id = s.id
+            WHERE s.status = 'active' AND c.status = 'active'
+            GROUP BY a.id, a.slug
+            HAVING cnt >= ?
+        ", [self::MIN_RESULTS]);
+
+        foreach ($areaRankingRows as $row) {
+            $urls[] = [
+                'loc'        => "{$base}/{$row->slug}/ranking/",
+                'lastmod'    => $now,
+                'changefreq' => 'daily',
+                'priority'   => '0.6',
             ];
         }
 

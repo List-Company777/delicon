@@ -405,6 +405,10 @@ Route::get('/track/shop/{id}/', [\App\Http\Controllers\TrackController::class, '
 // /business/* → /yoasobi/* 301リダイレクト（旧URLの念のための保護）
 Route::get('/business/{any}', fn(string $any) => redirect('/yoasobi/' . $any, 301))
     ->where('any', '.*');
+Route::get('/{area_slug}/ranking/', [\App\Http\Controllers\RankingController::class, 'bySlug'])
+    ->where(['area_slug' => '[a-z0-9\-]+'])
+    ->name('ranking.area');
+
 
 // 店舗一覧: /{area}/shop-list/  and  /{area}/shop-list/{filter}/
 Route::get('/{area_slug}/shop-list/', [\App\Http\Controllers\SearchController::class, 'shopList'])
