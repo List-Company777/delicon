@@ -52,6 +52,21 @@
         <p class="text-xs text-[#6A6A7E] mt-1">電話・お気に入り・口コミ・閲覧数をもとに算出（直近7日間）</p>
     </div>
 
+    {{-- ナビゲーションリンク --}}
+    @if(!empty($navLinks))
+    <section class="mb-6">
+        <h2 class="text-sm font-bold text-[#9A96A0] mb-3">{{ $navLabel }}</h2>
+        <div class="flex flex-wrap gap-2">
+            @foreach($navLinks as $link)
+            <a href="{{ route('ranking.area', $link['slug']) }}/"
+               class="text-xs px-3 py-1.5 rounded-full bg-surface-600 border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
+                {{ $link['name'] }}
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
     @if($ranking->isEmpty())
     <p class="text-sm text-[#6A6A7E] mb-8">まだランキングデータがありません。</p>
     @else
@@ -107,20 +122,6 @@
     </div>
     @endif
 
-    {{-- ナビゲーションリンク --}}
-    @if(!empty($navLinks))
-    <section class="mt-4">
-        <h2 class="text-sm font-bold text-[#9A96A0] mb-3">{{ $navLabel }}</h2>
-        <div class="flex flex-wrap gap-2">
-            @foreach($navLinks as $link)
-            <a href="{{ route('ranking.area', $link['slug']) }}/"
-               class="text-xs px-3 py-1.5 rounded-full bg-surface-600 border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
-                {{ $link['name'] }}
-            </a>
-            @endforeach
-        </div>
-    </section>
-    @endif
 
     {{-- 全国ページへの戻りリンク（都道府県・エリアページ） --}}
     @if($pageType !== 'all')
