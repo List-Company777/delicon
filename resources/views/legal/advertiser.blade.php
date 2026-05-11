@@ -2,6 +2,7 @@
 
 @section('title', '掲載規約')
 @section('canonical', route('advertiser') . '/')
+@section('description', 'デリヘルリストの掲載規約。店舗・求人情報を掲載する事業者向けの利用条件を定めます。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">
@@ -10,7 +11,7 @@
 
     <div class="bg-white rounded-xl shadow-sm p-8 space-y-8 text-sm text-gray-700 leading-relaxed">
 
-        <p>本掲載規約（以下「本規約」）は、株式会社リスト（以下「当社」）が運営するナイトワークリスト（以下「本サービス」）に求人・営業情報を掲載する事業者（以下「掲載者」）と当社との間に適用される規約です。掲載者は本規約に同意のうえで本サービスをご利用ください。</p>
+        <p>本掲載規約（以下「本規約」）は、株式会社リスト（以下「当社」）が運営するデリヘルリスト（以下「本サービス」）に求人・営業情報を掲載する事業者（以下「掲載者」）と当社との間に適用される規約です。掲載者は本規約に同意のうえで本サービスをご利用ください。</p>
 
         <section>
             <h2 class="font-bold text-gray-800 mb-3">第1条（サービスの内容）</h2>

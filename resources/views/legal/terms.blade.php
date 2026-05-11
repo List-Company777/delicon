@@ -2,6 +2,7 @@
 
 @section('title', 'サービス利用規約')
 @section('canonical', route('terms') . '/')
+@section('description', 'デリヘルリストのサービス利用規約。本サービスの利用条件・禁止事項・免責事項などを定めます。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">
@@ -10,7 +11,7 @@
 
     <div class="bg-white rounded-xl shadow-sm p-8 space-y-8 text-sm text-gray-700 leading-relaxed">
 
-        <p>本規約は、株式会社リスト（以下「当社」）が運営するナイトワークリスト（以下「本サービス」）の利用条件を定めるものです。本サービスをご利用の方（以下「ユーザー」）は本規約に同意したものとみなします。</p>
+        <p>本規約は、株式会社リスト（以下「当社」）が運営するデリヘルリスト（以下「本サービス」）の利用条件を定めるものです。本サービスをご利用の方（以下「ユーザー」）は本規約に同意したものとみなします。</p>
 
         <section>
             <h2 class="font-bold text-gray-800 mb-3">第1条（サービスの内容）</h2>

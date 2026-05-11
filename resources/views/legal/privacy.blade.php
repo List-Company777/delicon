@@ -2,6 +2,7 @@
 
 @section('title', 'プライバシーポリシー')
 @section('canonical', route('privacy') . '/')
+@section('description', 'デリヘルリストのプライバシーポリシー。お客様の個人情報の取り扱いについてご説明します。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">
@@ -10,7 +11,7 @@
 
     <div class="bg-white rounded-xl shadow-sm p-8 space-y-8 text-sm text-gray-700 leading-relaxed">
 
-        <p>株式会社リスト（以下「当社」）は、ナイトワークリスト（以下「本サービス」）の運営において取得する個人情報を以下の方針に基づき適切に管理します。</p>
+        <p>株式会社リスト（以下「当社」）は、デリヘルリスト（以下「本サービス」）の運営において取得する個人情報を以下の方針に基づき適切に管理します。</p>
 
         <section>
             <h2 class="font-bold text-gray-800 mb-3">第1条（収集する個人情報）</h2>

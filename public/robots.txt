@@ -24,4 +24,4 @@ Disallow: /apply/
 Disallow: /diary/post/
 Disallow: /suggest
 
-Sitemap: https://www.delicon.jp/sitemap.xml
+Sitemap: https://new.delicon.jp/sitemap.xml

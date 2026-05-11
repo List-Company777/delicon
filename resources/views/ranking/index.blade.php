@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $pageTitle . ' | デリヘルリスト')
+@section('title', $pageTitle)
 @section('description', $pageDesc)
 @section('canonical', $canonical)
 @if($noindex)
