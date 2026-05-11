@@ -46,6 +46,19 @@
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
 @endif
+@php
+    $lcpImg = null;
+    if ($pickupShops->isNotEmpty()) {
+        $lcpImg = $pickupShops->first()->main_image_url ?? null;
+    }
+    if (!$lcpImg && $featuredShops->isNotEmpty()) {
+        $ff = $featuredShops->first();
+        if ($ff->main_image) $lcpImg = \Illuminate\Support\Facades\Storage::url($ff->main_image);
+    }
+@endphp
+@if($lcpImg)
+<link rel="preload" as="image" href="{{ $lcpImg }}" fetchpriority="high">
+@endif
 @endpush
 
 @section('content')
@@ -75,7 +88,7 @@
 
 {{-- ① ピックアップ店舗（plan 1-2 横並び大カード） --}}
 @if($pickupShops->isNotEmpty())
-<div class="bg-surface-700 border-b border-surface-500">
+<section class="bg-surface-700 border-b border-surface-500">
     <div class="max-w-6xl mx-auto px-4 py-5">
         <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
             <span aria-hidden="true" class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
@@ -90,17 +103,15 @@
                          @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" @endif
                          class="img-onerror-hide w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 </div>
-                <div class="p-3 flex flex-col justify-between min-w-0">
-                    <div>
-                        @if($shop->shop_type_name)
-                        <span class="text-[10px] text-deli-400 font-medium">{{ $shop->shop_type_name }}</span>
-                        @endif
-                        <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1 mt-0.5">{{ $shop->name }}</p>
-                        @if($shop->catche)
-                        <p class="text-xs text-[#8A8A9E] line-clamp-2 mt-1">{{ $shop->catche }}</p>
-                        @endif
-                    </div>
-                    <div class="flex items-center gap-3 mt-2 flex-wrap">
+                <div class="p-3 flex flex-col min-w-0">
+                    @if($shop->shop_type_name)
+                    <span class="text-[10px] text-deli-400 font-medium">{{ $shop->shop_type_name }}</span>
+                    @endif
+                    <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1 mt-0.5">{{ $shop->name }}</p>
+                    @if($shop->catche)
+                    <p class="text-xs text-[#8A8A9E] line-clamp-2 mt-1">{{ $shop->catche }}</p>
+                    @endif
+                    <div class="flex items-center gap-3 mt-auto pt-1 flex-wrap">
                         @if($shop->price_60)
                         <span class="text-xs text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
                         @endif
@@ -111,12 +122,12 @@
             @endforeach
         </div>
     </div>
-</div>
+</section>
 @endif
 
 {{-- ⑥ バナー広告（横3列） --}}
 @if($bannerShops->isNotEmpty())
-<div class="bg-surface-700 border-b border-surface-500">
+<aside class="bg-surface-700 border-b border-surface-500" aria-label="広告">
     <div class="max-w-6xl mx-auto px-4 py-5">
         <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
             <span aria-hidden="true" class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>
@@ -139,7 +150,7 @@
             @endforeach
         </div>
     </div>
-</div>
+</aside>
 @endif
 
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-10">
@@ -196,7 +207,7 @@
                     @if($shop->main_image)
                     <img src="{{ Storage::url($shop->main_image) }}"
                          alt="{{ $shop->name }}のデリヘル情報"
-                         loading="lazy"
+                         @if($loop->first) loading="eager" fetchpriority="high" @else loading="lazy" @endif
                          class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                     @else
                     <span aria-hidden="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
@@ -329,29 +340,29 @@
 
     {{-- エリアで探す（都道府県ページのみ） --}}
     @if(isset($subAreas) && $subAreas->isNotEmpty())
-    <section>
+    <nav aria-label="エリアで探す">
         <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
             <span aria-hidden="true" class="w-1 h-5 bg-deli-400 rounded-full inline-block"></span>
             エリアで探す
         </h2>
-        <div class="flex flex-wrap gap-2">
+        <ul class="flex flex-wrap gap-2">
             @foreach($subAreas as $subArea)
-            <a href="{{ route('shop.list', ['area_slug' => $subArea->slug]) }}/"
+            <li><a href="{{ route('shop.list', ['area_slug' => $subArea->slug]) }}/"
                class="px-3 py-1.5 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
                 {{ $subArea->name }}<span class="text-[#6A6A7E] ml-1">{{ number_format($subArea->cnt) }}</span>
-            </a>
+            </a></li>
             @endforeach
-        </div>
-    </section>
+        </ul>
+    </nav>
     @endif
 
     {{-- タイプで探す --}}
-    <section>
+    <nav aria-label="タイプで探す">
         <h2 class="text-base font-bold text-[#E8E4DC] flex items-center gap-2 mb-4">
             <span aria-hidden="true" class="w-1 h-5 bg-surface-200 rounded-full inline-block"></span>
             タイプで探す
         </h2>
-        <div class="flex flex-wrap gap-2">
+        <ul class="flex flex-wrap gap-2">
             @foreach([
                 ['slug'=>'kirei',    'name'=>'キレイ系'],
                 ['slug'=>'kawaii',   'name'=>'カワイイ系'],
@@ -364,13 +375,13 @@
                 ['slug'=>'oneesan',  'name'=>'お姉さん系'],
                 ['slug'=>'iyashi',   'name'=>'癒し系'],
             ] as $type)
-            <a href="{{ route('girl.list.type', ['area_slug' => $area_slug, 'type_slug' => $type['slug']]) }}/"
+            <li><a href="{{ route('girl.list.type', ['area_slug' => $area_slug, 'type_slug' => $type['slug']]) }}/"
                class="px-3 py-1.5 rounded-full text-xs border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
                 {{ $type['name'] }}
-            </a>
+            </a></li>
             @endforeach
-        </div>
-    </section>
+        </ul>
+    </nav>
 
     {{-- クイックリンク --}}
     <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
