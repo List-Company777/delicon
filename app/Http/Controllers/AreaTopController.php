@@ -117,6 +117,8 @@ class AreaTopController extends Controller
                     'cup'            => $cast->cup,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
                         ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.svg',
+                    'img_webp_url'   => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg.webp' : null,
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
@@ -171,6 +173,8 @@ class AreaTopController extends Controller
                     'cup'            => $cast->cup,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
                         ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.svg',
+                    'img_webp_url'   => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg.webp' : null,
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
@@ -198,6 +202,8 @@ class AreaTopController extends Controller
                     'age'            => $cast->age,
                     'img_url'        => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
                         ? $cast->img_file_name . 'big.jpg' : '/img/no-cast.svg',
+                    'img_webp_url'   => ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/'))
+                        ? $cast->img_file_name . 'big.jpg.webp' : null,
                     'cast_type_name' => $cast->castType?->name,
                     'shop_id'        => $cast->shop_id,
                     'shop_name'      => $cast->shop?->name,
