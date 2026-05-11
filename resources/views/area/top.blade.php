@@ -127,9 +127,14 @@
             <a href="{{ route('shop.show', $shop->id) }}/"
                class="block hover:opacity-80 transition rounded overflow-hidden"
                title="{{ $shop->name }}">
-                <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
-                     loading="lazy" width="468" height="60"
-                     class="img-onerror-hide w-full h-auto">
+                <picture>
+                    @if($shop->banner_webp_url)
+                    <source srcset="{{ $shop->banner_webp_url }}" type="image/webp">
+                    @endif
+                    <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
+                         loading="lazy" width="468" height="60"
+                         class="img-onerror-hide w-full h-auto">
+                </picture>
             </a>
             @endforeach
         </div>
@@ -153,9 +158,14 @@
             @foreach($recentCasts as $cast)
             <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
                 <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-gold-400 transition">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                         loading="lazy"
-                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <picture>
+                        @if($cast->img_webp_url)
+                        <source srcset="{{ $cast->img_webp_url }}" type="image/webp">
+                        @endif
+                        <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                             loading="lazy"
+                             class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    </picture>
                     <span class="absolute top-1.5 left-1.5 bg-gold-400 text-surface-800 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
                 </div>
                 <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
@@ -224,9 +234,14 @@
             @foreach($workingCasts as $cast)
             <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
                 <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-500 transition">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                         loading="lazy"
-                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <picture>
+                        @if($cast->img_webp_url)
+                        <source srcset="{{ $cast->img_webp_url }}" type="image/webp">
+                        @endif
+                        <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                             loading="lazy"
+                             class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    </picture>
                     <span class="absolute top-1.5 left-1.5 bg-deli-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">出勤中</span>
                 </div>
                 <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
@@ -275,9 +290,14 @@
             @foreach($comingSoonCasts as $cast)
             <a href="{{ route('cast.show', $cast->id) }}/" class="group flex-1 min-w-0">
                 <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border border-surface-300 group-hover:border-deli-400 transition">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                         loading="lazy"
-                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    <picture>
+                        @if($cast->img_webp_url)
+                        <source srcset="{{ $cast->img_webp_url }}" type="image/webp">
+                        @endif
+                        <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                             loading="lazy"
+                             class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    </picture>
                     <span class="absolute top-1.5 left-1.5 bg-deli-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">予定</span>
                 </div>
                 <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>

@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Encoders\JpegEncoder;
+use Intervention\Image\Encoders\WebpEncoder;
 
 class CastProfileController extends BaseController
 {
@@ -217,15 +218,19 @@ class CastProfileController extends BaseController
 
     private function savePhoto($file): string
     {
-        $filename = Str::random(20) . '.jpg';
-        $dir = public_path('img/girl/00');
+        $base = Str::random(20);
+        $dir = public_path('img/girl/uploads');
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
         $manager = new ImageManager(new Driver());
         $img = $manager->decode($file->getPathname());
         $img->cover(400, 600);
-        file_put_contents($dir . '/' . $filename, (string) $img->encode(new JpegEncoder(quality: 85)));
-        return $filename;
+
+        $jpgPath = "{$dir}/{$base}big.jpg";
+        file_put_contents($jpgPath, (string) $img->encode(new JpegEncoder(quality: 85)));
+        file_put_contents("{$jpgPath}.webp", (string) $img->encode(new WebpEncoder(quality: 80)));
+
+        return "/img/girl/uploads/{$base}";
     }
 }

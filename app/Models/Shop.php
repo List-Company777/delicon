@@ -233,6 +233,21 @@ class Shop extends Model
         return $this->shop_file_name;
     }
 
+    public function getBannerWebpUrlAttribute(): ?string
+    {
+        if ($this->main_image) {
+            return null; // storage画像はWebP未生成
+        }
+        if ($this->shop_file_name) {
+            $path = $this->shop_file_name;
+            if (!pathinfo($path, PATHINFO_EXTENSION)) {
+                $path .= '.jpg';
+            }
+            return $path . '.webp';
+        }
+        return null;
+    }
+
     public function shopType(): BelongsTo
     {
         return $this->belongsTo(ShopType::class, "shop_type_id");

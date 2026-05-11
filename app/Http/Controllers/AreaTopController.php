@@ -221,8 +221,11 @@ class AreaTopController extends Controller
                 ->map(fn($shop) => [
                     'id'         => $shop->id,
                     'name'       => $shop->name,
-                    'banner_url' => $shop->shop_file_name
+                    'banner_url'      => $shop->shop_file_name
                         . (!pathinfo($shop->shop_file_name, PATHINFO_EXTENSION) ? '.jpg' : ''),
+                    'banner_webp_url' => $shop->shop_file_name
+                        . (!pathinfo($shop->shop_file_name, PATHINFO_EXTENSION) ? '.jpg' : '')
+                        . '.webp',
                 ])
                 ->all();
         });

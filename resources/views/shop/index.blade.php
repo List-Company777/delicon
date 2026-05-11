@@ -56,9 +56,14 @@
            class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group">
             @if($shop->shop_file_name)
             <div class="relative overflow-hidden">
-                <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
-                     class="w-full h-36 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-300"
-                     loading="lazy" class="img-onerror-hide">
+                <picture>
+                    @if($shop->banner_webp_url)
+                    <source srcset="{{ $shop->banner_webp_url }}" type="image/webp">
+                    @endif
+                    <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
+                         class="w-full h-36 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-300 img-onerror-hide"
+                         loading="lazy">
+                </picture>
                 <div class="absolute inset-0 bg-gradient-to-t from-surface-900/60 to-transparent"></div>
             </div>
             @else
