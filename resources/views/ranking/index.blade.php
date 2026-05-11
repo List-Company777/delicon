@@ -22,8 +22,12 @@
             'name'     => $cast->name,
         ])->values()->all(),
     ];
+    $lcpImg = $ranking->first()->img_url ?? null;
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@if($lcpImg)
+<link rel="preload" as="image" href="{{ $lcpImg }}" fetchpriority="high">
+@endif
 @endif
 @endpush
 
@@ -31,46 +35,46 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
 
     {{-- パンくず --}}
-    <nav class="text-xs text-[#6A6A7E] mb-4 flex items-center gap-1">
+    <nav aria-label="パンくず" class="text-xs text-[#6A6A7E] mb-4 flex items-center gap-1">
         <a href="/" class="hover:text-deli-400">TOP</a>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">人気女性ランキング</a>
         @if($pageType === 'pref' || $pageType === 'area')
-            <span>/</span>
+            <span aria-hidden="true">/</span>
             @if($pageType === 'area')
                 <a href="{{ route('ranking.area', $prefModel->slug) }}/" class="hover:text-deli-400">{{ $prefModel->name }}</a>
-                <span>/</span>
+                <span aria-hidden="true">/</span>
             @endif
             <span class="text-[#9A96A0]">{{ $pageTitle }}</span>
         @endif
     </nav>
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-black text-[#F0ECE4] flex items-center gap-3">
-            <span class="text-2xl">🏆</span> {{ $pageTitle }}
-        </h1>
-        <p class="text-xs text-[#6A6A7E] mt-1">電話・お気に入り・口コミ・閲覧数をもとに算出（直近7日間）</p>
-    </div>
+    <h1 class="text-2xl font-black text-[#F0ECE4] flex items-center gap-3 mb-1">
+        <span aria-hidden="true" class="text-2xl">🏆</span> {{ $pageTitle }}
+    </h1>
+    <p class="text-xs text-[#6A6A7E] mb-6">電話・お気に入り・口コミ・閲覧数をもとに算出（直近7日間）</p>
 
-    {{-- ナビゲーションリンク --}}
+    {{-- 都道府県 / エリアナビ --}}
     @if(!empty($navLinks))
-    <section class="mb-6">
+    <nav aria-label="{{ $navLabel }}" class="mb-6">
         <h2 class="text-sm font-bold text-[#9A96A0] mb-3">{{ $navLabel }}</h2>
-        <div class="flex flex-wrap gap-2">
+        <ul class="flex flex-wrap gap-2" role="list">
             @foreach($navLinks as $link)
-            <a href="{{ route('ranking.area', $link['slug']) }}/"
-               class="text-xs px-3 py-1.5 rounded-full bg-surface-600 border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
-                {{ $link['name'] }}
-            </a>
+            <li>
+                <a href="{{ route('ranking.area', $link['slug']) }}/"
+                   class="text-xs px-3 py-1.5 rounded-full bg-surface-600 border border-surface-400 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition">
+                    {{ $link['name'] }}
+                </a>
+            </li>
             @endforeach
-        </div>
-    </section>
+        </ul>
+    </nav>
     @endif
 
     @if($ranking->isEmpty())
     <p class="text-sm text-[#6A6A7E] mb-8">まだランキングデータがありません。</p>
     @else
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-10">
+    <ol class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-10" role="list">
         @foreach($ranking as $i => $cast)
         @php
             $shop    = $cast->shop;
@@ -87,21 +91,21 @@
                 default => 'bg-surface-400 text-[#9A96A0]',
             };
         @endphp
+        <li>
         <article class="bg-surface-600 border border-surface-400 hover:border-deli-400 rounded-xl overflow-hidden transition group relative">
             <a href="{{ route('cast.show', $cast) }}/" class="block">
-                <div class="absolute top-1.5 left-1.5 z-10">
-                    <span class="text-xs font-black px-1.5 py-0.5 rounded {{ $medalColor }}">
-                        {{ $rank }}位
-                    </span>
+                <div class="absolute top-1.5 left-1.5 z-10" aria-hidden="true">
+                    <span class="text-xs font-black px-1.5 py-0.5 rounded {{ $medalColor }}">{{ $rank }}位</span>
                 </div>
                 @if($cast->isNew())
-                <div class="absolute top-1.5 right-1.5 z-10">
+                <div class="absolute top-1.5 right-1.5 z-10" aria-hidden="true">
                     <span class="text-xs bg-pink-500 text-white font-bold px-1.5 py-0.5 rounded leading-tight">NEW</span>
                 </div>
                 @endif
                 <div class="aspect-[3/4] overflow-hidden bg-surface-500">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                         loading="{{ $i < 5 ? 'eager' : 'lazy' }}"
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }} ({{ $rank }}位)"
+                         loading="{{ $i === 0 ? 'eager' : ($i < 5 ? 'eager' : 'lazy') }}"
+                         fetchpriority="{{ $i === 0 ? 'high' : 'auto' }}"
                          class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
                 </div>
                 <div class="p-2">
@@ -118,18 +122,18 @@
                 </div>
             </a>
         </article>
+        </li>
         @endforeach
-    </div>
+    </ol>
     @endif
-
 
     {{-- 全国ページへの戻りリンク（都道府県・エリアページ） --}}
     @if($pageType !== 'all')
-    <div class="mt-6 text-center">
+    <p class="mt-6 text-center">
         <a href="{{ route('ranking.index') }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400 transition">
             ← 全国ランキングに戻る
         </a>
-    </div>
+    </p>
     @endif
 
 </div>
