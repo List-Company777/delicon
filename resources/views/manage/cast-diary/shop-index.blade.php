@@ -1,17 +1,32 @@
-@extends('layouts.manage')
+@extends('layouts.app')
 @section('title', '写メ日記一覧')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-xl font-bold text-[#F0ECE4] mb-6">写メ日記一覧</h1>
+<div class="bg-business-700 text-white py-4">
+    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@include('manage._nav')
+
+<div class="max-w-4xl mx-auto px-4 pb-12">
+    <h1 class="text-xl font-bold text-gray-800 mb-6">写メ日記一覧</h1>
 
     @if(session('success'))
-    <div class="mb-4 bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
     @endif
 
     <div class="space-y-4">
         @forelse($diaries as $diary)
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="text-sm font-medium text-gray-800">{{ $diary->cast?->name ?? '（削除済み）' }}</span>
@@ -21,7 +36,7 @@
                         {{ $diary->status === 'published' ? '公開中' : '非公開' }}
                     </span>
                 </div>
-                <form method="POST" action="{{ route('cast-diary.destroy', $diary) }}/"
+                <form method="POST" action="{{ route('manage.cast-diary.destroy', $diary) }}/"
                       onsubmit="return confirm('この日記を削除しますか？')">
                     @csrf @method('DELETE')
                     <button class="text-xs bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 px-3 py-1.5 rounded-lg transition">削除</button>

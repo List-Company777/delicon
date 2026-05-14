@@ -173,9 +173,15 @@
             </div>
             @endif
 
-            {{-- 口コミセクション --}}
+            {{-- 口コミセクション（在籍キャストへの口コミ） --}}
             @php
-                $approvedReviews = $shop->reviews()->where('status','approved')->with('user:id,name')->orderByDesc('created_at')->take(5)->get();
+                $castIds = $shop->castMembers()->pluck('id');
+                $approvedReviews = \App\Models\CastReview::whereIn('cast_id', $castIds)
+                    ->where('is_approved', true)
+                    ->with('cast:id,name')
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get();
             @endphp
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
                 <div class="flex items-center justify-between mb-4">
@@ -183,27 +189,26 @@
                         <span class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
                         口コミ <span class="text-[#8A8A9E] font-normal">({{ $approvedReviews->count() }}件)</span>
                     </h2>
-                    @auth
-                    <a href="{{ route('review.create') }}?shop_id={{ $shop->id }}" class="text-xs bg-deli-500 hover:bg-deli-400 text-white px-3 py-1.5 rounded-lg transition">口コミを書く</a>
-                    @else
-                    <a href="{{ route('visitor.register') }}?redirect={{ urlencode(route('review.create') . '?shop_id=' . $shop->id) }}" class="text-xs border border-deli-500 text-deli-400 hover:bg-deli-500 hover:text-white px-3 py-1.5 rounded-lg transition">口コミを書く（要登録）</a>
-                    @endauth
                 </div>
                 @if($approvedReviews->isEmpty())
-                <p class="text-sm text-[#8A8A9E] text-center py-4">まだ口コミがありません。最初の口コミを投稿してみましょう。</p>
+                <p class="text-sm text-[#8A8A9E] text-center py-4">まだ口コミがありません。</p>
                 @else
                 <div class="space-y-4">
                     @foreach($approvedReviews as $review)
                     <div class="border-b border-surface-300 pb-4 last:border-0">
-                        <div class="flex items-center gap-2 mb-1">
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
                             <span class="text-amber-400 text-sm">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
-                            <span class="text-xs text-[#8A8A9E]">{{ $review->user->name }}</span>
+                            <span class="text-xs font-medium text-[#C8C4BC]">{{ $review->cast?->name }}</span>
+                            <span class="text-xs text-[#8A8A9E]">{{ $review->nickname ?? '匿名' }}</span>
                             <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
                         </div>
-                        @if($review->title)
-                        <p class="text-sm font-semibold text-[#E8E4DC] mb-1">{{ $review->title }}</p>
-                        @endif
                         <p class="text-sm text-[#B0AEAD] leading-relaxed">{{ $review->body }}</p>
+                        @if($review->shop_reply)
+                        <div class="mt-2 bg-surface-600 border border-surface-400 rounded-lg px-3 py-2">
+                            <p class="text-xs text-[#6A6A7E] mb-0.5">店舗からの返信</p>
+                            <p class="text-xs text-[#8A8A9E] leading-relaxed whitespace-pre-wrap">{{ $review->shop_reply }}</p>
+                        </div>
+                        @endif
                     </div>
                     @endforeach
                 </div>
@@ -230,7 +235,7 @@
                                  class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300"
                                  loading="lazy">
                             @if($isWorking)
-                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">待機中</span>
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">本日出勤</span>
                             @elseif($isNew)
                             <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-gold-500 text-surface-800 px-1.5 py-0.5 rounded-full leading-none">NEW</span>
                             @endif
@@ -273,7 +278,7 @@
         {{-- サイドバー --}}
         <div class="space-y-4">
             @if($shop->tel)
-            <div class="bg-deli-500 rounded-xl p-5 text-center">
+            <div class="hidden md:block bg-deli-500 rounded-xl p-5 text-center">
                 <a href="tel:{{ $shop->tel }}" rel="nofollow" class="block text-white text-base font-bold hover:opacity-90 transition">この店舗に問い合わせする</a>
             </div>
             @endif
@@ -312,7 +317,7 @@
             @endif
 
             {{-- 店舗情報サマリー --}}
-            <div class="bg-surface-500 border border-surface-300 rounded-xl p-4 text-sm space-y-2">
+            <div class="hidden md:block bg-surface-500 border border-surface-300 rounded-xl p-4 text-sm space-y-2">
                 @if($shop->price_60)
                 <div class="flex justify-between">
                     <span class="text-[#8A8A9E]">60分〜</span>
@@ -364,6 +369,40 @@
 
     </div>
 </div>
+
+{{-- 近隣有料掲載店（無料店ページのみ） --}}
+@if($nearbyPaidShops->isNotEmpty())
+<div class="max-w-5xl mx-auto px-4 pb-10">
+    <h2 class="text-sm font-bold text-[#8A8A9E] mb-4 flex items-center gap-2">
+        <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>
+        このエリアのおすすめ店舗
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @foreach($nearbyPaidShops as $ps)
+        @php
+            $psThumb    = $ps->main_image ? \App\Services\ImageService::thumbWebpPath($ps->main_image) : null;
+            $psThumbJpg = $ps->main_image ? \App\Services\ImageService::thumbJpgPath($ps->main_image) : null;
+        @endphp
+        <a href="{{ route('shop.show', $ps->id) }}/"
+           class="bg-surface-500 border border-surface-300 rounded-xl overflow-hidden hover:border-deli-500 transition group block">
+            @if($psThumb)
+            <picture>
+                <source srcset="{{ Storage::url($psThumb) }}" type="image/webp">
+                <img src="{{ Storage::url($psThumbJpg) }}" alt="{{ $ps->name }}"
+                     class="w-full aspect-video object-cover group-hover:opacity-90 transition" loading="lazy" width="224" height="126">
+            </picture>
+            @endif
+            <div class="p-3">
+                <p class="text-sm font-bold text-[#E8E4DC] truncate group-hover:text-deli-400 transition">{{ $ps->name }}</p>
+                @if($ps->area)
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $ps->area->name }}</p>
+                @endif
+            </div>
+        </a>
+        @endforeach
+    </div>
+</div>
+@endif
 
 {{-- フロートバー（スマホのみ） --}}
 <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 p-3 bg-surface-900/95 backdrop-blur border-t border-surface-500">
@@ -496,9 +535,10 @@
         $ld_local['address'] = array_filter($ld_local['address'], fn($v) => $v !== null);
     }
 
-    $ratingStats = \Illuminate\Support\Facades\DB::table('shop_reviews')
-        ->where('shop_id', $shop->id)
-        ->where('status', 'approved')
+    $castIdsForRating = $shop->castMembers()->pluck('id');
+    $ratingStats = \Illuminate\Support\Facades\DB::table('cast_reviews')
+        ->whereIn('cast_id', $castIdsForRating)
+        ->where('is_approved', true)
         ->selectRaw('COUNT(*) as cnt, AVG(rating) as avg_rating')
         ->first();
     if ($ratingStats && $ratingStats->cnt > 0) {

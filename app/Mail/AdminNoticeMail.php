@@ -19,8 +19,8 @@ class AdminNoticeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】' . $this->notice->title,
-            replyTo: [new Address(config('mail.admin_address'), 'ナイトワークリスト')],
+            subject: '【デリヘルリスト】' . $this->notice->title,
+            replyTo: [new Address(config('mail.admin_address'), 'デリヘルリスト')],
         );
     }
 

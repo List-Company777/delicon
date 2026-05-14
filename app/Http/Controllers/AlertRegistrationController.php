@@ -16,7 +16,7 @@ class AlertRegistrationController extends Controller
             : 'female';
 
         $areas = Area::whereNull('parent_id')
-            ->with('prefecture:id,name')
+            ->with('prefecture:id,prefecture')
             ->orderBy('sort_order')
             ->get(['id', 'name', 'prefecture_id'])
             ->groupBy(fn($a) => $a->prefecture?->name ?? 'その他');

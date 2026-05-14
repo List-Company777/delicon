@@ -16,7 +16,7 @@ class CastAnalyticsController extends BaseController
         $since  = now()->subDays($period)->startOfDay();
 
         $casts = Cast::where('shop_id', $shop->id)
-            ->select('id', 'name', 'image', 'status')
+            ->select('id', 'name', 'img_file_name', 'status')
             ->get();
 
         if ($casts->isEmpty()) {

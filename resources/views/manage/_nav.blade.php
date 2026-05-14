@@ -17,19 +17,7 @@
     }
 @endphp
 
-{{-- 未対応応募バナー（応募管理ページ以外で表示） --}}
-@if($unreadCount > 0 && !request()->routeIs('manage.applications.*'))
-<div class="bg-red-50 border-b border-red-200">
-    <div class="max-w-4xl mx-auto px-4 py-2 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
-        <a href="{{ route('manage.applications.index') }}/" class="text-sm text-red-700 font-medium hover:underline">
-            未対応の応募が <span class="font-bold">{{ $unreadCount }}</span> 件あります → 確認する
-        </a>
-    </div>
-</div>
-@endif
+{{-- 応募管理バナー（非表示中） --}}
 
 {{-- 代理操作中バナー --}}
 @if(auth()->user()->isPartner() && session()->has('acting_shop_id'))
@@ -56,16 +44,13 @@
                     'manage.dashboard'          => 'ダッシュボード',
                     'manage.shop.edit'          => '基本情報',
                     'manage.shop.image'         => 'メイン画像',
-                    'manage.business.edit'      => '営業情報',
                     'manage.cast-profile.index' => '在籍キャスト',
-                    'manage.applications.index' => '応募管理',
-                    'manage.paid-plan'          => '掲載プラン',
-                    'manage.contact'            => 'お問い合わせ',
-                    'manage.shop.news.index'    => 'お知らせ',
                     'manage.diaries.index'      => '写メ日記',
                     'manage.shift-requests.index' => 'シフト申請',
                     'manage.review.index'       => '口コミ管理',
                     'manage.cast-analytics.index' => '女性統計',
+                    'manage.shop.news.index'    => 'お知らせ',
+                    'manage.contact'            => 'お問い合わせ',
                     'manage.password.edit'      => 'パスワード変更',
                 ];
             @endphp

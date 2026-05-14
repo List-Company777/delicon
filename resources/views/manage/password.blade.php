@@ -1,6 +1,19 @@
 @extends('layouts.app')
 @section('title', 'パスワード変更')
 @section('content')
+<div class="bg-business-700 text-white py-4">
+    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 @include('manage._nav')
 
 <div class="max-w-lg mx-auto py-8 px-4">

@@ -29,7 +29,7 @@ class ShopNotifier
         if ($owner->line_user_id && config('services.line.messaging_token')) {
             static::sendLinePush(
                 $owner->line_user_id,
-                "【ナイトワークリスト】掲載継続の確認\n"
+                "【デリヘルリスト】掲載継続の確認\n"
                 . "以下のリンクから継続手続きをお願いします（2週間以内）\n"
                 . route('manage.alive', $shop->alive_check_token),
                 'alive_check'
@@ -53,7 +53,7 @@ class ShopNotifier
         if ($owner->line_user_id && config('services.line.messaging_token')) {
             static::sendLinePush(
                 $owner->line_user_id,
-                "【ナイトワークリスト】{$shop->name} の掲載を一時停止しました。\n"
+                "【デリヘルリスト】{$shop->name} の掲載を一時停止しました。\n"
                 . "再開は管理画面よりログインしてお手続きください。\n"
                 . route('login'),
                 'inactivated'

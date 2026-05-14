@@ -821,7 +821,8 @@ class ImportXmlFeed extends Command
             if (strlen($clean) === 8) {
                 return Carbon::createFromFormat('Ymd', $clean)->endOfDay();
             }
-        } catch (\Exception) {}
+        } catch (\Exception) { // 日付パース失敗は無視（不正な文字列のため）
+        }
         return null;
     }
 }

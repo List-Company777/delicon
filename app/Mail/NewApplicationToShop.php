@@ -22,7 +22,7 @@ class NewApplicationToShop extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】新しい応募が届きました',
+            subject: '【デリヘルリスト】新しい応募が届きました',
         );
     }
 

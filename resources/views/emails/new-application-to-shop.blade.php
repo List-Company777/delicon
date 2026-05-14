@@ -41,5 +41,5 @@
 {{ route('password.request') }}/
 
 ---
-ナイトワークリスト
-https://nightwork-list.com/
+デリヘルリスト
+https://delicon.jp/

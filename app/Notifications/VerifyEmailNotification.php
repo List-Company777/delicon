@@ -10,7 +10,7 @@ class VerifyEmailNotification extends VerifyEmail
     protected function buildMailMessage($url): MailMessage
     {
         return (new MailMessage)
-            ->subject('【ナイトワークリスト】メールアドレスの確認')
+            ->subject('【デリヘルリスト】メールアドレスの確認')
             ->text('emails.verify-email-text', ['url' => $url]);
     }
 }

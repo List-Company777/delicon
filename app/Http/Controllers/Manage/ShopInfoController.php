@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Manage;
 
+use App\Models\Genre;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,8 @@ class ShopInfoController extends BaseController
     public function edit()
     {
         $shop = $this->shopOrFail();
-        return view('manage.shop.edit', compact('shop'));
+        $genres = Genre::orderBy('id')->get();
+        return view('manage.shop.edit', compact('shop', 'genres'));
     }
 
     public function update(Request $request)
@@ -47,6 +49,7 @@ class ShopInfoController extends BaseController
             'shop_type_id2'         => ['nullable', 'integer', 'exists:shop_types,id'],
             'tags'                  => ['nullable', 'array'],
             'tags.*'                => ['string', 'max:30'],
+            'genre_id'              => ['nullable', 'integer', 'exists:genres,id'],
         ]);
 
         $shop->update($request->only([
@@ -55,7 +58,7 @@ class ShopInfoController extends BaseController
             'base', 'catche', 'system_text', 'coupon',
             'open_time', 'close_time', 'rest_day',
             'price_60', 'price_90', 'price_120', 'price_high',
-            'eigyo_area', 'eigyo_space', 'shop_type_id', 'shop_type_id2',
+            'eigyo_area', 'eigyo_space', 'shop_type_id', 'shop_type_id2', 'genre_id',
         ]) + [
             'all_time' => $request->boolean('all_time'),
             'tags'     => $request->input('tags', []),

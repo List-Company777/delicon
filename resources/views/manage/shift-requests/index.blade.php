@@ -1,18 +1,33 @@
-@extends('layouts.manage')
+@extends('layouts.app')
 @section('title', 'シフト申請')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-xl font-bold text-[#F0ECE4] mb-2">シフト申請</h1>
-    <p class="text-xs text-gray-400 mb-6">在籍女性から届いたシフト申請を確認・承認できます。承認するとシフトに自動反映されます。</p>
+<div class="bg-business-700 text-white py-4">
+    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@include('manage._nav')
+
+<div class="max-w-4xl mx-auto px-4 pb-12">
+    <h1 class="text-xl font-bold text-gray-800 mb-2">シフト申請</h1>
+    <p class="text-xs text-gray-500 mb-6">在籍女性から届いたシフト申請を確認・承認できます。承認するとシフトに自動反映されます。</p>
 
     @if(session('success'))
-    <div class="mb-4 bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
     @endif
 
     {{-- 承認待ち --}}
     <div class="mb-8">
-        <h2 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+        <h2 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
             承認待ち
             @if($pending->isNotEmpty())
@@ -21,11 +36,11 @@
         </h2>
 
         @if($pending->isEmpty())
-        <p class="text-sm text-gray-400 py-6 text-center bg-white/5 rounded-xl border border-white/10">承認待ちのシフト申請はありません</p>
+        <p class="text-sm text-gray-400 py-6 text-center bg-gray-50 rounded-xl border border-gray-100">承認待ちのシフト申請はありません</p>
         @else
         <div class="space-y-2">
             @foreach($pending as $req)
-            <div class="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-center gap-3 justify-between">
+            <div class="bg-white rounded-xl shadow-sm p-4 flex flex-wrap items-center gap-3 justify-between">
                 <div class="flex items-center gap-3 flex-wrap">
                     <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 shrink-0">
                         <img src="{{ $req->cast->img_url }}" alt="" class="img-onerror-cast w-full h-full object-cover">
@@ -61,13 +76,13 @@
     {{-- 直近7日の処理済み --}}
     @if($recent->isNotEmpty())
     <div>
-        <h2 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+        <h2 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
             処理済み（直近7日）
         </h2>
         <div class="space-y-2">
             @foreach($recent as $req)
-            <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-wrap items-center gap-3 justify-between opacity-70">
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 flex flex-wrap items-center gap-3 justify-between opacity-70">
                 <div class="flex items-center gap-3">
                     <div class="w-7 h-7 rounded-full overflow-hidden bg-gray-100 shrink-0">
                         <img src="{{ $req->cast->img_url }}" alt="" class="img-onerror-cast w-full h-full object-cover">
@@ -78,7 +93,7 @@
                         @if($req->start_time) {{ substr($req->start_time, 0, 5) }}〜{{ substr($req->end_time ?? '', 0, 5) }} @endif
                     </p>
                 </div>
-                <span class="text-xs font-bold px-2 py-0.5 rounded-full {{ $req->isApproved() ? 'bg-emerald-900/50 text-emerald-400' : 'bg-red-900/30 text-red-400' }}">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full {{ $req->isApproved() ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }}">
                     {{ $req->isApproved() ? '承認済' : '却下' }}
                 </span>
             </div>

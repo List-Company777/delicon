@@ -179,7 +179,7 @@
                     <p class="text-gold-400 font-bold mb-3 text-xs tracking-widest uppercase">キャストを探す</p>
                     <ul class="space-y-2">
                         <li><a href="{{ url("/{$fa}/girl-list/") }}/" class="block py-1.5 text-deli-400 hover:text-deli-300 transition">キャスト一覧</a></li>
-                        <li><a href="{{ url("/{$fa}/girl-list/standby/") }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">待機中</a></li>
+                        <li><a href="{{ url("/{$fa}/girl-list/standby/") }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">本日出勤</a></li>
                         <li><a href="{{ url("/{$fa}/girl-list/new/") }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">新人</a></li>
                         <li><a href="{{ url("/{$fa}/girl-list/diary/") }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">写メ日記</a></li>
                         <li><a href="{{ url("/{$fa}/girl-list/review/") }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">口コミ</a></li>

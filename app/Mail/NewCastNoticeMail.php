@@ -15,7 +15,7 @@ class NewCastNoticeMail extends Mailable
 
     public function build(): static
     {
-        return $this->subject('【デリコン】新人キャスト「' . $this->cast->name . '」が登録されました')
+        return $this->subject('【デリヘルリスト】新人キャスト「' . $this->cast->name . '」が登録されました')
                     ->view('emails.new-cast-notice');
     }
 }

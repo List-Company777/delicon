@@ -15,7 +15,7 @@ class CastWorkingNoticeMail extends Mailable
 
     public function build(): static
     {
-        return $this->subject('【デリコン】' . $this->cast->name . 'さんが本日出勤します')
+        return $this->subject('【デリヘルリスト】' . $this->cast->name . 'さんが本日出勤します')
                     ->view('emails.cast-working-notice');
     }
 }

@@ -153,28 +153,6 @@
 </div>
 @endif
 
-{{-- キーワード正規化サマリー --}}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <a href="{{ route('admin.keywords.index', ['status' => 'new']) }}/"
-       class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition border-l-4 border-yellow-400 block">
-        <p class="text-xs text-gray-500 mb-1">未判定キーワード</p>
-        <p class="text-3xl font-bold text-yellow-600">{{ number_format($stats['new']) }}</p>
-        <p class="text-xs text-gray-400 mt-1">正規化が必要なワード →</p>
-    </a>
-    <a href="{{ route('admin.keywords.index', ['status' => 'mapped']) }}/"
-       class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition border-l-4 border-green-400 block">
-        <p class="text-xs text-gray-500 mb-1">正規化済み</p>
-        <p class="text-3xl font-bold text-green-600">{{ number_format($stats['mapped']) }}</p>
-        <p class="text-xs text-gray-400 mt-1">ディレクトリURLに紐付け済み →</p>
-    </a>
-    <a href="{{ route('admin.keywords.index', ['status' => 'excluded']) }}/"
-       class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition border-l-4 border-gray-300 block">
-        <p class="text-xs text-gray-500 mb-1">除外済み</p>
-        <p class="text-3xl font-bold text-gray-500">{{ number_format($stats['excluded']) }}</p>
-        <p class="text-xs text-gray-400 mt-1">SEO対象外のワード →</p>
-    </a>
-</div>
-
 {{-- XML未解決求人 --}}
 @if($unresolvedXmlJobs->isNotEmpty())
 <div class="bg-white rounded-xl shadow-sm p-6">
@@ -205,10 +183,6 @@
 <div class="bg-white rounded-xl shadow-sm p-6">
     <h2 class="text-sm font-bold text-gray-600 mb-4">クイックアクション</h2>
     <div class="flex flex-wrap gap-3">
-        <a href="{{ route('admin.keywords.index', ['status' => 'new']) }}/"
-           class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-white text-sm rounded-lg transition font-medium">
-            未判定キーワードを処理する
-        </a>
         <a href="{{ route('admin.articles.index') }}/"
            class="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-sm rounded-lg transition font-medium">
             記事を管理する

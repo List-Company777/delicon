@@ -13,6 +13,7 @@
         <a href="{{ route('user.dashboard') }}/" class="text-deli-400 border-b-2 border-deli-500 pb-2">お気に入り / 閲覧履歴</a>
         <a href="{{ route('user.settings') }}/?tab=notify" class="text-[#6A6A7E] hover:text-[#C8C4BC] pb-2 transition">新人通知</a>
         <a href="{{ route('user.settings') }}/?tab=prefs" class="text-[#6A6A7E] hover:text-[#C8C4BC] pb-2 transition">好み</a>
+        <a href="{{ route('user.coupons') }}/" class="text-[#6A6A7E] hover:text-[#C8C4BC] pb-2 transition">クーポン</a>
     </div>
 
     {{-- あなたにおすすめ --}}
@@ -30,7 +31,7 @@
                     <img src="{{ $cast->img_url ?? '/img/no-cast.svg' }}" alt="{{ $cast->name }}"
                          class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
                     @if($cast->working_date && $cast->working_date->isToday())
-                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>
+                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">本日出勤</span>
                     @endif
                 </div>
                 <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 truncate">{{ $cast->name }}</p>

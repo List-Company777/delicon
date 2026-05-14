@@ -86,8 +86,8 @@ class CastProfileController extends BaseController
 
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:100'],
-            'age'            => ['nullable', 'integer', 'min:18', 'max:99'],
-            'tall'           => ['nullable', 'integer', 'min:100', 'max:220'],
+            'age'            => ['required_without:date_of_birth', 'nullable', 'integer', 'min:18', 'max:99'],
+            'tall'           => ['required', 'integer', 'min:100', 'max:220'],
             'bust'           => ['nullable', 'integer', 'min:50', 'max:200'],
             'cup'            => ['nullable', 'string', 'max:3'],
             'west'           => ['nullable', 'integer', 'min:40', 'max:150'],
@@ -99,8 +99,14 @@ class CastProfileController extends BaseController
             'is_recommended' => ['boolean'],
             'is_new'         => ['boolean'],
             'join_date'      => ['nullable', 'date'],
+            'date_of_birth'  => ['nullable', 'date', 'before_or_equal:' . now()->subYears(18)->format('Y-m-d')],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
+
+        // 生年月日から年齢を自動計算
+        if (!empty($data['date_of_birth'])) {
+            $data['age'] = \Carbon\Carbon::parse($data['date_of_birth'])->age;
+        }
 
         // 名前＋年齢の重複チェック（同じ店舗内）
         if (!empty($data['age'])) {
@@ -116,7 +122,12 @@ class CastProfileController extends BaseController
         $cast = new Cast();
         $cast->shop_id = $shop->id;
         $cast->fill($data);
-        $cast->is_recommended = $request->boolean('is_recommended');
+        $wantsRecommended = $request->boolean('is_recommended');
+        if ($wantsRecommended) {
+            $recommendedCount = Cast::where('shop_id', $shop->id)->where('is_recommended', true)->count();
+            $wantsRecommended = $recommendedCount < 3;
+        }
+        $cast->is_recommended = $wantsRecommended;
         $cast->is_new = $request->boolean('is_new');
         if ($cast->is_new) {
             // 新規登録時: is_new が ON なら new_since をセット（join_dateと今日の遅い方）
@@ -156,8 +167,8 @@ class CastProfileController extends BaseController
 
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:100'],
-            'age'            => ['nullable', 'integer', 'min:18', 'max:99'],
-            'tall'           => ['nullable', 'integer', 'min:100', 'max:220'],
+            'age'            => ['required_without:date_of_birth', 'nullable', 'integer', 'min:18', 'max:99'],
+            'tall'           => ['required', 'integer', 'min:100', 'max:220'],
             'bust'           => ['nullable', 'integer', 'min:50', 'max:200'],
             'cup'            => ['nullable', 'string', 'max:3'],
             'west'           => ['nullable', 'integer', 'min:40', 'max:150'],
@@ -169,11 +180,24 @@ class CastProfileController extends BaseController
             'is_recommended' => ['boolean'],
             'is_new'         => ['boolean'],
             'join_date'      => ['nullable', 'date'],
+            'date_of_birth'  => ['nullable', 'date', 'before_or_equal:' . now()->subYears(18)->format('Y-m-d')],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
 
+        // 生年月日から年齢を自動計算
+        if (!empty($data['date_of_birth'])) {
+            $data['age'] = \Carbon\Carbon::parse($data['date_of_birth'])->age;
+        }
+
         $cast->fill($data);
-        $cast->is_recommended = $request->boolean('is_recommended');
+        $wantsRecommended = $request->boolean('is_recommended');
+        if ($wantsRecommended && !$cast->is_recommended) {
+            $recommendedCount = Cast::where('shop_id', $shop->id)->where('is_recommended', true)->count();
+            if ($recommendedCount >= 3) {
+                return back()->withErrors(['is_recommended' => 'おすすめは3人までです。'])->withInput();
+            }
+        }
+        $cast->is_recommended = $wantsRecommended;
         $wasNew = $cast->is_new;
         $wantNew = $request->boolean('is_new');
         if ($wantNew && !$wasNew) {
@@ -214,6 +238,16 @@ class CastProfileController extends BaseController
         $cast = Cast::where('shop_id', $shop->id)->findOrFail($id);
         $cast->delete();
         return back()->with('success', 'キャストを削除しました');
+    }
+
+    public function reorder(Request $request)
+    {
+        $shop = $this->shopOrFail();
+        $ids = $request->input('ids', []);
+        foreach ($ids as $order => $id) {
+            Cast::where('id', $id)->where('shop_id', $shop->id)->update(['sort_order' => $order]);
+        }
+        return response()->json(['ok' => true]);
     }
 
     private function savePhoto($file): string

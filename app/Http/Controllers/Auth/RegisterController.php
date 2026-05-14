@@ -157,7 +157,7 @@ class RegisterController extends Controller
             })
             ->whereDoesntHave('users')
             ->select('id', 'name', 'prefecture_id', 'area_id', 'genre_id')
-            ->with(['prefecture:id,name', 'area:id,name', 'genre:id,name'])
+            ->with(['prefecture:id,prefecture', 'area:id,name', 'genre:id,name'])
             ->limit(5)
             ->get()
             ->map(fn($s) => [

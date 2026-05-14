@@ -3,11 +3,14 @@
 @section('content')
 <div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}/" method="POST">
-            @csrf
-            <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
-        </form>
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -22,28 +25,25 @@
 
     <form action="{{ route('manage.shop.update') }}/" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden">
         @csrf @method('PUT')
-        <table class="w-full text-sm">
+        <table class="w-full text-sm" style="color:#111827">
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-36 whitespace-nowrap">店舗名 <span class="text-red-400">*</span></th>
                 <td class="px-4 py-3">
                     <input type="text" name="name" value="{{ old('name', $shop->name) }}" required
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('name') border-red-400 @enderror">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('name') border-red-400 @enderror">
                     @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">フリガナ</th>
-                <td class="px-4 py-3">
-                    <input type="text" name="kana" value="{{ old('kana', $shop->kana) }}"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                </td>
-            </tr>
-            {{-- 業種・都道府県・エリアは管理者のみ変更可（読み取り専用） --}}
-            <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">業種</th>
                 <td class="px-4 py-3">
-                    <span class="text-gray-700">{{ $shop->genre?->name ?? '—' }}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">変更は<a href="{{ route('manage.contact') }}/" class="underline hover:text-gray-600">お問い合わせフォーム</a>からご連絡ください</p>
+                    <select name="genre_id"
+                            class="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 w-48">
+                        <option value="">選択してください</option>
+                        @foreach($genres as $g)
+                            <option value="{{ $g->id }}" {{ $shop->genre_id == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                        @endforeach
+                    </select>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -74,26 +74,17 @@
                 <td class="px-4 py-3">
                     <input type="text" name="postal_code" value="{{ old('postal_code', $shop->postal_code) }}"
                            placeholder="例：160-0021" maxlength="8"
-                           class="w-40 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('postal_code') border-red-400 @enderror">
+                           class="w-40 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('postal_code') border-red-400 @enderror">
                     @error('postal_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">市区町村</th>
-                <td class="px-4 py-3">
-                    <input type="text" name="address_locality" value="{{ old('address_locality', $shop->address_locality) }}"
-                           placeholder="例：新宿区歌舞伎町"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('address_locality') border-red-400 @enderror">
-                    <p class="text-xs text-gray-400 mt-0.5">区・町・丁目まで入力してください（検索エンジン向け住所情報に使用）</p>
-                    @error('address_locality')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                </td>
-            </tr>
-            <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">番地・建物名 <span class="text-red-400">*</span></th>
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">住所 <span class="text-red-400">*</span></th>
                 <td class="px-4 py-3">
                     <input type="text" name="address" value="{{ old('address', $shop->address) }}" required
-                           placeholder="例：1-1-1 ○○ビル3F"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('address') border-red-400 @enderror">
+                           placeholder="例：新宿区歌舞伎町1-1-1 ○○ビル3F"
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('address') border-red-400 @enderror">
+                    <p class="text-xs text-gray-400 mt-0.5">区・町まで入力してください（検索エンジン向け住所情報に使用）</p>
                     @error('address')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>
@@ -102,7 +93,7 @@
                 <td class="px-4 py-3">
                     <input type="tel" name="tel" value="{{ old('tel', $shop->tel) }}" required
                            placeholder="例：03-0000-0000"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500 @error('tel') border-red-400 @enderror">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('tel') border-red-400 @enderror">
                     @error('tel')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>
@@ -111,7 +102,7 @@
                 <td class="px-4 py-3">
                     <input type="text" name="nearest_line" value="{{ old('nearest_line', $shop->nearest_line) }}"
                            placeholder="例：東京メトロ丸ノ内線"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500">
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -119,23 +110,7 @@
                 <td class="px-4 py-3">
                     <input type="text" name="nearest_station_name" value="{{ old('nearest_station_name', $shop->nearest_station_name) }}"
                            placeholder="例：新宿三丁目"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                </td>
-            </tr>
-            <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">徒歩（分）</th>
-                <td class="px-4 py-3">
-                    <input type="number" name="nearest_station_walk" value="{{ old('nearest_station_walk', $shop->nearest_station_walk) }}"
-                           min="1" max="99" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                </td>
-            </tr>
-            <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">LINE ID</th>
-                <td class="px-4 py-3">
-                    <input type="text" name="line_id" value="{{ old('line_id', $shop->line_id) }}"
-                           placeholder="店舗公式LINEのID"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                    <p class="text-xs text-gray-400 mt-0.5">求職者が友だち追加するための公開LINE IDです</p>
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500">
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -143,7 +118,7 @@
                 <td class="px-4 py-3">
                     <input type="text" name="base" value="{{ old('base', $shop->base) }}"
                            placeholder="例：新宿・渋谷エリア"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -151,14 +126,14 @@
                 <td class="px-4 py-3">
                     <input type="text" name="catche" value="{{ old('catche', $shop->catche) }}" maxlength="200"
                            placeholder="例：超高級デリヘル！業界トップクラスの在籍数"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">システム説明</th>
                 <td class="px-4 py-3">
                     <textarea name="system_text" id="shop-system-text" rows="4" maxlength="5000"
-                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('system_text', $shop->system_text) }}</textarea>
+                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400 resize-y">{{ old('system_text', $shop->system_text) }}</textarea>
                     <p class="text-xs text-gray-400 mt-0.5">デリヘルのシステム・サービス内容の説明</p>
                     @php $shopTextLen = mb_strlen($shop->base ?? '') + mb_strlen($shop->system_text ?? ''); @endphp
                     @if($shopTextLen < 100)
@@ -172,7 +147,7 @@
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">クーポン</th>
                 <td class="px-4 py-3">
                     <textarea name="coupon" rows="3" maxlength="2000"
-                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('coupon', $shop->coupon) }}</textarea>
+                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400 resize-y">{{ old('coupon', $shop->coupon) }}</textarea>
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
@@ -181,10 +156,10 @@
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-center gap-2">
                             <input type="text" name="open_time" value="{{ old('open_time', $shop->open_time) }}"
-                                   placeholder="09:00" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   placeholder="09:00" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                             <span class="text-gray-500 text-sm">〜</span>
                             <input type="text" name="close_time" value="{{ old('close_time', $shop->close_time) }}"
-                                   placeholder="翌05:00" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   placeholder="翌05:00" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                         </div>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="all_time" value="1" @checked(old('all_time', $shop->all_time))
@@ -196,7 +171,7 @@
                         <span class="text-xs text-gray-500 whitespace-nowrap">定休日：</span>
                         <input type="text" name="rest_day" value="{{ old('rest_day', $shop->rest_day) }}"
                                placeholder="例：年中無休" maxlength="100"
-                               class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                               class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                     </div>
                 </td>
             </tr>
@@ -207,25 +182,25 @@
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500 w-16">60分</span>
                             <input type="number" name="price_60" value="{{ old('price_60', $shop->price_60) }}" min="0"
-                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                             <span class="text-xs text-gray-500">円</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500 w-16">90分</span>
                             <input type="number" name="price_90" value="{{ old('price_90', $shop->price_90) }}" min="0"
-                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                             <span class="text-xs text-gray-500">円</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500 w-16">120分</span>
                             <input type="number" name="price_120" value="{{ old('price_120', $shop->price_120) }}" min="0"
-                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                             <span class="text-xs text-gray-500">円</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500 w-16">高級コース</span>
                             <input type="number" name="price_high" value="{{ old('price_high', $shop->price_high) }}" min="0"
-                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                                   class="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                             <span class="text-xs text-gray-500">円〜</span>
                         </div>
                     </div>
@@ -235,7 +210,7 @@
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">営業エリア</th>
                 <td class="px-4 py-3">
                     <textarea name="eigyo_area" rows="3" maxlength="2000"
-                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('eigyo_area', $shop->eigyo_area) }}</textarea>
+                              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400 resize-y">{{ old('eigyo_area', $shop->eigyo_area) }}</textarea>
                     <p class="text-xs text-gray-400 mt-0.5">例：新宿・渋谷・池袋・六本木など</p>
                 </td>
             </tr>
@@ -324,7 +299,7 @@
                 <td class="px-4 py-3">
                     <input type="text" name="eigyo_space" value="{{ old('eigyo_space', $shop->eigyo_space) }}" maxlength="200"
                            placeholder="例：お客様自宅・ホテル"
-                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                           class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
                 </td>
             </tr>
         </table>

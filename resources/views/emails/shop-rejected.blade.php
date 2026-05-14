@@ -15,4 +15,4 @@
 {{ config('app.url') }}/manage/dashboard/
 
 ---
-ナイトワークリスト
+デリヘルリスト

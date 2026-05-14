@@ -2,8 +2,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cast;
+use App\Mail\NewReviewToShopMail;
 use App\Models\CastReview;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 
 class CastReviewController extends Controller
@@ -27,10 +29,20 @@ class CastReviewController extends Controller
             'nickname'   => Auth::user()->name,
             'rating'     => $request->rating,
             'body'       => $request->body,
-            'is_approved'=> false,
+            'is_approved'=> true,
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('review_success', '口コミを投稿しました。承認後に公開されます。');
+        // 店舗オーナーへ通知
+        $owner = $cast->shop?->users()->wherePivot('role', 'owner')->first();
+        if ($owner) {
+            try {
+                Mail::to($owner->email)->queue(new NewReviewToShopMail($review->load('cast.shop')));
+            } catch (\Throwable $e) {
+                \Log::warning('NewReviewToShopMail failed: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('review_success', '口コミを投稿しました。');
     }
 }

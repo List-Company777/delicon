@@ -3,8 +3,14 @@
 @section('content')
 <div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}" method="POST">@csrf<button class="text-sm opacity-70 hover:opacity-100">ログアウト</button></form>
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -20,10 +26,9 @@
 
     {{-- ランキング説明バナー --}}
     <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-        <p class="text-sm font-bold text-amber-800 mb-1">📸 画像を登録すると検索順位が上がります</p>
+        <p class="text-sm font-bold text-amber-800 mb-1">📸 画像を登録すると掲載できる場所が増えます</p>
         <p class="text-xs text-amber-700 leading-relaxed">
-            画像がなくてもお店は検索結果に表示されますが、<strong>メイン画像を登録した店舗が優先的に上位表示</strong>されます。<br>
-            また、求人カードにも店舗画像が使われるため、クリック率の向上にもつながります。
+            画像がなくてもお店は検索結果に表示されますが、<strong>画像のある店舗はより多くの場所に掲載</strong>されます。
         </p>
     </div>
 

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>デリコンが全面リニューアル | デリヘルリスト</title>
-    <meta name="description" content="デリコンが全面リニューアル。サイト名もデリヘルリストに変わります。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
+    <title>デリコンがリニューアル、デリヘルリストへ | デリヘルリスト</title>
+    <meta name="description" content="デリコンがリニューアルして、デリヘルリストになりました。ユーザー登録・充実した検索機能・店舗向け管理機能・SEO強化など、旧サイトからの主な追加機能をご紹介します。">
     <meta name="robots" content="noindex,follow">
     @vite(['resources/css/app.css'])
     <style>
@@ -36,12 +36,32 @@
             RENEWED
         </div>
         <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6">
-            デリコンが<span class="text-deli-400">全面リニューアル</span>。
+            デリコンが<span class="text-deli-400">リニューアル</span>して、デリヘルリストへ。
         </h1>
         <p class="text-[#B0AEAD] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
             ユーザー向けの会員機能・充実した検索・店舗管理ツール・SEO強化など、<br class="hidden md:inline">
-            旧サイトから大幅にパワーアップしました。主な追加・改善点をご紹介します。<br class="hidden md:inline">なお、サイト名も<strong class="text-white">「デリヘルリスト」</strong>に変わります。
+            旧サイト「デリコン」から大幅にパワーアップしました。主な追加・改善点をご紹介します。
         </p>
+    </div>
+</section>
+
+{{-- SEO実績バナー --}}
+<section class="border-b border-[#2A2A3E] bg-[#12121E]/60">
+    <div class="max-w-4xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-6">
+        <div class="flex items-start gap-4">
+            <span class="text-3xl shrink-0">📅</span>
+            <div>
+                <p class="text-white font-black text-lg leading-snug mb-1">ドメインエイジ<span class="text-deli-400 text-2xl">約21年</span></p>
+                <p class="text-[#8A8A9E] text-sm leading-relaxed">delicon.jp は2004年から運営する歴史あるドメインです。無料掲載してオフィシャルHPにリンクするだけで、SEO対策になります。</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-4">
+            <span class="text-3xl shrink-0">📈</span>
+            <div>
+                <p class="text-white font-black text-lg leading-snug mb-1">月間<span class="text-deli-400 text-2xl">1万クリック以上</span>をGoogleから獲得</p>
+                <p class="text-[#8A8A9E] text-sm leading-relaxed">直近1か月間でGoogleからの検索流入が1万クリックを突破。今回のリニューアルでさらに増やせる見込みです。</p>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -167,6 +187,9 @@
                     ['icon' => '💬', 'title' => '口コミ管理',             'desc' => '寄せられた口コミを管理画面で確認。有料プランの店舗は不当な書き込みへの削除申請が可能です。'],
                     ['icon' => '📷', 'title' => '写メ日記管理',           'desc' => '在籍女性が投稿した写メ日記を管理画面で一覧確認。不適切な投稿はすぐに削除できます。'],
                     ['icon' => '🔔', 'title' => 'ユーザーへの自動通知',   'desc' => '新人登録・シフト登録でお気に入りユーザーに自動メール通知。集客コストゼロで呼び込めます。'],
+                    ['icon' => '↩',  'title' => '口コミへの返信',           'desc' => '寄せられた口コミに店舗から返信を投稿できます。ユーザーの閲覧ページにも返信が表示されます。'],
+                    ['icon' => '🎟', 'title' => 'クーポン送付',             'desc' => '口コミを投稿してくれた会員ユーザーに割引クーポンをメールで送付できます。合言葉やメッセージも設定可能。送付済みクーポンはユーザーのマイページに一覧表示されます。'],
+                    ['icon' => '🎂', 'title' => '年齢の自動更新',           'desc' => '生年月日を登録しておくだけで、年齢は毎日自動計算されます。「20歳→21歳」の更新を手作業で行う必要はありません。'],
                 ];
             @endphp
             @foreach($shopFeatures as $f)

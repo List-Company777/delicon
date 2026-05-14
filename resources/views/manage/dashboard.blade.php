@@ -47,7 +47,7 @@
 
     {{-- コンセプトバナー --}}
     <div class="bg-business-50 border border-business-200 rounded-xl px-5 py-4 mb-6">
-        <p class="text-sm text-business-900 leading-relaxed">「<span class="font-bold">夜ビジ：ナイトワークリスト</span>」は、ナイトビジネス全体を盛り上げるための営業支援サイトです。基本無料で利用できますので系列店やお知り合いのお店にご紹介をお願いいたします。</p>
+        <p class="text-sm text-business-900 leading-relaxed">「<span class="font-bold">夜ビジ：デリヘルリスト</span>」は、ナイトビジネス全体を盛り上げるための営業支援サイトです。基本無料で利用できますので系列店やお知り合いのお店にご紹介をお願いいたします。</p>
     </div>
 
     {{-- メール認証完了メッセージ --}}
@@ -58,7 +58,7 @@
         </svg>
         <div>
             <p class="text-sm font-bold text-green-800">登録が完了しました！</p>
-            <p class="text-xs text-green-700 mt-0.5">ようこそ、ナイトワークリストへ。まずは店舗情報を入力してください。</p>
+            <p class="text-xs text-green-700 mt-0.5">ようこそ、デリヘルリストへ。まずは店舗情報を入力してください。</p>
         </div>
     </div>
     @endif
@@ -127,7 +127,7 @@
                     <p class="text-sm font-bold text-blue-800 mb-1"><a href="https://www.up-stage.info/" target="_blank" rel="noopener" class="underline hover:text-blue-900">アップステージ</a>と連携中のお店です</p>
                     <p class="text-xs text-blue-700 leading-relaxed">
                         ボーイ求人{{ $xmlStaffCount }}件が<a href="https://www.up-stage.info/" target="_blank" rel="noopener" class="underline">アップステージ</a>から自動で連携されています。<br>
-                        営業情報とキャスト求人を追加すると、ナイトワークリスト上に店舗ページが公開されます。
+                        キャスト情報を追加すると、デリヘルリスト上に店舗ページが公開されます。
                     </p>
                 </div>
             </div>
@@ -175,99 +175,70 @@
             @endif
         </div>
 
-        {{-- セクション別ステータス --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-
-            {{-- 営業情報 --}}
-            @php $detail = $shop->detail; @endphp
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-bold text-gray-700">営業情報</h3>
-                    @if($detail)
-                        <span @class([
-                            'text-xs px-2 py-0.5 rounded-full',
-                            'bg-green-100 text-green-700' => $detail->status === 'active',
-                            'bg-gray-100 text-gray-400'   => $detail->status !== 'active',
-                        ])>{{ $detail->status === 'active' ? '公開中' : '非公開' }}</span>
-                    @else
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">未登録</span>
-                    @endif
-                </div>
-                @if($detail)
-                    <p class="text-xs text-gray-500">
-                        @if($shop->setPrices->isNotEmpty())
-                            セット料金：{{ $shop->setPrices->count() }}件登録<br>
-                        @elseif($detail->set_price)
-                            セット料金：{{ $detail->set_price }}<br>
-                        @endif
-                        @if($detail->opening_hours) {{ $detail->opening_hours }}〜{{ $detail->closing_hours }} @endif
-                    </p>
+        {{--
+        キャスト求人ブロック（将来使用予定・現在非表示）
+        @php
+            $castJobs = $shop->jobs->filter(fn($j) => in_array($j->search_group, ['female', 'both']));
+            $activeCastJobs = $castJobs->where('status', 'active');
+        @endphp
+        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-gray-700">キャスト求人</h3>
+                @if($castJobs->count() > 0)
+                    <span @class([
+                        'text-xs px-2 py-0.5 rounded-full',
+                        'bg-green-100 text-green-700' => $activeCastJobs->count() > 0,
+                        'bg-gray-100 text-gray-400'   => $activeCastJobs->count() === 0,
+                    ])>{{ $activeCastJobs->count() > 0 ? '公開中' : '非公開' }}</span>
+                @else
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">未登録</span>
                 @endif
-                <a href="{{ route('manage.business.edit') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
             </div>
-
-            {{-- キャスト求人 --}}
-            @php
-                $castJobs = $shop->jobs->filter(fn($j) => in_array($j->search_group, ['female', 'both']));
-                $activeCastJobs = $castJobs->where('status', 'active');
-            @endphp
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-bold text-gray-700">キャスト求人</h3>
-                    @if($castJobs->count() > 0)
-                        <span @class([
-                            'text-xs px-2 py-0.5 rounded-full',
-                            'bg-green-100 text-green-700' => $activeCastJobs->count() > 0,
-                            'bg-gray-100 text-gray-400'   => $activeCastJobs->count() === 0,
-                        ])>{{ $activeCastJobs->count() > 0 ? '公開中' : '非公開' }}</span>
-                    @else
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">未登録</span>
-                    @endif
-                </div>
-                <p class="text-xs text-gray-500">
-                    {{ $castJobs->count() }}件登録
-                    @if($castJobs->count() > 0)・公開中 {{ $activeCastJobs->count() }}件@endif
-                </p>
-                <a href="{{ route('manage.cast.index') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
-            </div>
-
-            {{-- スタッフ求人 --}}
-            @php
-                $staffJobs = $shop->jobs->filter(fn($j) => in_array($j->search_group, ['male']));
-                $activeStaffJobs = $staffJobs->where('status', 'active');
-            @endphp
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-bold text-gray-700">スタッフ求人</h3>
-                    @if($staffJobs->count() > 0)
-                        <span @class([
-                            'text-xs px-2 py-0.5 rounded-full',
-                            'bg-green-100 text-green-700' => $activeStaffJobs->count() > 0,
-                            'bg-gray-100 text-gray-400'   => $activeStaffJobs->count() === 0,
-                        ])>{{ $activeStaffJobs->count() > 0 ? '公開中' : '非公開' }}</span>
-                    @else
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">未登録</span>
-                    @endif
-                </div>
-                <p class="text-xs text-gray-500">
-                    {{ $staffJobs->count() }}件登録
-                    @if($staffJobs->count() > 0)・公開中 {{ $activeStaffJobs->count() }}件@endif
-                </p>
-                <a href="{{ route('manage.staff.index') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
-            </div>
-
+            <p class="text-xs text-gray-500">
+                {{ $castJobs->count() }}件登録
+                @if($castJobs->count() > 0)・公開中 {{ $activeCastJobs->count() }}件@endif
+            </p>
+            <a href="{{ route('manage.cast.index') }}/" class="text-xs text-business-600 mt-3 hover:underline block">編集する →</a>
         </div>
+        --}}
+        {{-- 掲載権限 --}}
+        @if($shop)
+        @php
+            $planLabels = [
+                1 => ['label' => 'VIP',       'color' => 'bg-yellow-100 text-yellow-800 border-yellow-300'],
+                2 => ['label' => 'ミドル',    'color' => 'bg-purple-100 text-purple-800 border-purple-300'],
+                3 => ['label' => 'ベーシック','color' => 'bg-blue-100 text-blue-800 border-blue-300'],
+                4 => ['label' => '無料上位',  'color' => 'bg-green-100 text-green-800 border-green-300'],
+                5 => ['label' => '無料',      'color' => 'bg-gray-100 text-gray-600 border-gray-300'],
+            ];
+            $planInfo = $planLabels[$shop->plan] ?? $planLabels[5];
+        @endphp
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">現在の掲載権限</h3>
+            <span class="inline-block border px-4 py-1.5 rounded-full text-sm font-bold {{ $planInfo['color'] }}">
+                {{ $planInfo['label'] }}
+            </span>
+            @if($shop->plan === 4)
+            <p class="mt-3 text-xs text-gray-500 leading-relaxed">
+                貴社HPへのバナー設置により上位表示されています。バナーが無い場合は下位表示となりますので予めご了承ください。
+            </p>
+            @elseif($shop->plan === 3 && $shop->is_banner_plan)
+            <p class="mt-3 text-xs text-gray-500 leading-relaxed">
+                貴社HPへのバナー設置によりベーシック掲載されています。バナーが無い場合は下位表示となりますので予めご了承ください。
+            </p>
+            @endif
+        </div>
+        @endif
         {{-- 有料掲載にすると変わること（無料店のみ） --}}
         @if(!$shop->hasBudget() && !$shop->isXmlActive())
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h3 class="text-sm font-bold text-gray-700 mb-3">有料掲載にすると変わること</h3>
             <ul class="space-y-2">
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>検索結果で上位に表示</li>
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>検索一覧にメイン画像が表示</li>
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>求人を複数登録（キャスト3件・スタッフ5件）</li>
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>近隣の同業種・無料掲載店舗のページにも優先表示</li>
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>応募があるとLINEに即時通知</li>
-                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>ホットリンクで自社サイト・SNSへ誘導</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>検索結果でカード形式（画像付き）・上位に表示（無料はテキストリストのみ）</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>ランキングスコアにプランボーナスが加算され、注目度が上がる</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>オフィシャルHPへのリンクを店舗ページに掲載</li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>口コミへの削除申請が可能（運営に依頼）<span class="text-gray-400">※内容の有利不利を問わず、正当な評価と判断されるものは削除できません</span></li>
+                <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>近隣エリアの無料掲載店ページに「おすすめ店舗」として、無料店の在籍女性ページに「おすすめキャスト」として優先表示</li>
             </ul>
             <div class="mt-4">
                 <a href="{{ route('manage.paid-plan') }}/" class="inline-block text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</a>
@@ -275,61 +246,9 @@
         </div>
         @endif
 
-        {{-- 有料掲載（リンク誘導） --}}
-        @if($shop->status === 'active')
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-sm font-bold text-gray-700 mb-1">有料掲載・入札単価</h3>
-                    <div class="flex items-center gap-4 mt-2">
-                        <div>
-                            <p class="text-xs text-gray-400">予算残高</p>
-                            <p class="text-lg font-bold text-gray-800">{{ number_format($shop->budget_balance) }}<span class="text-xs font-normal text-gray-500 ml-1">円</span></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400">入札単価</p>
-                            @if($shop->hasBudget())
-                                <p class="text-lg font-bold text-business-700">{{ number_format($shop->bid_price) }}<span class="text-xs font-normal text-gray-500 ml-1">円</span></p>
-                            @else
-                                <p class="text-lg font-bold text-gray-400">無料</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('manage.paid-plan') }}/"
-                   class="text-xs text-business-600 hover:underline shrink-0">
-                    詳細・設定 →
-                </a>
-            </div>
-        </div>
-        @endif
 
-        {{-- 予算の消費について（有料店のみ） --}}
-        @if($shop->status === 'active' && $shop->hasBudget())
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h3 class="text-sm font-bold text-gray-700 mb-3">予算の消費について</h3>
-            <p class="text-xs text-gray-600 mb-4">店舗詳細・各求人詳細への遷移クリックが課金対象です。1クリックあたり入札単価（現在 {{ number_format($shop->bid_price) }}円）を消費します。</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-xs font-bold text-gray-700 mb-2">課金されるケース</p>
-                    <ul class="space-y-1">
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>検索結果一覧からのクリック</li>
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>無料掲載店舗の詳細ページ下部に表示される関連リンクからのクリック</li>
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">●</span>求人応募完了ページの関連リンクからのクリック</li>
-                    </ul>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-700 mb-2">課金されないケース</p>
-                    <ul class="space-y-1">
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>同一ユーザーが1時間以内に同じページを再クリックした場合</li>
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>検索エンジンから直接詳細ページに流入した場合</li>
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>検索エンジン・クローラーによるアクセス</li>
-                        <li class="flex items-start gap-1.5 text-xs text-gray-600"><span class="text-gray-400 shrink-0 mt-0.5">●</span>記事ページ下部の関連リンクからのクリック</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        @endif
+
+
 
 
 
@@ -422,6 +341,54 @@
 
     @endif
 </div>
+
+{{-- 他サービス紹介 --}}
+<div class=bg-white rounded-xl shadow-sm p-6 mb-6>
+    <h3 class=text-sm font-bold text-gray-700 mb-4>株式会社リストの他サービスもご活用ください</h3>
+    <div class=space-y-3>
+
+        <div class=flex items-start gap-3 p-4 rounded-lg border border-gray-100 hover:border-rose-200 hover:bg-rose-50 transition>
+            <div class=shrink-0 w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-bold>風</div>
+            <div>
+                <a href=https://fuzoku-list.com/ target=_blank rel=noopener
+                   class=text-sm font-bold text-gray-800 hover:text-rose-600 hover:underline transition>
+                    風俗リスト（fuzoku-list.com）
+                </a>
+                <p class=text-xs text-gray-500 mt-0.5>デリヘル・ヘルス・ソープ・箱ヘルなど風俗系店舗専門の求人・店舗情報サイト。当サービスと同時掲載で集客を最大化できます。無料から掲載スタート可能です。</p>
+                <a href=https://fuzoku-list.com/register/ target=_blank rel=noopener
+                   class=inline-block mt-2 text-xs text-rose-600 hover:underline font-medium>無料で掲載登録する →</a>
+            </div>
+        </div>
+
+        <div class=flex items-start gap-3 p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition>
+            <div class=shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold>男</div>
+            <div>
+                <a href=https://www.up-stage.info/ target=_blank rel=noopener
+                   class=text-sm font-bold text-gray-800 hover:text-blue-600 hover:underline transition>
+                    アップステージ（up-stage.info）
+                </a>
+                <p class=text-xs text-gray-500 mt-0.5>ホスト・ボーイ・黒服など男性ナイトワーク専門の求人・スカウトサイト。男性スタッフの採用をお考えの店舗様はぜひご活用ください。求人の無料掲載も対応しています。</p>
+                <a href=https://www.up-stage.info/register/ target=_blank rel=noopener
+                   class=inline-block mt-2 text-xs text-blue-600 hover:underline font-medium>求人を掲載する →</a>
+            </div>
+        </div>
+
+        <div class=flex items-start gap-3 p-4 rounded-lg border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition>
+            <div class=shrink-0 w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold>M</div>
+            <div>
+                <a href=https://mens-v.com/ target=_blank rel=noopener
+                   class=text-sm font-bold text-gray-800 hover:text-purple-600 hover:underline transition>
+                    メンズバリュー（mens-value.com）
+                </a>
+                <p class=text-xs text-gray-500 mt-0.5>メンズエステ・リラクゼーション・アロマなど男性向けサービス店舗の求人・集客サイト。エステ系・リラクゼーション系の採用・集客にご活用ください。</p>
+                <a href=https://mens-v.com/register/ target=_blank rel=noopener
+                   class=inline-block mt-2 text-xs text-purple-600 hover:underline font-medium>無料で掲載登録する →</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 
 {{-- 届出書モーダル --}}
 <div id="permit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-4 hidden"

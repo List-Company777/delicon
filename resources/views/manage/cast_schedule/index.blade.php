@@ -1,13 +1,16 @@
 @extends('layouts.app')
 @section('title', $cast->name . ' シフト管理')
 @section('content')
-<div class="bg-red-700 text-white py-4">
+<div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}/" method="POST">
-            @csrf
-            <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
-        </form>
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -54,7 +57,7 @@
                 </div>
             </div>
             <button type="submit"
-                    class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-5 py-2 rounded-lg transition">
+                    class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition">
                 追加する
             </button>
         </form>

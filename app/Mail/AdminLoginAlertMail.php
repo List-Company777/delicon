@@ -12,7 +12,7 @@ class AdminLoginAlertMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '【ナイトワークリスト】管理者ログイン通知');
+        return new Envelope(subject: '【デリヘルリスト】管理者ログイン通知');
     }
 
     public function content(): Content

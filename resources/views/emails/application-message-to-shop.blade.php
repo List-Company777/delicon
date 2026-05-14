@@ -10,5 +10,5 @@
 {{ route('manage.applications.show', $application->id) }}
 
 ---
-ナイトワークリスト
-https://nightwork-list.com/
+デリヘルリスト
+https://delicon.jp/

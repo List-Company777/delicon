@@ -28,7 +28,7 @@ class Shop extends Model
         'alive_check_token', 'alive_check_sent_at', 'alive_confirmed_at',
         'base', 'catche', 'system_text', 'coupon', 'open_time', 'close_time', 'all_time', 'rest_day',
         'price_60', 'price_90', 'price_120', 'price_high', 'eigyo_area', 'eigyo_space',
-        'shop_type_id', 'shop_type_id2', 'tags',
+        'shop_type_id', 'shop_type_id2', 'tags', 'plan', 'is_banner_plan', 'banner_checked_at',
     ];
 
     protected $casts = [
@@ -38,6 +38,8 @@ class Shop extends Model
         'alive_check_sent_at'   => 'datetime',
         'tags'                  => 'array',
         'alive_confirmed_at'    => 'datetime',
+        'banner_checked_at'     => 'datetime',
+        'is_banner_plan'        => 'boolean',
     ];
 
     public function genre(): BelongsTo
@@ -83,7 +85,7 @@ class Shop extends Model
 
     public function isPaid(): bool
     {
-        return ($this->plan ?? 99) <= 3;
+        return ($this->plan ?? 99) <= 4;
     }
 
     public function planApplications(): HasMany

@@ -22,7 +22,7 @@ class ApplicationMessageToShop extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】' . $this->application->applicant_name . 'さんから返信が届きました',
+            subject: '【デリヘルリスト】' . $this->application->applicant_name . 'さんから返信が届きました',
         );
     }
 

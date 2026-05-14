@@ -20,8 +20,8 @@ class CastScheduleNoticeMail extends Mailable
     {
         $count = $this->items->count();
         $subject = $count === 1
-            ? '【デリコン】' . $this->items->first()['cast']->name . 'さんのシフトが入りました'
-            : "【デリコン】お気に入りの{$count}名のシフトが入りました";
+            ? '【デリヘルリスト】' . $this->items->first()['cast']->name . 'さんのシフトが入りました'
+            : "【デリヘルリスト】お気に入りの{$count}名のシフトが入りました";
 
         return $this->subject($subject)->view('emails.cast-schedule-notice');
     }

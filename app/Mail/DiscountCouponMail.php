@@ -15,7 +15,7 @@ class DiscountCouponMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '【' . $this->coupon->shop->name . '】割引クーポンのお知らせ');
+        return new Envelope(subject: '【' . $this->coupon->shop->name . '】口コミへのお礼クーポンが届きました🎟');
     }
 
     public function content(): Content

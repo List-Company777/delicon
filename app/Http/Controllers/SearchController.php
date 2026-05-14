@@ -398,8 +398,8 @@ class SearchController extends Controller
                 )
                 ->pluck('shop_details.id')->all();
         } else {
-            // デリコンは店舗案内サイト（求人なし）→ Shop を直接検索
-            $query = Shop::where('status', 'active')
+            // デリヘルリストは店舗案内サイト（求人なし）→ Shop を直接検索
+            $query = Shop::where('status', 'active')->where('plan', '<=', 4)
                 ->when($prefSlug, fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
                 ->when($area, fn($q) => $useSlug
                     ? $q->whereHas('area', fn($a) =>

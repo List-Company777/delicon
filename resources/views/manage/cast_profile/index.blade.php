@@ -1,13 +1,16 @@
 @extends('layouts.app')
 @section('title', '在籍キャスト管理')
 @section('content')
-<div class="bg-red-700 text-white py-4">
+<div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}/" method="POST">
-            @csrf
-            <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
-        </form>
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -74,7 +77,7 @@
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-bold text-gray-800">在籍キャスト一覧</h2>
         <a href="{{ route('manage.cast-profile.create') }}/"
-           class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
+           class="bg-red-600 hover:bg-business-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             ＋ キャストを追加
         </a>
     </div>
@@ -84,9 +87,15 @@
             在籍キャストはまだ登録されていません。
         </div>
     @else
-        <div class="grid gap-3">
+        <p class="text-xs text-gray-400 mb-3">≡ ドラッグまたは「↑先頭」ボタンで表示順を変更できます</p>
+        <div id="cast-sortable" class="grid gap-3">
             @foreach($casts as $cast)
-            <div class="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4" data-id="{{ $cast->id }}">
+                <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 shrink-0 px-1 touch-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 4a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zM7 8a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zM7 12a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zM7 16a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z"/>
+                    </svg>
+                </div>
                 <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                      class="w-14 h-20 object-cover rounded-lg bg-gray-100 shrink-0">
                 <div class="flex-1 min-w-0">
@@ -114,6 +123,8 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                    <button type="button"
+                            class="move-top-btn text-xs border border-gray-300 text-gray-500 hover:bg-gray-50 px-2 py-1.5 rounded transition">↑先頭</button>
                     <a href="{{ route('manage.cast-schedule.index', $cast->id) }}/"
                        class="text-xs border border-blue-200 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded transition">シフト</a>
                     <a href="{{ route('manage.cast-profile.edit', $cast->id) }}/"
@@ -130,3 +141,35 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js" @nonce></script>
+<script @nonce>
+const reorderUrl = '{{ route('manage.cast-profile.reorder') }}/';
+const csrf = '{{ csrf_token() }}';
+
+function saveOrder() {
+    const ids = [...document.querySelectorAll('#cast-sortable > [data-id]')].map(el => el.dataset.id);
+    fetch(reorderUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+        body: JSON.stringify({ ids })
+    });
+}
+
+Sortable.create(document.getElementById('cast-sortable'), {
+    handle: '.drag-handle',
+    animation: 150,
+    onEnd: saveOrder
+});
+
+document.querySelectorAll('.move-top-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const card = btn.closest('[data-id]');
+        const list = document.getElementById('cast-sortable');
+        list.prepend(card);
+        saveOrder();
+    });
+});
+</script>
+@endpush

@@ -12,7 +12,7 @@ class UserLoginAlertMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '【ナイトワークリスト】ログイン通知');
+        return new Envelope(subject: '【デリヘルリスト】ログイン通知');
     }
 
     public function content(): Content

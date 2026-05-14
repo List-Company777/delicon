@@ -111,17 +111,19 @@ class ApplicationController extends Controller
             $shopInfo .= "━━━━━━━━━━━━━━━━━━━━━━━";
 
             Mail::raw(
-                "【ナイトワークリスト】応募を受け付けました\n\n"
+                "【デリヘルリスト】応募を受け付けました\n\n"
                 . "{$validated['applicant_name']} 様\n\n"
                 . "以下の求人にご応募いただきました。\n\n"
                 . $shopInfo
                 . "\n\n店舗より連絡があるまでしばらくお待ちください。\n\n"
-                . "ナイトワークリスト\nhttps://nightwork-list.com/",
+                . "デリヘルリスト\nhttps://delicon.jp/",
                 fn($m) => $m
                     ->to($validated['applicant_email'], $validated['applicant_name'])
-                    ->subject('【ナイトワークリスト】応募を受け付けました')
+                    ->subject('【デリヘルリスト】応募を受け付けました')
             );
-        } catch (\Exception) {}
+        } catch (\Exception $e) {
+            Log::warning(__CLASS__ . ': メール送信失敗: ' . $e->getMessage());
+        }
 
         // 店舗オーナーへの通知（メール＋LINE）
         $owner = $job->shop->users()->wherePivot('role', 'owner')->first();
@@ -154,7 +156,7 @@ class ApplicationController extends Controller
                             'to'       => $lineUserId,
                             'messages' => [[
                                 'type' => 'text',
-                                'text' => "【ナイトワークリスト】新しい応募が届きました\n\n"
+                                'text' => "【デリヘルリスト】新しい応募が届きました\n\n"
                                     . "求人：{$job->title}\n"
                                     . "応募者：{$validated['applicant_name']}\n\n"
                                     . "管理画面で確認してください。\n"

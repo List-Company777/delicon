@@ -99,7 +99,7 @@ class SendJobAlerts implements ShouldQueue
                 return $line;
             })->implode("\n\n");
 
-            $message = "【ナイトワークリスト】新着求人のお知らせ\n\n"
+            $message = "【デリヘルリスト】新着求人のお知らせ\n\n"
                 . $jobLines
                 . "\n\n▼ アラート解除\n「解除」と送信してください";
 

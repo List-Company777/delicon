@@ -48,7 +48,7 @@
                 </div>
                 <a href="{{ route('top') }}/" target="_blank" class="bg-purple-50 rounded-lg p-4 text-center block hover:bg-purple-100 transition">
                     <div class="text-2xl mb-2">💼</div>
-                    <div class="font-bold text-purple-800 text-sm">ナイトワークリスト</div>
+                    <div class="font-bold text-purple-800 text-sm">デリヘルリスト</div>
                     <div class="text-xs text-gray-500 mt-1">水商売系特化サイト</div>
                 </a>
                 <a href="https://fuzoku-list.com/" target="_blank" rel="noopener" class="bg-pink-50 rounded-lg p-4 text-center block hover:bg-pink-100 transition">

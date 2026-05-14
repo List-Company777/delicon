@@ -15,7 +15,7 @@ class XmlShopController extends Controller
         $keyword = $request->query('keyword', '');
 
         $query = Shop::whereNotNull('xml_source')
-            ->with(['genre:id,name', 'prefecture:id,name', 'area:id,name', 'users:id,name,email'])
+            ->with(['genre:id,name', 'prefecture:id,prefecture', 'area:id,name', 'users:id,name,email'])
             ->withCount('users');
 
         if ($filter === 'no_account') {

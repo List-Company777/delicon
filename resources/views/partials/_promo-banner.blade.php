@@ -7,7 +7,7 @@
                 <span class="text-yellow-300">月間利用者急増中！</span>お店の掲載、完全無料で。
             </p>
             <p class="text-gray-300 text-sm leading-relaxed">
-                ナイトワークリストへの基本掲載は<strong class="text-white">完全無料</strong>。<br>
+                デリヘルリストへの基本掲載は<strong class="text-white">完全無料</strong>。<br>
                 審査通過後、最短即日で求職者・夜遊びユーザーにリーチできます。
             </p>
             <div class="flex flex-wrap gap-3 mt-3 justify-center md:justify-start">

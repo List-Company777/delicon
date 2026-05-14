@@ -50,7 +50,7 @@ class SalesExportController extends Controller
                 'shop_name'          => $app->shop?->name ?? '',
                 'partner_type'       => $partnerType,
                 'agency_name'        => $agencyName,
-                'product_name'       => $app->plan_name ?: 'nightwork-list 広告掲載料',
+                'product_name'       => $app->plan_name ?: 'デリヘルリスト 広告掲載料',
                 'list_price'         => $listPrice,
                 'margin_rate'        => $rate,
                 'calculated_amount'  => $calcAmount,
@@ -60,7 +60,7 @@ class SalesExportController extends Controller
         });
 
         return response()->json([
-            'media'   => 'nightwork-list',
+            'media'   => 'delicon',
             'month'   => $month,
             'records' => $records,
         ]);

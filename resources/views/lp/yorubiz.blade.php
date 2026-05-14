@@ -197,13 +197,13 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {{-- ナイトワークリスト --}}
+            {{-- デリヘルリスト --}}
             <div class="bg-gray-900 border border-business-700/40 rounded-2xl overflow-hidden card-glow transition">
                 <div class="bg-business-900/60 border-b border-business-700/30 px-6 py-4">
                     <div class="flex items-center gap-3 mb-1">
                         <span class="text-2xl font-black text-white">ナイトワーク<span class="text-business-300">リスト</span></span>
                     </div>
-                    <p class="text-business-300 text-xs font-bold">nightwork-list.com</p>
+                    <p class="text-business-300 text-xs font-bold">delicon.jp</p>
                 </div>
                 <div class="px-6 py-5">
                     <p class="text-gray-300 text-sm leading-relaxed mb-5">
@@ -223,10 +223,10 @@
                             @endforeach
                         </div>
                     </div>
-                    <a href="https://nightwork-list.com/register/"
+                    <a href="https://delicon.jp/register/"
                        rel="noopener noreferrer"
                        class="block w-full text-center bg-business-700 hover:bg-business-600 text-white font-black py-3.5 rounded-xl transition text-base">
-                        ナイトワークリストに無料登録
+                        デリヘルリストに無料登録
                     </a>
                     <p class="text-center text-xs text-gray-500 mt-2">登録・掲載・求人投稿 すべて無料</p>
                 </div>
@@ -242,7 +242,7 @@
                 </div>
                 <div class="px-6 py-5">
                     <p class="text-gray-300 text-sm leading-relaxed mb-5">
-                        左記（ナイトワークリスト）以外の業態向け特化サイト。<br>
+                        左記（デリヘルリスト）以外の業態向け特化サイト。<br>
                         性風俗・アドルト系の表現・検索機能に対応します。
                     </p>
                     <div class="mb-5">
@@ -331,10 +331,10 @@
     <div class="max-w-2xl mx-auto px-4 text-center">
         <h2 class="text-2xl md:text-3xl font-black text-white mb-4">まずは無料で<span class="text-business-300">始めてみませんか</span></h2>
         <p class="text-gray-300 text-sm mb-8">クレジットカード不要。登録5分。いつでも退会可能。</p>
-        <a href="https://nightwork-list.com/register/"
+        <a href="https://delicon.jp/register/"
            rel="noopener noreferrer"
            class="inline-block bg-business-700 hover:bg-business-600 text-white font-black py-4 px-12 rounded-xl text-lg transition shadow-lg">
-            ナイトワークリストに無料登録
+            デリヘルリストに無料登録
         </a>
         <p class="text-gray-400 text-xs mt-4">風俗系の業態は <a href="https://fuzoku-list.com/register/" rel="noopener noreferrer" class="underline hover:text-white transition">風俗リスト（fuzoku-list.com）</a> へ</p>
     </div>
@@ -349,13 +349,13 @@
                 <span class="text-gray-500">— ナイトビジネス運営支援プラットフォーム</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://nightwork-list.com/" class="hover:text-gray-300 transition">ナイトワークリスト</a>
+                <a href="https://delicon.jp/" class="hover:text-gray-300 transition">デリヘルリスト</a>
                 <a href="https://fuzoku-list.com/" rel="noopener noreferrer" class="hover:text-gray-300 transition">風俗リスト</a>
                 <a href="{{ route('inquiry') }}/" class="hover:text-gray-300 transition">お問い合わせ</a>
                 <a href="{{ route('privacy') }}/" class="hover:text-gray-300 transition">プライバシーポリシー</a>
             </div>
         </div>
-        <p class="text-center text-gray-500 text-xs mt-6">&copy; {{ date('Y') }} 夜ビズ / ナイトワークリスト. All rights reserved.</p>
+        <p class="text-center text-gray-500 text-xs mt-6">&copy; {{ date('Y') }} 夜ビズ / デリヘルリスト. All rights reserved.</p>
     </div>
 </footer>
 

@@ -73,6 +73,12 @@ class CastController extends Controller
 
         $similarCasts = $this->getSimilarCasts($cast);
 
+        // 所属店が無料の場合：同エリア・有料店の似た女性を最大3件
+        $shopPlan = $cast->shop?->plan ?? 5;
+        $nearbyPaidSimilarCasts = ($shopPlan >= 4 && $cast->shop?->area_id)
+            ? $this->getNearbyPaidSimilarCasts($cast)
+            : collect();
+
         $otherCasts = Cast::active()
             ->where('shop_id', $cast->shop_id)
             ->where('id', '!=', $cast->id)
@@ -100,7 +106,44 @@ class CastController extends Controller
 
         $noindex = mb_strlen($cast->comment ?? '') < 100;
 
-        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts', 'footerPrefSlug', 'likedDiaryIds', 'noindex'));
+        // 所属店が無料の場合：同エリア・同ジャンルの有料店を最大3件
+        $nearbyPaidShops = collect();
+        $shopPlan = $cast->shop?->plan ?? 5;
+        if ($shopPlan >= 4) {
+            $areaId  = $cast->shop?->area_id;
+            $genreId = $cast->shop?->genre_id;
+            if ($areaId && $genreId) {
+                $nearbyPaidShops = \App\Models\Shop::where('status', 'active')
+                    ->whereBetween('plan', [1, 3])
+                    ->where('genre_id', $genreId)
+                    ->where('area_id', $areaId)
+                    ->whereNotNull('main_image')
+                    ->orderByDesc('rank_score')
+                    ->limit(3)
+                    ->with('area:id,name,slug')
+                    ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
+                // 同エリアで3件未満なら都道府県まで広げる
+                if ($nearbyPaidShops->count() < 3) {
+                    $prefId = $cast->shop->prefecture_id;
+                    if ($prefId) {
+                        $found = $nearbyPaidShops->pluck('id')->all();
+                        $extra = \App\Models\Shop::where('status', 'active')
+                            ->whereBetween('plan', [1, 3])
+                            ->where('genre_id', $genreId)
+                            ->where('prefecture_id', $prefId)
+                            ->whereNotIn('id', $found)
+                            ->whereNotNull('main_image')
+                            ->orderByDesc('rank_score')
+                            ->limit(3 - $nearbyPaidShops->count())
+                            ->with('area:id,name,slug')
+                            ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
+                        $nearbyPaidShops = $nearbyPaidShops->concat($extra);
+                    }
+                }
+            }
+        }
+
+        return view('cast.show', compact('cast', 'otherCasts', 'isFavorited', 'similarCasts', 'nearbyPaidSimilarCasts', 'footerPrefSlug', 'likedDiaryIds', 'noindex', 'nearbyPaidShops'));
     }
 
     public function submitDeletionRequest(Request $request, Cast $cast)
@@ -173,6 +216,29 @@ class CastController extends Controller
         }
     }
 
+    private function getNearbyPaidSimilarCasts(Cast $cast, int $limit = 3): \Illuminate\Support\Collection
+    {
+        return Cast::active()
+            ->where('casts.id', '!=', $cast->id)
+            ->join('shops', 'casts.shop_id', '=', 'shops.id')
+            ->where('shops.status', 'active')
+            ->whereBetween('shops.plan', [1, 3])
+            ->where('shops.area_id', $cast->shop->area_id)
+            ->with(['shop'])
+            ->select('casts.*')
+            ->selectRaw('
+                (CASE WHEN casts.body_id = ? THEN 3 ELSE 0 END) +
+                (CASE WHEN casts.type_id = ? THEN 3 ELSE 0 END) +
+                (CASE WHEN casts.age IS NOT NULL AND ABS(CAST(casts.age AS SIGNED) - ?) <= 5 THEN 1 ELSE 0 END)
+                AS similarity_score',
+                [$cast->body_id ?? 0, $cast->type_id ?? 0, $cast->age ?? 0]
+            )
+            ->orderByDesc('similarity_score')
+            ->orderByDesc('casts.is_recommended')
+            ->take($limit)
+            ->get();
+    }
+
     private function getSimilarCasts(Cast $cast, int $limit = 6): \Illuminate\Support\Collection
     {
         return Cast::active()
@@ -185,7 +251,7 @@ class CastController extends Controller
                 (CASE WHEN casts.body_id = ? THEN 2 ELSE 0 END) +
                 (CASE WHEN casts.type_id = ? THEN 2 ELSE 0 END) +
                 (CASE WHEN casts.age IS NOT NULL AND ABS(CAST(casts.age AS SIGNED) - ?) <= 3 THEN 1 ELSE 0 END) +
-                (CASE WHEN shops.plan <= 3 THEN 1 ELSE 0 END)
+                (CASE WHEN shops.plan <= 4 THEN 1 ELSE 0 END)
                 AS similarity_score',
                 [$cast->body_id ?? 0, $cast->type_id ?? 0, $cast->age ?? 0]
             )

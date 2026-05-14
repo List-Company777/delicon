@@ -18,7 +18,7 @@ class AliveCheck extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】掲載継続の確認（リンクから継続手続きをお願いします）',
+            subject: '【デリヘルリスト】掲載継続の確認（リンクから継続手続きをお願いします）',
         );
     }
 

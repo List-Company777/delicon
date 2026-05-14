@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'デリヘル情報サイト｜全国のデリヘル店・キャスト')
-@section('description', '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト「デリコン」。新着キャスト情報も随時更新中。')
+@section('description', '全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト「デリヘルリスト」。新着キャスト情報も随時更新中。')
 @section('canonical', route('top') . '/')
 @section('robots', 'index, follow')
 @section('og_type', 'website')
@@ -8,10 +8,10 @@
 @push('head')
 @php
 $ldWebsite = ['@context'=>'https://schema.org','@type'=>'WebSite','@id'=>url('/').'#website','url'=>url('/').'/',
-    'name'=>'デリコン','description'=>'全国のデリヘル情報サイト','inLanguage'=>'ja',
+    'name'=>'デリヘルリスト','description'=>'全国のデリヘル情報サイト','inLanguage'=>'ja',
     'potentialAction'=>['@type'=>'SearchAction','target'=>['@type'=>'EntryPoint','urlTemplate'=>url('/shops/').'?q={search_term_string}'],'query-input'=>'required name=search_term_string']];
 $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'#webpage','url'=>url('/').'/',
-    'name'=>'デリヘル情報サイト｜全国のデリヘル店・キャスト - デリコン','inLanguage'=>'ja',
+    'name'=>'デリヘル情報サイト｜全国のデリヘル店・キャスト - デリヘルリスト','inLanguage'=>'ja',
     'description'=>'全国のデリヘル情報を掲載。デリヘル店のシステム・料金・在籍キャスト情報が検索できる総合情報サイト。',
     'isPartOf'=>['@id'=>url('/').'#website']];
 @endphp
@@ -34,7 +34,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <p class="text-[#A0A0B8] text-base md:text-lg mb-2 max-w-xl">
             デリヘル店のシステム・料金・在籍キャストを詳しく掲載
         </p>
-        <p class="text-[#8A8A9E] text-sm mb-6">デリコン｜デリヘル・風俗総合情報</p>
+        <p class="text-[#8A8A9E] text-sm mb-6">デリヘルリスト｜デリヘル・風俗総合情報</p>
         <p class="text-sm font-semibold text-deli-400 mb-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
 
         {{-- エリアから探す --}}
@@ -203,7 +203,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                          class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
                     @if($cast->working_date && $cast->working_date->isToday())
-                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">待機中</span>
+                    <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">本日出勤</span>
                     @endif
                     @if($cast->isNew())
                     <span class="absolute top-1 right-1 text-[9px] font-bold bg-gold-500 text-white px-1.5 py-0.5 rounded-full">NEW</span>
@@ -306,7 +306,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <h2 class="text-xl font-bold text-[#F0ECE4] mb-4">デリヘルとは</h2>
         <div class="text-[#9090A4] text-sm leading-7 space-y-3 mb-8">
             <p>デリヘル（デリバリーヘルス）とは、派遣型の風俗サービスの一種で、キャストがお客様の指定する場所（ホテル・自宅など）に出張する形式の店舗です。店舗型ではないため比較的リーズナブルな料金設定が多く、全国各地で多くの店舗が営業しています。</p>
-            <p>デリコンでは、全国のデリヘル・風俗店情報を掲載しています。各店舗のシステム・料金・在籍キャストのプロフィールをまとめて確認できます。ホテヘル・素人系・人妻・SMなど業種ごとに絞り込み検索も可能です。</p>
+            <p>デリヘルリストでは、全国のデリヘル・風俗店情報を掲載しています。各店舗のシステム・料金・在籍キャストのプロフィールをまとめて確認できます。ホテヘル・素人系・人妻・SMなど業種ごとに絞り込み検索も可能です。</p>
         </div>
 
         <dl class="grid grid-cols-3 gap-4">
@@ -343,7 +343,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                     デリヘルはどんな業種がありますか？
                     <span aria-hidden="true" class="text-[#8A8A9E] group-open:rotate-180 transition-transform text-sm shrink-0">▼</span>
                 </summary>
-                <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルにはホテヘル・素人系・人妻・熟女・SM・ニューハーフ・アロマエステ・イメクラなどさまざまな業種があります。デリコンでは業種ごとに絞り込み検索ができます。</p>
+                <p class="mt-3 text-sm text-[#9090A4] leading-7">デリヘルにはホテヘル・素人系・人妻・熟女・SM・ニューハーフ・アロマエステ・イメクラなどさまざまな業種があります。デリヘルリストでは業種ごとに絞り込み検索ができます。</p>
             </details>
             <details class="bg-surface-600 border border-surface-400 hover:border-surface-200 rounded-xl p-5 group transition">
                 <summary class="font-medium text-[#D8D4CC] cursor-pointer list-none flex justify-between items-center gap-3">

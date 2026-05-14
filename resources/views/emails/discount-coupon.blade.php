@@ -9,7 +9,7 @@
     </div>
     <div style="padding:28px 32px;">
         <p style="color:#333;margin-bottom:16px;">{{ $coupon->user->name }} 様</p>
-        <p style="color:#333;margin-bottom:20px;">この度は口コミをご投稿いただきありがとうございます。<br>感謝の気持ちとして、割引クーポンをお送りします。</p>
+        <p style="color:#333;margin-bottom:20px;">あなたが投稿した口コミへのお礼として、<strong>割引クーポン</strong>が届きました！<br>デリヘルリストのマイページ「クーポン」からもご確認いただけます。</p>
 
         @if($coupon->message)
         <div style="background:#fafafa;border-left:3px solid #c02040;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#555;">

@@ -24,7 +24,7 @@
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">メールアドレス</label>
                     <input type="email" name="email" value="{{ old('email') }}" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 @error('email') border-red-400 @enderror">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('email') border-red-400 @enderror">
                     @error('email')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -33,7 +33,7 @@
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">パスワード</label>
                     <input type="password" name="password" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-business-500">
                 </div>
 
                 <div class="flex items-center justify-between text-sm">

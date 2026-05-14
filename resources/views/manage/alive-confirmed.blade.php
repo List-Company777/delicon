@@ -14,7 +14,7 @@
             <h1 class="text-xl font-bold text-gray-800 mb-2">掲載継続を確認しました</h1>
             <p class="text-sm text-gray-500 mb-1">{{ $shop->name }}</p>
             <p class="text-sm text-gray-400 mt-4">
-                引き続きナイトワークリストをご利用いただきありがとうございます。<br>
+                引き続きデリヘルリストをご利用いただきありがとうございます。<br>
                 掲載は継続されます。
             </p>
             <a href="{{ route('login') }}/"

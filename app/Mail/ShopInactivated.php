@@ -18,7 +18,7 @@ class ShopInactivated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】' . $this->shop->name . ' の掲載を一時停止しました',
+            subject: '【デリヘルリスト】' . $this->shop->name . ' の掲載を一時停止しました',
         );
     }
 

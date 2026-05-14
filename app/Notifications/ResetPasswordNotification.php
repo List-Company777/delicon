@@ -10,7 +10,7 @@ class ResetPasswordNotification extends ResetPassword
     protected function buildMailMessage($url): MailMessage
     {
         return (new MailMessage)
-            ->subject('【ナイトワークリスト】パスワード再設定')
+            ->subject('【デリヘルリスト】パスワード再設定')
             ->text('emails.reset-password-text', ['url' => $url]);
     }
 }

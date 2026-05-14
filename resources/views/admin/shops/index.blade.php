@@ -14,45 +14,69 @@
     </div>
 @endif
 
-{{-- タブ --}}
-<div class="flex gap-1 mb-6 border-b border-gray-200">
+{{-- ステータスタブ --}}
+<div class="flex gap-1 mb-5 border-b border-gray-200">
     @foreach(['pending' => '申請中', 'active' => '掲載中', 'inactive' => '非公開', 'all' => 'すべて'] as $s => $label)
-    <a href="{{ route('admin.shops.index', ['status' => $s]) }}/"
-       class="{{ $status === $s
-           ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold'
-           : 'text-gray-500 hover:text-gray-700' }}
-          px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
+    @php $tabParams = array_filter(['status' => $s, 'pref_id' => $prefId, 'plan' => $plan, 'keyword' => $keyword]); @endphp
+    <a href="{{ route('admin.shops.index', $tabParams) }}"
+       class="{{ $status === $s ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
         {{ $label }}
-        <span class="ml-1 text-xs {{ $status === $s ? 'text-yellow-500' : 'text-gray-400' }}">
-            {{ number_format($counts[$s]) }}
-        </span>
+        <span class="ml-1 text-xs {{ $status === $s ? 'text-yellow-500' : 'text-gray-400' }}">{{ number_format($counts[$s]) }}</span>
     </a>
     @endforeach
 </div>
+
+{{-- 絞り込みフォーム --}}
+<form method="GET" action="{{ route('admin.shops.index') }}" class="bg-white rounded-xl shadow-sm px-4 py-3 mb-4 flex flex-wrap items-end gap-3">
+    <input type="hidden" name="status" value="{{ $status }}">
+
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">都道府県</label>
+        <select name="pref_id" class="border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-yellow-400 w-36">
+            <option value="">全都道府県</option>
+            @foreach($prefectures as $pref)
+                <option value="{{ $pref->id }}" {{ $prefId == $pref->id ? 'selected' : '' }}>{{ $pref->prefecture }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">掲載プラン</label>
+        <select name="plan" class="border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-yellow-400 w-32">
+            <option value="">全プラン</option>
+            <option value="paid"  {{ $plan === 'paid' ? 'selected' : '' }}>有料（1〜3）</option>
+            <option value="free"  {{ $plan === 'free' ? 'selected' : '' }}>無料（5）</option>
+            <option value="1" {{ $plan == '1' ? 'selected' : '' }}>VIP</option>
+            <option value="2" {{ $plan == '2' ? 'selected' : '' }}>ミドル</option>
+            <option value="3" {{ $plan == '3' ? 'selected' : '' }}>ベーシック</option>
+            <option value="4" {{ $plan == '4' ? 'selected' : '' }}>無料上位</option>
+            <option value="5" {{ $plan == '5' ? 'selected' : '' }}>無料</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">店舗名</label>
+        <input type="text" name="keyword" value="{{ $keyword }}" placeholder="キーワード"
+               class="border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-yellow-400 w-44">
+    </div>
+
+    <button type="submit" class="px-4 py-1.5 bg-gray-700 text-white text-xs rounded hover:bg-gray-600 transition">絞り込む</button>
+    @if($prefId || $plan || $keyword || $noArea)
+        <a href="{{ route('admin.shops.index', ['status' => $status]) }}" class="px-3 py-1.5 text-xs text-gray-400 hover:text-gray-600">クリア</a>
+    @endif
+</form>
 
 {{-- 小エリア未設定警告 --}}
 @if($noAreaCount > 0)
 <div class="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between text-sm">
     <span class="text-orange-700">⚠ 小エリア未設定の店舗が <strong>{{ $noAreaCount }}件</strong> あります</span>
     @if($noArea)
-        <a href="{{ route('admin.shops.index', ['status' => $status]) }}/" class="text-orange-600 underline hover:text-orange-800 text-xs">絞り込み解除</a>
+        <a href="{{ route('admin.shops.index', array_filter(['status' => $status, 'pref_id' => $prefId, 'plan' => $plan, 'keyword' => $keyword])) }}" class="text-orange-600 underline hover:text-orange-800 text-xs">絞り込み解除</a>
     @else
-        <a href="{{ route('admin.shops.index', ['status' => $status, 'no_area' => 1]) }}/" class="text-orange-600 underline hover:text-orange-800 text-xs">この店舗を表示</a>
+        <a href="{{ route('admin.shops.index', array_merge(array_filter(['status' => $status, 'pref_id' => $prefId, 'plan' => $plan, 'keyword' => $keyword]), ['no_area' => 1])) }}" class="text-orange-600 underline hover:text-orange-800 text-xs">この店舗を表示</a>
     @endif
 </div>
 @endif
-
-{{-- 店舗名検索 --}}
-<form method="GET" action="{{ route('admin.shops.index') }}/" class="mb-4 flex gap-2">
-    <input type="hidden" name="status" value="{{ $status }}">
-    @if($noArea)<input type="hidden" name="no_area" value="1">@endif
-    <input type="text" name="keyword" value="{{ $keyword }}" placeholder="店舗名で絞り込み"
-           class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500 w-64">
-    <button type="submit" class="px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">検索</button>
-    @if($keyword)
-        <a href="{{ route('admin.shops.index', ['status' => $status]) }}/" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">クリア</a>
-    @endif
-</form>
 
 @if($shops->isEmpty())
     <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
@@ -65,23 +89,47 @@
             <tr>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-10">ID</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">店舗名</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">業種</th>
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-24">プラン</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">エリア</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">担当者</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">更新日</th>
+                @if($status === 'pending' || $status === 'all')
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-32">届出書</th>
+                @endif
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-24">更新日</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-20">状態</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-32">入札単価</th>
-                <th class="px-4 py-3 w-36"></th>
+                <th class="px-4 py-3 w-28"></th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
             @foreach($shops as $shop)
+            @php
+                $planLabels = [
+                    1 => ['label' => 'VIP',       'color' => 'bg-yellow-100 text-yellow-700'],
+                    2 => ['label' => 'ミドル',    'color' => 'bg-purple-100 text-purple-700'],
+                    3 => ['label' => 'ベーシック', 'color' => 'bg-blue-100 text-blue-700'],
+                    4 => ['label' => '無料上位',  'color' => 'bg-green-100 text-green-700'],
+                    5 => ['label' => '無料',      'color' => 'bg-gray-100 text-gray-500'],
+                ];
+                $planInfo = $planLabels[$shop->plan] ?? $planLabels[5];
+            @endphp
             <tr class="{{ $shop->area_id ? 'hover:bg-gray-50' : 'bg-orange-50 hover:bg-orange-100' }} transition">
                 <td class="px-4 py-3 text-gray-400 text-xs">{{ $shop->id }}</td>
                 <td class="px-4 py-3 font-medium">
-                    <a href="{{ route('admin.shops.show', $shop->id) }}/" class="text-gray-800 hover:text-business-700 hover:underline">{{ $shop->name }}</a>
+                    <a href="{{ route('admin.shops.show', $shop->id) }}" class="text-gray-800 hover:underline">{{ $shop->name }}</a>
+                    <form action="{{ route('admin.shops.updateGenre', $shop->id) }}" method="POST" class="inline ml-1">
+                        @csrf @method('PATCH')
+                        <select name="genre_id" onchange="this.form.submit()"
+                                class="text-xs border-0 bg-transparent text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer py-0">
+                            <option value="">— 未設定 —</option>
+                            @foreach($genres as $g)
+                                <option value="{{ $g->id }}" {{ $shop->genre_id == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
                 </td>
-                <td class="px-4 py-3 text-gray-500 text-xs">{{ $shop->genre?->name ?? '—' }}</td>
+                <td class="px-4 py-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium {{ $planInfo['color'] }}">{{ $planInfo['label'] }}</span>
+                </td>
                 <td class="px-4 py-3 text-gray-500 text-xs">{{ $shop->area?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-xs">
                     @php $owner = $shop->users->first(); @endphp
@@ -92,51 +140,58 @@
                         <span class="text-gray-400">—</span>
                     @endif
                 </td>
-                <td class="px-4 py-3 text-xs text-gray-400">
-                    {{ $shop->updated_at->format('Y/m/d H:i') }}
+                @if($status === 'pending' || $status === 'all')
+                <td class="px-4 py-3 text-xs">
+                    @if($shop->permit_type === 'uploaded')
+                        @if($shop->permit_document_path)
+                            <a href="{{ route('admin.shops.permit-download', $shop->id) }}"
+                               target="_blank"
+                               class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 transition text-xs font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                届出書を確認
+                            </a>
+                        @else
+                            <span class="text-amber-500">ファイルなし</span>
+                        @endif
+                    @elseif($shop->permit_type === 'not_required')
+                        <span class="inline-flex items-center gap-1 text-green-600 text-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            届出不要（誓約済）
+                        </span>
+                    @else
+                        <span class="text-gray-300 text-xs">未提出</span>
+                    @endif
                 </td>
+                @endif
+                <td class="px-4 py-3 text-xs text-gray-400">{{ $shop->updated_at->format('m/d H:i') }}</td>
                 <td class="px-4 py-3">
                     @if($shop->status === 'pending')
-                        <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-full">申請中</span>
+                        <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">申請中</span>
                     @elseif($shop->status === 'active')
-                        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 border border-green-200 rounded-full">掲載中</span>
+                        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">掲載中</span>
                     @else
-                        <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full">非公開</span>
+                        <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">非公開</span>
                     @endif
                 </td>
                 <td class="px-4 py-3">
-                    @if($shop->status === 'active')
-                        <form action="{{ route('admin.shops.updateBidPrice', $shop->id) }}/" method="POST" class="flex items-center gap-1">
-                            @csrf @method('PATCH')
-                            <input type="number" name="bid_price" value="{{ $shop->bid_price }}"
-                                   min="10" max="9990" step="10"
-                                   class="w-20 border border-gray-300 rounded px-2 py-1 text-xs text-right focus:outline-none focus:border-business-500">
-                            <span class="text-xs text-gray-400">円</span>
-                            <button type="submit" class="text-xs text-business-700 hover:underline px-1">更新</button>
-                        </form>
-                    @else
-                        <span class="text-xs text-gray-400">無料（10円）</span>
-                    @endif
-                </td>
-                <td class="px-4 py-3">
-                    <div class="flex gap-2">
+                    <div class="flex gap-1.5">
                         @if($shop->status !== 'active')
-                            <form action="{{ route('admin.shops.approve', $shop->id) }}/" method="POST">
+                            <form action="{{ route('admin.shops.approve', $shop->id) }}" method="POST">
                                 @csrf
-                                <button type="submit"
-                                        class="px-3 py-1 bg-green-500 hover:bg-green-400 text-white text-xs rounded transition font-medium">
-                                    承認
-                                </button>
+                                <button type="submit" class="px-2.5 py-1 bg-green-500 hover:bg-green-400 text-white text-xs rounded transition">承認</button>
                             </form>
                         @endif
                         @if($shop->status !== 'inactive')
-                            <form action="{{ route('admin.shops.reject', $shop->id) }}/" method="POST">
+                            <form action="{{ route('admin.shops.reject', $shop->id) }}" method="POST">
                                 @csrf
                                 <button type="submit"
-                                        class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs rounded transition"
-                                        onclick="return confirm('「{{ $shop->name }}」を非公開にしますか？')">
-                                    却下
-                                </button>
+                                        class="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs rounded transition"
+                                        onclick="return confirm('「{{ $shop->name }}」を非公開にしますか？')">非公開</button>
                             </form>
                         @endif
                     </div>
@@ -147,11 +202,10 @@
     </table>
 </div>
 
-@if($shops->hasPages())
-<div class="mt-6">
+<div class="mt-4 flex items-center justify-between">
+    <p class="text-xs text-gray-400">{{ $shops->total() }} 件</p>
     {{ $shops->appends(request()->query())->links() }}
 </div>
-@endif
 @endif
 
 @endsection

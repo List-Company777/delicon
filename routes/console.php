@@ -65,3 +65,7 @@ Schedule::command('notify:new-casts')->dailyAt('10:00');
 
 // キャスト掲載スコア更新（毎日午前1時）
 Schedule::command('casts:update-scores')->dailyAt('01:00');
+
+// 生年月日からの年齢自動更新（毎日午前0時）
+Schedule::command("casts:update-ages")->dailyAt("00:30");
+Schedule::command("coupons:send-expiry-reminders")->dailyAt("10:00");

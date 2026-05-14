@@ -22,7 +22,7 @@ class ShopApproved extends Mailable
     {
         return new Envelope(
             subject: "【{$this->shop->name}】掲載が開始されました",
-            replyTo: [new Address(config('mail.admin_address'), 'ナイトワークリスト')],
+            replyTo: [new Address(config('mail.admin_address'), 'デリヘルリスト')],
         );
     }
 

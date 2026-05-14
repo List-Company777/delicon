@@ -44,7 +44,9 @@ class ThreadController extends Controller
                 Mail::to($owner->email, $owner->name)
                     ->send(new ApplicationMessageToShop($application, $msg));
             }
-        } catch (\Exception) {}
+        } catch (\Exception $e) {
+            Log::warning(__CLASS__ . ': メール送信失敗: ' . $e->getMessage());
+        }
 
         return redirect()->route('apply.thread', $token)
             ->with('sent', true);

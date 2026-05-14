@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class DiscountCoupon extends Model
 {
-    protected $fillable = ['shop_id','user_id','code','discount_amount','min_order_amount','conditions','message','expires_at','used_at','sent_at'];
+    protected $fillable = ['shop_id','user_id','code','discount_amount','min_order_amount','conditions','message','expires_at','used_at','sent_at','review_id'];
     protected $casts = ['expires_at'=>'date','used_at'=>'datetime','sent_at'=>'datetime'];
 
     public function shop(): BelongsTo { return $this->belongsTo(Shop::class); }

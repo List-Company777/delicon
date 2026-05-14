@@ -42,7 +42,7 @@
     <div class="space-y-4 text-sm">
         <div class="flex gap-4">
             <span class="text-gray-400 w-24 shrink-0">件名</span>
-            <span class="font-medium text-gray-800">【ナイトワークリスト】{{ $notice->title }}</span>
+            <span class="font-medium text-gray-800">【デリヘルリスト】{{ $notice->title }}</span>
         </div>
         <div class="flex gap-4">
             <span class="text-gray-400 w-24 shrink-0">送信対象</span>

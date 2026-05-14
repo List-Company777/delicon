@@ -93,8 +93,8 @@ class SendMonthlyReport extends Command
 
         Mail::raw($body, fn($m) => $m
             ->to(self::TO)
-            ->subject("【ナイトワークリスト】{$label} 月次レポート")
-            ->from(config('mail.from.address'), 'ナイトワークリスト')
+            ->subject("【デリヘルリスト】{$label} 月次レポート")
+            ->from(config('mail.from.address'), 'デリヘルリスト')
         );
 
         $this->info("Monthly report sent for {$label}");
@@ -120,7 +120,7 @@ class SendMonthlyReport extends Command
         $pctFmt = fn($v) => $v !== null ? "（{$sign($v)}%）" : '';
 
         $lines = [];
-        $lines[] = "【ナイトワークリスト】{$label} 月次レポート";
+        $lines[] = "【デリヘルリスト】{$label} 月次レポート";
         $lines[] = str_repeat('=', 50);
         $lines[] = '';
 
@@ -202,8 +202,8 @@ class SendMonthlyReport extends Command
         $lines[] = sprintf("  当月応募数         : %s 件", number_format($applications));
         $lines[] = '';
         $lines[] = str_repeat('-', 50);
-        $lines[] = 'ナイトワークリスト 自動レポート';
-        $lines[] = 'https://nightwork-list.com/';
+        $lines[] = 'デリヘルリスト 自動レポート';
+        $lines[] = 'https://delicon.jp/';
 
         return implode("\n", $lines);
     }

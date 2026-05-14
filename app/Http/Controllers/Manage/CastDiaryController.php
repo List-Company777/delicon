@@ -61,13 +61,13 @@ class CastDiaryController extends BaseController
             }
         }
 
-        return redirect()->route('cast-diary.index', $castId)->with('success', '日記を投稿しました');
+        return redirect()->route('manage.cast-diary.index', $castId)->with('success', '日記を投稿しました');
     }
 
     public function shopDiaries()
     {
         $shop    = $this->shopOrFail();
-        $castIds = $shop->casts()->pluck('id');
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
         $diaries = CastDiary::with(['cast', 'images'])
             ->whereIn('cast_id', $castIds)
             ->latest()

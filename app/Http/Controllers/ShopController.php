@@ -180,6 +180,21 @@ class ShopController extends Controller
         $shopTextLen = mb_strlen($shop->base ?? '') + mb_strlen($shop->system_text ?? '');
         $noindex = $shopTextLen < 100;
 
-        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug', 'isSubscribed', 'noindex'));
+        // 無料店のみ：同ジャンル・同都道府県の有料店を最大3件
+        $nearbyPaidShops = collect();
+        if ($shop->plan >= 4 && $shop->genre_id && $shop->prefecture_id) {
+            $nearbyPaidShops = Shop::where('id', '!=', $shop->id)
+                ->where('status', 'active')
+                ->whereBetween('plan', [1, 3])
+                ->where('genre_id', $shop->genre_id)
+                ->where('prefecture_id', $shop->prefecture_id)
+                ->whereNotNull('main_image')
+                ->orderByDesc('rank_score')
+                ->limit(3)
+                ->with('area:id,name,slug')
+                ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
+        }
+
+        return view('shop.show', compact('shop', 'casts', 'news', 'footerPrefSlug', 'isSubscribed', 'noindex', 'nearbyPaidShops'));
     }
 }

@@ -19,7 +19,7 @@
 
 @include('manage._nav')
 
-<div class="max-w-2xl mx-auto px-4 pb-12">
+<div class="max-w-4xl mx-auto px-4 pb-12">
 
     <h2 class="text-lg font-bold text-gray-800 mb-1">お問い合わせ・要望</h2>
     <p class="text-sm text-gray-500 mb-3">掲載内容の変更依頼・機能への要望などをお気軽にご送信ください。</p>

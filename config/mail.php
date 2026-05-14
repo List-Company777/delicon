@@ -111,10 +111,10 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'noreply@nightwork-list.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@delicon.jp'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
-    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'nwl-support@nightwork-list.com'),
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'info@delicon.jp'),
 
 ];

@@ -2,95 +2,183 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Mail\DiscountCouponMail;
+use App\Mail\ReviewRepliedMail;
+use App\Mail\ShopContactMail;
+use App\Models\Cast;
+use App\Models\CastReview;
 use App\Models\DiscountCoupon;
-use App\Models\ShopReview;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class ReviewManageController extends BaseController
 {
-    // 口コミ投稿者一覧
     public function index()
     {
-        $shop = $this->shopOrFail();
-
-        $reviewers = ShopReview::where('shop_id', $shop->id)
-            ->with('user:id,name,email,created_at')
-            ->selectRaw('user_id, COUNT(*) as review_count, MAX(created_at) as last_reviewed_at, SUM(rating) as total_rating')
-            ->groupBy('user_id')
-            ->orderByDesc('last_reviewed_at')
-            ->get()
-            ->map(fn($r) => (object)[
-                'user'            => $r->user,
-                'review_count'    => $r->review_count,
-                'last_reviewed_at'=> $r->last_reviewed_at,
-                'avg_rating'      => round($r->total_rating / $r->review_count, 1),
-            ]);
-
-        return view('manage.review.index', compact('shop', 'reviewers'));
-    }
-
-    // 特定ユーザーの口コミ一覧 + クーポン送付フォーム
-    public function showUser(int $userId)
-    {
         $shop    = $this->shopOrFail();
-        $user    = User::findOrFail($userId);
-        $reviews = ShopReview::where('shop_id', $shop->id)
-            ->where('user_id', $userId)
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
+
+        $reviews = CastReview::whereIn('cast_id', $castIds)
             ->with('cast:id,name')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(30);
 
-        $sentCoupons = DiscountCoupon::where('shop_id', $shop->id)
-            ->where('user_id', $userId)
-            ->orderByDesc('created_at')
-            ->get();
-
-        return view('manage.review.user', compact('shop', 'user', 'reviews', 'sentCoupons'));
+        return view('manage.review.index', compact('shop', 'reviews'));
     }
 
-    // 口コミステータス変更（承認/否認）
-    public function updateStatus(Request $request, int $reviewId)
+    public function requestDeletion(int $reviewId)
     {
-        $shop   = $this->shopOrFail();
-        $review = ShopReview::where('shop_id', $shop->id)->findOrFail($reviewId);
-        $review->update(['status' => $request->input('status')]);
-        return back()->with('success', '口コミのステータスを更新しました');
+        $shop    = $this->shopOrFail();
+
+        if (!$shop->isPaid()) {
+            return back()->withErrors(['error' => '削除依頼は有料掲載店舗のみ利用できます。']);
+        }
+
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
+        $review  = CastReview::whereIn('cast_id', $castIds)->findOrFail($reviewId);
+
+        if ($review->deletion_requested_at) {
+            return back()->with('success', 'すでに削除依頼済みです。');
+        }
+
+        $review->update(['deletion_requested_at' => now()]);
+
+        $body = implode("\n", [
+            '口コミ削除依頼',
+            '',
+            '口コミID: ' . $review->id,
+            '対象女性: ' . ($review->cast?->name ?? '不明'),
+            '投稿者: '   . ($review->nickname ?? '匿名'),
+            '評価: ★'   . $review->rating,
+            '内容: '     . mb_substr($review->body, 0, 200),
+        ]);
+
+        $user = auth()->user();
+        try {
+            Mail::to(config('mail.admin_address', 'nwl-support@nightwork-list.com'))
+                ->send(new ShopContactMail(
+                    shopName:       $shop->name,
+                    senderName:     $user->name,
+                    senderEmail:    $user->email,
+                    category:       '口コミ削除依頼',
+                    contactSubject: '口コミ削除依頼 #' . $review->id,
+                    body:           $body,
+                ));
+        } catch (\Throwable $e) {
+            \Log::warning('Review deletion request mail failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', '削除依頼を送信しました。内容を確認の上、ご連絡いたします。');
     }
 
-    // 割引クーポン送付
-    public function sendCoupon(Request $request, int $userId)
+    public function reply(Request $request, int $reviewId)
     {
-        $shop = $this->shopOrFail();
-        $user = User::findOrFail($userId);
+        $shop    = $this->shopOrFail();
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
+        $review  = CastReview::whereIn('cast_id', $castIds)->findOrFail($reviewId);
 
         $data = $request->validate([
-            'discount_amount'    => ['required', 'integer', 'min:100', 'max:100000'],
-            'min_order_amount'   => ['nullable', 'integer', 'min:0'],
-            'conditions'         => ['nullable', 'string', 'max:500'],
-            'message'            => ['nullable', 'string', 'max:1000'],
-            'expires_at'         => ['required', 'date', 'after:today'],
+            'shop_reply' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $review->update([
+            'shop_reply'      => $data['shop_reply'],
+            'shop_replied_at' => now(),
+        ]);
+
+        // 口コミ投稿者（会員）へ通知
+        if ($review->user_id) {
+            try {
+                Mail::to($review->user->email)->queue(new ReviewRepliedMail($review->load('cast.shop', 'user')));
+            } catch (\Throwable $e) {
+                \Log::warning('ReviewRepliedMail failed: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', '返信を投稿しました。');
+    }
+
+    public function deleteReply(int $reviewId)
+    {
+        $shop    = $this->shopOrFail();
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
+        $review  = CastReview::whereIn('cast_id', $castIds)->findOrFail($reviewId);
+
+        $review->update(['shop_reply' => null, 'shop_replied_at' => null]);
+
+        return back()->with('success', '返信を削除しました。');
+    }
+
+    public function sendCoupon(Request $request, int $reviewId)
+    {
+        $shop    = $this->shopOrFail();
+        $castIds = Cast::where('shop_id', $shop->id)->pluck('id');
+        $review  = CastReview::whereIn('cast_id', $castIds)->findOrFail($reviewId);
+
+        if (!$review->user_id) {
+            return back()->withErrors(['error' => 'ゲスト投稿のためクーポンを送付できません。']);
+        }
+
+        if ($review->coupon_sent) {
+            return back()->with('success', 'このレビューへのクーポンはすでに送付済みです。');
+        }
+
+        $data = $request->validate([
+            'discount_amount'  => ['required', 'integer', 'min:500', 'max:100000', 'multiple_of:500'],
+            'min_order_amount' => ['nullable', 'integer', 'min:0'],
+            'conditions'       => ['nullable', 'string', 'max:200'],
+            'message'          => ['nullable', 'string', 'max:500'],
+            'expires_days'     => ['required', 'integer', 'min:1', 'max:365'],
         ]);
 
         $coupon = DiscountCoupon::create([
             'shop_id'          => $shop->id,
-            'user_id'          => $userId,
+            'user_id'          => $review->user_id,
+            'review_id'        => $review->id,
             'code'             => DiscountCoupon::generateCode(),
             'discount_amount'  => $data['discount_amount'],
             'min_order_amount' => $data['min_order_amount'] ?? null,
             'conditions'       => $data['conditions'] ?? null,
             'message'          => $data['message'] ?? null,
-            'expires_at'       => $data['expires_at'],
+            'expires_at'       => now()->addDays((int) $data['expires_days']),
             'sent_at'          => now(),
         ]);
 
+        $review->update(['coupon_sent' => true]);
+
+        $user = auth()->user();
+
         try {
-            Mail::to($user->email)->send(new DiscountCouponMail($coupon));
+            Mail::to($review->user->email)
+                ->send(new DiscountCouponMail($coupon));
         } catch (\Throwable $e) {
             \Log::warning('Coupon mail failed: ' . $e->getMessage());
         }
 
-        return back()->with('success', "{$user->name} さんに割引クーポンを送付しました（コード: {$coupon->code}）");
+        // 店舗オーナーへの送付確認メール
+        $confirmBody = implode("
+", [
+            'クーポンを送付しました。',
+            '',
+            '対象者: ' . ($review->user?->name ?? $review->nickname ?? '匿名'),
+            '割引金額: ¥' . number_format($coupon->discount_amount),
+            'クーポンコード: ' . $coupon->code,
+            '有効期限: ' . $coupon->expires_at->format('Y年m月d日'),
+            ($coupon->message ? 'メッセージ: ' . $coupon->message : ''),
+        ]);
+        try {
+            Mail::to($user->email)
+                ->send(new ShopContactMail(
+                    shopName:       $shop->name,
+                    senderName:     $user->name,
+                    senderEmail:    $user->email,
+                    category:       'クーポン送付確認',
+                    contactSubject: '【送付完了】クーポン ' . $coupon->code,
+                    body:           $confirmBody,
+                ));
+        } catch (\Throwable $e) {
+            \Log::warning('Coupon confirm mail failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'クーポンを送付しました。');
     }
 }

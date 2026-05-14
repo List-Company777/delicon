@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\AdminNoticeMail;
 use App\Models\AdminNotice;
+use App\Models\Prefecture;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,27 +21,28 @@ class NoticeController extends Controller
 
     public function create()
     {
-        return view('admin.notices.create');
+        $prefectures = Prefecture::orderBy('id')->get();
+        return view('admin.notices.create', compact('prefectures'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'  => ['required', 'string', 'max:100'],
-            'body'   => ['required', 'string', 'max:5000'],
-            'target' => ['required', 'in:all,active,inactive'],
+            'title'          => ['required', 'string', 'max:100'],
+            'body'           => ['required', 'string', 'max:5000'],
+            'target'         => ['required', 'in:all,active,inactive'],
+            'filter_pref_id' => ['nullable', 'integer', 'exists:prefectures,id'],
+            'filter_plan'    => ['nullable', 'integer', 'min:1', 'max:5'],
         ]);
 
         $notice = AdminNotice::create($validated);
 
-        // プレビュー確認後に送信するので、下書き保存
         return redirect()->route('admin.notices.show', $notice)
             ->with('success', '下書きを保存しました。内容を確認して送信してください。');
     }
 
     public function show(AdminNotice $notice)
     {
-        // 送信対象の人数を取得（プレビュー表示用）
         $targetCount = $this->getTargetUsers($notice)->count();
         return view('admin.notices.show', compact('notice', 'targetCount'));
     }
@@ -55,8 +57,7 @@ class NoticeController extends Controller
         $count = 0;
 
         foreach ($users as $user) {
-            Mail::to($user->email, $user->name)
-                ->queue(new AdminNoticeMail($notice));
+            Mail::to($user->email, $user->name)->queue(new AdminNoticeMail($notice));
             $count++;
         }
 
@@ -70,16 +71,19 @@ class NoticeController extends Controller
             ->with('success', "{$count}件のメールを送信キューに追加しました。");
     }
 
-    /** 送信対象ユーザーを target に応じて取得 */
     private function getTargetUsers(AdminNotice $notice)
     {
-        $query = User::whereHas('shops', function ($q) use ($notice) {
+        return User::whereHas('shops', function ($q) use ($notice) {
             $q->wherePivot('role', 'owner');
             if ($notice->target !== 'all') {
-                $q->where('status', $notice->target);
+                $q->where('shops.status', $notice->target);
             }
-        })->where('role', '!=', 'admin');
-
-        return $query->get();
+            if ($notice->filter_pref_id) {
+                $q->where('shops.prefecture_id', $notice->filter_pref_id);
+            }
+            if ($notice->filter_plan !== null) {
+                $q->where('shops.plan', $notice->filter_plan);
+            }
+        })->where('role', '!=', 'admin')->get();
     }
 }

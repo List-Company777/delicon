@@ -21,7 +21,7 @@ class Cast extends Model
         'yuumeijin', 'shiofuki', 'zitaku',
         'twitter_account', 'official_url',
         'price_on', 'is_recommended', 'is_new', 'new_since', 'sort_order', 'ranking_count', 'status',
-        'join_date', 'working_date',
+        'join_date', 'working_date', 'date_of_birth',
     ];
 
     protected $casts = [
@@ -30,6 +30,7 @@ class Cast extends Model
         'new_since'      => 'date',
         'join_date'      => 'date',
         'working_date'   => 'date',
+        'date_of_birth'  => 'date',
     ];
 
     public function shop(): BelongsTo

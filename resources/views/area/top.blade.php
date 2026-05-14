@@ -133,7 +133,7 @@
             <span aria-hidden="true" class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>
             広告
         </h2>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             @foreach($bannerShops as $shop)
             <a href="{{ route('shop.show', $shop->id) }}/"
                class="block hover:opacity-80 transition rounded overflow-hidden"

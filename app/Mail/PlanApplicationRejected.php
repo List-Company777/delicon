@@ -25,7 +25,7 @@ class PlanApplicationRejected extends Mailable
     {
         return new Envelope(
             subject: "【{$this->shop->name}】有料プランの申し込みについて",
-            replyTo: [new Address(config('mail.admin_address'), 'ナイトワークリスト')],
+            replyTo: [new Address(config('mail.admin_address'), 'デリヘルリスト')],
         );
     }
 

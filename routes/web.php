@@ -8,7 +8,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Manage\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Admin\KeywordController as AdminKeyword;
 use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ShopController;
@@ -119,8 +118,7 @@ Route::view('/privacy/',    'legal.privacy')->name('privacy');
 Route::view('/terms/',      'legal.terms')->name('terms');
 Route::view('/advertiser/', 'legal.advertiser')->name('advertiser');
 Route::view('/company/',    'legal.company')->name('company');
-
-
+Route::view('/welcome/',    'welcome_migration')->name('welcome.migration');
 // 代理店パートナー募集（noindex）
 Route::view('/agency/', 'agency.index')->name('agency');
 
@@ -179,6 +177,7 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/casts/',                 [CastProfileController::class, 'index'])->name('cast-profile.index');
     Route::get('/casts/create/',          [CastProfileController::class, 'create'])->name('cast-profile.create');
     Route::post('/casts/',                [CastProfileController::class, 'store'])->name('cast-profile.store');
+    Route::post("/casts/reorder/",          [CastProfileController::class, "reorder"])->name("cast-profile.reorder");
     Route::get('/casts/{id}/edit/',       [CastProfileController::class, 'edit'])->name('cast-profile.edit')->where('id', '[0-9]+');
     Route::get('/casts/analytics/',       [CastAnalyticsController::class, 'index'])->name('cast-analytics.index');
     Route::get('/diaries/',                       [\App\Http\Controllers\Manage\CastDiaryController::class, 'shopDiaries'])->name('diaries.index');
@@ -200,9 +199,11 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/reviews/',                            [ReviewManageController::class, 'index'])->name('review.index');
     Route::get('/reviews/users/{userId}/',             [ReviewManageController::class, 'showUser'])->name('review.user')->where('userId','[0-9]+');
     Route::patch('/reviews/{reviewId}/status/',        [ReviewManageController::class, 'updateStatus'])->name('review.status')->where('reviewId','[0-9]+');
-    Route::post('/reviews/users/{userId}/coupon/',     [ReviewManageController::class, 'sendCoupon'])->name('review.coupon.send')->where('userId','[0-9]+');
-
-
+    Route::post('/reviews/{reviewId}/delete-request/',  [ReviewManageController::class, 'requestDeletion'])->name('review.delete-request')->where('reviewId','[0-9]+');
+    Route::post('/reviews/{reviewId}/reply/',          [ReviewManageController::class, 'reply'])->name('review.reply')->where('reviewId','[0-9]+');
+    Route::delete('/reviews/{reviewId}/reply/',       [ReviewManageController::class, 'deleteReply'])->name('review.reply.delete')->where('reviewId','[0-9]+');
+    Route::post('/reviews/{reviewId}/coupon/',         [ReviewManageController::class, 'sendCoupon'])->name('review.coupon.send')->where('reviewId','[0-9]+');
+    
     // 掲載申請
     Route::post('/apply/',               [\App\Http\Controllers\Manage\DashboardController::class, 'apply'])->name('apply');
 
@@ -239,8 +240,6 @@ Route::get('/search/', [SearchController::class, 'index'])->name('search');
 
 // 求人詳細
 Route::get('/job/{id}/', [JobController::class, 'show'])->name('job.show')->where('id', '[0-9]+');
-
-
 // 通報フォーム
 Route::post('/report/', [\App\Http\Controllers\ReportController::class, 'send'])->name('report.send')->middleware('throttle:10,10');
 
@@ -263,12 +262,6 @@ Route::get('/manage/alive/{token}/', [\App\Http\Controllers\Manage\AliveControll
 // Admin（サイト管理者専用）
 Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard/',                      [AdminDashboard::class, 'index'])->name('dashboard');
-    Route::get('/keywords/',                       [AdminKeyword::class, 'index'])->name('keywords.index');
-    Route::post('/keywords/{id}/map/',             [AdminKeyword::class, 'map'])->name('keywords.map')->where('id', '[0-9]+');
-    Route::post('/keywords/{id}/confirm/',         [AdminKeyword::class, 'confirm'])->name('keywords.confirm')->where('id', '[0-9]+');
-    Route::post('/keywords/{id}/exclude/',         [AdminKeyword::class, 'exclude'])->name('keywords.exclude')->where('id', '[0-9]+');
-    Route::post('/keywords/{id}/reset/',           [AdminKeyword::class, 'reset'])->name('keywords.reset')->where('id', '[0-9]+');
-    Route::post('/keywords/generate-candidates/', [AdminKeyword::class, 'generateCandidates'])->name('keywords.generate_candidates');
     Route::get('/master/',                                     [AdminMaster::class, 'index'])->name('master.index');
     Route::post('/master/area/',                               [AdminMaster::class, 'storeArea'])->name('master.area.store');
     Route::post('/master/job-type/',                           [AdminMaster::class, 'storeJobType'])->name('master.job_type.store');
@@ -286,6 +279,9 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::patch('/shops/{id}/partner/',           [\App\Http\Controllers\Admin\ShopReviewController::class, 'updatePartner'])->name('shops.updatePartner')->where('id', '[0-9]+');
     Route::patch('/shops/{id}/area/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateArea'])->name('shops.updateArea')->where('id', '[0-9]+');
     Route::patch('/shops/{id}/plan/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updatePlan'])->name('shops.updatePlan')->where('id', '[0-9]+');
+    Route::patch('/shops/{id}/genre/',             [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateGenre'])->name('shops.updateGenre')->where('id', '[0-9]+');
+    Route::get('/banner-check/',                   [\App\Http\Controllers\Admin\BannerCheckController::class, 'index'])->name('banner-check.index');
+    Route::post('/banner-check/{id}/check/',       [\App\Http\Controllers\Admin\BannerCheckController::class, 'check'])->name('banner-check.check')->where('id', '[0-9]+');
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
     Route::get('/shops/{id}/permit-download/',     [\App\Http\Controllers\Admin\ShopReviewController::class, 'downloadPermit'])->name('shops.permit-download')->where('id', '[0-9]+');
 
@@ -368,8 +364,8 @@ Route::get('/shops/{pref}/{area}/', fn(string $pref, string $area) => redirect("
 // ユーザーダッシュボード・設定
 Route::middleware('auth')->group(function () {
     Route::get('/user/dashboard/', [UserDashboardController::class, 'index'])->name('user.dashboard');
-    Route::get('/deletion-requests/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'index'])->name('deletion-requests.index');
-    Route::patch('/deletion-requests/{deletionRequest}/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'process'])->name('deletion-requests.process');
+    Route::get('/deletion-requests/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'index'])->name('admin.deletion-requests.index');
+    Route::patch('/deletion-requests/{deletionRequest}/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'process'])->name('admin.deletion-requests.process');
     Route::get('/cast-diaries/',                             [\App\Http\Controllers\Admin\CastDiaryController::class, 'index'])->name('admin.cast-diaries.index');
     Route::delete('/cast-diaries/{diary}/',                   [\App\Http\Controllers\Admin\CastDiaryController::class, 'destroy'])->name('admin.cast-diaries.destroy');
     Route::patch('/cast-diaries/{diary}/approve/',          [\App\Http\Controllers\Admin\CastDiaryController::class, 'approve'])->name('admin.cast-diaries.approve');
@@ -377,6 +373,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cast-reviews/{review}/approve/',           [\App\Http\Controllers\Admin\CastReviewController::class, 'approve'])->name('admin.cast-reviews.approve');
     Route::delete('/cast-reviews/{review}/reject/',            [\App\Http\Controllers\Admin\CastReviewController::class, 'reject'])->name('admin.cast-reviews.reject');
     Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
+    Route::get('/user/coupons/', [UserDashboardController::class, 'coupons'])->name('user.coupons');
     Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
     Route::post('/user/notify-working/', [UserDashboardController::class, 'toggleNotifyWorking'])->name('user.notify-working.toggle');
     Route::post('/favorites/{cast}/', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
@@ -408,8 +405,6 @@ Route::get('/business/{any}', fn(string $any) => redirect('/yoasobi/' . $any, 30
 Route::get('/{area_slug}/ranking/', [\App\Http\Controllers\RankingController::class, 'bySlug'])
     ->where(['area_slug' => '[a-z0-9\-]+'])
     ->name('ranking.area');
-
-
 // 店舗一覧: /{area}/shop-list/  and  /{area}/shop-list/{filter}/
 Route::get('/{area_slug}/shop-list/', [\App\Http\Controllers\SearchController::class, 'shopList'])
     ->where(['area_slug' => '[a-z0-9\-]+'])
@@ -445,8 +440,6 @@ Route::get('/{area_slug}/girl-list/{cast_tab}/', [\App\Http\Controllers\GirlList
 Route::get('/{area_slug}/girl-list/type/{type_slug}/', [\App\Http\Controllers\GirlListController::class, 'byType'])
     ->where(['area_slug' => '[a-z0-9\-]+', 'type_slug' => '[a-z0-9\-]+'])
     ->name('girl.list.type');
-
-
 // エリアトップ
 Route::get('/{area_slug}/', [\App\Http\Controllers\AreaTopController::class, 'show'])
     ->where(['area_slug' => '[a-z0-9\-]+'])

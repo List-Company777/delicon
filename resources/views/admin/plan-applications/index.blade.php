@@ -89,11 +89,32 @@
                             <form action="{{ route('admin.plan-applications.approve', $application) }}/" method="POST"
                                   x-data="{ open: false }" @submit.prevent="open ? $el.submit() : (open = true)">
                                 @csrf
-                                <div x-show="open" class="mb-2 space-y-1" x-cloak>
-                                    <input type="text" name="plan_name"
-                                           placeholder="nightwork-list 広告掲載料 4月1日～"
-                                           class="border border-gray-300 rounded px-2 py-1 text-xs w-56 focus:outline-none">
-                                    <p class="text-xs text-gray-400">品目名（invoy請求書に記載されます）</p>
+                                <div x-show="open" class="mb-2 space-y-2" x-cloak>
+                                    <div>
+                                        <p class="text-xs text-gray-400 mb-1">承認後の掲載プラン</p>
+                                        <select name="plan" x-ref="planSelect"
+                                                @change="showBanner = ($event.target.value == 3)"
+                                                class="border border-gray-300 rounded px-2 py-1 text-xs w-44 focus:outline-none">
+                                            <option value="">変更しない</option>
+                                            <option value="1" {{ $application->shop->plan == 1 ? 'selected' : '' }}>1：VIP（¥80,000）</option>
+                                            <option value="2" {{ $application->shop->plan == 2 ? 'selected' : '' }}>2：ミドル（¥40,000）</option>
+                                            <option value="3" {{ $application->shop->plan == 3 ? 'selected' : '' }}>3：ベーシック（¥20,000）</option>
+                                            <option value="4" {{ $application->shop->plan == 4 ? 'selected' : '' }}>4：無料上位（バナー）</option>
+                                            <option value="5" {{ $application->shop->plan == 5 ? 'selected' : '' }}>5：無料</option>
+                                        </select>
+                                    </div>
+                                    <div x-data="{ showBanner: {{ $application->shop->plan == 3 ? 'true' : 'false' }} }" x-show="showBanner" class="flex items-center gap-2">
+                                        <input type="checkbox" name="is_banner_plan" value="1" id="banner_{{ $application->id }}"
+                                               {{ $application->shop->is_banner_plan ? 'checked' : '' }}
+                                               class="rounded border-gray-300">
+                                        <label for="banner_{{ $application->id }}" class="text-xs text-gray-600">バナー設置によるベーシック</label>
+                                    </div>
+                                    <div>
+                                        <input type="text" name="plan_name"
+                                               placeholder="deliconサービス費 6月分"
+                                               class="border border-gray-300 rounded px-2 py-1 text-xs w-56 focus:outline-none">
+                                        <p class="text-xs text-gray-400 mt-0.5">品目名（請求書に記載されます）</p>
+                                    </div>
                                 </div>
                                 <button type="submit"
                                         class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition">

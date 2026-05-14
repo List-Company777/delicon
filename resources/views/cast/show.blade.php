@@ -78,7 +78,7 @@
                      class="img-onerror-cast w-full rounded-xl border border-surface-300 mb-3" loading="eager">
                 {{-- 待機中バッジ --}}
                 @if($cast->working_date && $cast->working_date->isToday())
-                <span class="absolute top-2 left-2 text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow">待機中</span>
+                <span class="absolute top-2 left-2 text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow">本日出勤</span>
                 @endif
                 @if($cast->isNew())
                 <span class="absolute top-2 right-2 text-xs font-bold bg-gold-500 text-white px-2.5 py-1 rounded-full shadow">NEW</span>
@@ -403,6 +403,12 @@
                         <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
                     </div>
                     <p class="text-sm text-[#C8C4BC] leading-relaxed">{{ $review->body }}</p>
+                    @if($review->shop_reply)
+                    <div class="mt-3 bg-surface-600 border border-surface-400 rounded-lg px-4 py-3">
+                        <p class="text-xs text-[#6A6A7E] mb-1">店舗からの返信</p>
+                        <p class="text-xs text-[#B0AEAD] leading-relaxed whitespace-pre-wrap">{{ $review->shop_reply }}</p>
+                    </div>
+                    @endif
                 </div>
                 @endforeach
             </div>
@@ -490,6 +496,30 @@
         </h2>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             @foreach($similarCasts as $similar)
+            <a href="{{ route('cast.show', $similar->id) }}/" class="group text-center">
+                <div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 border border-surface-300 group-hover:border-deli-500 transition mb-1">
+                    <img src="{{ $similar->img_url }}" alt="{{ $similar->name }}"
+                         class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">
+                </div>
+                <p class="text-xs text-[#C8C4BC] group-hover:text-gold-400 transition truncate">{{ $similar->name }}</p>
+                @if($similar->shop)
+                <p class="text-[10px] text-[#6A6A7E] truncate">{{ $similar->shop->name }}</p>
+                @endif
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- 近隣有料店の似た女性（所属店が無料の場合のみ） --}}
+    @if($nearbyPaidSimilarCasts->isNotEmpty())
+    <section class="mt-10">
+        <h2 class="text-lg font-bold text-[#F0ECE4] mb-5 flex items-center gap-3">
+            <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
+            このエリアのおすすめキャスト
+        </h2>
+        <div class="grid grid-cols-3 gap-3">
+            @foreach($nearbyPaidSimilarCasts as $similar)
             <a href="{{ route('cast.show', $similar->id) }}/" class="group text-center">
                 <div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 border border-surface-300 group-hover:border-deli-500 transition mb-1">
                     <img src="{{ $similar->img_url }}" alt="{{ $similar->name }}"
@@ -601,6 +631,40 @@
 })();
 </script>
 @endpush
+
+{{-- 近隣有料掲載店（所属店が無料の場合のみ） --}}
+@if($nearbyPaidShops->isNotEmpty())
+<div class="max-w-5xl mx-auto px-4 pb-10">
+    <h2 class="text-sm font-bold text-[#8A8A9E] mb-4 flex items-center gap-2">
+        <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>
+        このエリアのおすすめ店舗
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @foreach($nearbyPaidShops as $ps)
+        @php
+            $psThumb    = $ps->main_image ? \App\Services\ImageService::thumbWebpPath($ps->main_image) : null;
+            $psThumbJpg = $ps->main_image ? \App\Services\ImageService::thumbJpgPath($ps->main_image) : null;
+        @endphp
+        <a href="{{ route('shop.show', $ps->id) }}/"
+           class="bg-surface-500 border border-surface-300 rounded-xl overflow-hidden hover:border-deli-500 transition group block">
+            @if($psThumb)
+            <picture>
+                <source srcset="{{ Storage::url($psThumb) }}" type="image/webp">
+                <img src="{{ Storage::url($psThumbJpg) }}" alt="{{ $ps->name }}"
+                     class="w-full aspect-video object-cover group-hover:opacity-90 transition" loading="lazy" width="224" height="126">
+            </picture>
+            @endif
+            <div class="p-3">
+                <p class="text-sm font-bold text-[#E8E4DC] truncate group-hover:text-deli-400 transition">{{ $ps->name }}</p>
+                @if($ps->area)
+                <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $ps->area->name }}</p>
+                @endif
+            </div>
+        </a>
+        @endforeach
+    </div>
+</div>
+@endif
 
 {{-- フロートバー（スマホのみ） --}}
 <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 p-3 bg-surface-900/95 backdrop-blur border-t border-surface-500">

@@ -1,4 +1,4 @@
-@extends('layouts.manage')
+@extends('layouts.app')
 @section('title', $cast->name . ' - 写メ日記')
 
 @section('content')

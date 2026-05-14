@@ -325,19 +325,33 @@
                 <div class="border-t border-gray-100 pt-4">
                     <p class="text-xs text-gray-400 mb-2">掲載プラン</p>
                     @php
-                        $planLabels = [1=>'1：VIP有料', 2=>'2：ミドル有料', 3=>'3：基本有料'];
+                        $planLabels = [
+                            1 => '1：VIP（¥80,000）',
+                            2 => '2：ミドル（¥40,000）',
+                            3 => '3：ベーシック（¥20,000）',
+                            4 => '4：無料上位（バナー）',
+                            5 => '5：無料',
+                        ];
                     @endphp
-                    <form action="{{ route('admin.shops.updatePlan', $shop->id) }}/" method="POST" class="flex items-center gap-2">
+                    <form action="{{ route('admin.shops.updatePlan', $shop->id) }}/" method="POST" class="space-y-2">
                         @csrf @method('PATCH')
-                        <select name="plan" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500">
-                            @foreach($planLabels as $val => $label)
-                            <option value="{{ $val }}" {{ $shop->plan == $val ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="text-sm text-business-700 hover:underline"
-                                onclick="return confirm('プランを変更しますか？有料→無料に変更すると掲載期間カウントがリセットされます。')">
-                            変更
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <select name="plan" id="plan_select_{{ $shop->id }}" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-business-500" onchange="toggleBannerPlan(this, {{ $shop->id }})">
+                                @foreach($planLabels as $val => $label)
+                                <option value="{{ $val }}" {{ $shop->plan == $val ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="text-sm text-business-700 hover:underline"
+                                    onclick="return confirm('プランを変更しますか？')">
+                                変更
+                            </button>
+                        </div>
+                        <div id="banner_plan_row_{{ $shop->id }}" class="{{ $shop->plan == 3 ? '' : 'hidden' }} flex items-center gap-2">
+                            <input type="checkbox" name="is_banner_plan" value="1" id="is_banner_{{ $shop->id }}"
+                                   {{ $shop->is_banner_plan ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-business-600">
+                            <label for="is_banner_{{ $shop->id }}" class="text-xs text-gray-600">バナー設置によるベーシック</label>
+                        </div>
                     </form>
                     @if($shop->paid_since)
                     <p class="text-xs text-gray-400 mt-1">有料継続開始日：{{ $shop->paid_since }}</p>
@@ -402,3 +416,12 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+function toggleBannerPlan(select, shopId) {
+    const row = document.getElementById('banner_plan_row_' + shopId);
+    row.classList.toggle('hidden', parseInt(select.value) !== 3);
+}
+</script>
+@endpush

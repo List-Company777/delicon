@@ -16,6 +16,7 @@
            class="pb-2 transition {{ request('tab', 'notify') === 'notify' ? 'text-deli-400 border-b-2 border-deli-500' : 'text-[#6A6A7E] hover:text-[#C8C4BC]' }}">新人通知</a>
         <a href="{{ route('user.settings') }}/?tab=prefs"
            class="pb-2 transition {{ request('tab') === 'prefs' ? 'text-deli-400 border-b-2 border-deli-500' : 'text-[#6A6A7E] hover:text-[#C8C4BC]' }}">好み</a>
+        <a href="{{ route('user.coupons') }}/" class="text-[#6A6A7E] hover:text-[#C8C4BC] pb-2 transition">クーポン</a>
     </div>
 
     @if(session('success'))

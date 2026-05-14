@@ -110,7 +110,7 @@
         'author'           => [
             '@type' => 'Organization',
             '@id'   => url('/') . '#org',
-            'name'  => 'デリコン編集部',
+            'name'  => 'デリヘルリスト編集部',
             'url'   => url('/') . '/',
         ],
         'publisher'        => ['@id' => url('/') . '#org'],
@@ -130,7 +130,7 @@
         '@type'    => 'BreadcrumbList',
         '@id'      => $articleUrl . '#breadcrumb',
         'itemListElement' => [
-            ['@type' => 'ListItem', 'position' => 1, 'name' => 'デリコン', 'item' => route('top') . '/'],
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'デリヘルリスト', 'item' => route('top') . '/'],
             ['@type' => 'ListItem', 'position' => 2, 'name' => 'コラム・ガイド', 'item' => route('article.index') . '/'],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $article->title, 'item' => $articleUrl],
         ],
@@ -141,7 +141,7 @@
         '@type'      => 'WebPage',
         '@id'        => $articleUrl . '#webpage',
         'url'        => $articleUrl,
-        'name'       => $article->title . ' | デリコン',
+        'name'       => $article->title . ' | デリヘルリスト',
         'inLanguage' => 'ja',
         'isPartOf'   => ['@id' => url('/') . '#website'],
         'about'      => ['@id' => url('/') . '#org'],
@@ -176,7 +176,7 @@
         'uploadDate'   => ($article->video->created_at)->toIso8601String(),
         'contentUrl'   => asset('storage/' . $article->video->video_path),
         'thumbnailUrl' => $article->hero_image ? asset('storage/' . $article->hero_image) : asset('android-chrome-192x192.png'),
-        'publisher'    => ['@type' => 'Organization', 'name' => 'ナイトワークリスト'],
+        'publisher'    => ['@type' => 'Organization', 'name' => 'デリヘルリスト'],
     ];
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($videoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
@@ -189,7 +189,7 @@
 
     {{-- パンくず --}}
     <nav class="text-xs text-gray-400 mb-6" aria-label="パンくずリスト">
-        <a href="{{ route('top') }}/" class="hover:text-gray-600">デリコン</a>
+        <a href="{{ route('top') }}/" class="hover:text-gray-600">デリヘルリスト</a>
         <span class="mx-1" aria-hidden="true">›</span>
         <a href="{{ route('article.index') }}/" class="hover:text-gray-600">コラム・ガイド</a>
         <span class="mx-1" aria-hidden="true">›</span>
@@ -221,7 +221,7 @@
             <svg class="w-4 h-4 shrink-0 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span>著者：<strong class="font-medium text-gray-500">デリコン編集部</strong></span>
+            <span>著者：<strong class="font-medium text-gray-500">デリヘルリスト編集部</strong></span>
             <span class="text-gray-200">|</span>
             <span>編集部スタッフが内容を確認・監修しています</span>
         </div>

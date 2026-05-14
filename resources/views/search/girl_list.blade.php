@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-    $tabLabels = ['all' => '女性一覧', 'standby' => '待機中', 'new' => '新人', 'diary' => '写メ日記', 'review' => '口コミ'];
+    $tabLabels = ['all' => '女性一覧', 'standby' => '本日出勤', 'new' => '新人', 'diary' => '写メ日記', 'review' => '口コミ'];
     $tabLabel  = $cast_tab === 'type' ? ($typeName ?? '女性一覧') : ($tabLabels[$cast_tab] ?? '女性一覧');
     $suffix    = 'デリヘル・風俗';
 
@@ -58,21 +58,21 @@
     // description
     if ($cast_tab === 'type' && isset($typeName)) {
         $pageDescription = $areaName
-            ? "{$areaName}で{$typeName}のデリヘル・風俗女性を探すなら「デリコン」。{$totalStr}人掲載中。エリア・体型・スタイルで絞り込み検索できます。"
+            ? "{$areaName}で{$typeName}のデリヘル・風俗女性を探すなら「デリヘルリスト」。{$totalStr}人掲載中。エリア・体型・スタイルで絞り込み検索できます。"
             : "{$typeName}のデリヘル・風俗女性一覧。全国{$totalStr}人掲載中。エリア・体型で絞り込み検索できます。";
     } elseif ($filterLabel && $areaName) {
         $pageDescription = "{$areaName}で{$filterLabel}のデリヘル女性キャストを検索。{$totalStr}人掲載中。年齢・体型・スタイルで絞り込んで希望のキャストを見つけよう。";
     } elseif ($filterLabel) {
         $pageDescription = "{$filterLabel}のデリヘル女性一覧。全国{$totalStr}人掲載中。エリア・年齢・体型で絞り込み検索できます。";
     } elseif ($areaName) {
-        $pageDescription = "{$areaName}のデリヘル女性キャスト{$totalStr}人を掲載。年齢・体型・スタイルで絞り込み検索できます。待機中・新人情報も確認できます。";
+        $pageDescription = "{$areaName}のデリヘル女性キャスト{$totalStr}人を掲載。年齢・体型・スタイルで絞り込み検索できます。本日出勤・新人情報も確認できます。";
     } else {
         $pageDescription = "全国のデリヘル女性キャスト{$totalStr}人を掲載。エリア・年齢・体型・スタイルで絞り込み検索できます。";
     }
 
     // H1
     if ($cast_tab === 'type' && isset($typeName)) {
-        $h1Text = $areaName ? "{$areaName}の{$typeName}" : "{$typeName}の女性一覧";
+        $h1Text = $areaName ? "{$areaName}の{$typeName}風俗・デリヘル" : "{$typeName}のデリヘル・風俗女性一覧";
     } elseif ($filterLabel) {
         $h1Text = $areaName ? "{$areaName}の{$filterLabel}女性" : "{$filterLabel}女性一覧";
     } else {
@@ -144,7 +144,7 @@
             @php
                 $tabs = [
                     'all'     => ['label' => '女性一覧', 'url' => route('girl.list', ['area_slug' => $area_slug]) . '/'],
-                    'standby' => ['label' => '待機中',   'url' => route('girl.list.tab', ['area_slug' => $area_slug, 'cast_tab' => 'standby']) . '/'],
+                    'standby' => ['label' => '本日出勤',   'url' => route('girl.list.tab', ['area_slug' => $area_slug, 'cast_tab' => 'standby']) . '/'],
                     'new'     => ['label' => '新人',     'url' => route('girl.list.tab', ['area_slug' => $area_slug, 'cast_tab' => 'new']) . '/'],
                     'diary'   => ['label' => '写メ日記', 'url' => route('girl.list.tab', ['area_slug' => $area_slug, 'cast_tab' => 'diary']) . '/'],
                     'review'  => ['label' => '口コミ',   'url' => route('girl.list.tab', ['area_slug' => $area_slug, 'cast_tab' => 'review']) . '/'],
@@ -194,6 +194,7 @@
 
         {{-- フィルター内容 --}}
         <div x-show="open"
+             x-cloak
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -366,15 +367,20 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
 
     {{-- ヘッダー --}}
-    <div class="mb-4 flex items-baseline gap-3">
+    <div class="mb-2 flex items-baseline gap-3">
         <h1 class="text-lg font-bold text-[#E8E4DC]">{{ $h1Text }}</h1>
         <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
     </div>
+    @if($cast_tab === 'type' && isset($typeName))
+    <p class="text-sm text-[#8A8A9E] mb-4 leading-relaxed">{{ $areaName !== '全国' ? $areaName . 'で活躍する' : '全国の' }}{{ $typeName }}のデリヘル嬢を{{ $totalStr }}人掲載。年齢・体型・スタイルで絞り込んでお好みの女性を見つけてください。</p>
+    @else
+    <div class="mb-4"></div>
+    @endif
 
     @if($results->isEmpty())
         <div class="text-center py-16 text-[#8A8A9E]">
             <p class="text-lg">
-                @if($cast_tab === 'standby') 現在待機中の女性はいません
+                @if($cast_tab === 'standby') 現在本日出勤の女性はいません
                 @elseif($cast_tab === 'new') 新人女性は登録されていません
                 @elseif($cast_tab === 'diary') 写メ日記の投稿はありません
                 @elseif($cast_tab === 'review') まだ口コミがありません
@@ -482,7 +488,7 @@
                              class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
                         <div class="absolute top-1.5 left-1.5 flex flex-col gap-1">
                             @if($isStandby)
-                                <span class="text-xs bg-emerald-500 text-white font-bold px-1.5 py-0.5 rounded leading-tight">待機中</span>
+                                <span class="text-xs bg-emerald-500 text-white font-bold px-1.5 py-0.5 rounded leading-tight">本日出勤</span>
                             @endif
                             @if($isNew)
                                 <span class="text-xs bg-pink-500 text-white font-bold px-1.5 py-0.5 rounded leading-tight">NEW</span>
@@ -516,5 +522,33 @@
 
     @endif
 </div>
+
+@if($cast_tab === 'type' && isset($typeName))
+@php
+    $relatedTypeList = [
+        ['slug' => 'kanreki',   'name' => '還暦'],
+        ['slug' => 'isoji',     'name' => '五十路'],
+        ['slug' => 'obaachan',  'name' => 'おばあちゃん'],
+        ['slug' => 'chojukujo', 'name' => '超熟女'],
+        ['slug' => 'jukujo',    'name' => '熟女系'],
+        ['slug' => 'hitozuma',  'name' => '人妻系'],
+        ['slug' => 'kyonyuu',   'name' => '巨乳'],
+        ['slug' => 'hinnyuu',   'name' => '貧乳'],
+        ['slug' => 'newhalfu',  'name' => 'ニューハーフ'],
+    ];
+    $relatedTypes = array_filter($relatedTypeList, fn($t) => $t['slug'] !== ($type_slug ?? ''));
+@endphp
+<div class="max-w-6xl mx-auto px-4 pb-10 border-t border-surface-500 pt-6">
+    <h2 class="text-xs font-bold text-[#8A8A9E] uppercase tracking-wider mb-3">関連カテゴリ</h2>
+    <div class="flex flex-wrap gap-2">
+        @foreach($relatedTypes as $rt)
+        <a href="{{ url("/{$area_slug}/girl-list/type/{$rt['slug']}/") }}/"
+           class="text-xs px-3 py-1.5 rounded-full border border-surface-300 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400 transition whitespace-nowrap">
+            {{ $areaName !== '全国' ? $areaName . 'の' : '' }}{{ $rt['name'] }}
+        </a>
+        @endforeach
+    </div>
+</div>
+@endif
 
 @endsection

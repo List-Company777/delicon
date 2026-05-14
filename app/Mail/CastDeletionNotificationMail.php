@@ -18,7 +18,7 @@ class CastDeletionNotificationMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '【デリコン】削除依頼を受け付けました');
+        return new Envelope(subject: '【デリヘルリスト】削除依頼を受け付けました');
     }
 
     public function content(): Content

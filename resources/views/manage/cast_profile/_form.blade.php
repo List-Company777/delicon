@@ -1,7 +1,7 @@
 @php
     $cups = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'];
 @endphp
-<table class="w-full text-sm">
+<table class="w-full text-sm" style="color:#111827">
     <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 w-32 whitespace-nowrap">源氏名 <span class="text-red-400">*</span></th>
         <td class="px-4 py-3">
@@ -16,25 +16,43 @@
             @if($cast?->img_file_name)
                 <img src="{{ $cast->img_url }}" class="w-16 h-24 object-cover rounded mb-2 bg-gray-100">
             @endif
-            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
-                   class="text-sm text-gray-600">
-            <p class="text-xs text-gray-400 mt-1">JPEG・PNG・WebP、5MB以下、400×600px推奨</p>
+            <label class="inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition">
+                📷 写真を選択
+                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="hidden"
+                       onchange="this.closest('label').querySelector('span') && (this.closest('label').querySelector('span').textContent = this.files[0]?.name ?? '')">
+            </label>
+            <p class="text-xs text-gray-500 mt-1">JPEG・PNG・WebP、5MB以下、400×600px推奨</p>
             @error('photo')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
         </td>
     </tr>
     <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">年齢</th>
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">生年月日</th>
+        <td class="px-4 py-3">
+            <div class="flex items-center gap-2 flex-wrap">
+                <input type="date" name="date_of_birth" id="date_of_birth"
+                       value="{{ old('date_of_birth', $cast?->date_of_birth?->format('Y-m-d') ?? now()->subYears(20)->format('Y-m-d')) }}"
+                       max="{{ now()->subYears(18)->format('Y-m-d') }}"
+                       class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
+                <span class="text-xs text-gray-400">入力すると年齢が自動計算・毎日更新されます</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">表示には利用されません。年齢計算にのみ利用されます。18歳未満は登録できません。</p>
+            @error('date_of_birth')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">年齢 <span class="text-red-400">*</span></th>
         <td class="px-4 py-3">
             <div class="flex items-center gap-2">
-                <input type="number" name="age" value="{{ old('age', $cast?->age) }}" min="18" max="99"
+                <input type="number" name="age" id="age_input" value="{{ old('age', $cast?->age) }}" min="18" max="99"
                        class="w-20 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
                 <span class="text-gray-500 text-sm">歳</span>
+                <span class="text-xs text-gray-400">（生年月日を入力すると自動入力）</span>
             </div>
             @error('age')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
         </td>
     </tr>
     <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">身長</th>
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">身長 <span class="text-red-400">*</span></th>
         <td class="px-4 py-3">
             <div class="flex items-center gap-2">
                 <input type="number" name="tall" value="{{ old('tall', $cast?->tall) }}" min="100" max="220"
@@ -98,9 +116,9 @@
         </td>
     </tr>
     <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">コメント</th>
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">店舗からのコメント</th>
         <td class="px-4 py-3">
-            <textarea name="comment" id="cast-comment" rows="4" maxlength="2000"
+            <textarea name="comment" id="cast-comment" rows="10" maxlength="2000"
                       class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('comment', $cast?->comment) }}</textarea>
             @if($cast && mb_strlen($cast->comment ?? '') < 100)
             <p id="noindex-warning" class="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
@@ -112,9 +130,9 @@
         </td>
     </tr>
     <tr class="border-b border-gray-100">
-        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">メッセージ</th>
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">女性からのメッセージ</th>
         <td class="px-4 py-3">
-            <textarea name="message" rows="3" maxlength="2000"
+            <textarea name="message" rows="8" maxlength="2000"
                       class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400 resize-y">{{ old('message', $cast?->message) }}</textarea>
         </td>
     </tr>
@@ -144,8 +162,9 @@
                 <input type="checkbox" name="is_recommended" value="1"
                        @checked(old('is_recommended', $cast?->is_recommended))
                        class="w-4 h-4 accent-red-600">
-                <span class="text-sm text-gray-700">おすすめキャストとして表示する（一覧の上位に表示）</span>
+                <span class="text-sm text-gray-700">おすすめキャストとして表示する（一覧の上位に表示・最大3人）</span>
             </label>
+            @error('is_recommended')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
         </td>
     </tr>
     <tr class="border-b border-gray-100">
@@ -199,3 +218,32 @@
         </td>
     </tr>
 </table>
+
+<script>
+(function() {
+    const dobInput = document.getElementById('date_of_birth');
+    const ageInput = document.getElementById('age_input');
+    if (!dobInput || !ageInput) return;
+
+    function calcAge(dob) {
+        const today = new Date();
+        const d = new Date(dob);
+        let age = today.getFullYear() - d.getFullYear();
+        const m = today.getMonth() - d.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+        return age;
+    }
+
+    dobInput.addEventListener('change', function() {
+        if (this.value) {
+            const age = calcAge(this.value);
+            if (age >= 18 && age <= 99) ageInput.value = age;
+        }
+    });
+
+    if (dobInput.value && !ageInput.value) {
+        const age = calcAge(dobInput.value);
+        if (age >= 18 && age <= 99) ageInput.value = age;
+    }
+})();
+</script>

@@ -13,5 +13,5 @@
   必ず上のリンクからご返信ください。
 
 ---
-ナイトワークリスト
-https://nightwork-list.com/
+デリヘルリスト
+https://delicon.jp/

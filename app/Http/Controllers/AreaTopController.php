@@ -69,7 +69,7 @@ class AreaTopController extends Controller
         $featuredShopsRaw = Cache::remember("area_top:featured:{$area_slug}", 600, function () use ($areaIds) {
             $q = Shop::with(['shopType'])
                 ->where('status', 'active')
-                ->where('plan', '<=', 3)
+                ->where('plan', '<=', 4)
                 ->where(fn($q) => $q->whereNotNull('main_image')->orWhereNotNull('shop_file_name'));
             if (!empty($areaIds)) {
                 $q->whereIn('area_id', $areaIds);

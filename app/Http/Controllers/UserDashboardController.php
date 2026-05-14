@@ -6,6 +6,7 @@ use App\Models\Cast;
 use App\Models\CastSchedule;
 use App\Models\CastType;
 use App\Models\CastView;
+use App\Models\DiscountCoupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -102,6 +103,18 @@ class UserDashboardController extends Controller
         ]);
 
         return back()->with('success', '設定を保存しました');
+    }
+
+    public function coupons()
+    {
+        $user = auth()->user();
+
+        $coupons = DiscountCoupon::where('user_id', $user->id)
+            ->with('shop:id,name')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('user.coupons', compact('coupons'));
     }
 
     private function getRecommendedCasts(\App\Models\User $user, int $limit = 12): \Illuminate\Support\Collection

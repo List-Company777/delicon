@@ -6,5 +6,5 @@
 またの機会にぜひお気軽にご応募ください。
 
 ---
-ナイトワークリスト
-https://nightwork-list.com/
+デリヘルリスト
+https://delicon.jp/

@@ -1,20 +1,23 @@
 @extends('layouts.app')
 @section('title', '女性別統計')
 @section('content')
-<div class="bg-red-700 text-white py-4">
+<div class="bg-business-700 text-white py-4">
     <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <h1 class="font-bold">店舗管理</h1>
-        <form action="{{ route('logout') }}/" method="POST">
-            @csrf
-            <button class="text-sm opacity-70 hover:opacity-100">ログアウト</button>
-        </form>
+        <h1 class="font-bold text-lg">店舗管理</h1>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="opacity-70">{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}/" method="POST">
+                @csrf
+                <button type="submit" class="opacity-70 hover:opacity-100 transition">ログアウト</button>
+            </form>
+        </div>
     </div>
 </div>
 
 @include('manage._nav')
 
 <div class="max-w-4xl mx-auto px-4 pb-12">
-    <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+    <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
         <h2 class="text-lg font-bold text-gray-800">女性別統計</h2>
         {{-- 期間切替 --}}
         <div class="flex rounded-lg overflow-hidden border border-gray-200 text-sm">
@@ -75,8 +78,8 @@
                         <td class="px-4 py-3">
                             <a href="{{ route('manage.cast-profile.edit', $row->cast->id) }}/"
                                class="flex items-center gap-2.5 hover:opacity-80 transition">
-                                @if($row->cast->image)
-                                <img src="/storage/{{ $row->cast->image }}" alt=""
+                                @if($row->cast->img_file_name)
+                                <img src="{{ $row->cast->img_url }}" alt=""
                                      class="w-8 h-8 rounded-full object-cover shrink-0">
                                 @else
                                 <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">

@@ -100,7 +100,9 @@ class ApplicationController extends Controller
         try {
             Mail::to($application->applicant_email, $application->applicant_name)
                 ->send(new ApplicationMessageToApplicant($application, $msg));
-        } catch (\Exception) {}
+        } catch (\Exception $e) {
+            Log::warning(__CLASS__ . ': メール送信失敗: ' . $e->getMessage());
+        }
 
         // ステータスを「連絡済み」に更新（newの場合のみ）
         if ($application->status === 'new') {

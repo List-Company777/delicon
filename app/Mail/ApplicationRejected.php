@@ -20,7 +20,7 @@ class ApplicationRejected extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【ナイトワークリスト】' . $this->application->shop->name . ' からご連絡',
+            subject: '【デリヘルリスト】' . $this->application->shop->name . ' からご連絡',
         );
     }
 
