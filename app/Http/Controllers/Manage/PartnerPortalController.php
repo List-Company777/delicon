@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manage;
 use App\Http\Controllers\Controller;
 use App\Models\JobType;
 use App\Models\Shop;
+use App\Models\ShopPlanApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -21,7 +22,7 @@ class PartnerPortalController extends Controller
         $keyword = $request->input('keyword', '');
 
         $shops = Shop::where('partner_id', $partner->id)
-            ->with(['genre', 'area.prefecture', 'detail'])
+            ->with(['genre', 'area.prefecture', 'detail', 'planApplications'])
             ->when($keyword !== '', fn($q) => $q->where('name', 'like', '%' . $keyword . '%'))
             ->orderByDesc('bid_price')
             ->orderBy('name')
@@ -193,6 +194,56 @@ class PartnerPortalController extends Controller
                 'job_type_ranks'    => $jobTypeRanks,
             ]];
         });
+    }
+
+    /** プラン申し込み */
+    public function applyPlan(Request $request, int $shopId)
+    {
+        $partner = auth()->user()->partner;
+        abort_if(! $partner, 403);
+
+        $shop = Shop::where('id', $shopId)
+            ->where('partner_id', $partner->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        // 申し込み受付は毎月20日以降のみ
+        abort_if(now()->day < 20, 422, '申し込み受付は毎月20日以降です');
+
+        $request->validate(['plan' => ['required', 'integer', 'min:1', 'max:4']]);
+
+        abort_if(
+            ShopPlanApplication::where('shop_id', $shop->id)->where('status', 'pending')->exists(),
+            422,
+            '審査中の申し込みがすでにあります'
+        );
+
+        $planAmounts    = [1 => 80000, 2 => 40000, 3 => 20000, 4 => 0];
+        $plan           = (int) $request->plan;
+        $isCurrentlyPaid = in_array($shop->plan, [1, 2, 3]);
+        $appType        = $isCurrentlyPaid ? 'renewal' : 'new';
+
+        // 継続：翌月1日から。新規：承認後即時（effective_dateは承認時にセット）
+        $nextMonthStart = now()->addMonthNoOverflow()->startOfMonth();
+        $nextMonthEnd   = $nextMonthStart->copy()->endOfMonth()->toDateString();
+
+        ShopPlanApplication::create([
+            'shop_id'             => $shop->id,
+            'partner_id'          => $partner->id,
+            'plan'                => $plan,
+            'application_type'    => $appType,
+            'effective_date'      => $appType === 'renewal' ? $nextMonthStart->toDateString() : null,
+            'expires_on'          => $nextMonthEnd,
+            'amount'              => $planAmounts[$plan],
+            'bid_price_requested' => 0,
+            'status'              => 'pending',
+        ]);
+
+        $msg = $appType === 'renewal'
+            ? "「{$shop->name}」の継続申し込みを送信しました（{$nextMonthStart->format('n月')}〜適用）。"
+            : "「{$shop->name}」の有料掲載申し込みを送信しました。管理者承認後すぐに掲載開始されます。";
+
+        return back()->with('success', $msg);
     }
 
     private function shopScore(Shop $shop): int

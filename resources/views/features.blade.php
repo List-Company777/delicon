@@ -262,6 +262,117 @@
         </div>
     </section>
 
+
+    {{-- ⑥ 料金プラン --}}
+    <section id="pricing" class="mt-9">
+        <div class="flex items-center gap-4 mb-8">
+            <span class="flex-shrink-0 w-10 h-10 rounded-full bg-deli-500 text-white font-black text-lg flex items-center justify-center">⑥</span>
+            <div>
+                <p class="text-deli-400 text-sm font-bold tracking-widest mb-0.5">PRICING</p>
+                <h2 class="text-2xl md:text-3xl font-black">料金プラン</h2>
+            </div>
+        </div>
+        <p class="text-[#B0AEAD] mb-6 leading-relaxed">
+            上位プランほど検索結果での表示優先度が上がり、集客効果が高まります。
+        </p>
+
+        {{-- 全プラン共通機能 --}}
+        <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-2xl p-6 mb-6">
+            <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest mb-4">全プラン共通機能</p>
+            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm text-[#8A8A9E]">
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">✓</span>店舗情報・女性プロフィール掲載（無制限）</div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">✓</span>写メ日記投稿・シフト管理</div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">✓</span>ユーザーへの自動通知メール（新人・出勤）</div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">✓</span>自社HPへのリンク掲載</div>
+            </div>
+        </div>
+
+        {{-- プランカード（差分のみ） --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+
+            {{-- 無料 --}}
+            <div class="bg-[#16162A] border border-[#2A2A3E] rounded-2xl p-5 flex flex-col">
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest mb-2">無料</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">無料</p>
+                    <p class="text-xs text-[#6A6A7E] mt-1">条件なし</p>
+                </div>
+                <ul class="space-y-2 text-sm flex-1">
+                    <li class="flex gap-2 text-[#4A4A5E]"><span class="shrink-0">—</span>追加機能なし</li>
+                </ul>
+                <p class="text-xs text-[#6A6A7E] mt-5 pt-4 border-t border-[#2A2A3E]">まず試したい方向け</p>
+            </div>
+
+            {{-- 無料上位 --}}
+            <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-2xl p-5 flex flex-col">
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest mb-2">無料上位</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">無料</p>
+                    <p class="text-xs text-[#6A6A7E] mt-1">HPリンク設置が条件</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
+                    <li class="flex gap-2"><span class="text-emerald-400 shrink-0">+</span><span class="text-[#E8E4DC]">少し上位表示</span></li>
+                </ul>
+                <p class="text-xs text-[#6A6A7E] mt-5 pt-4 border-t border-[#2A2A3E]">自社HPをお持ちの店舗が対象</p>
+            </div>
+
+            {{-- ベーシック --}}
+            <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-2xl p-5 flex flex-col">
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest mb-2">ベーシック</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥20,000</p>
+                    <p class="text-xs text-[#6A6A7E] mt-1">/月（税別）</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
+                    <li class="flex gap-2"><span class="text-emerald-400 shrink-0">+</span><span class="text-[#E8E4DC]">より上位表示</span></li>
+                </ul>
+                <p class="text-xs text-[#6A6A7E] mt-5 pt-4 border-t border-[#2A2A3E]">&nbsp;</p>
+            </div>
+
+            {{-- ミドル --}}
+            <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-2xl p-5 flex flex-col">
+                <div class="mb-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest">ミドル</p>
+                        <span class="text-xs bg-deli-900/60 text-deli-300 border border-deli-700/40 rounded px-1.5 py-0.5 font-bold">人気</span>
+                    </div>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥40,000</p>
+                    <p class="text-xs text-[#6A6A7E] mt-1">/月（税別）</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
+                    <li class="flex gap-2"><span class="text-emerald-400 shrink-0">+</span><span class="text-[#E8E4DC]">もっと上位表示</span></li>
+                    <li class="flex gap-2"><span class="text-emerald-400 shrink-0">+</span><span class="text-[#E8E4DC]">エリアトップのピックアップ掲載</span></li>
+                </ul>
+                <p class="text-xs text-[#6A6A7E] mt-5 pt-4 border-t border-[#2A2A3E]">&nbsp;</p>
+            </div>
+
+            {{-- VIP --}}
+            <div class="bg-gradient-to-b from-deli-900/50 to-[#1E1E30] border border-deli-500/50 rounded-2xl p-5 flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-deli-500 text-white text-xs font-black px-3 py-1 rounded-bl-xl">VIP</div>
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-deli-400 uppercase tracking-widest mb-2">VIP</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥80,000</p>
+                    <p class="text-xs text-deli-300 mt-1">/月（税別）・限定枠</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
+                    <li class="flex gap-2"><span class="text-deli-400 shrink-0">★</span><span class="text-deli-200 font-bold">最上位表示</span></li>
+                    <li class="flex gap-2"><span class="text-emerald-400 shrink-0">+</span><span class="text-[#E8E4DC]">エリアトップのピックアップ掲載</span></li>
+                </ul>
+                <p class="text-xs text-deli-400/70 mt-5 pt-4 border-t border-deli-700/30">東京・大阪10枠 / その他5枠</p>
+            </div>
+
+        </div>
+
+        <p class="text-xs text-[#6A6A7E] mt-4 leading-relaxed">※情報の充実度や、更新頻度などによって下位プランでも上位プランよりも上位に表示される可能性もあります。</p>
+        <p class="text-xs text-[#6A6A7E] mt-1 leading-relaxed">※店舗検索順は、同一プラン内においては、継続先着順になります。</p>
+
+        <p class="text-center text-xs text-[#6A6A7E] mt-4">
+            料金はすべて税別表示です。掲載に関するご相談は
+            <a href="{{ route('inquiry') }}" class="text-deli-400 underline hover:no-underline">お問い合わせフォーム</a>
+            よりお気軽にどうぞ。
+        </p>
+    </section>
+
     {{-- CTA --}}
     <section class="bg-gradient-to-br from-deli-900/40 to-[#1E1E30] border border-deli-700/30 rounded-2xl p-8 md:p-12 text-center">
         <h2 class="text-2xl md:text-3xl font-black mb-4">まずはサイトをご覧ください</h2>

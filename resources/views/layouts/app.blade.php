@@ -65,12 +65,12 @@
     ];
 @endphp
     <script type="application/ld+json" @nonce>{!! json_encode($ldSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F8P5QRNC87" @nonce></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R2RD39B5PP" @nonce></script>
     <script @nonce>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-F8P5QRNC87');
+        gtag('config', 'G-R2RD39B5PP');
     </script>
 </head>
 <body class="bg-surface-700 text-[#E8E4DC] antialiased">

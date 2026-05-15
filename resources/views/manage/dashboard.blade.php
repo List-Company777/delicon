@@ -241,7 +241,9 @@
                 <li class="flex items-start gap-2 text-xs text-gray-600"><span class="text-business-600 shrink-0 mt-0.5">✓</span>近隣エリアの無料掲載店ページに「おすすめ店舗」として、無料店の在籍女性ページに「おすすめキャスト」として優先表示</li>
             </ul>
             <div class="mt-4">
-                <a href="{{ route('manage.paid-plan') }}/" class="inline-block text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</a>
+                <button type="button"
+                        onclick="alert('有料掲載のお申し込みは担当代理店の作業が必要です。\nお取引のある代理店様にご相談ください。')"
+                        class="text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</button>
             </div>
         </div>
         @endif

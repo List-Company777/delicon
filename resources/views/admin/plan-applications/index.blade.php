@@ -14,6 +14,29 @@
     </div>
 @endif
 
+@if(session('slot_warning'))
+@php $sw = session('slot_warning'); @endphp
+<div class="bg-red-50 border-2 border-red-400 text-red-800 rounded-lg px-4 py-4 mb-4 text-sm">
+    <p class="font-bold text-base mb-2">⚠️ VIP限定枠超過</p>
+    <p>{{ $sw['pref_name'] }} の VIP 枠は <strong>{{ $sw['max'] }}枠</strong> ですが、現在 <strong>{{ $sw['current'] }}店舗</strong> が使用中です。</p>
+    <p class="mt-1">このまま承認すると枠を超えて掲載されます。強制承認する場合は以下のボタンを押してください。</p>
+    <form action="{{ route('admin.plan-applications.approve', $sw['app_id']) }}/" method="POST" class="mt-3 flex items-center gap-3">
+        @csrf
+        <input type="hidden" name="force_approve" value="1">
+        @if(old('plan'))
+            <input type="hidden" name="plan" value="{{ old('plan') }}">
+        @endif
+        @if(old('plan_name'))
+            <input type="hidden" name="plan_name" value="{{ old('plan_name') }}">
+        @endif
+        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded transition">
+            枠超過を承知の上で強制承認
+        </button>
+        <a href="{{ route('admin.plan-applications.index') }}/" class="text-sm text-gray-500 hover:text-gray-700">キャンセル</a>
+    </form>
+</div>
+@endif
+
 {{-- タブ --}}
 <div class="flex gap-1 mb-6 border-b border-gray-200">
     @foreach(['pending' => '審査待ち', 'approved' => '承認済み', 'rejected' => '却下', 'all' => 'すべて'] as $s => $label)
@@ -42,8 +65,10 @@
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-10">ID</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">店舗名</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">代理店</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">申込金額</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">希望入札単価</th>
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-24">種別</th>
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">申込プラン</th>
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">現在のプラン</th>
+                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">適用日 / 期限</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">申込日時</th>
                 <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-20">状態</th>
                 <th class="px-4 py-3 w-64"></th>
@@ -64,11 +89,41 @@
                 <td class="px-4 py-3 text-xs text-gray-500">
                     {{ $shop->partner?->company_name ?? '—' }}
                 </td>
-                <td class="px-4 py-3 text-gray-800 font-medium">
-                    {{ number_format($application->amount) }}円
+                <td class="px-4 py-3">
+                    @if($application->application_type === 'renewal')
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">継続</span>
+                    @else
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">新規</span>
+                    @endif
                 </td>
-                <td class="px-4 py-3 text-gray-800">
-                    {{ number_format($application->bid_price_requested) }}円
+                <td class="px-4 py-3">
+                    @if($application->plan && isset($planLabels[$application->plan]))
+                        <span class="text-xs px-2 py-0.5 rounded-full {{ $planLabels[$application->plan]['color'] }}">
+                            {{ $planLabels[$application->plan]['label'] }}
+                        </span>
+                        @if($application->amount > 0)
+                            <p class="text-xs text-gray-400 mt-0.5">¥{{ number_format($application->amount) }}/月</p>
+                        @endif
+                    @else
+                        <span class="text-xs text-gray-400">—</span>
+                    @endif
+                </td>
+                <td class="px-4 py-3">
+                    @if($shop && isset($planLabels[$shop->plan]))
+                        <span class="text-xs px-2 py-0.5 rounded-full {{ $planLabels[$shop->plan]['color'] }}">
+                            {{ $planLabels[$shop->plan]['label'] }}
+                        </span>
+                    @endif
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-500">
+                    @if($application->effective_date)
+                        <p>{{ \Carbon\Carbon::parse($application->effective_date)->format('n/j') }}〜</p>
+                    @else
+                        <p class="text-orange-600">承認後即時</p>
+                    @endif
+                    @if($application->expires_on)
+                        <p class="text-gray-400">〜{{ \Carbon\Carbon::parse($application->expires_on)->format('n/j') }}</p>
+                    @endif
                 </td>
                 <td class="px-4 py-3 text-xs text-gray-400">
                     {{ $application->created_at->format('Y/m/d H:i') }}

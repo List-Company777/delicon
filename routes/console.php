@@ -69,3 +69,6 @@ Schedule::command('casts:update-scores')->dailyAt('01:00');
 // 生年月日からの年齢自動更新（毎日午前0時）
 Schedule::command("casts:update-ages")->dailyAt("00:30");
 Schedule::command("coupons:send-expiry-reminders")->dailyAt("10:00");
+
+// 月次プラン処理：継続申し込み反映 + 期限切れ無料化（毎月1日 00:10）
+Schedule::command('plans:monthly-process')->monthlyOn(1, '00:10');

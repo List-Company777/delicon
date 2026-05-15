@@ -49,20 +49,30 @@ class Partner extends Model
         return $this->shops()->where('status', 'active')->count();
     }
 
-    /** 管理件数から算出したマージン率（ベース20%、100件ごとに+1%、上限30%） */
-    public function calculatedManagementRate(): float
+    /** 当月（または指定月）の売上合計から算出したマージン率（売上50万以上25%、100万以上30%） */
+    public function calculatedManagementRate(?int $year = null, ?int $month = null): float
     {
-        $increment = min(intdiv($this->activeManagedShopsCount(), 100), 10);
-        return 0.20 + $increment * 0.01;
+        $year  ??= now()->year;
+        $month ??= now()->month;
+
+        $monthRevenue = (int) $this->planApplications()
+            ->where('status', 'approved')
+            ->whereYear('approved_at', $year)
+            ->whereMonth('approved_at', $month)
+            ->sum('amount');
+
+        if ($monthRevenue >= 1_000_000) return 0.30;
+        if ($monthRevenue >= 500_000)   return 0.25;
+        return 0.20;
     }
 
     /** 実効マージン率（管理代行：オーバーライド優先、なければ自動計算。紹介：commission_rate） */
-    public function effectiveCommissionRate(): float
+    public function effectiveCommissionRate(?int $year = null, ?int $month = null): float
     {
         if ($this->isManagement()) {
             return $this->commission_rate_override !== null
                 ? (float) $this->commission_rate_override
-                : $this->calculatedManagementRate();
+                : $this->calculatedManagementRate($year, $month);
         }
         return (float) $this->commission_rate;
     }
@@ -81,7 +91,7 @@ class Partner extends Model
 
     /**
      * 管理代行代理店：指定月の請求額（税込）
-     * 申請金額 × (1 - discount_rate) × 1.1
+     * 申請金額 × (1 - 実効マージン率) × 1.1
      */
     public function billingAmountForMonth(int $year, int $month): int
     {
@@ -91,7 +101,7 @@ class Partner extends Model
             ->whereMonth('approved_at', $month)
             ->sum('amount');
 
-        $discount = $this->effectiveCommissionRate();
+        $discount = $this->effectiveCommissionRate($year, $month);
         return (int) round($total * (1 - $discount) * 1.1);
     }
 }

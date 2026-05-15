@@ -133,16 +133,37 @@ class ShopReviewController extends Controller
 
         $shop     = Shop::findOrFail($id);
         $newPlan  = (int) $request->plan;
+        $oldPlan  = (int) $shop->plan;
         $isBanner = (bool) $request->input('is_banner_plan', false);
+        $today    = now()->toDateString();
 
-        if ($newPlan > 4 && $shop->plan <= 4) {
+        // plan{N}_since 更新ルール：
+        // アップグレード（newPlan < oldPlan）：新プランの時計をリセット
+        // ダウングレード（newPlan > oldPlan）：
+        //   - 新プランの since は既存値を維持、なければ旧プランの since を引き継ぐ
+        //   - 旧プランの since は null にリセット（ベーシック経由でミドルの古い日付が蘇るのを防ぐ）
+        $planSinceKey    = "plan{$newPlan}_since";
+        $oldPlanSinceKey = "plan{$oldPlan}_since";
+        $isUpgrade       = $newPlan < $oldPlan;
+        $isDowngrade     = $newPlan > $oldPlan;
+        $newPlanSince    = $isUpgrade
+            ? $today
+            : ($shop->$planSinceKey ?? $shop->$oldPlanSinceKey ?? $today);
+
+        if ($newPlan > 4 && $oldPlan <= 4) {
             $shop->update(['plan' => $newPlan, 'is_banner_plan' => false, 'paid_since' => null]);
         } else {
-            $shop->update([
+            $updates = [
                 'plan'           => $newPlan,
                 'is_banner_plan' => $newPlan === 3 ? $isBanner : false,
-                'paid_since'     => $newPlan <= 4 ? ($shop->paid_since ?? now()->toDateString()) : null,
-            ]);
+                'paid_since'     => $newPlan <= 4 ? ($shop->paid_since ?? $today) : null,
+                $planSinceKey    => $newPlan <= 4 ? $newPlanSince : null,
+            ];
+            // ダウングレード時は旧プランの since をリセット（古い日付の再利用を防ぐ）
+            if ($isDowngrade && $oldPlan <= 4) {
+                $updates[$oldPlanSinceKey] = null;
+            }
+            $shop->update($updates);
         }
 
         return back()->with('success', "掲載プランを更新しました");

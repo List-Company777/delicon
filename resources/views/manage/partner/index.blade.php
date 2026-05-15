@@ -70,8 +70,8 @@
                     <th class="text-left px-4 py-3 text-gray-500 font-medium">業種</th>
                     <th class="text-left px-4 py-3 text-gray-500 font-medium">エリア</th>
                     <th class="text-center px-4 py-3 text-gray-500 font-medium">掲載状況</th>
-                    <th class="text-right px-4 py-3 text-gray-500 font-medium w-24">入札単価</th>
-                    <th class="px-4 py-3 {{ $partner->isManagement() ? 'w-48' : 'w-32' }}"></th>
+                    <th class="text-center px-4 py-3 text-gray-500 font-medium w-24">プラン</th>
+                    <th class="px-4 py-3 {{ $partner->isManagement() ? 'w-64' : 'w-48' }}"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -91,15 +91,65 @@
                             <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">非公開</span>
                         @endif
                     </td>
-                    <td class="px-4 py-3 text-right text-sm text-gray-600">
-                        {{ number_format($shop->bid_price) }}円
+                    <td class="px-4 py-3 text-center">
+                        @php
+                            $planLabels = [1=>'VIP',2=>'ミドル',3=>'ベーシック',4=>'無料上位',5=>'無料'];
+                            $planColors = [
+                                1=>'bg-yellow-100 text-yellow-700',
+                                2=>'bg-purple-100 text-purple-700',
+                                3=>'bg-blue-100 text-blue-700',
+                                4=>'bg-green-100 text-green-700',
+                                5=>'bg-gray-100 text-gray-500',
+                            ];
+                        @endphp
+                        <span class="text-xs px-2 py-0.5 rounded-full {{ $planColors[$shop->plan] ?? 'bg-gray-100 text-gray-500' }}">
+                            {{ $planLabels[$shop->plan] ?? '—' }}
+                        </span>
+                        @php $pendingApp = $shop->planApplications->where('status','pending')->first(); @endphp
+                        @if($shop->plan_expires_on)
+                            <p class="text-xs text-gray-400 mt-0.5">〜{{ \Carbon\Carbon::parse($shop->plan_expires_on)->format('n/j') }}</p>
+                        @endif
+                        @if($pendingApp)
+                            <p class="text-xs text-yellow-600 mt-0.5">申込中</p>
+                        @endif
                     </td>
                     <td class="px-4 py-3 text-right">
-                        <div class="flex items-center justify-end gap-2">
+                        <div class="flex items-center justify-end gap-2 flex-wrap">
+                            @php $windowOpen = now()->day >= 20; @endphp
+                            @if($shop->status === 'active' && !$pendingApp && $windowOpen)
+                            <form action="{{ route('manage.partner.shops.planApply', $shop->id) }}/" method="POST"
+                                  x-data="{ open: false }" @submit.prevent="open ? $el.submit() : (open = true)">
+                                @csrf
+                                <div x-show="open" x-cloak class="mb-1">
+                                    <select name="plan" required
+                                            class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none w-36">
+                                        <option value="">プランを選択</option>
+                                        @if(in_array($shop->plan, [1,2,3]))
+                                            <option value="1" {{ $shop->plan == 1 ? 'selected' : '' }}>VIP（¥80,000）継続</option>
+                                            <option value="2" {{ $shop->plan == 2 ? 'selected' : '' }}>ミドル（¥40,000）継続</option>
+                                            <option value="3" {{ $shop->plan == 3 ? 'selected' : '' }}>ベーシック（¥20,000）継続</option>
+                                        @else
+                                            <option value="1">VIP（¥80,000）</option>
+                                            <option value="2">ミドル（¥40,000）</option>
+                                            <option value="3">ベーシック（¥20,000）</option>
+                                            <option value="4">無料上位</option>
+                                        @endif
+                                    </select>
+                                </div>
+                                <button type="submit"
+                                        class="text-xs bg-yellow-500 hover:bg-yellow-400 text-white px-3 py-1.5 rounded transition whitespace-nowrap">
+                                    <span x-text="open ? '申込確定' : ({{ in_array($shop->plan,[1,2,3]) ? 'true' : 'false' }} ? '継続申込' : 'プラン申込')">
+                                        {{ in_array($shop->plan, [1,2,3]) ? '継続申込' : 'プラン申込' }}
+                                    </span>
+                                </button>
+                            </form>
+                            @elseif($shop->status === 'active' && !$pendingApp && !$windowOpen)
+                            <span class="text-xs text-gray-400 whitespace-nowrap">20日以降に受付</span>
+                            @endif
                             <form action="{{ route('manage.partner.actAs', $shop->id) }}/" method="POST">
                                 @csrf
                                 <button type="submit"
-                                        class="text-xs bg-business-700 hover:bg-business-600 text-white px-3 py-1.5 rounded transition">
+                                        class="text-xs bg-business-700 hover:bg-business-600 text-white px-3 py-1.5 rounded transition whitespace-nowrap">
                                     管理画面を開く
                                 </button>
                             </form>

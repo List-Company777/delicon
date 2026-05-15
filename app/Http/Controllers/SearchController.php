@@ -443,7 +443,7 @@ class SearchController extends Controller
                         ->pluck('shop_id')
                     );
                 })
-                ->orderByRaw("plan ASC, COALESCE(paid_since, '9999-12-31') ASC, id ASC")
+                ->orderByRaw("plan ASC, COALESCE(CASE plan WHEN 1 THEN plan1_since WHEN 2 THEN plan2_since WHEN 3 THEN plan3_since WHEN 4 THEN plan4_since ELSE NULL END, '9999-12-31') ASC, id ASC")
                 ->pluck('id')->all();
         }
 

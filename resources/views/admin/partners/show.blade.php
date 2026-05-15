@@ -17,8 +17,6 @@
     @php $now = now(); @endphp
     @if($partner->isManagement())
     @php
-        $nextTierCount  = (intdiv($managedActiveCount, 100) + 1) * 100;
-        $toNextTier     = $nextTierCount - $managedActiveCount;
         $isOverridden   = $partner->commission_rate_override !== null;
         $calcRatePct    = number_format($calculatedRate * 100, 2);
         $effectRatePct  = number_format($effectiveRate * 100, 2);
@@ -31,23 +29,26 @@
         <div class="bg-white rounded-xl shadow-sm p-5">
             <p class="text-xs text-gray-400 mb-1">掲載中店舗数</p>
             <p class="text-2xl font-bold text-gray-800">{{ number_format($managedActiveCount) }}<span class="text-sm font-normal text-gray-400 ml-1">件</span></p>
-            @if(!$isOverridden && $calculatedRate < 0.30)
-                <p class="text-xs text-gray-400 mt-1">次のティアまであと {{ $toNextTier }} 件</p>
-            @endif
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 mb-1">適用割引率</p>
+            <p class="text-xs text-gray-400 mb-1">適用マージン率</p>
             <p class="text-2xl font-bold text-gray-800">{{ $effectRatePct }}%</p>
             @if($isOverridden)
                 <p class="text-xs text-orange-500 mt-1">オーバーライド中（自動: {{ $calcRatePct }}%）</p>
             @else
-                <p class="text-xs text-gray-400 mt-1">自動計算</p>
+                <p class="text-xs text-gray-400 mt-1">当月売上ベース自動計算</p>
             @endif
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
             <p class="text-xs text-gray-400 mb-1">当月請求額（税込）</p>
             <p class="text-2xl font-bold text-purple-700">¥{{ number_format($partner->billingAmountForMonth($now->year, $now->month)) }}</p>
         </div>
+    </div>
+    {{-- 管理代行マージン率ルール --}}
+    <div class="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 text-xs text-purple-800">
+        <span class="font-bold">管理代行マージン率ルール：</span>
+        当月売上 100万円以上 → 30%　／　50万円以上 → 25%　／　50万円未満 → 20%。
+        オーバーライドを設定すると自動計算を無視して固定値が適用されます。
     </div>
     @else
     <div class="grid grid-cols-3 gap-4">

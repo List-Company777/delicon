@@ -145,6 +145,7 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::post('/partner/act-as/{shopId}/',               [\App\Http\Controllers\Manage\PartnerPortalController::class, 'actAs'])->name('partner.actAs')->where('shopId', '[0-9]+');
     Route::post('/partner/stop-acting/',                   [\App\Http\Controllers\Manage\PartnerPortalController::class, 'stopActing'])->name('partner.stopActing');
     Route::delete('/partner/shops/{shopId}/',              [\App\Http\Controllers\Manage\PartnerPortalController::class, 'destroyShop'])->name('partner.shops.destroy')->where('shopId', '[0-9]+');
+    Route::post('/partner/shops/{shopId}/plan-apply/',     [\App\Http\Controllers\Manage\PartnerPortalController::class, 'applyPlan'])->name('partner.shops.planApply')->where('shopId', '[0-9]+');
 
     // 店舗基本情報
     Route::get('/shop/edit/',            [ShopInfoController::class, 'edit'])->name('shop.edit');
@@ -284,6 +285,9 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::post('/banner-check/{id}/check/',       [\App\Http\Controllers\Admin\BannerCheckController::class, 'check'])->name('banner-check.check')->where('id', '[0-9]+');
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
     Route::get('/shops/{id}/permit-download/',     [\App\Http\Controllers\Admin\ShopReviewController::class, 'downloadPermit'])->name('shops.permit-download')->where('id', '[0-9]+');
+
+    // 代理店移管
+    Route::get('/partner-transfer/', [\App\Http\Controllers\Admin\PartnerTransferController::class, 'index'])->name('partner-transfer.index');
 
     // パートナー管理
     Route::get('/partners/',                       [\App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('partners.index');

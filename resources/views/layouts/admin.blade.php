@@ -36,6 +36,10 @@
                        class="{{ request()->routeIs('admin.partners.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         代理店
                     </a>
+                    <a href="{{ route('admin.partner-transfer.index') }}/"
+                       class="{{ request()->routeIs('admin.partner-transfer.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
+                        代理店移管
+                    </a>
                     <a href="{{ route('admin.billing.index') }}/"
                        class="{{ request()->routeIs('admin.billing.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         月次集計
