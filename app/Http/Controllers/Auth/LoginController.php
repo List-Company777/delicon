@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\LoginLog;
+use App\Models\User;
 use App\Mail\AdminLoginAlertMail;
 use App\Mail\UserLoginAlertMail;
 use Illuminate\Http\Request;
@@ -35,18 +36,25 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
+        $ip          = $request->ip();
+        $allowedIps  = config('admin.allowed_ips', []);
+        $isAllowedIp = empty($allowedIps) || in_array($ip, $allowedIps);
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
             $user = Auth::user();
             $user->timestamps = false;
             $user->update(['last_login_at' => now()]);
-            LoginLog::create(['user_id' => $user->id, 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
+            LoginLog::create(['user_id' => $user->id, 'ip_address' => $ip, 'user_agent' => $request->userAgent()]);
 
             if ($user->isAdmin()) {
-                Mail::to(config('mail.admin_address'))->queue(new AdminLoginAlertMail($request->ip()));
+                // 許可外IPからの成功ログインのみ通知（正常ログインは通知しない）
+                if (!$isAllowedIp) {
+                    Mail::to(config('mail.admin_address'))->queue(new AdminLoginAlertMail($ip, false, true));
+                }
             } else {
-                Mail::to($user->email)->queue(new UserLoginAlertMail($request->ip()));
+                Mail::to($user->email)->queue(new UserLoginAlertMail($ip));
             }
 
             $destination = $user->isAdmin()
@@ -58,6 +66,13 @@ class LoginController extends Controller
         }
 
         RateLimiter::hit($throttleKey, 900);
+
+        // ログイン失敗：管理者メールアドレスと一致する場合のみ通知
+        $targetUser = User::where('email', $credentials['email'])->first();
+        if ($targetUser?->isAdmin()) {
+            Mail::to(config('mail.admin_address'))->queue(new AdminLoginAlertMail($ip, true, !$isAllowedIp));
+        }
+
         return back()->withErrors([
             'email' => 'メールアドレスまたはパスワードが正しくありません',
         ])->onlyInput('email');
