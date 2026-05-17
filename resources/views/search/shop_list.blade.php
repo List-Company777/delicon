@@ -63,18 +63,20 @@
             <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
         </div>
         {{-- パンくず --}}
-        <nav class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
-            <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a>
-            <span>›</span>
-            <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国の店舗一覧</a>
+        <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mt-1.5">
+            <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+            <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
+            <li aria-hidden="true">›</li>
+            <li><a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国の店舗一覧</a></li>
             @if($areaName)
-                <span>›</span>
-                <a href="{{ route('shop.list', ['area_slug' => $area_slug]) }}/" class="hover:text-gold-400 transition">{{ $areaName }}</a>
+                <li aria-hidden="true">›</li>
+                <li @if(!$jobTypeName) aria-current="page" @endif><a href="{{ route('shop.list', ['area_slug' => $area_slug]) }}/" class="hover:text-gold-400 transition">{{ $areaName }}</a></li>
             @endif
             @if($jobTypeName)
-                <span>›</span>
-                <span>{{ $jobTypeName }}</span>
+                <li aria-hidden="true">›</li>
+                <li aria-current="page"><span>{{ $jobTypeName }}</span></li>
             @endif
+            </ol>
         </nav>
     </div>
 </div>

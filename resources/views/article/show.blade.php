@@ -189,11 +189,13 @@
 
     {{-- パンくず --}}
     <nav class="text-xs text-gray-400 mb-6" aria-label="パンくずリスト">
-        <a href="{{ route('top') }}/" class="hover:text-gray-600">デリヘルリスト</a>
-        <span class="mx-1" aria-hidden="true">›</span>
-        <a href="{{ route('article.index') }}/" class="hover:text-gray-600">コラム・ガイド</a>
-        <span class="mx-1" aria-hidden="true">›</span>
-        <span class="text-gray-600" aria-current="page">{{ $article->title }}</span>
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="{{ route('top') }}/" class="hover:text-gray-600">デリヘルリスト</a></li>
+        <li class="mx-1" aria-hidden="true">›</li>
+        <li><a href="{{ route('article.index') }}/" class="hover:text-gray-600">コラム・ガイド</a></li>
+        <li class="mx-1" aria-hidden="true">›</li>
+        <li aria-current="page"><span class="text-gray-600">{{ $article->title }}</span></li>
+        </ol>
     </nav>
 
     <article>

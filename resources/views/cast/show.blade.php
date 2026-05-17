@@ -57,16 +57,18 @@
 <div class="max-w-5xl mx-auto px-4 py-8 pb-20 md:pb-8">
 
     {{-- パンくず --}}
-    <nav class="text-xs text-[#6A6A7E] mb-5 flex flex-wrap items-center gap-1">
-        <a href="{{ route('top') }}/" class="hover:text-deli-400 transition">ホーム</a>
-        <span class="text-[#3A3A4E]">/</span>
-        <a href="{{ route('cast.index') }}/" class="hover:text-deli-400 transition">キャスト検索</a>
+    <nav aria-label="パンくずリスト" class="text-xs text-[#6A6A7E] mb-5">
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="{{ route('top') }}/" class="hover:text-deli-400 transition">ホーム</a></li>
+        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
+        <li><a href="{{ route('cast.index') }}/" class="hover:text-deli-400 transition">キャスト検索</a></li>
         @if($cast->shop)
-        <span class="text-[#3A3A4E]">/</span>
-        <a href="{{ route('shop.show', $cast->shop->id) }}/" class="hover:text-deli-400 transition">{{ $cast->shop->name }}</a>
+        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
+        <li><a href="{{ route('shop.show', $cast->shop->id) }}/" class="hover:text-deli-400 transition">{{ $cast->shop->name }}</a></li>
         @endif
-        <span class="text-[#3A3A4E]">/</span>
-        <span class="text-[#C8C4BC]">{{ $cast->name }}</span>
+        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
+        <li><span class="text-[#C8C4BC]" aria-current="page">{{ $cast->name }}</span></li>
+        </ol>
     </nav>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

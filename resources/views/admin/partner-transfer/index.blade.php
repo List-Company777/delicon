@@ -71,7 +71,7 @@
                 </td>
                 <td class="px-4 py-3 text-gray-500 text-xs">{{ $shop->genre?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
-                    {{ $shop->prefecture?->name ?? '' }}{{ $shop->area?->name ? '・' . $shop->area->name : '' ?: '—' }}
+                    {{ $shop->prefecture?->name ?? '' }}{{ ($shop->area?->name ? '・' . $shop->area->name : '') ?: '—' }}
                 </td>
                 <td class="px-4 py-3">
                     @php

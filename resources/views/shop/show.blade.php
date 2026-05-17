@@ -19,16 +19,22 @@
 <div class="max-w-5xl mx-auto px-4 py-8 pb-20 md:pb-8">
 
     {{-- パンくず --}}
-    <nav class="text-xs text-[#8A8A9E] mb-4">
-        <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">ホーム</a> &rsaquo;
-        <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">店舗一覧</a> &rsaquo;
+    <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mb-4">
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">ホーム</a></li>
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">店舗一覧</a></li>
         @if($shop->prefecture)
-        <a href="{{ route('shop.list', ['area_slug' => $shop->prefecture->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->prefecture->name }}</a> &rsaquo;
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ route('shop.list', ['area_slug' => $shop->prefecture->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->prefecture->name }}</a></li>
         @endif
         @if($shop->area)
-        <a href="{{ route('shop.list', ['area_slug' => $shop->area->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->area->name }}</a> &rsaquo;
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ route('shop.list', ['area_slug' => $shop->area->slug]) }}/" class="hover:text-gold-400 transition">{{ $shop->area->name }}</a></li>
         @endif
-        <span class="text-[#B0AEAD]">{{ $shop->name }}</span>
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><span class="text-[#B0AEAD]" aria-current="page">{{ $shop->name }}</span></li>
+        </ol>
     </nav>
 
     {{-- 店舗メイン画像 --}}

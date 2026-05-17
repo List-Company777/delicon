@@ -20,7 +20,6 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 @endpush
 
 @section('content')
-<main>
 
 {{-- ヒーロー --}}
 <section class="relative bg-surface-800 overflow-hidden">
@@ -356,5 +355,4 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     </div>
 </section>
 
-</main>
 @endsection

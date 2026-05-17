@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'デリヘル・風俗情報') | デリヘルリスト</title>
+    <title>@php $__pt=trim($__env->yieldContent('title','デリヘル・風俗情報')); echo str_contains($__pt,'デリヘルリスト') ? $__pt : $__pt.' | デリヘルリスト'; @endphp</title>
     <meta name="description" content="@yield('description', '全国のデリヘル・風俗情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
     @hasSection('canonical')
     <link rel="canonical" href="@yield('canonical')">
@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="デリヘルリスト">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('title', 'デリヘル・風俗情報') | デリヘルリスト">
+    <meta property="og:title" content="@php echo htmlspecialchars(str_contains($__pt,'デリヘルリスト') ? $__pt : $__pt.' | デリヘルリスト'); @endphp">
     <meta property="og:description" content="@yield('description', '全国のデリヘル・風俗情報を掲載。デリヘル店のシステム・料金・在籍キャストのプロフィールが検索できる総合情報サイト。')">
     <meta property="og:url" content="@hasSection('canonical')@yield('canonical')@else{{ url()->current() }}@endif">
     <meta property="og:image" content="@yield('ogp_image', asset('android-chrome-192x192.png'))">
@@ -81,22 +81,24 @@
                 <span class="text-[#E8E4DC]">デリヘル</span><span class="text-gold-400">リスト</span>
             </a>
             <nav class="hidden md:flex items-center gap-1 text-sm" aria-label="メインナビゲーション">
-                <a href="{{ url("/{$fa}/shop-list/") }}/"
+                <ul class="flex items-center gap-1 list-none m-0 p-0">
+                <li><a href="{{ url("/{$fa}/shop-list/") }}/"
                    class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
                     店舗一覧
-                </a>
-                <a href="{{ url("/{$fa}/girl-list/") }}/"
+                </a></li>
+                <li><a href="{{ url("/{$fa}/girl-list/") }}/"
                    class="px-3 py-2 rounded text-deli-400 hover:text-deli-300 hover:bg-surface-600 transition">
                     キャスト検索
-                </a>
-                <a href="{{ route('article.index') }}/"
+                </a></li>
+                <li><a href="{{ route('article.index') }}/"
                    class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
                     コラム
-                </a>
-                <a href="{{ route('ranking.index') }}/"
+                </a></li>
+                <li><a href="{{ route('ranking.index') }}/"
                    class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
                     ランキング
-                </a>
+                </a></li>
+                </ul>
                 @auth
                     @if(auth()->user()->role === 'visitor')
                     <a href="{{ route('user.dashboard') }}/"
@@ -134,24 +136,27 @@
         </div>
         <div x-data="{ open: false }" @toggle-menu.window="open = !open">
             <template x-if="open">
-                <div class="md:hidden bg-surface-800 border-t border-surface-400 px-4 pb-4 pt-2">
-                    <a href="{{ url("/{$fa}/shop-list/") }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">店舗一覧</a>
-                    <a href="{{ url("/{$fa}/girl-list/") }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 border-b border-surface-400 transition">キャスト検索</a>
-                    <a href="{{ route('article.index') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">コラム</a>
+                <nav class="md:hidden bg-surface-800 border-t border-surface-400 px-4 pb-4 pt-2" aria-label="モバイルメニュー">
+                    <ul class="list-none m-0 p-0">
+                    <li><a href="{{ url("/{$fa}/shop-list/") }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">店舗一覧</a></li>
+                    <li><a href="{{ url("/{$fa}/girl-list/") }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 border-b border-surface-400 transition">キャスト検索</a></li>
+                    <li><a href="{{ route('article.index') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">コラム</a></li>
+                    <li><a href="{{ route('ranking.index') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">ランキング</a></li>
                     @auth
                         @if(auth()->user()->role === 'visitor')
-                        <a href="{{ route('user.dashboard') }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 text-sm transition">マイページ</a>
+                        <li><a href="{{ route('user.dashboard') }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 text-sm transition">マイページ</a></li>
                         @else
-                        <a href="{{ route('manage.dashboard') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 text-sm transition">管理画面</a>
+                        <li><a href="{{ route('manage.dashboard') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 text-sm transition">管理画面</a></li>
                         @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin.dashboard') }}/" class="block py-2.5 text-amber-500 hover:text-amber-400 text-sm transition">Admin</a>
+                        <li><a href="{{ route('admin.dashboard') }}/" class="block py-2.5 text-amber-500 hover:text-amber-400 text-sm transition">Admin</a></li>
                         @endif
                         @endif
                     @else
-                        <a href="{{ route('visitor.register') }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 text-sm transition">会員登録</a>
-                        <a href="{{ route('login') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 text-sm transition">店舗掲載</a>
+                        <li><a href="{{ route('visitor.register') }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 text-sm transition">会員登録</a></li>
+                        <li><a href="{{ route('login') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 text-sm transition">店舗掲載</a></li>
                     @endauth
-                </div>
+                    </ul>
+                </nav>
             </template>
         </div>
     </header>
@@ -212,11 +217,11 @@
             {{-- グループサイト --}}
             <div class="border-t border-surface-400 pt-5 mb-5">
                 <p class="text-gold-400 font-bold mb-2 text-xs tracking-widest uppercase">グループサイト</p>
-                <div class="flex flex-col">
-                <a href="https://fuzoku-list.com/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">風俗リスト</a>
-                <a href="https://www.mens-v.com/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">風俗情報メンズバリュー</a>
-                <a href="https://www.up-stage.info/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">男性求人アップステージ</a>
-                </div>
+                <ul class="flex flex-col list-none m-0 p-0">
+                <li><a href="https://fuzoku-list.com/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">風俗リスト</a></li>
+                <li><a href="https://www.mens-v.com/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">風俗情報メンズバリュー</a></li>
+                <li><a href="https://www.up-stage.info/" target="_blank" rel="noopener noreferrer" class="block py-1.5 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">男性求人アップステージ</a></li>
+                </ul>
             </div>
 
             {{-- エリアから探す（ジャンル別・小エリア・都道府県フィルタ・30日PV順 top10） --}}
@@ -248,13 +253,13 @@
             @if($footerGenres->isNotEmpty())
             <div class="border-t border-surface-400 pt-5 mb-5">
                 <p class="text-gold-400 font-bold mb-3 text-xs tracking-widest uppercase">エリアから探す</p>
-                <div class="space-y-2">
+                <ul class="space-y-2 list-none m-0 p-0">
                     @foreach($footerGenres as $genre)
                     @foreach($genre->areas as $area)
-                    <a href="{{ url('/' . $area->slug . '/shop-list/') }}/" class="block py-1 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">{{ $area->name }}</a>
+                    <li><a href="{{ url('/' . $area->slug . '/shop-list/') }}/" class="block py-1 text-sm text-[#B0AEAD] hover:text-[#E8E4DC] transition">{{ $area->name }}</a></li>
                     @endforeach
                     @endforeach
-                </div>
+                </ul>
             </div>
             @endif
             <div class="border-t border-surface-400 pt-6 text-xs text-[#8A8A9E] leading-relaxed mb-6">

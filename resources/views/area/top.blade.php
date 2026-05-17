@@ -63,7 +63,6 @@
 
 @section('content')
 
-<main>
 
 {{-- ヘッダー --}}
 <div class="bg-surface-800 border-b border-surface-400">
@@ -72,16 +71,18 @@
             <h1 class="text-xl font-bold text-[#E8E4DC]">{{ $pageTitle }}</h1>
             <span class="text-sm text-[#B0AEAD]">{{ number_format($totalShops) }}件掲載</span>
         </div>
-        <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mt-1.5 flex items-center gap-1 flex-wrap">
-            <a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a>
-            <span aria-hidden="true">›</span>
+        <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mt-1.5">
+            <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+            <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
+            <li aria-hidden="true">›</li>
             @if($area_slug !== 'all')
-            <a href="{{ route('area.top', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国</a>
-            <span aria-hidden="true">›</span>
-            <span>{{ $areaName }}</span>
+            <li><a href="{{ route('area.top', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国</a></li>
+            <li aria-hidden="true">›</li>
+            <li aria-current="page"><span>{{ $areaName }}</span></li>
             @else
-            <span>全国</span>
+            <li aria-current="page"><span>全国</span></li>
             @endif
+            </ol>
         </nav>
     </div>
 </div>
@@ -405,5 +406,4 @@
 
 </div>
 
-</main>
 @endsection

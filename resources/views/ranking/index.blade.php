@@ -38,18 +38,20 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
 
     {{-- パンくず --}}
-    <nav aria-label="パンくず" class="text-xs text-[#6A6A7E] mb-4 flex items-center gap-1">
-        <a href="/" class="hover:text-deli-400">TOP</a>
-        <span aria-hidden="true">/</span>
-        <a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">人気女性ランキング</a>
+    <nav aria-label="パンくずリスト" class="text-xs text-[#6A6A7E] mb-4">
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="/" class="hover:text-deli-400">TOP</a></li>
+        <li aria-hidden="true">/</li>
+        <li @if($pageType === 'top') aria-current="page" @endif><a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">人気女性ランキング</a></li>
         @if($pageType === 'pref' || $pageType === 'area')
-            <span aria-hidden="true">/</span>
+            <li aria-hidden="true">/</li>
             @if($pageType === 'area')
-                <a href="{{ route('ranking.area', $prefModel->slug) }}/" class="hover:text-deli-400">{{ $prefModel->name }}</a>
-                <span aria-hidden="true">/</span>
+                <li><a href="{{ route('ranking.area', $prefModel->slug) }}/" class="hover:text-deli-400">{{ $prefModel->name }}</a></li>
+                <li aria-hidden="true">/</li>
             @endif
-            <span class="text-[#9A96A0]">{{ $pageTitle }}</span>
+            <li aria-current="page"><span class="text-[#9A96A0]">{{ $pageTitle }}</span></li>
         @endif
+        </ol>
     </nav>
 
     <h1 class="text-2xl font-black text-[#F0ECE4] flex items-center gap-3 mb-1">

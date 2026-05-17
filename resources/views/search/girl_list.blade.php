@@ -371,6 +371,26 @@
         <h1 class="text-lg font-bold text-[#E8E4DC]">{{ $h1Text }}</h1>
         <span class="text-sm text-[#B0AEAD]">{{ number_format($results->total()) }}件</span>
     </div>
+    {{-- パンくず --}}
+    <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mb-3">
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
+        <li aria-hidden="true">›</li>
+        <li><a href="{{ url('/all/girl-list/') }}/" class="hover:text-gold-400 transition">女性一覧</a></li>
+        @if($area_slug !== 'all')
+            @if(isset($prefModel) && $prefModel)
+            <li aria-hidden="true">›</li>
+            <li @if(!isset($areaModel) || !$areaModel) aria-current="page" @endif>
+                <a href="{{ url("/{$prefModel->slug}/girl-list/") }}/" class="hover:text-gold-400 transition">{{ $prefModel->prefecture ?? $areaName }}</a>
+            </li>
+            @endif
+            @if(isset($areaModel) && $areaModel)
+            <li aria-hidden="true">›</li>
+            <li aria-current="page"><span>{{ $areaName }}</span></li>
+            @endif
+        @endif
+        </ol>
+    </nav>
     @if($cast_tab === 'type' && isset($typeName))
     <p class="text-sm text-[#8A8A9E] mb-4 leading-relaxed">{{ $areaName !== '全国' ? $areaName . 'で活躍する' : '全国の' }}{{ $typeName }}のデリヘル嬢を{{ $totalStr }}人掲載。年齢・体型・スタイルで絞り込んでお好みの女性を見つけてください。</p>
     @else
