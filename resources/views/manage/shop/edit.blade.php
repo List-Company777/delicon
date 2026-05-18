@@ -130,6 +130,23 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">三行広告</th>
+                <td class="px-4 py-3">
+                    <div class="space-y-1.5">
+                        <input type="text" name="sangyo_text1" value="{{ old('sangyo_text1', $shop->sangyo_text1) }}" maxlength="30"
+                               placeholder="1行目（30文字以内）"
+                               class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
+                        <input type="text" name="sangyo_text2" value="{{ old('sangyo_text2', $shop->sangyo_text2) }}" maxlength="30"
+                               placeholder="2行目（30文字以内）"
+                               class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
+                        <input type="text" name="sangyo_text3" value="{{ old('sangyo_text3', $shop->sangyo_text3) }}" maxlength="30"
+                               placeholder="3行目（30文字以内）"
+                               class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-red-400">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">エリアトップページに表示される短い告知文（各30文字以内）</p>
+                </td>
+            </tr>
+            <tr class="border-b border-gray-100">
                 <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">システム説明</th>
                 <td class="px-4 py-3">
                     <textarea name="system_text" id="shop-system-text" rows="4" maxlength="5000"

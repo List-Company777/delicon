@@ -3,6 +3,9 @@
 @php
     $tabLabels = ['all' => '女性一覧', 'standby' => '本日出勤', 'new' => '新人', 'diary' => '写メ日記', 'review' => '口コミ'];
     $tabLabel  = $cast_tab === 'type' ? ($typeName ?? '女性一覧') : ($tabLabels[$cast_tab] ?? '女性一覧');
+    // SEO用ラベル（title / H1 / description）
+    $tabSeoLabels = ['all' => 'デリヘル女性一覧', 'standby' => '本日出勤デリヘルキャスト', 'new' => '新人デリヘルキャスト', 'diary' => 'デリヘル写メ日記', 'review' => 'デリヘル口コミ'];
+    $tabSeoLabel = $cast_tab === 'type' ? ($typeName ?? 'デリヘル女性一覧') : ($tabSeoLabels[$cast_tab] ?? 'デリヘル女性一覧');
     $suffix    = 'デリヘル・風俗';
 
     // アクティブなフィルターパラメータ
@@ -51,8 +54,8 @@
             : "{$filterLabel}女性一覧 | {$suffix}";
     } else {
         $pageTitle = $areaName
-            ? "{$areaName}の{$tabLabel} | {$suffix}"
-            : "{$tabLabel}一覧 | {$suffix}";
+            ? "{$areaName}の{$tabSeoLabel} | {$suffix}"
+            : "{$tabSeoLabel} | {$suffix}";
     }
 
     // description
@@ -65,7 +68,17 @@
     } elseif ($filterLabel) {
         $pageDescription = "{$filterLabel}のデリヘル女性一覧。全国{$totalStr}人掲載中。エリア・年齢・体型で絞り込み検索できます。";
     } elseif ($areaName) {
-        $pageDescription = "{$areaName}のデリヘル女性キャスト{$totalStr}人を掲載。年齢・体型・スタイルで絞り込み検索できます。本日出勤・新人情報も確認できます。";
+        if ($cast_tab === 'standby') {
+            $pageDescription = "{$areaName}の本日出勤デリヘルキャスト{$totalStr}人を掲載。今日会えるキャストをエリア・体型・年齢で絞り込み検索できます。";
+        } elseif ($cast_tab === 'new') {
+            $pageDescription = "{$areaName}の新人デリヘルキャスト{$totalStr}人を掲載。最新の新人情報をチェック。体型・年齢で絞り込み可能。";
+        } elseif ($cast_tab === 'diary') {
+            $pageDescription = "{$areaName}のデリヘル写メ日記{$totalStr}件。キャストの素顔・雰囲気をチェックしてお気に入りの女性を見つけよう。";
+        } elseif ($cast_tab === 'review') {
+            $pageDescription = "{$areaName}のデリヘル口コミ{$totalStr}件。実際の体験談・評判からお気に入りのキャストを探そう。";
+        } else {
+            $pageDescription = "{$areaName}のデリヘル女性キャスト{$totalStr}人を掲載。年齢・体型・スタイルで絞り込み検索できます。本日出勤・新人情報も確認できます。";
+        }
     } else {
         $pageDescription = "全国のデリヘル女性キャスト{$totalStr}人を掲載。エリア・年齢・体型・スタイルで絞り込み検索できます。";
     }
@@ -76,7 +89,7 @@
     } elseif ($filterLabel) {
         $h1Text = $areaName ? "{$areaName}の{$filterLabel}女性" : "{$filterLabel}女性一覧";
     } else {
-        $h1Text = $areaName ? "{$areaName}の{$tabLabel}" : $tabLabel;
+        $h1Text = $areaName ? "{$areaName}の{$tabSeoLabel}" : $tabSeoLabel;
     }
 
     // canonical URL: フィルターあり→フィルター付きURL（page除く）、なし→base URL
@@ -116,23 +129,72 @@
 
 @push('head')
 @php
+    // BreadcrumbList
     $glItems = [['name' => 'ホーム', 'item' => route('top') . '/']];
-    if ($area_slug === 'all') {
-        $glItems[] = ['name' => '女性一覧', 'item' => url('/all/girl-list/') . '/'];
-    } else {
-        $glItems[] = ['name' => '女性一覧', 'item' => url('/all/girl-list/') . '/'];
-        if ($prefModel) $glItems[] = ['name' => $prefModel->prefecture ?? $areaName, 'item' => url("/{$prefModel->slug}/girl-list/") . '/'];
-        if ($areaModel) $glItems[] = ['name' => $areaName, 'item' => url("/{$area_slug}/girl-list/") . '/'];
+    $glItems[] = ['name' => 'デリヘル女性一覧', 'item' => url('/all/girl-list/') . '/'];
+    if ($area_slug !== 'all') {
+        // 都道府県ページ: $prefOnlyModel が設定される
+        if ($prefOnlyModel) {
+            $glItems[] = ['name' => $prefOnlyModel->name, 'item' => url("/{$prefOnlyModel->slug}/girl-list/") . '/'];
+        }
+        // 小エリアページ: $areaModel が設定され $prefModel は親都道府県
+        if ($areaModel) {
+            if ($prefModel) $glItems[] = ['name' => $prefModel->name ?? $prefModel->prefecture, 'item' => url("/{$prefModel->slug}/girl-list/") . '/'];
+            $glItems[] = ['name' => $areaName, 'item' => url("/{$area_slug}/girl-list/") . '/'];
+        }
     }
     if ($cast_tab === 'type' && isset($typeName)) {
         $glItems[] = ['name' => $typeName, 'item' => $canonicalUrl];
     } elseif ($filterLabel ?? '') {
         $glItems[] = ['name' => $filterLabel, 'item' => $canonicalUrl];
+    } elseif ($cast_tab !== 'all') {
+        $tabItemUrl = url("/{$area_slug}/girl-list/{$cast_tab}/") . '/';
+        $glItems[] = ['name' => $tabLabels[$cast_tab] ?? $tabLabel, 'item' => $tabItemUrl];
     }
     $glSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' =>
         array_map(fn($item, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $item['name'], 'item' => $item['item']], array_values($glItems), array_keys($glItems))];
+
+    // ItemList（キャストタブ・非noindexのみ）
+    $glItemList = null;
+    if (!in_array($cast_tab, ['diary', 'review']) && !$noindex && $results->isNotEmpty()) {
+        $glItemList = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => $pageTitle ?? ($areaName . 'のデリヘル女性一覧'),
+            'url'             => $canonicalUrl,
+            'numberOfItems'   => $results->count(),
+            'itemListElement' => $results->map(fn($cast, $i) => [
+                '@type'    => 'ListItem',
+                'position' => $i + 1,
+                'url'      => route('cast.show', $cast->id) . '/',
+                'name'     => $cast->name,
+            ])->values()->all(),
+        ];
+    }
+
+    // CollectionPage + areaServed（エリア・都道府県ページのみ）
+    $glAreaPage = null;
+    if ($area_slug !== 'all' && $areaName !== '全国') {
+        $glAreaPage = [
+            '@context'    => 'https://schema.org',
+            '@type'       => 'CollectionPage',
+            'name'        => $pageTitle ?? ($areaName . 'のデリヘル女性一覧'),
+            'url'         => $canonicalUrl,
+            'areaServed'  => [
+                '@type'            => 'AdministrativeArea',
+                'name'             => $areaName,
+                'containedInPlace' => ['@type' => 'Country', 'name' => '日本'],
+            ],
+        ];
+    }
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($glSchema, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@if($glItemList)
+<script type="application/ld+json" @nonce>{!! json_encode($glItemList, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endif
+@if($glAreaPage)
+<script type="application/ld+json" @nonce>{!! json_encode($glAreaPage, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -246,7 +308,7 @@
                 @php
                     $ageTypeSlug = $ageToTypeSlug[$ageKey] ?? null;
                     $ageHref     = $ageTypeSlug
-                        ? url("/{$area_slug}/girl-list/type/{$ageTypeSlug}/")
+                        ? url("/{$area_slug}/girl-list/type/{$ageTypeSlug}/") . '/'
                         : $filterUrl('age', $ageKey);
                     $ageActive   = $ageTypeSlug
                         ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $ageTypeSlug)
@@ -269,7 +331,7 @@
                 @php
                     $tallTypeSlug = $tallToTypeSlug[$tallKey] ?? null;
                     $tallHref     = $tallTypeSlug
-                        ? url("/{$area_slug}/girl-list/type/{$tallTypeSlug}/")
+                        ? url("/{$area_slug}/girl-list/type/{$tallTypeSlug}/") . '/'
                         : $filterUrl('tall', $tallKey);
                     $tallActive   = $tallTypeSlug
                         ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $tallTypeSlug)
@@ -307,7 +369,7 @@
                 @php
                     $btTypeSlug = $bodyToTypeSlug[$bt->id] ?? null;
                     $btHref     = $btTypeSlug
-                        ? url("/{$area_slug}/girl-list/type/{$btTypeSlug}/")
+                        ? url("/{$area_slug}/girl-list/type/{$btTypeSlug}/") . '/'
                         : $filterUrl('body', (string)$bt->id);
                     $btActive   = $btTypeSlug
                         ? (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $btTypeSlug)
@@ -341,7 +403,7 @@
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-[#8A8A9E] shrink-0 w-10">特集</span>
                 @foreach($featuredLps as $lp)
-                <a href="{{ url("/{$area_slug}/girl-list/type/{$lp['slug']}/") }}"
+                <a href="{{ url("/{$area_slug}/girl-list/type/{$lp['slug']}/") }}/"
                    class="px-3 py-1.5 rounded-full text-sm border transition
                           {{ (($cast_tab ?? '') === 'type' && ($type_slug ?? '') === $lp['slug'])
                               ? 'bg-deli-500 border-deli-500 text-white'
@@ -376,18 +438,33 @@
         <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
         <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
         <li aria-hidden="true">›</li>
-        <li><a href="{{ url('/all/girl-list/') }}/" class="hover:text-gold-400 transition">女性一覧</a></li>
+        @php
+            $bcHasTab = !in_array($cast_tab, ['all', 'type']) && !$filterLabel;
+        @endphp
+        <li @if($area_slug === 'all' && !$bcHasTab) aria-current="page" @endif>
+            <a href="{{ url('/all/girl-list/') }}/" class="hover:text-gold-400 transition">デリヘル女性一覧</a>
+        </li>
         @if($area_slug !== 'all')
-            @if(isset($prefModel) && $prefModel)
+            @php
+                $bcPref = $prefModel ?? $prefOnlyModel ?? null;
+                $bcPrefIsLast = $bcPref && (!isset($areaModel) || !$areaModel) && !$bcHasTab;
+            @endphp
+            @if($bcPref)
             <li aria-hidden="true">›</li>
-            <li @if(!isset($areaModel) || !$areaModel) aria-current="page" @endif>
-                <a href="{{ url("/{$prefModel->slug}/girl-list/") }}/" class="hover:text-gold-400 transition">{{ $prefModel->prefecture ?? $areaName }}</a>
+            <li @if($bcPrefIsLast) aria-current="page" @endif>
+                <a href="{{ url("/{$bcPref->slug}/girl-list/") }}/" class="hover:text-gold-400 transition">{{ $bcPref->name ?? $bcPref->prefecture ?? $areaName }}</a>
             </li>
             @endif
             @if(isset($areaModel) && $areaModel)
             <li aria-hidden="true">›</li>
-            <li aria-current="page"><span>{{ $areaName }}</span></li>
+            <li @if(!$bcHasTab) aria-current="page" @endif>
+                @if($bcHasTab)<a href="{{ url("/{$area_slug}/girl-list/") }}/" class="hover:text-gold-400 transition">{{ $areaName }}</a>@else<span>{{ $areaName }}</span>@endif
+            </li>
             @endif
+        @endif
+        @if($bcHasTab)
+        <li aria-hidden="true">›</li>
+        <li aria-current="page"><span>{{ $tabLabels[$cast_tab] ?? $tabLabel }}</span></li>
         @endif
         </ol>
     </nav>
@@ -452,14 +529,14 @@
 
         @elseif($cast_tab === 'diary')
         {{-- 写メ日記グリッド --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             @foreach($results as $diary)
             @php
                 $firstImg = $diary->images->first();
                 $cast     = $diary->cast;
                 $shop     = $cast?->shop;
             @endphp
-            <article class="bg-surface-600 border border-surface-400 rounded-xl overflow-hidden hover:border-deli-400 transition">
+            <article class="bg-surface-600 border border-surface-400 rounded-xl overflow-hidden hover:border-deli-400 transition min-w-0">
                 <a href="{{ route('cast.show', $cast) }}/">
                     @if($firstImg)
                     <div class="aspect-square overflow-hidden bg-surface-500">
@@ -487,7 +564,7 @@
 
         @else
         {{-- キャストグリッド（女性一覧/待機中/新人/タイプ） --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             @foreach($results as $cast)
             @php
                 $shop      = $cast->shop;
@@ -499,7 +576,7 @@
                     $cast->hip   ? "H{$cast->hip}"  : null,
                 ])->filter()->implode(' ');
             @endphp
-            <article class="bg-surface-600 border border-surface-400 hover:border-deli-400 rounded-xl overflow-hidden transition group">
+            <article class="bg-surface-600 border border-surface-400 hover:border-deli-400 rounded-xl overflow-hidden transition group min-w-0">
                 <a href="{{ route('cast.show', $cast) }}/" class="block">
                     <div class="aspect-[3/4] overflow-hidden bg-surface-500 relative">
                         <img src="{{ $cast->img_url }}"

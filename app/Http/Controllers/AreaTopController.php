@@ -237,6 +237,30 @@ class AreaTopController extends Controller
         });
         $bannerShops = collect($bannerShopsRaw)->map(fn($s) => (object) $s);
 
+        // ⑦ 三行広告
+        $sangyoShopsRaw = Cache::remember("area_top:sangyo_v2:{$area_slug}", 1800, function () use ($areaIds) {
+            $q = Shop::where("status", "active")
+                ->where("plan", "<=", 4)
+                ->whereNotNull("sangyo_text1")
+                ->where("sangyo_text1", "!=", "");
+            if (!empty($areaIds)) {
+                $q->whereIn("area_id", $areaIds);
+            }
+            return $q->orderByRaw("RAND()")
+                ->limit(12)
+                ->get()
+                ->map(fn($shop) => [
+                    "id"           => $shop->id,
+                    "name"         => $shop->name,
+                    "sangyo_text1" => $shop->sangyo_text1,
+                    "sangyo_text2" => $shop->sangyo_text2,
+                    "sangyo_text3" => $shop->sangyo_text3,
+                ])
+                ->all();
+        });
+        $sangyoShops = collect($sangyoShopsRaw)->map(fn($s) => (object) $s);
+
+
         // ジャンル別件数
         $shopTypeCounts = Cache::remember("area_top:shop_types:{$area_slug}", 1800, function () use ($area_slug, $areaModel, $prefModel) {
             $query = DB::table('shops')
@@ -291,6 +315,7 @@ class AreaTopController extends Controller
         return response()->view('area.top', compact(
             'area_slug', 'areaName', 'areaModel', 'prefModel',
             'pickupShops', 'featuredShops', 'workingCasts',
+            'sangyoShops',
             'recentDiaries', 'recentCasts', 'comingSoonCasts', 'bannerShops',
             'shopTypeCounts', 'totalShops', 'noindex', 'subAreas'
         ), $status);

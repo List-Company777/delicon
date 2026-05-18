@@ -34,9 +34,24 @@ class PartnerController extends Controller
         $data = $this->validated($request);
         $data['referral_code'] = $data['referral_code'] ?: strtoupper(Str::random(8));
 
-        Partner::create($data);
+        $partner = Partner::create($data);
 
-        return redirect()->route('admin.partners.index')->with('success', 'パートナーを登録しました');
+        // ログインユーザーを自動作成（同メールのユーザーが未存在の場合）
+        $successMsg = 'パートナーを登録しました';
+        if (!empty($data['email']) && !User::where('email', $data['email'])->exists()) {
+            $password = Str::random(10) . '!1';
+            User::create([
+                'name'              => $data['contact_name'] ?? $data['company_name'],
+                'email'             => $data['email'],
+                'password'          => Hash::make($password),
+                'role'              => 'agency',
+                'partner_id'        => $partner->id,
+                'email_verified_at' => now(),
+            ]);
+            $successMsg .= "（ログインパスワード: {$password}）";
+        }
+
+        return redirect()->route('admin.partners.index')->with('success', $successMsg);
     }
 
     public function edit(Partner $partner)

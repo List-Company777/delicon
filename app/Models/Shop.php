@@ -26,7 +26,7 @@ class Shop extends Model
         'permit_type', 'permit_document_path',
         'paid_since', 'plan1_since', 'plan2_since', 'plan3_since', 'plan4_since', 'plan_expires_on',
         'alive_check_token', 'alive_check_sent_at', 'alive_confirmed_at',
-        'base', 'catche', 'system_text', 'coupon', 'open_time', 'close_time', 'all_time', 'rest_day',
+        'base', 'catche', 'sangyo_text1', 'sangyo_text2', 'sangyo_text3', 'system_text', 'coupon', 'open_time', 'close_time', 'all_time', 'rest_day',
         'price_60', 'price_90', 'price_120', 'price_high', 'eigyo_area', 'eigyo_space',
         'shop_type_id', 'shop_type_id2', 'tags', 'plan', 'is_banner_plan', 'banner_checked_at',
     ];
@@ -214,10 +214,6 @@ class Shop extends Model
     {
         if ($this->main_image) {
             return Storage::url($this->main_image);
-        }
-        $file = $this->shop_file_name;
-        if ($file && str_starts_with($file, "/") && !str_starts_with($file, "http")) {
-            return $file;
         }
         return null;
     }

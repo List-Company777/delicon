@@ -473,13 +473,12 @@ class SearchController extends Controller
             ->get();
         }
 
-        return new \Illuminate\Pagination\LengthAwarePaginator(
+        return (new \Illuminate\Pagination\LengthAwarePaginator(
             $items,
             $total,
             $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+            $page
+        ))->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
     }
 
     /** LP統計バー用の集計（noindexページでは呼ばない） */

@@ -49,6 +49,7 @@ Schedule::command('report:monthly')->monthlyOn(1, '01:05');
 
 // フッター都道府県キャッシュ更新（毎日 02:00）
 Schedule::command('cache:warm-footer')->dailyAt('02:00');
+Schedule::command('cache:warm-area-top')->dailyAt('03:00');
 
 // girl-list・shop-listサイトマップ（毎日 06:00〜06:30）
 Schedule::command("sitemap:generate-girl-list")->dailyAt("06:00");

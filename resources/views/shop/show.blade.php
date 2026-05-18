@@ -39,7 +39,7 @@
 
     {{-- 店舗メイン画像 --}}
     @if($shop->main_image_url)
-    <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-6 bg-surface-600">
+    <div class="relative w-full aspect-[5/2] rounded-xl overflow-hidden mb-6 bg-surface-600">
         <img src="{{ $shop->main_image_url }}" alt="{{ $shop->name }}"
              fetchpriority="high"
              class="absolute inset-0 w-full h-full object-cover img-onerror-hide">

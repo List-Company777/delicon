@@ -73,7 +73,7 @@
         gtag('config', 'G-R2RD39B5PP');
     </script>
 </head>
-<body class="bg-surface-700 text-[#E8E4DC] antialiased">
+<body class="bg-surface-700 text-[#E8E4DC] antialiased overflow-x-hidden">
 @php $fa = (isset($footerPrefSlug) && $footerPrefSlug) ? $footerPrefSlug : (request()->route('area_slug') ?? 'all'); @endphp
     <header class="bg-surface-800 border-b border-surface-400 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -206,6 +206,7 @@
                 <nav aria-label="サービス">
                     <p class="text-gold-400 font-bold mb-3 text-xs tracking-widest uppercase">サービス</p>
                     <ul class="space-y-2">
+                        <li><a href="{{ route('lp.keisai') }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">無料掲載のご案内</a></li>
                         <li><a href="{{ route('login') }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">店舗掲載のご案内</a></li>
                         <li><a href="{{ route('terms') }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">利用規約</a></li>
                         <li><a href="{{ route('privacy') }}/" class="block py-1.5 text-[#B0AEAD] hover:text-[#E8E4DC] transition">プライバシーポリシー</a></li>

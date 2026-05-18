@@ -116,7 +116,9 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 @if($shop->shop_type_name ?? null)
                 <span class="absolute top-2 left-2 z-10 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
                 @endif
+                @if($shop->shop_image_url)
                 <p aria-hidden="true" class="absolute bottom-2 left-2 right-2 z-10 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
+                @endif
             </div>
             <div class="p-3">
                 <h3 class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">

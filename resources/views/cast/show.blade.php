@@ -76,8 +76,10 @@
         {{-- 左カラム：写真 --}}
         <div>
             <div class="relative">
-                <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                     class="img-onerror-cast w-full rounded-xl border border-surface-300 mb-3" loading="eager">
+                <div class="aspect-[3/4] rounded-xl border border-surface-300 mb-3 overflow-hidden">
+                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
+                </div>
                 {{-- 待機中バッジ --}}
                 @if($cast->working_date && $cast->working_date->isToday())
                 <span class="absolute top-2 left-2 text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow">本日出勤</span>

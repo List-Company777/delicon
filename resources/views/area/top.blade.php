@@ -52,8 +52,8 @@
         $lcpImg = $pickupShops->first()->main_image_url ?? null;
     }
     if (!$lcpImg && $featuredShops->isNotEmpty()) {
-        $ff = $featuredShops->first();
-        if ($ff->main_image) $lcpImg = \Illuminate\Support\Facades\Storage::url($ff->main_image);
+        $ff = $featuredShops->first(fn($s) => $s->main_image);
+        if ($ff) $lcpImg = \Illuminate\Support\Facades\Storage::url($ff->main_image);
     }
 @endphp
 @if($lcpImg)
@@ -64,97 +64,14 @@
 @section('content')
 
 
-{{-- ヘッダー --}}
-<div class="bg-surface-800 border-b border-surface-400">
-    <div class="max-w-6xl mx-auto px-4 py-4">
-        <div class="flex items-baseline gap-3">
-            <h1 class="text-xl font-bold text-[#E8E4DC]">{{ $pageTitle }}</h1>
-            <span class="text-sm text-[#B0AEAD]">{{ number_format($totalShops) }}件掲載</span>
-        </div>
-        <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mt-1.5">
-            <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
-            <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
-            <li aria-hidden="true">›</li>
-            @if($area_slug !== 'all')
-            <li><a href="{{ route('area.top', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国</a></li>
-            <li aria-hidden="true">›</li>
-            <li aria-current="page"><span>{{ $areaName }}</span></li>
-            @else
-            <li aria-current="page"><span>全国</span></li>
-            @endif
-            </ol>
-        </nav>
-    </div>
-</div>
-
-{{-- ① ピックアップ店舗（plan 1-2 横並び大カード） --}}
-@if($pickupShops->isNotEmpty())
-<section class="bg-surface-700 border-b border-surface-500">
-    <div class="max-w-6xl mx-auto px-4 py-5">
-        <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
-            <span aria-hidden="true" class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
-            ピックアップ
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            @foreach($pickupShops as $loop_shop => $shop)
-            <a href="{{ route('shop.show', $shop->id) }}/"
-               class="group flex bg-surface-600 border border-surface-400 hover:border-gold-400 rounded-xl overflow-hidden transition">
-                <div class="w-28 flex-shrink-0 overflow-hidden">
-                    <img src="{{ $shop->main_image_url }}" alt="{{ $shop->name }}"
-                         @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" @endif
-                         class="img-onerror-hide w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                </div>
-                <div class="p-3 flex flex-col min-w-0">
-                    @if($shop->shop_type_name)
-                    <span class="text-[10px] text-deli-400 font-medium">{{ $shop->shop_type_name }}</span>
-                    @endif
-                    <p class="text-sm font-bold text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1 mt-0.5">{{ $shop->name }}</p>
-                    @if($shop->catche)
-                    <p class="text-xs text-[#8A8A9E] line-clamp-2 mt-1">{{ $shop->catche }}</p>
-                    @endif
-                    <div class="flex items-center gap-3 mt-auto pt-1 flex-wrap">
-                        @if($shop->price_60)
-                        <span class="text-xs text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
-                        @endif
-                        <span class="text-xs text-[#8A8A9E]">{{ $shop->cast_count }}名在籍</span>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ⑥ バナー広告（横3列） --}}
-@if($bannerShops->isNotEmpty())
-<aside class="bg-surface-700 border-b border-surface-500" aria-label="広告">
-    <div class="max-w-6xl mx-auto px-4 py-5">
-        <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
-            <span aria-hidden="true" class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>
-            広告
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            @foreach($bannerShops as $shop)
-            <a href="{{ route('shop.show', $shop->id) }}/"
-               class="block hover:opacity-80 transition rounded overflow-hidden"
-               title="{{ $shop->name }}">
-                <picture>
-                    @if($shop->banner_webp_url)
-                    <source srcset="{{ $shop->banner_webp_url }}" type="image/webp">
-                    @endif
-                    <img src="{{ $shop->banner_url }}" alt="{{ $shop->name }}"
-                         loading="lazy" width="468" height="60"
-                         class="img-onerror-hide w-full h-auto">
-                </picture>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</aside>
-@endif
-
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-10">
+
+    {{-- H1 --}}
+    <h1 class="text-lg font-bold text-[#E8E4DC] border-b border-surface-400 pb-3">{{ $areaName }}のデリヘル・風俗一覧<span class="text-sm font-normal text-[#8A8A9E] ml-2">{{ number_format($totalShops) }}件掲載</span></h1>
+
+
+
+
 
     {{-- ⑤ 新人デビュー --}}
     @if($recentCasts->isNotEmpty())
@@ -201,6 +118,7 @@
             </a>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @php $firstFeaturedImgShown = false; @endphp
             @foreach($featuredShops as $shop)
             <a href="{{ route('shop.show', $shop->id) }}/"
                class="bg-surface-500 border border-surface-300 hover:border-deli-500 rounded-xl overflow-hidden transition group block">
@@ -208,8 +126,9 @@
                     @if($shop->main_image)
                     <img src="{{ Storage::url($shop->main_image) }}"
                          alt="{{ $shop->name }}のデリヘル情報"
-                         @if($loop->first) loading="eager" fetchpriority="high" @else loading="lazy" @endif
+                         @if(!$firstFeaturedImgShown) loading="eager" fetchpriority="high" @elseif($loop->index < 4) loading="eager" @else loading="lazy" @endif
                          class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
+                    @php $firstFeaturedImgShown = true; @endphp
                     @else
                     <span aria-hidden="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
                     @endif
@@ -217,7 +136,7 @@
                     @if($shop->shop_type_name)
                     <span class="absolute top-2 left-2 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
                     @endif
-                    <p aria-hidden="true" class="absolute bottom-2 left-2 right-2 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
+
                 </div>
                 <div class="p-3">
                     <p class="font-bold text-sm text-[#E8E4DC] group-hover:text-gold-400 transition line-clamp-1">{{ $shop->name }}</p>
@@ -225,6 +144,46 @@
                     <p class="text-xs text-gold-400 font-medium mt-1">60分¥{{ number_format($shop->price_60) }}〜</p>
                     @endif
                 </div>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- ⑧ 三行広告 --}}
+    @if($sangyoShops->isNotEmpty())
+    <section>
+        <h2 class="text-sm font-bold text-[#E8E4DC] flex items-center gap-2 mb-3">
+            <span aria-hidden="true" class="w-1 h-4 bg-surface-200 rounded-full inline-block"></span>
+            三行広告
+        </h2>
+        <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1">
+            @foreach($sangyoShops as $s)
+            <a href="{{ route('shop.show', $s->id) }}/"
+               class="flex flex-row-reverse items-center justify-center bg-surface-600 hover:bg-surface-500 transition rounded border border-white/25 px-2 py-1.5 gap-1.5">
+                @php
+                    $vStyle = 'writing-mode:vertical-rl;text-orientation:upright;white-space:nowrap;';
+                    $tate = function($t) {
+                        $escaped = e($t);
+                        // 先頭が2桁数字ならその塊を大きく、それ以外は先頭1文字を大きく
+                        if (preg_match('/^(\d{2})(?!\d)(.*)/su', $escaped, $m)) {
+                            $first = '<span style="font-size:1rem;text-combine-upright:all">' . $m[1] . '</span>';
+                            $rest  = $m[2];
+                        } else {
+                            $first = '<span style="font-size:1rem;">' . mb_substr($escaped, 0, 1) . '</span>';
+                            $rest  = mb_substr($escaped, 1);
+                        }
+                        $rest = preg_replace('/(?<!\d)\d{2}(?!\d)/', '<span style="text-combine-upright:all">$0</span>', $rest);
+                        return $first . $rest;
+                    };
+                @endphp
+                <p class="text-[#E8E4DC] font-bold text-xs leading-none" style="{{ $vStyle }}">{!! $tate($s->sangyo_text1) !!}</p>
+                @if($s->sangyo_text2)
+                <p class="text-[#E8E4DC] text-xs leading-none" style="{{ $vStyle }}">{!! $tate($s->sangyo_text2) !!}</p>
+                @endif
+                @if($s->sangyo_text3)
+                <p class="text-[#E8E4DC] text-xs leading-none" style="{{ $vStyle }}">{!! $tate($s->sangyo_text3) !!}</p>
+                @endif
             </a>
             @endforeach
         </div>

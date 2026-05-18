@@ -44,7 +44,7 @@ Route::get('/', [TopController::class, 'index'])->name('top');
 // 認証（ゲストのみ）
 Route::middleware('guest')->group(function () {
     Route::get('/login/',    [LoginController::class, 'show'])->name('login');
-    Route::post('/login/',   [LoginController::class, 'store'])->middleware('throttle:5,15');
+    Route::post('/login/',   [LoginController::class, 'store'])->middleware('throttle:login');
     Route::get('/register/', [RegisterController::class, 'show'])->name('register');
     Route::post('/register/', [RegisterController::class, 'store'])->middleware('throttle:5,30');
     // www.up-stage.info連携店舗の引き継ぎ検索（登録フォームのAJAX）
@@ -122,6 +122,7 @@ Route::view('/terms/',      'legal.terms')->name('terms');
 Route::view('/advertiser/', 'legal.advertiser')->name('advertiser');
 Route::view('/company/',    'legal.company')->name('company');
 Route::view('/welcome/',    'welcome_migration')->name('welcome.migration');
+Route::view('/delicon/',    'welcome_migration')->name('delicon.guide');
 // 代理店パートナー募集（noindex）
 Route::view('/agency/', 'agency.index')->name('agency');
 

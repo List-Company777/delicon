@@ -42,13 +42,53 @@
 
 @push('head')
 @php
-    $sbItems = [['name' => 'ホーム', 'item' => route('top') . '/'], ['name' => '店舗一覧', 'item' => route('shop.list', ['area_slug' => 'all']) . '/']];
+    $sbItems = [['name' => 'ホーム', 'item' => route('top') . '/'], ['name' => 'デリヘル店舗一覧', 'item' => route('shop.list', ['area_slug' => 'all']) . '/']];
     if ($areaName) $sbItems[] = ['name' => $areaName, 'item' => route('shop.list', ['area_slug' => $area_slug]) . '/'];
     if ($jobTypeName) $sbItems[] = ['name' => $jobTypeName, 'item' => $shopBase];
     $sbSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' =>
         array_map(fn($item, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $item['name'], 'item' => $item['item']], array_values($sbItems), array_keys($sbItems))];
+
+    // ItemList（非noindex・結果あり）
+    $sbItemList = null;
+    if (!$noindex && $results->isNotEmpty()) {
+        $sbItemList = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => $pageTitle,
+            'url'             => $shopCanonical,
+            'numberOfItems'   => $results->count(),
+            'itemListElement' => $results->map(fn($shop, $i) => [
+                '@type'    => 'ListItem',
+                'position' => $i + 1,
+                'url'      => route('shop.show', $shop->id) . '/',
+                'name'     => $shop->name,
+            ])->values()->all(),
+        ];
+    }
+
+    // CollectionPage + areaServed（エリア・都道府県ページのみ）
+    $sbAreaPage = null;
+    if ($area_slug !== 'all' && $areaName) {
+        $sbAreaPage = [
+            '@context'   => 'https://schema.org',
+            '@type'      => 'CollectionPage',
+            'name'       => $pageTitle,
+            'url'        => $shopCanonical,
+            'areaServed' => [
+                '@type'            => 'AdministrativeArea',
+                'name'             => $areaName,
+                'containedInPlace' => ['@type' => 'Country', 'name' => '日本'],
+            ],
+        ];
+    }
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($sbSchema, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@if($sbItemList)
+<script type="application/ld+json" @nonce>{!! json_encode($sbItemList, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endif
+@if($sbAreaPage)
+<script type="application/ld+json" @nonce>{!! json_encode($sbAreaPage, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -67,7 +107,7 @@
             <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
             <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">TOP</a></li>
             <li aria-hidden="true">›</li>
-            <li><a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">全国の店舗一覧</a></li>
+            <li><a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="hover:text-gold-400 transition">デリヘル店舗一覧</a></li>
             @if($areaName)
                 <li aria-hidden="true">›</li>
                 <li @if(!$jobTypeName) aria-current="page" @endif><a href="{{ route('shop.list', ['area_slug' => $area_slug]) }}/" class="hover:text-gold-400 transition">{{ $areaName }}</a></li>
@@ -121,7 +161,7 @@
     {{-- 年齢層フィルター --}}
     @php
         $ageGroups  = ['' => 'すべて', '18-19' => '10代', '20-24' => '20〜24歳', '25-34' => '25〜34歳', '35-44' => '35〜44歳', '45+' => '45歳〜'];
-        $baseUrl    = url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : ''));
+        $baseUrl    = url("/{$area_slug}/shop-list/" . ($job_slug !== 'all' ? "{$job_slug}/" : '')) . '/';
     @endphp
     <div class="flex flex-wrap items-center gap-2 mb-6">
         <span class="text-xs text-[#8A8A9E]">年齢層:</span>

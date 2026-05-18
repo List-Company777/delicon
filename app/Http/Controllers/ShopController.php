@@ -52,7 +52,8 @@ class ShopController extends Controller
 
         $shops = $query->orderByDesc('ranking_count')
             ->orderBy('name')
-            ->paginate(30);
+            ->paginate(30)
+            ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
 
         return view('shop.index', compact('shops', 'shopTypes', 'areas'));
     }
@@ -73,7 +74,8 @@ class ShopController extends Controller
             ->with(['shopType'])
             ->withCount('castMembers')
             ->orderByDesc('ranking_count')->orderBy('name')
-            ->paginate(30);
+            ->paginate(30)
+            ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
 
         // 配下エリア（店舗が存在するもの）
         $areas = Area::whereIn('prefecture_id', $prefIds)
@@ -109,7 +111,8 @@ class ShopController extends Controller
             ->with(['shopType'])
             ->withCount('castMembers')
             ->orderByDesc('ranking_count')->orderBy('name')
-            ->paginate(30);
+            ->paginate(30)
+            ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
 
         $areas = collect(); // エリアページでは子リンク不要
         $title       = $area->name . 'のデリヘル店舗一覧';
@@ -159,7 +162,8 @@ class ShopController extends Controller
             ->with(['castType', 'bodyType', 'tags'])
             ->orderByDesc('is_recommended')
             ->orderBy('sort_order')
-            ->paginate(24);
+            ->paginate(24)
+            ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
 
         $news = $shop->news()->orderByDesc("is_pinned")->latest()->take(3)->get();
 

@@ -29,16 +29,17 @@ class LoginController extends Controller
 
         $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        $ip          = $request->ip();
+        $allowedIps  = config('admin.allowed_ips', []);
+        $isAllowedIp = empty($allowedIps) || in_array($ip, $allowedIps);
+
+        // 許可IPはレートリミット対象外
+        if (!$isAllowedIp && RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $minutes = ceil(RateLimiter::availableIn($throttleKey) / 60);
             return back()->withErrors([
                 'email' => "ログイン試行回数の上限に達しました。{$minutes}分後に再試行してください。",
             ])->onlyInput('email');
         }
-
-        $ip          = $request->ip();
-        $allowedIps  = config('admin.allowed_ips', []);
-        $isAllowedIp = empty($allowedIps) || in_array($ip, $allowedIps);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::clear($throttleKey);

@@ -233,7 +233,7 @@ class GirlListController extends Controller
                   ->orderBy('casts.id');
         }
 
-        return $query->paginate(self::PER_PAGE)->withQueryString();
+        return $query->paginate(self::PER_PAGE)->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
     }
 
     private function getDiaries(string $area_slug, ?Area $areaModel, ?Prefecture $prefOnlyModel)
@@ -249,6 +249,7 @@ class GirlListController extends Controller
             })
             ->orderByDesc('created_at')
             ->paginate(self::PER_PAGE)
+            ->withPath(rtrim(request()->url(), '/') . '/')
             ->withQueryString();
     }
 
@@ -265,6 +266,7 @@ class GirlListController extends Controller
             })
             ->orderByDesc('created_at')
             ->paginate(self::PER_PAGE)
+            ->withPath(rtrim(request()->url(), '/') . '/')
             ->withQueryString();
     }
 
@@ -314,6 +316,7 @@ class GirlListController extends Controller
             ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
             ->orderBy('casts.id')
             ->paginate(self::PER_PAGE)
+            ->withPath(rtrim(request()->url(), '/') . '/')
             ->withQueryString();
 
         $noindex  = $results->total() <= 5;

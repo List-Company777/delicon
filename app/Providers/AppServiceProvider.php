@@ -9,6 +9,8 @@ use App\Models\Job;
 use App\Models\Prefecture;
 use App\Observers\JobObserver;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
@@ -28,10 +32,23 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('login', function (Request $request) {
+            $allowedIps = config('admin.allowed_ips', []);
+            if (!empty($allowedIps) && in_array($request->ip(), $allowedIps)) {
+                return Limit::none();
+            }
+            return Limit::perMinutes(15, 5)->by($request->ip());
+        });
+
         Blade::directive('nonce', fn() => '<?php echo \'nonce="\' . e(Vite::cspNonce()) . \'"\'; ?>');
 
         if (app()->environment('production')) {
             URL::forceScheme('https');
+        }
+
+        $replyTo = config("mail.reply_to");
+        if (!empty($replyTo["address"])) {
+            Mail::alwaysReplyTo($replyTo["address"], $replyTo["name"]);
         }
 
         Cast::observe(CastObserver::class);

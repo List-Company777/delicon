@@ -48,7 +48,8 @@ class CastController extends Controller
 
         $casts = $query->orderByDesc('is_recommended')
             ->orderBy('sort_order')
-            ->paginate(30);
+            ->paginate(30)
+            ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();
 
         return view('cast.index', compact('casts', 'castTypes', 'bodyTypes'));
     }
@@ -71,12 +72,28 @@ class CastController extends Controller
             ? CastFavorite::where('user_id', auth()->id())->where('cast_id', $cast->id)->exists()
             : false;
 
-        $similarCasts = $this->getSimilarCasts($cast);
+        // 類似キャスト（IDをキャッシュ → 軽量whereInで再取得）
+        $similarCastIds = Cache::remember("cast:similar_ids:{$cast->id}", 1800,
+            fn() => $this->getSimilarCasts($cast)->pluck('id')->all()
+        );
+        $similarCasts = $similarCastIds
+            ? Cast::active()->with(['shop'])->whereIn('id', $similarCastIds)
+                ->orderByRaw('FIELD(id,' . implode(',', $similarCastIds) . ')')
+                ->get()
+            : collect();
 
-        // 所属店が無料の場合：同エリア・有料店の似た女性を最大3件
         $shopPlan = $cast->shop?->plan ?? 5;
-        $nearbyPaidSimilarCasts = ($shopPlan >= 4 && $cast->shop?->area_id)
-            ? $this->getNearbyPaidSimilarCasts($cast)
+
+        // 無料店所属の場合：同エリア有料店の類似キャスト（IDキャッシュ）
+        $nearbyPaidSimilarCastIds = ($shopPlan >= 4 && $cast->shop?->area_id)
+            ? Cache::remember("cast:nearby_paid_similar_ids:{$cast->id}", 1800,
+                fn() => $this->getNearbyPaidSimilarCasts($cast)->pluck('id')->all()
+              )
+            : [];
+        $nearbyPaidSimilarCasts = $nearbyPaidSimilarCastIds
+            ? Cast::active()->with(['shop'])->whereIn('id', $nearbyPaidSimilarCastIds)
+                ->orderByRaw('FIELD(id,' . implode(',', $nearbyPaidSimilarCastIds) . ')')
+                ->get()
             : collect();
 
         $otherCasts = Cast::active()
@@ -106,39 +123,45 @@ class CastController extends Controller
 
         $noindex = mb_strlen($cast->comment ?? '') < 100;
 
-        // 所属店が無料の場合：同エリア・同ジャンルの有料店を最大3件
+        // 無料店所属の場合：同エリア・同ジャンルの有料店（店舗IDキャッシュ）
         $nearbyPaidShops = collect();
-        $shopPlan = $cast->shop?->plan ?? 5;
         if ($shopPlan >= 4) {
             $areaId  = $cast->shop?->area_id;
             $genreId = $cast->shop?->genre_id;
             if ($areaId && $genreId) {
-                $nearbyPaidShops = \App\Models\Shop::where('status', 'active')
-                    ->whereBetween('plan', [1, 3])
-                    ->where('genre_id', $genreId)
-                    ->where('area_id', $areaId)
-                    ->whereNotNull('main_image')
-                    ->orderByDesc('rank_score')
-                    ->limit(3)
-                    ->with('area:id,name,slug')
-                    ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
-                // 同エリアで3件未満なら都道府県まで広げる
-                if ($nearbyPaidShops->count() < 3) {
-                    $prefId = $cast->shop->prefecture_id;
-                    if ($prefId) {
-                        $found = $nearbyPaidShops->pluck('id')->all();
-                        $extra = \App\Models\Shop::where('status', 'active')
+                $nearbyPaidShopIds = Cache::remember("cast:nearby_paid_shop_ids:{$cast->id}", 3600,
+                    function () use ($cast, $areaId, $genreId) {
+                        $ids = \App\Models\Shop::where('status', 'active')
                             ->whereBetween('plan', [1, 3])
                             ->where('genre_id', $genreId)
-                            ->where('prefecture_id', $prefId)
-                            ->whereNotIn('id', $found)
+                            ->where('area_id', $areaId)
                             ->whereNotNull('main_image')
                             ->orderByDesc('rank_score')
-                            ->limit(3 - $nearbyPaidShops->count())
-                            ->with('area:id,name,slug')
-                            ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
-                        $nearbyPaidShops = $nearbyPaidShops->concat($extra);
+                            ->limit(3)
+                            ->pluck('id')->all();
+                        if (count($ids) < 3) {
+                            $prefId = $cast->shop->prefecture_id;
+                            if ($prefId) {
+                                $extra = \App\Models\Shop::where('status', 'active')
+                                    ->whereBetween('plan', [1, 3])
+                                    ->where('genre_id', $genreId)
+                                    ->where('prefecture_id', $prefId)
+                                    ->whereNotIn('id', $ids)
+                                    ->whereNotNull('main_image')
+                                    ->orderByDesc('rank_score')
+                                    ->limit(3 - count($ids))
+                                    ->pluck('id')->all();
+                                $ids = array_merge($ids, $extra);
+                            }
+                        }
+                        return $ids;
                     }
+                );
+                if ($nearbyPaidShopIds) {
+                    $nearbyPaidShops = \App\Models\Shop::whereIn('id', $nearbyPaidShopIds)
+                        ->with('area:id,name,slug')
+                        ->orderByRaw('FIELD(id,' . implode(',', $nearbyPaidShopIds) . ')')
+                        ->get(['id', 'name', 'plan', 'rank_score', 'main_image', 'area_id']);
                 }
             }
         }
@@ -176,7 +199,6 @@ class CastController extends Controller
     {
         $request = request();
 
-        // クローラー除外
         $ua = strtolower($request->userAgent() ?? '');
         if ($ua === '') return;
         foreach (['bot','crawl','spider','slurp','mediapartners','facebookexternalhit',
@@ -186,7 +208,6 @@ class CastController extends Controller
             if (str_contains($ua, $p)) return;
         }
 
-        // 同一IP 1時間以内の重複排除（ログイン済みはユーザーIDで、非ログインはIPで）
         if (auth()->check()) {
             $cacheKey = "cast_view:{$cast->id}:u" . auth()->id();
         } else {

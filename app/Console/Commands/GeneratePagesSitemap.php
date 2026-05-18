@@ -18,13 +18,17 @@ class GeneratePagesSitemap extends Command
         $base = rtrim(config('app.url'), '/');
         $urls = [];
 
-        // 固定ページ
+        // 固定ページ（noindexページは除外）
         foreach ([
-            ['/', '1.0', 'daily'],
-            ['/ranking/', '0.8', 'daily'],
-            ['/features/', '0.6', 'monthly'],
-            ['/inquiry/', '0.4', 'monthly'],
-            ['/alert/', '0.5', 'monthly'],
+            ['/',            '1.0', 'daily'],
+            ['/ranking/',    '0.8', 'daily'],
+            ['/inquiry/',    '0.4', 'monthly'],
+            ['/keisai/',     '0.7', 'monthly'],
+            ['/yorubiz/',    '0.7', 'monthly'],
+            ['/privacy/',    '0.3', 'yearly'],
+            ['/terms/',      '0.3', 'yearly'],
+            ['/advertiser/', '0.3', 'yearly'],
+            ['/company/',    '0.3', 'yearly'],
         ] as [$path, $priority, $freq]) {
             $urls[] = ['loc' => $base . $path, 'lastmod' => $now, 'changefreq' => $freq, 'priority' => $priority];
         }

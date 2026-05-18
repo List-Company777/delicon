@@ -26,6 +26,40 @@
     $lcpWebpImg = $ranking->first()->img_webp_url ?? null;
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ld_list, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@php
+    // BreadcrumbList
+    $ld_bc = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'TOP', 'item' => config('app.url') . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'デリヘル人気女性ランキング', 'item' => route('ranking.index') . '/'],
+    ]];
+    if ($pageType === 'pref' && $prefModel) {
+        $ld_bc['itemListElement'][] = ['@type' => 'ListItem', 'position' => 3, 'name' => $pageTitle, 'item' => $canonical];
+    } elseif ($pageType === 'area' && $prefModel) {
+        $ld_bc['itemListElement'][] = ['@type' => 'ListItem', 'position' => 3, 'name' => $prefModel->name . 'のデリヘル人気女性ランキング', 'item' => route('ranking.area', $prefModel->slug) . '/'];
+        $ld_bc['itemListElement'][] = ['@type' => 'ListItem', 'position' => 4, 'name' => $pageTitle, 'item' => $canonical];
+    }
+    // WebPage + areaServed（エリア・都道府県ページのみ）
+    $ld_wp = null;
+    if (($pageType === 'pref' || $pageType === 'area') && $prefModel) {
+        $areaName = $pageType === 'area' ? ($areaModel->name ?? $prefModel->name) : $prefModel->name;
+        $ld_wp = [
+            '@context'    => 'https://schema.org',
+            '@type'       => 'CollectionPage',
+            'name'        => $pageTitle,
+            'url'         => $canonical,
+            'description' => $pageDesc,
+            'areaServed'  => [
+                '@type' => 'AdministrativeArea',
+                'name'  => $areaName,
+                'containedInPlace' => ['@type' => 'Country', 'name' => '日本'],
+            ],
+        ];
+    }
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@if($ld_wp)
+<script type="application/ld+json" @nonce>{!! json_encode($ld_wp, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endif
 @if($lcpWebpImg)
 <link rel="preload" as="image" href="{{ $lcpWebpImg }}" type="image/webp" fetchpriority="high">
 @elseif($lcpImg)
@@ -40,9 +74,9 @@
     {{-- パンくず --}}
     <nav aria-label="パンくずリスト" class="text-xs text-[#6A6A7E] mb-4">
         <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
-        <li><a href="/" class="hover:text-deli-400">TOP</a></li>
+        <li><a href="{{ config('app.url') }}/" class="hover:text-deli-400">TOP</a></li>
         <li aria-hidden="true">/</li>
-        <li @if($pageType === 'top') aria-current="page" @endif><a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">人気女性ランキング</a></li>
+        <li @if($pageType === 'top') aria-current="page" @endif><a href="{{ route('ranking.index') }}/" class="hover:text-deli-400">デリヘル人気女性ランキング</a></li>
         @if($pageType === 'pref' || $pageType === 'area')
             <li aria-hidden="true">/</li>
             @if($pageType === 'area')
