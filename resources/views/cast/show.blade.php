@@ -22,7 +22,7 @@
         '@type'    => 'BreadcrumbList',
         'itemListElement' => [
             ['@type'=>'ListItem','position'=>1,'name'=>'ホーム','item'=>route('top').'/'],
-            ['@type'=>'ListItem','position'=>2,'name'=>'キャスト検索','item'=>route('cast.index').'/'],
+            ['@type'=>'ListItem','position'=>2,'name'=>'デリヘル女性一覧','item'=>url('/all/girl-list/').'/'],
         ],
     ];
     if ($cast->shop) {
@@ -33,24 +33,32 @@
     $approvedReviews = $cast->reviews->where('is_approved', true);
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
-@if($approvedReviews->count() > 0 && !$noindex)
 @php
-    $ld_person = [
-        '@context' => 'https://schema.org',
-        '@type'    => 'Person',
-        'name'     => $cast->name,
-        'url'      => route('cast.show', $cast->id) . '/',
-        'aggregateRating' => [
+    $ld_person = array_filter([
+        '@context'    => 'https://schema.org',
+        '@type'       => 'Person',
+        'name'        => $cast->name,
+        'url'         => route('cast.show', $cast->id) . '/',
+        'image'       => ($cast->img_url && !str_contains($cast->img_url, 'no-cast')) ? url($cast->img_url) : null,
+        'description' => $cast->comment ? mb_strimwidth(strip_tags($cast->comment), 0, 160, '…') : null,
+        'jobTitle'    => $cast->castType?->name ?? null,
+        'worksFor'    => $cast->shop ? [
+            '@type' => 'LocalBusiness',
+            'name'  => $cast->shop->name,
+            'url'   => route('shop.show', $cast->shop->id) . '/',
+        ] : null,
+    ], fn($v) => $v !== null);
+    if ($approvedReviews->count() > 0 && !$noindex) {
+        $ld_person['aggregateRating'] = [
             '@type'       => 'AggregateRating',
             'ratingValue' => round($approvedReviews->avg('rating'), 1),
             'bestRating'  => 5,
             'worstRating' => 1,
             'ratingCount' => $approvedReviews->count(),
-        ],
-    ];
+        ];
+    }
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($ld_person, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
-@endif
 @endpush
 
 @section('content')
