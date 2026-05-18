@@ -511,7 +511,7 @@
         'itemListElement' => (function() use ($shop) {
             $items = [
                 ['name'=>'ホーム',   'item'=>route('top').'/'],
-                ['name'=>'店舗一覧','item'=>route('shop.list',['area_slug'=>'all']).'/'],
+                ['name'=>'デリヘル店舗一覧','item'=>route('shop.list',['area_slug'=>'all']).'/'],
             ];
             if ($shop->prefecture) $items[] = ['name'=>$shop->prefecture->name,'item'=>route('shop.list',['area_slug'=>$shop->prefecture->slug]).'/'];
             if ($shop->area)       $items[] = ['name'=>$shop->area->name,      'item'=>route('shop.list',['area_slug'=>$shop->area->slug]).'/'];
@@ -523,6 +523,7 @@
         '@context'    => 'https://schema.org',
         '@type'       => 'LocalBusiness',
         'name'        => $shop->name,
+        'url'         => route('shop.show', $shop->id) . '/',
         'telephone'   => $shop->tel ?? null,
         'address'     => $shop->address ? [
             '@type'           => 'PostalAddress',
@@ -532,8 +533,13 @@
             'postalCode'      => $shop->postal_code ?? null,
             'addressCountry'  => 'JP',
         ] : null,
-        'image'       => $shop->main_image_url ? [$shop->main_image_url] : null,
-        'openingHours' => $shop->all_time ? ['Mo-Su 00:00-23:59'] : null,
+        'image'        => $shop->main_image_url ? [$shop->main_image_url] : null,
+        'priceRange'   => $shop->price_60 ? '¥' . number_format($shop->price_60) . '〜' : null,
+        'openingHours' => $shop->all_time
+            ? ['Mo-Su 00:00-23:59']
+            : ($shop->open_time && $shop->close_time
+                ? ['Mo-Su ' . substr($shop->open_time, 0, 5) . '-' . substr($shop->close_time, 0, 5)]
+                : null),
     ];
     // null を取り除く
     $ld_local = array_filter($ld_local, fn($v) => $v !== null);
