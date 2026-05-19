@@ -116,26 +116,22 @@
                 <td class="px-4 py-3 text-gray-400 text-xs">{{ $shop->id }}</td>
                 <td class="px-4 py-3 font-medium">
                     <a href="{{ route('admin.shops.show', $shop->id) }}" class="text-gray-800 hover:underline">{{ $shop->name }}</a>
-                    <form action="{{ route('admin.shops.updateGenre', $shop->id) }}" method="POST" class="inline ml-1">
-                        @csrf @method('PATCH')
-                        <select name="genre_id" onchange="this.form.submit()"
-                                class="text-xs border-0 bg-transparent {{ $shop->genre_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0">
-                            <option value="">— ジャンル未設定 —</option>
-                            @foreach($genres as $g)
-                                <option value="{{ $g->id }}" {{ $shop->genre_id == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
-                            @endforeach
-                        </select>
-                    </form>
-                    <form action="{{ route('admin.shops.updateShopType', $shop->id) }}" method="POST" class="inline ml-1">
-                        @csrf @method('PATCH')
-                        <select name="shop_type_id" onchange="this.form.submit()"
-                                class="text-xs border-0 bg-transparent {{ $shop->shop_type_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0">
-                            <option value="">— 業種未設定 —</option>
-                            @foreach($shopTypes as $t)
-                                <option value="{{ $t->id }}" {{ $shop->shop_type_id == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
-                            @endforeach
-                        </select>
-                    </form>
+                    <select data-url="/admin/shops/{{ $shop->id }}/genre/"
+                            data-field="genre_id"
+                            class="text-xs border-0 bg-transparent {{ $shop->genre_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0 ml-1">
+                        <option value="">— ジャンル未設定 —</option>
+                        @foreach($genres as $g)
+                            <option value="{{ $g->id }}" {{ $shop->genre_id == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                        @endforeach
+                    </select>
+                    <select data-url="/admin/shops/{{ $shop->id }}/shop-type/"
+                            data-field="shop_type_id"
+                            class="text-xs border-0 bg-transparent {{ $shop->shop_type_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0 ml-1">
+                        <option value="">— 業種未設定 —</option>
+                        @foreach($shopTypes as $t)
+                            <option value="{{ $t->id }}" {{ $shop->shop_type_id == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
+                        @endforeach
+                    </select>
                 </td>
                 <td class="px-4 py-3">
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium {{ $planInfo['color'] }}">{{ $planInfo['label'] }}</span>
@@ -218,4 +214,27 @@
 </div>
 @endif
 
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('select[data-url]').forEach(function(select) {
+    select.addEventListener('change', function() {
+        const url   = this.dataset.url;
+        const field = this.dataset.field;
+        const token = document.querySelector('meta[name=csrf-token]').content;
+        const body  = new FormData();
+        body.append('_method', 'PATCH');
+        body.append('_token', token);
+        body.append(field, this.value);
+        const sel = this;
+        fetch(url, { method: 'POST', body: body })
+            .then(function(r) {
+                if (r.ok || r.redirected) {
+                    sel.className = sel.className.replace('text-red-400', 'text-gray-400');
+                }
+            });
+    });
+});
+</script>
+@endpush
 @endsection
