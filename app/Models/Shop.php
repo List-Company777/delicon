@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\ShopPricePlan;
 use App\Models\ShopOtherCharge;
 use App\Models\XmlFeed;
+use App\Models\Cast;
 
 class Shop extends Model
 {
@@ -266,6 +267,35 @@ class Shop extends Model
         return $this->belongsToMany(User::class, 'shop_users')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Shop $shop) {
+            // キャスト画像（削除前に取得）
+            Cast::where('shop_id', $shop->id)->with('images')->get()->each(function (Cast $cast) {
+                // プロフィール画像（新システムでアップロードされたもののみ）
+                if ($cast->img_file_name
+                    && !str_starts_with($cast->img_file_name, '/img/common/')
+                    && !str_starts_with($cast->img_file_name, '/img/girl/00/')) {
+                    @unlink(public_path($cast->img_file_name . 'big.jpg'));
+                    @unlink(public_path($cast->img_file_name . 'big.jpg.webp'));
+                }
+                // 追加写真（cast_images）
+                foreach ($cast->images as $img) {
+                    Storage::disk('public')->delete([
+                        $img->img_path,
+                        str_replace('.jpg', '.webp', $img->img_path),
+                    ]);
+                }
+                // 日記画像
+                Storage::disk('public')->deleteDirectory("casts/{$cast->id}/diary");
+            });
+
+            // 店舗ディレクトリ（メイン画像・求人画像）
+            Storage::disk('public')->deleteDirectory("company/{$shop->id}");
+        });
     }
 
     public function reviews()
