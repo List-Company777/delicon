@@ -17,8 +17,8 @@ class UpdateCastScores extends Command
             UPDATE casts c
             JOIN shops s ON s.id = c.shop_id
             SET c.cast_score = (
-                /* 店舗プランボーナス: (4-plan)*10 → plan1=30/plan2=20/plan3=10 */
-                (4 - s.plan) * 10
+                /* 店舗プランボーナス: plan1=30/plan2=20/plan3=10/plan4以上=0 */
+                CASE WHEN s.plan = 1 THEN 30 WHEN s.plan = 2 THEN 20 WHEN s.plan = 3 THEN 10 ELSE 0 END
 
                 /* プロフィール文字数（100文字以上でプラス） */
                 + CASE WHEN CHAR_LENGTH(COALESCE(c.comment, '')) >= 100 THEN 10 ELSE -10 END
@@ -61,7 +61,36 @@ class UpdateCastScores extends Command
         ");
 
         $count = DB::table('casts')->where('status', 'active')->count();
-        $this->info("Done. Updated {$count} casts.");
+        $this->info("Updated {$count} cast scores. Rebuilding sort_rank...");
+
+        // ラウンドロビン sort_rank:
+        // 各店の中でスコア順に within_shop_rank を付与し、
+        // within_shop_rank → cast_score DESC → plan ASC の順で全体順位を決定する。
+        // 結果: 各店の1番手が全店分並んでから、各店の2番手が並ぶ形になり店独占を防ぐ。
+        DB::statement("
+            UPDATE casts c
+            JOIN (
+                SELECT id, @r := @r + 1 AS rk
+                FROM (
+                    SELECT c2.id,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY c2.shop_id
+                               ORDER BY c2.cast_score DESC, c2.id ASC
+                           ) AS within_shop_rank,
+                           c2.cast_score,
+                           s2.plan
+                    FROM casts c2
+                    JOIN shops s2 ON s2.id = c2.shop_id
+                    WHERE c2.status = 'active' AND s2.status = 'active'
+                ) base
+                JOIN (SELECT @r := 0) init
+                ORDER BY within_shop_rank ASC, cast_score DESC, plan ASC, id ASC
+            ) ranked ON ranked.id = c.id
+            SET c.sort_rank = ranked.rk
+            WHERE c.status = 'active'
+        ");
+
+        $this->info("Done. sort_rank assigned to {$count} casts.");
         return self::SUCCESS;
     }
 }

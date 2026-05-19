@@ -7,6 +7,7 @@ use App\Models\Cast;
 use App\Models\CastDiary;
 use App\Models\CastReview;
 use App\Models\Prefecture;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -209,28 +210,26 @@ class GirlListController extends Controller
 
     private function getCasts(Request $request, string $area_slug, ?Area $areaModel, ?Prefecture $prefOnlyModel, string $cast_tab)
     {
+        // エリアフィルター: shop_id の IN 条件で絞る（whereHas の相関 EXISTS より高速）
+        $shopQuery = Shop::where('status', 'active');
+        $this->applyAreaScope($shopQuery, $areaModel, $prefOnlyModel, $area_slug);
+        $shopIds = $shopQuery->pluck('id')->all();
+
         $query = Cast::with(['shop'])
             ->where('status', 'active')
-            ->whereHas('shop', function ($q) use ($area_slug, $areaModel, $prefOnlyModel) {
-                $q->where('status', 'active');
-                $this->applyAreaScope($q, $areaModel, $prefOnlyModel, $area_slug);
-            });
+            ->whereIn('shop_id', $shopIds);
 
         $this->applyFilters($query, $request);
 
         if ($cast_tab === 'standby') {
-            $query->whereDate('working_date', today());
-            $query->orderByDesc('cast_score')
-                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
-                  ->orderBy('casts.id');
+            $query->whereDate('working_date', today())
+                  ->orderBy('sort_rank');
         } elseif ($cast_tab === 'new') {
             $query->where('is_new', true)
-                  ->where(fn($q) => $q->whereNull('new_since')->orWhere('new_since', '>=', now()->subDays(30)));
-            $query->orderByDesc('new_since')->orderByDesc('created_at');
+                  ->where(fn($q) => $q->whereNull('new_since')->orWhere('new_since', '>=', now()->subDays(30)))
+                  ->orderByDesc('new_since')->orderByDesc('created_at');
         } else {
-            $query->orderByDesc('cast_score')
-                  ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
-                  ->orderBy('casts.id');
+            $query->orderBy('sort_rank');
         }
 
         return $query->paginate(self::PER_PAGE)->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();

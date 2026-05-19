@@ -64,8 +64,10 @@ Schedule::command('notify:schedules')->dailyAt('18:00');
 // 新人キャスト登録通知（毎日10:00）
 Schedule::command('notify:new-casts')->dailyAt('10:00');
 
-// キャスト掲載スコア更新（毎日午前1時）
+// キャスト掲載スコア更新・sort_rank再構築（1日3回: 深夜/朝/夕方ピーク前）
 Schedule::command('casts:update-scores')->dailyAt('01:00');
+Schedule::command('casts:update-scores')->dailyAt('07:00');
+Schedule::command('casts:update-scores')->dailyAt('18:00');
 
 // 生年月日からの年齢自動更新（毎日午前0時）
 Schedule::command("casts:update-ages")->dailyAt("00:30");

@@ -581,7 +581,7 @@
                     <div class="aspect-[3/4] overflow-hidden bg-surface-500 relative">
                         <img src="{{ $cast->img_url }}"
                              alt="{{ $cast->name }}"
-                             @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
+                             @if($loop->first) fetchpriority="high" @elseif($loop->index < 12) loading="eager" @else loading="lazy" @endif
                              class="img-onerror-cast w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
                         <div class="absolute top-1.5 left-1.5 flex flex-col gap-1">
                             @if($isStandby)
