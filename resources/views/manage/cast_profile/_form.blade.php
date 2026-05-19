@@ -199,6 +199,22 @@
         </td>
     </tr>
     <tr class="border-b border-gray-100">
+        <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 align-top whitespace-nowrap">特徴・チャーム</th>
+        <td class="px-4 py-3">
+            <div class="flex flex-wrap gap-2">
+                @foreach($charmTypes as $charm)
+                <label class="flex items-center gap-1.5 cursor-pointer bg-gray-50 border border-gray-200 hover:border-red-300 rounded-full px-3 py-1.5 text-sm transition has-[:checked]:bg-red-50 has-[:checked]:border-red-400">
+                    <input type="checkbox" name="charm_ids[]" value="{{ $charm->id }}"
+                           @checked(in_array($charm->id, old('charm_ids', $cast?->charms->pluck('id')->all() ?? [])))
+                           class="accent-red-600 w-3.5 h-3.5">
+                    {{ $charm->name }}
+                </label>
+                @endforeach
+            </div>
+            <p class="text-xs text-gray-400 mt-2">複数選択できます。AIが自動で入力することもあります（確認・修正可）</p>
+        </td>
+    </tr>
+    <tr class="border-b border-gray-100">
         <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">公開状態</th>
         <td class="px-4 py-3">
             <div class="flex gap-4">

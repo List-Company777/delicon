@@ -8,6 +8,7 @@ use App\Models\Cast;
 use App\Models\CastFavorite;
 use App\Models\CastType;
 use App\Models\CastBodyType;
+use App\Models\CastCharmType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -63,7 +64,8 @@ class CastProfileController extends BaseController
         $currentCount = Cast::where('shop_id', $shop->id)->where('status', 'active')->count();
         $castTypes = CastType::orderBy('id')->get();
         $bodyTypes = CastBodyType::orderBy('id')->get();
-        return view('manage.cast_profile.create', compact('shop', 'castTypes', 'bodyTypes', 'limit', 'currentCount'));
+        $charmTypes = CastCharmType::orderBy('sort_order')->orderBy('id')->get();
+        return view('manage.cast_profile.create', compact('shop', 'castTypes', 'bodyTypes', 'charmTypes', 'limit', 'currentCount'));
     }
 
     private function castLimit(int $plan): ?int
@@ -101,6 +103,8 @@ class CastProfileController extends BaseController
             'join_date'      => ['nullable', 'date'],
             'date_of_birth'  => ['nullable', 'date', 'before_or_equal:' . now()->subYears(18)->format('Y-m-d')],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'charm_ids'      => ['nullable', 'array'],
+            'charm_ids.*'    => ['integer', 'exists:cast_charm_types,id'],
         ]);
 
         // 生年月日から年齢を自動計算
@@ -141,6 +145,7 @@ class CastProfileController extends BaseController
         }
 
         $cast->save();
+        $cast->charms()->sync($request->input('charm_ids', []));
 
         // 新人登録通知
         if ($cast->join_date) {
@@ -157,7 +162,8 @@ class CastProfileController extends BaseController
         $cast = Cast::where('shop_id', $shop->id)->findOrFail($id);
         $castTypes = CastType::orderBy('id')->get();
         $bodyTypes = CastBodyType::orderBy('id')->get();
-        return view('manage.cast_profile.edit', compact('shop', 'cast', 'castTypes', 'bodyTypes'));
+        $charmTypes = CastCharmType::orderBy('sort_order')->orderBy('id')->get();
+        return view('manage.cast_profile.edit', compact('shop', 'cast', 'castTypes', 'bodyTypes', 'charmTypes'));
     }
 
     public function update(Request $request, int $id)
@@ -182,6 +188,8 @@ class CastProfileController extends BaseController
             'join_date'      => ['nullable', 'date'],
             'date_of_birth'  => ['nullable', 'date', 'before_or_equal:' . now()->subYears(18)->format('Y-m-d')],
             'photo'          => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'charm_ids'      => ['nullable', 'array'],
+            'charm_ids.*'    => ['integer', 'exists:cast_charm_types,id'],
         ]);
 
         // 生年月日から年齢を自動計算
@@ -222,6 +230,7 @@ class CastProfileController extends BaseController
         }
 
         $cast->save();
+        $cast->charms()->sync($request->input('charm_ids', []));
 
         // 新たに出勤フラグが立った場合のみ通知
         if ($nowWorking && !$wasWorking) {

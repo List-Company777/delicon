@@ -69,4 +69,9 @@ return [
         'voice_id'    => env('HEYGEN_VOICE_ID', '289430c137354573a3ab773c91f05094'),
     ],
 
+    'vapid' => [
+        'public_key'  => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject'     => 'mailto:send@delicon.jp',
+    ],
 ];
