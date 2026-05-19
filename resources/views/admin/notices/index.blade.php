@@ -34,9 +34,10 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @foreach($notices as $notice)
-                <tr class="hover:bg-gray-50 transition cursor-pointer"
-                    onclick="location.href='{{ route('admin.notices.show', $notice) }}'">
-                    <td class="px-4 py-3 font-medium text-gray-800">{{ $notice->title }}</td>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-medium">
+                        <a href="{{ route('admin.notices.show', $notice) }}/" class="text-gray-800 hover:text-yellow-600">{{ $notice->title }}</a>
+                    </td>
                     <td class="px-4 py-3 text-xs text-gray-500">{{ $notice->targetLabel() }}</td>
                     <td class="px-4 py-3">
                         @if($notice->isSent())
