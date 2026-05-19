@@ -205,7 +205,7 @@
                 @foreach($charmTypes as $charm)
                 <label class="flex items-center gap-1.5 cursor-pointer bg-gray-50 border border-gray-200 hover:border-red-300 rounded-full px-3 py-1.5 text-sm transition has-[:checked]:bg-red-50 has-[:checked]:border-red-400">
                     <input type="checkbox" name="charm_ids[]" value="{{ $charm->id }}"
-                           @checked(in_array($charm->id, old('charm_ids', $cast?->charms->pluck('id')->all() ?? [])))
+                           @checked(in_array($charm->id, old('charm_ids', $cast ? $cast->charms->pluck('id')->all() : [])))
                            class="accent-red-600 w-3.5 h-3.5">
                     {{ $charm->name }}
                 </label>
