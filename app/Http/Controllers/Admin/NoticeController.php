@@ -80,7 +80,11 @@ class NoticeController extends Controller
 
     public function send(AdminNotice $notice)
     {
-        if ($notice->isSent()) {
+        $claimed = AdminNotice::where('id', $notice->id)
+            ->where('status', '!=', 'sent')
+            ->update(['status' => 'sent', 'sent_at' => now()]);
+
+        if (!$claimed) {
             return back()->withErrors(['error' => 'すでに送信済みです']);
         }
 
@@ -88,15 +92,12 @@ class NoticeController extends Controller
         $count = 0;
 
         foreach ($users as $user) {
-            Mail::to($user->email, $user->name)->queue(new AdminNoticeMail($notice));
+            Mail::to($user->email, $user->name)
+                ->later(now()->addMilliseconds($count * 600), new AdminNoticeMail($notice));
             $count++;
         }
 
-        $notice->update([
-            'status'     => 'sent',
-            'sent_at'    => now(),
-            'sent_count' => $count,
-        ]);
+        $notice->update(['sent_count' => $count]);
 
         return redirect()->route('admin.notices.index')
             ->with('success', "{$count}件のメールを送信キューに追加しました。");

@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class AdminNoticeMail extends Mailable
@@ -21,6 +22,15 @@ class AdminNoticeMail extends Mailable
         return new Envelope(
             subject: '【デリヘルリスト】' . $this->notice->title,
             replyTo: [new Address(config('mail.admin_address'), 'デリヘルリスト')],
+        );
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(
+            headers: [
+                'List-Unsubscribe' => '<mailto:' . config('mail.admin_address') . '?subject=配信停止希望>',
+            ],
         );
     }
 
