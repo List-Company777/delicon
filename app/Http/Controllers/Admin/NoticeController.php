@@ -74,7 +74,7 @@ class NoticeController extends Controller
     private function getTargetUsers(AdminNotice $notice)
     {
         return User::whereHas('shops', function ($q) use ($notice) {
-            $q->wherePivot('role', 'owner');
+            $q->where('shop_users.role', 'owner');
             if ($notice->target !== 'all') {
                 $q->where('shops.status', $notice->target);
             }
