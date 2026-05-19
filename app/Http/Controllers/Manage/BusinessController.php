@@ -72,6 +72,7 @@ class BusinessController extends BaseController
         $taxRaw      = $request->input('tax_included');
         $taxIncluded = ($taxRaw === '' || $taxRaw === null) ? null : (bool) $taxRaw;
 
+        $detail = $shop->detail;
         $detail = ShopDetail::updateOrCreate(
             ['shop_id' => $shop->id],
             [

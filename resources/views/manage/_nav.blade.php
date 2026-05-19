@@ -22,15 +22,15 @@
 {{-- 代理操作中バナー --}}
 @if(auth()->user()->isPartner() && session()->has('acting_shop_id'))
 @php $actingShop = \App\Models\Shop::find(session('acting_shop_id')); @endphp
-<div class="bg-amber-50 border-b border-amber-200">
-    <div class="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between">
-        <p class="text-sm text-amber-800">
-            <span class="font-bold">代理操作中：{{ $actingShop?->name }}</span>
-            <span class="text-amber-600 ml-2">（{{ auth()->user()->partner?->company_name }}）</span>
-        </p>
-        <form action="{{ route('manage.partner.stopActing') }}/" method="POST">
+<div class="bg-amber-400 border-b-2 border-amber-500 px-4 py-3">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div class="flex items-center gap-2 flex-1">
+            <span class="text-amber-900 font-bold text-sm">⚠ 代理操作中：{{ $actingShop?->name }}</span>
+            <span class="text-amber-800 text-sm">（{{ auth()->user()->partner?->company_name }}）</span>
+        </div>
+        <form action="{{ route('manage.partner.stopActing') }}/" method="POST" class="shrink-0">
             @csrf
-            <button type="submit" class="text-xs text-amber-700 hover:underline font-medium">← 店舗一覧に戻る</button>
+            <button type="submit" class="bg-gray-900 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-gray-700 whitespace-nowrap">← 代理店ページに戻る</button>
         </form>
     </div>
 </div>

@@ -161,6 +161,22 @@
         </div>
     </header>
 
+    {{-- なりすましログイン中バナー --}}
+    @if(session('impersonating_admin_id'))
+    <div class="bg-amber-400 border-b-2 border-amber-500 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="flex items-center gap-2 flex-1">
+                <span class="text-amber-900 font-bold text-sm">⚠ 管理者として店舗アカウントにログイン中</span>
+                <span class="text-amber-800 text-sm">（{{ auth()->user()->name ?? auth()->user()->email }}）</span>
+            </div>
+            <form action="/admin/shops/stop-impersonating/" method="POST" class="shrink-0">
+                @csrf
+                <button type="submit" class="bg-gray-900 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-gray-700 whitespace-nowrap">← 管理者ページに戻る</button>
+            </form>
+        </div>
+    </div>
+    @endif
+
     <main>
         @yield('content')
     </main>
@@ -283,5 +299,64 @@
     }, true);
     </script>
     @stack('scripts')
+    <script @nonce>
+    (function() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+        const VAPID_PUBLIC = '{{ config("services.vapid.public_key") }}';
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const raw = atob(base64);
+            return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+        }
+
+        async function subscribe(reg) {
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC),
+            });
+            const key = sub.getKey('p256dh');
+            const auth = sub.getKey('auth');
+            await fetch('/push/subscribe/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '',
+                },
+                body: JSON.stringify({
+                    endpoint:  sub.endpoint,
+                    publicKey: key  ? btoa(String.fromCharCode(...new Uint8Array(key)))  : null,
+                    authToken: auth ? btoa(String.fromCharCode(...new Uint8Array(auth))) : null,
+                    encoding:  'aesgcm',
+                }),
+            });
+        }
+
+        navigator.serviceWorker.register('/sw.js').then(async reg => {
+            const btn = document.getElementById('push-subscribe-btn');
+            if (!btn) return;
+
+            const perm = Notification.permission;
+            if (perm === 'granted') {
+                const existing = await reg.pushManager.getSubscription();
+                if (existing) { btn.closest('[data-push-prompt]')?.remove(); return; }
+            }
+            if (perm === 'denied') { btn.closest('[data-push-prompt]')?.remove(); return; }
+
+            btn.closest('[data-push-prompt]').style.display = 'flex';
+
+            btn.addEventListener('click', async () => {
+                try {
+                    await subscribe(reg);
+                    btn.closest('[data-push-prompt]').remove();
+                } catch (e) {
+                    console.warn('Push subscribe failed', e);
+                }
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

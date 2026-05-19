@@ -17,8 +17,6 @@ use App\Http\Controllers\CastController;
 use App\Http\Controllers\Manage\ShopInfoController;
 use App\Http\Controllers\Manage\ShopNewsController;
 use App\Http\Controllers\Manage\BusinessController;
-use App\Http\Controllers\Manage\CastJobController;
-use App\Http\Controllers\Manage\StaffJobController;
 use App\Http\Controllers\Manage\ContactController;
 use App\Http\Controllers\Manage\ApplicationController as ManageApplicationController;
 use App\Http\Controllers\Auth\VisitorRegisterController;
@@ -170,13 +168,6 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/business/edit/',        [BusinessController::class, 'edit'])->name('business.edit');
     Route::put('/business/',             [BusinessController::class, 'update'])->name('business.update');
 
-    // キャスト求人
-    Route::get('/cast/',                 [CastJobController::class, 'index'])->name('cast.index');
-    Route::get('/cast/create/',          [CastJobController::class, 'create'])->name('cast.create');
-    Route::post('/cast/',                [CastJobController::class, 'store'])->name('cast.store');
-    Route::get('/cast/{id}/edit/',       [CastJobController::class, 'edit'])->name('cast.edit')->where('id', '[0-9]+');
-    Route::put('/cast/{id}/',            [CastJobController::class, 'update'])->name('cast.update')->where('id', '[0-9]+');
-    Route::delete('/cast/{id}/',         [CastJobController::class, 'destroy'])->name('cast.destroy')->where('id', '[0-9]+');
 
     // 在籍キャスト管理（deliconサイト専用）
     Route::get('/casts/',                 [CastProfileController::class, 'index'])->name('cast-profile.index');
@@ -231,13 +222,6 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/contact/',              [ContactController::class, 'show'])->name('contact');
     Route::post('/contact/',             [ContactController::class, 'send'])->name('contact.send');
 
-    // スタッフ求人
-    Route::get('/staff/',                [StaffJobController::class, 'index'])->name('staff.index');
-    Route::get('/staff/create/',         [StaffJobController::class, 'create'])->name('staff.create');
-    Route::post('/staff/',               [StaffJobController::class, 'store'])->name('staff.store');
-    Route::get('/staff/{id}/edit/',      [StaffJobController::class, 'edit'])->name('staff.edit')->where('id', '[0-9]+');
-    Route::put('/staff/{id}/',           [StaffJobController::class, 'update'])->name('staff.update')->where('id', '[0-9]+');
-    Route::delete('/staff/{id}/',        [StaffJobController::class, 'destroy'])->name('staff.destroy')->where('id', '[0-9]+');
 });
 
 // 検索（クエリ文字列ベース）
@@ -264,6 +248,9 @@ Route::post('/apply/thread/{token}/message/', [\App\Http\Controllers\ThreadContr
 // 掲載継続確認（ログイン不要）
 Route::get('/manage/alive/{token}/', [\App\Http\Controllers\Manage\AliveController::class, 'confirm'])->name('manage.alive');
 
+// なりすまし解除（auth のみ・admin不要）
+Route::post('/admin/shops/stop-impersonating/', [\App\Http\Controllers\Admin\ShopReviewController::class, 'stopImpersonating'])->name('admin.shops.stopImpersonating')->middleware('auth');
+
 // Admin（サイト管理者専用）
 Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard/',                      [AdminDashboard::class, 'index'])->name('dashboard');
@@ -288,6 +275,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::get('/banner-check/',                   [\App\Http\Controllers\Admin\BannerCheckController::class, 'index'])->name('banner-check.index');
     Route::post('/banner-check/{id}/check/',       [\App\Http\Controllers\Admin\BannerCheckController::class, 'check'])->name('banner-check.check')->where('id', '[0-9]+');
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
+    Route::post('/shops/{id}/login-as/',          [\App\Http\Controllers\Admin\ShopReviewController::class, 'loginAs'])->name('shops.loginAs')->where('id', '[0-9]+');
     Route::get('/shops/{id}/permit-download/',     [\App\Http\Controllers\Admin\ShopReviewController::class, 'downloadPermit'])->name('shops.permit-download')->where('id', '[0-9]+');
 
     // 代理店移管
@@ -421,6 +409,10 @@ Route::get('/{area_slug}/shop-list/', [\App\Http\Controllers\SearchController::c
 Route::get('/{area_slug}/shop-list/{filter_slug}/', [\App\Http\Controllers\SearchController::class, 'shopListFilter'])
     ->where(['area_slug' => '[a-z0-9\-]+', 'filter_slug' => '[a-z0-9\-]+'])
     ->name('shop.list.filter');
+
+// Web Push 購読管理
+Route::post('/push/subscribe/',   [\App\Http\Controllers\PushController::class, 'subscribe'])->name('push.subscribe')->middleware('throttle:10,1');
+Route::post('/push/unsubscribe/', [\App\Http\Controllers\PushController::class, 'unsubscribe'])->name('push.unsubscribe');
 
 // 旧URLからの301リダイレクト (SEO保全)
 Route::get('/{gender}/{area_slug}/', fn($gender, $area_slug) => redirect("/{$area_slug}/shop-list/", 301))

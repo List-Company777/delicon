@@ -176,6 +176,39 @@ class ShopReviewController extends Controller
         return back()->with('success', 'ジャンルを更新しました');
     }
 
+    public function loginAs(int $id)
+    {
+        $shop  = Shop::with(['users' => fn($q) => $q->wherePivot('role', 'owner')])->findOrFail($id);
+        $owner = $shop->users->first();
+
+        if (!$owner) {
+            return back()->with('error', 'この店舗にオーナーが紐づいていません。');
+        }
+
+        if (!$owner->hasVerifiedEmail()) {
+            $owner->markEmailAsVerified();
+        }
+
+        session(['impersonating_admin_id' => auth()->id(), 'impersonating_shop_id' => $shop->id]);
+        auth()->login($owner);
+
+        return redirect('/manage/dashboard/');
+    }
+
+    public function stopImpersonating()
+    {
+        $adminId = session('impersonating_admin_id');
+        if (!$adminId) {
+            return redirect('/');
+        }
+
+        $shopId = session('impersonating_shop_id');
+        session()->forget(['impersonating_admin_id', 'impersonating_shop_id']);
+        auth()->loginUsingId($adminId);
+
+        return redirect($shopId ? '/admin/shops/' . $shopId . '/' : '/admin/shops/');
+    }
+
     public function destroy(int $id)
     {
         $shop = Shop::findOrFail($id);

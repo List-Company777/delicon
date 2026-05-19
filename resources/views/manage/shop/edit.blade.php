@@ -35,7 +35,7 @@
                 </td>
             </tr>
             <tr class="border-b border-gray-100">
-                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">業種</th>
+                <th class="bg-gray-50 text-gray-500 font-normal text-left px-4 py-3 whitespace-nowrap">ジャンル</th>
                 <td class="px-4 py-3">
                     <select name="genre_id"
                             class="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 w-48">

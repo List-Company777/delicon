@@ -399,7 +399,8 @@ class SearchController extends Controller
                 ->pluck('shop_details.id')->all();
         } else {
             // デリヘルリストは店舗案内サイト（求人なし）→ Shop を直接検索
-            $query = Shop::where('status', 'active')->where('plan', '<=', 4)
+            // plan: 1-3=有料掲載, 4=リンクあり無料, 5=リンクなし無料（全プラン検索対象）
+            $query = Shop::where('status', 'active')->where('plan', '<=', 5)
                 ->when($prefSlug, fn($q) => $q->whereHas('area.prefecture', fn($p) => $p->where('slug', $prefSlug)))
                 ->when($area, fn($q) => $useSlug
                     ? $q->whereHas('area', fn($a) =>

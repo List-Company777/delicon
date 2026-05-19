@@ -13,6 +13,12 @@
     @else
         <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full">非公開</span>
     @endif
+    @if($shop->users->isNotEmpty())
+    <form action="{{ route('admin.shops.loginAs', $shop->id) }}/" method="POST" class="ml-auto">
+        @csrf
+        <button type="submit" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium">管理画面でログイン</button>
+    </form>
+    @endif
 </div>
 
 @if(session('success'))
@@ -41,6 +47,10 @@
                 </tr>
                 <tr>
                     <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">業種</th>
+                    <td class="px-5 py-3 text-gray-700">{{ $shop->shopType?->name ?? '—' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">ジャンル</th>
                     <td class="px-5 py-3 text-gray-700">{{ $shop->genre?->name ?? '—' }}</td>
                 </tr>
                 <tr>

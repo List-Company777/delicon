@@ -73,3 +73,6 @@ Schedule::command("coupons:send-expiry-reminders")->dailyAt("10:00");
 
 // 月次プラン処理：継続申し込み反映 + 期限切れ無料化（毎月1日 00:10）
 Schedule::command('plans:monthly-process')->monthlyOn(1, '00:10');
+
+// 毎週木曜 18:00 に週末プッシュ通知送信
+Schedule::command('push:weekly')->weeklyOn(4, '18:00');

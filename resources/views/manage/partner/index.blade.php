@@ -59,7 +59,7 @@
     @if($shops->isEmpty())
         <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
             <p class="mb-2">紹介店舗がまだありません</p>
-            <p class="text-xs">紹介URL：<span class="font-mono text-gray-600">{{ url('/register?ref=' . $partner->referral_code) }}/</span></p>
+            <p class="text-xs">紹介URL：<span class="font-mono text-gray-600">{{ url('/register?ref=' . $partner->referral_code) }}</span></p>
         </div>
     @else
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -270,7 +270,7 @@
 
     <div class="mt-4 p-4 bg-gray-50 rounded-lg text-xs text-gray-500">
         <p class="font-medium text-gray-600 mb-1">紹介URL</p>
-        <p class="font-mono">{{ url('/register?ref=' . $partner->referral_code) }}/</p>
+        <p class="font-mono">{{ url('/register?ref=' . $partner->referral_code) }}</p>
         <p class="mt-1">このURLから登録した店舗は自動的にあなたの紹介店舗として記録されます</p>
     </div>
     @endif

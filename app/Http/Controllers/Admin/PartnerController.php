@@ -147,8 +147,9 @@ class PartnerController extends Controller
             'name'              => $data['name'],
             'email'             => $data['email'],
             'password'          => Hash::make($data['password']),
+            'role'              => 'agency',
             'partner_id'        => $partner->id,
-            'email_verified_at' => now(), // 代理店はadminが発行するので認証不要
+            'email_verified_at' => now(),
         ]);
 
         return back()->with('success', 'ログインユーザーを作成しました');
