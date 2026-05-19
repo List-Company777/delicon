@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PasswordController extends Controller
 {
@@ -34,5 +36,28 @@ class PasswordController extends Controller
         $user->update(['password' => Hash::make($request->password)]);
 
         return back()->with('success', 'パスワードを変更しました');
+    }
+
+    public function updateEmail(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+        ], [
+            'email.required' => 'メールアドレスを入力してください',
+            'email.email'    => '正しいメールアドレスの形式で入力してください',
+            'email.unique'   => 'このメールアドレスはすでに使用されています',
+        ]);
+
+        $user->update([
+            'email'              => $request->email,
+            'email_verified_at'  => null,
+            'email_bounced_at'   => null,
+        ]);
+
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('email_success', 'メールアドレスを変更しました。確認メールを送信しましたので認証をお願いします。');
     }
 }

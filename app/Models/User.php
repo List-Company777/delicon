@@ -21,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'partner_id', 'line_user_id', 'line_name', 'last_login_at',
+        'name', 'email', 'password', 'role', 'partner_id', 'line_user_id', 'line_name', 'last_login_at', 'email_bounced_at',
         'notify_new_cast', 'notify_working',
         'pref_cast_type_ids', 'pref_area_ids', 'pref_body_type_ids', 'preferred_days', 'preferred_times',
         'pref_age_min', 'pref_age_max',
@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at'  => 'datetime',
+            'email_bounced_at'   => 'datetime',
             'last_login_at'      => 'datetime',
             'password'           => 'hashed',
             'preferred_days'     => 'array',

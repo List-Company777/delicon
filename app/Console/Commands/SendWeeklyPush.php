@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\PushSubscription;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
@@ -62,7 +63,15 @@ class SendWeeklyPush extends Command
             }
         }
 
-        $this->info("Done. success=" . ($count - $failed) . " failed/removed={$failed}");
+        $sent = $count - $failed;
+        DB::table('push_send_logs')->insert([
+            'title'   => $msg['title'],
+            'sent'    => $sent,
+            'failed'  => $failed,
+            'sent_at' => now(),
+        ]);
+
+        $this->info("Done. success={$sent} failed/removed={$failed}");
         return 0;
     }
 }

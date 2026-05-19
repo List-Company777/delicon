@@ -50,6 +50,26 @@
         <p class="text-sm text-business-900 leading-relaxed">「<span class="font-bold">夜ビジ：デリヘルリスト</span>」は、ナイトビジネス全体を盛り上げるための営業支援サイトです。基本無料で利用できますので系列店やお知り合いのお店にご紹介をお願いいたします。</p>
     </div>
 
+    {{-- メールバウンス警告 --}}
+    @if(auth()->user()->email_bounced_at)
+    <div class="bg-red-50 border border-red-300 rounded-xl px-5 py-4 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-red-800">登録メールアドレスにメールが届いていません</p>
+            <p class="text-xs text-red-700 mt-1">
+                <span class="font-mono bg-red-100 px-1 rounded">{{ auth()->user()->email }}</span>
+                宛のメールが返送されています。<br>
+                新しいメールアドレスへの変更、またはご不要の場合はそのままにしてください。
+            </p>
+            <a href="{{ route('manage.contact') }}/" class="inline-block mt-2 text-xs font-medium text-red-700 underline hover:text-red-900">
+                メールアドレス変更のお問い合わせはこちら →
+            </a>
+        </div>
+    </div>
+    @endif
+
     {{-- メール認証完了メッセージ --}}
     @if(session('verified'))
     <div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-6 flex items-start gap-3">

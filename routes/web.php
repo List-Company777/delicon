@@ -217,6 +217,24 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     // パスワード変更
     Route::get('/password/',             [\App\Http\Controllers\Manage\PasswordController::class, 'edit'])->name('password.edit');
     Route::put('/password/',             [\App\Http\Controllers\Manage\PasswordController::class, 'update'])->name('password.update');
+    Route::patch('/email/',              [\App\Http\Controllers\Manage\PasswordController::class, 'updateEmail'])->name('email.update');
+
+
+    // キャスト求人管理
+    Route::get('/cast-jobs/',                  [\App\Http\Controllers\Manage\CastJobController::class, 'index'])->name('cast.index');
+    Route::get('/cast-jobs/create/',            [\App\Http\Controllers\Manage\CastJobController::class, 'create'])->name('cast.create');
+    Route::post('/cast-jobs/',                  [\App\Http\Controllers\Manage\CastJobController::class, 'store'])->name('cast.store');
+    Route::get('/cast-jobs/{id}/edit/',         [\App\Http\Controllers\Manage\CastJobController::class, 'edit'])->name('cast.edit')->where('id', '[0-9]+');
+    Route::put('/cast-jobs/{id}/',              [\App\Http\Controllers\Manage\CastJobController::class, 'update'])->name('cast.update')->where('id', '[0-9]+');
+    Route::delete('/cast-jobs/{id}/',           [\App\Http\Controllers\Manage\CastJobController::class, 'destroy'])->name('cast.destroy')->where('id', '[0-9]+');
+
+    // スタッフ求人管理
+    Route::get('/staff-jobs/',                  [\App\Http\Controllers\Manage\StaffJobController::class, 'index'])->name('staff.index');
+    Route::get('/staff-jobs/create/',            [\App\Http\Controllers\Manage\StaffJobController::class, 'create'])->name('staff.create');
+    Route::post('/staff-jobs/',                  [\App\Http\Controllers\Manage\StaffJobController::class, 'store'])->name('staff.store');
+    Route::get('/staff-jobs/{id}/edit/',         [\App\Http\Controllers\Manage\StaffJobController::class, 'edit'])->name('staff.edit')->where('id', '[0-9]+');
+    Route::put('/staff-jobs/{id}/',              [\App\Http\Controllers\Manage\StaffJobController::class, 'update'])->name('staff.update')->where('id', '[0-9]+');
+    Route::delete('/staff-jobs/{id}/',           [\App\Http\Controllers\Manage\StaffJobController::class, 'destroy'])->name('staff.destroy')->where('id', '[0-9]+');
 
     // お問い合わせ・要望
     Route::get('/contact/',              [ContactController::class, 'show'])->name('contact');
@@ -272,6 +290,8 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::patch('/shops/{id}/area/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateArea'])->name('shops.updateArea')->where('id', '[0-9]+');
     Route::patch('/shops/{id}/plan/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updatePlan'])->name('shops.updatePlan')->where('id', '[0-9]+');
     Route::patch('/shops/{id}/genre/',             [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateGenre'])->name('shops.updateGenre')->where('id', '[0-9]+');
+    Route::patch('/shops/{id}/shop-type/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateShopType'])->name('shops.updateShopType')->where('id', '[0-9]+');
+    Route::post('/shops/{id}/urls/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateExternalUrls'])->name('shops.updateUrls')->where('id', '[0-9]+');
     Route::get('/banner-check/',                   [\App\Http\Controllers\Admin\BannerCheckController::class, 'index'])->name('banner-check.index');
     Route::post('/banner-check/{id}/check/',       [\App\Http\Controllers\Admin\BannerCheckController::class, 'check'])->name('banner-check.check')->where('id', '[0-9]+');
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
@@ -447,3 +467,5 @@ Route::get('/{area_slug}/girl-list/type/{type_slug}/', [\App\Http\Controllers\Gi
 Route::get('/{area_slug}/', [\App\Http\Controllers\AreaTopController::class, 'show'])
     ->where(['area_slug' => '[a-z0-9\-]+'])
     ->name('area.top');
+
+Route::post('/webhook/resend/', [\App\Http\Controllers\ResendWebhookController::class, 'handle'])->name('webhook.resend');

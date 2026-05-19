@@ -7,7 +7,9 @@ use App\Mail\ShopApproved;
 use App\Mail\ShopRejected;
 use App\Models\Area;
 use App\Models\Genre;
+use App\Models\ShopExternalUrl;
 use App\Models\Partner;
+use App\Models\ShopType;
 use App\Models\Prefecture;
 use App\Models\Shop;
 use Illuminate\Http\Request;
@@ -23,8 +25,15 @@ class ShopReviewController extends Controller
         $prefId   = request('pref_id', '');
         $plan     = request('plan', '');
 
-        $shops = Shop::with(['genre', 'area', 'users' => fn($q) => $q->wherePivot('role', 'owner')])
-            ->when($status !== 'all', fn($q) => $q->where('status', $status))
+        $query = Shop::with(['genre', 'shopType', 'area', 'users' => fn($q) => $q->wherePivot('role', 'owner')]);
+
+        if ($status === 'missing') {
+            $query->where(fn($q) => $q->whereNull('genre_id')->orWhereNull('shop_type_id'));
+        } elseif ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $shops = $query
             ->when($keyword !== '', fn($q) => $q->where('name', 'like', '%' . $keyword . '%'))
             ->when($noArea, fn($q) => $q->whereNull('area_id'))
             ->when($prefId !== '', fn($q) => $q->where('prefecture_id', $prefId))
@@ -40,14 +49,16 @@ class ShopReviewController extends Controller
             'active'   => Shop::where('status', 'active')->count(),
             'inactive' => Shop::where('status', 'inactive')->count(),
             'all'      => Shop::count(),
+            'missing'  => Shop::where(fn($q) => $q->whereNull('genre_id')->orWhereNull('shop_type_id'))->count(),
         ];
         $noAreaCount = Shop::whereNull('area_id')->count();
         $prefectures = Prefecture::orderBy('id')->get();
         $genres      = Genre::orderBy('id')->get();
+        $shopTypes   = ShopType::orderBy('id')->get();
 
         return view('admin.shops.index', compact(
             'shops', 'status', 'counts', 'keyword', 'noArea', 'noAreaCount',
-            'prefectures', 'prefId', 'plan', 'genres'
+            'prefectures', 'prefId', 'plan', 'genres', 'shopTypes'
         ));
     }
 
@@ -174,6 +185,37 @@ class ShopReviewController extends Controller
         $request->validate(['genre_id' => ['nullable', 'integer', 'exists:genres,id']]);
         Shop::findOrFail($id)->update(['genre_id' => $request->genre_id ?: null]);
         return back()->with('success', 'ジャンルを更新しました');
+    }
+
+    public function updateShopType(Request $request, int $id)
+    {
+        $request->validate(['shop_type_id' => ['nullable', 'integer', 'exists:shop_types,id']]);
+        Shop::findOrFail($id)->update(['shop_type_id' => $request->shop_type_id ?: null]);
+        return back()->with('success', '業種を更新しました');
+    }
+
+    public function updateExternalUrls(Request $request, int $id)
+    {
+        $request->validate([
+            'urls.*.url_type' => ['required', 'in:' . implode(',', array_keys(ShopExternalUrl::TYPES))],
+            'urls.*.url'      => ['required', 'url', 'max:500'],
+        ]);
+
+        $shop = Shop::findOrFail($id);
+        $shop->externalUrls()->delete();
+
+        foreach ($request->input('urls', []) as $i => $row) {
+            if (!empty($row['url'])) {
+                ShopExternalUrl::create([
+                    'shop_id'    => $shop->id,
+                    'url_type'   => $row['url_type'],
+                    'url'        => $row['url'],
+                    'sort_order' => $i,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'URLを更新しました');
     }
 
     public function loginAs(int $id)

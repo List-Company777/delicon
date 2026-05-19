@@ -79,5 +79,8 @@ Schedule::command('plans:monthly-process')->monthlyOn(1, '00:10');
 // 毎週木曜 18:00 に週末プッシュ通知送信
 Schedule::command('push:weekly')->weeklyOn(4, '18:00');
 
+// 週次レポートメール（毎週金曜 09:00 に木曜分の指標をwebmaster@delicon.jpへ）
+Schedule::command('report:weekly-push')->weeklyOn(5, '09:00');
+
 // キャストPRテキストからチャーム自動抽出（毎日午前3時・未処理分のみ）
 Schedule::command('casts:extract-charms --min-length=100')->dailyAt('03:00');

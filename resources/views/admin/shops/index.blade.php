@@ -16,7 +16,7 @@
 
 {{-- ステータスタブ --}}
 <div class="flex gap-1 mb-5 border-b border-gray-200">
-    @foreach(['pending' => '申請中', 'active' => '掲載中', 'inactive' => '非公開', 'all' => 'すべて'] as $s => $label)
+    @foreach(['pending' => '申請中', 'active' => '掲載中', 'inactive' => '非公開', 'all' => 'すべて', 'missing' => '未設定'] as $s => $label)
     @php $tabParams = array_filter(['status' => $s, 'pref_id' => $prefId, 'plan' => $plan, 'keyword' => $keyword]); @endphp
     <a href="{{ route('admin.shops.index', $tabParams) }}"
        class="{{ $status === $s ? 'border-b-2 border-yellow-500 text-yellow-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
@@ -119,10 +119,20 @@
                     <form action="{{ route('admin.shops.updateGenre', $shop->id) }}" method="POST" class="inline ml-1">
                         @csrf @method('PATCH')
                         <select name="genre_id" onchange="this.form.submit()"
-                                class="text-xs border-0 bg-transparent text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer py-0">
-                            <option value="">— 未設定 —</option>
+                                class="text-xs border-0 bg-transparent {{ $shop->genre_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0">
+                            <option value="">— ジャンル未設定 —</option>
                             @foreach($genres as $g)
                                 <option value="{{ $g->id }}" {{ $shop->genre_id == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                    <form action="{{ route('admin.shops.updateShopType', $shop->id) }}" method="POST" class="inline ml-1">
+                        @csrf @method('PATCH')
+                        <select name="shop_type_id" onchange="this.form.submit()"
+                                class="text-xs border-0 bg-transparent {{ $shop->shop_type_id ? 'text-gray-400' : 'text-red-400' }} hover:text-gray-600 focus:outline-none cursor-pointer py-0">
+                            <option value="">— 業種未設定 —</option>
+                            @foreach($shopTypes as $t)
+                                <option value="{{ $t->id }}" {{ $shop->shop_type_id == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
                             @endforeach
                         </select>
                     </form>

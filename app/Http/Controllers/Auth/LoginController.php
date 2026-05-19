@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\LoginLog;
 use App\Models\User;
 use App\Mail\AdminLoginAlertMail;
-use App\Mail\UserLoginAlertMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -55,7 +54,6 @@ class LoginController extends Controller
                     Mail::to(config('mail.admin_address'))->queue(new AdminLoginAlertMail($ip, false, true));
                 }
             } else {
-                Mail::to($user->email)->queue(new UserLoginAlertMail($ip));
             }
 
             $destination = $user->isAdmin()

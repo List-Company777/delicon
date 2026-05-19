@@ -6,9 +6,9 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-xl font-bold text-[#F0ECE4]">{{ $cast->name }} の写メ日記</h1>
-            <a href="{{ route('cast-profile.edit', $cast->id) }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400">← キャスト編集に戻る</a>
+            <a href="{{ route('manage.cast-profile.edit', $cast->id) }}/" class="text-xs text-[#6A6A7E] hover:text-deli-400">← キャスト編集に戻る</a>
         </div>
-        <a href="{{ route('cast-diary.create', $cast->id) }}/" class="bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
+        <a href="{{ route('manage.cast-diary.create', $cast->id) }}/" class="bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
             + 新しい日記
         </a>
     </div>
@@ -35,7 +35,7 @@
         @else
         <p class="text-sm text-[#6A6A7E] mb-3">URLが発行されていません。</p>
         @endif
-        <form method="POST" action="{{ route('cast-diary.issue-token', $cast->id) }}/" class="mt-2">
+        <form method="POST" action="{{ route('manage.cast-diary.issue-token', $cast->id) }}/" class="mt-2">
             @csrf
             <button type="submit" class="text-xs text-[#6A6A7E] hover:text-deli-400 underline transition">
                 {{ $token ? 'URLを再発行する（旧URLは無効になります）' : '投稿URLを発行する' }}
@@ -71,7 +71,7 @@
                     </div>
                     @endif
                 </div>
-                <form method="POST" action="{{ route('cast-diary.destroy', $diary->id) }}/" onsubmit="return confirm('削除しますか？')">
+                <form method="POST" action="{{ route('manage.cast-diary.destroy', $diary->id) }}/" onsubmit="return confirm('削除しますか？')">
                     @csrf @method('DELETE')
                     <button type="submit" class="text-xs text-[#6A6A7E] hover:text-red-400 transition shrink-0">削除</button>
                 </form>

@@ -105,6 +105,38 @@
                     <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap">申請日時</th>
                     <td class="px-5 py-3 text-gray-500 text-xs">{{ $shop->updated_at->format('Y/m/d H:i') }}</td>
                 </tr>
+                <tr>
+                    <th class="text-left px-5 py-3 text-xs text-gray-400 font-normal whitespace-nowrap align-top pt-4">URL設定</th>
+                    <td class="px-5 py-3">
+                        <form action="{{ route('admin.shops.updateUrls', $shop->id) }}/" method="POST" id="url-form">
+                            @csrf
+                            <div id="url-rows" class="space-y-2 mb-2">
+                                @forelse($shop->externalUrls as $eu)
+                                <div class="flex items-center gap-2 url-row">
+                                    <select name="urls[{{ $loop->index }}][url_type]"
+                                            class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-400 w-36">
+                                        @foreach(\App\Models\ShopExternalUrl::TYPES as $key => $label)
+                                            <option value="{{ $key }}" {{ $eu->url_type === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="url" name="urls[{{ $loop->index }}][url]" value="{{ $eu->url }}"
+                                           class="flex-1 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-400 min-w-0"
+                                           placeholder="https://">
+                                    <button type="button" onclick="this.closest('.url-row').remove()"
+                                            class="text-gray-300 hover:text-red-400 text-lg leading-none shrink-0">×</button>
+                                </div>
+                                @empty
+                                @endforelse
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="addUrlRow()"
+                                        class="text-xs text-blue-500 hover:text-blue-700">＋ URLを追加</button>
+                                <button type="submit"
+                                        class="text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">保存</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -440,6 +472,16 @@
 function toggleBannerPlan(select, shopId) {
     const row = document.getElementById('banner_plan_row_' + shopId);
     row.classList.toggle('hidden', parseInt(select.value) !== 3);
+}
+const URL_TYPES = {"website":"公式サイト","instagram":"Instagram","tiktok":"TikTok","x":"X（旧Twitter）","line":"LINE","youtube":"YouTube","other":"その他"};
+function addUrlRow() {
+    const container = document.getElementById('url-rows');
+    const idx = container.querySelectorAll('.url-row').length;
+    const opts = Object.entries(URL_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-2 url-row';
+    div.innerHTML = `<select name="urls[${idx}][url_type]" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-400 w-36">${opts}</select><input type="url" name="urls[${idx}][url]" class="flex-1 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-400 min-w-0" placeholder="https://"><button type="button" onclick="this.closest('.url-row').remove()" class="text-gray-300 hover:text-red-400 text-lg leading-none shrink-0">×</button>`;
+    container.appendChild(div);
 }
 </script>
 @endpush
