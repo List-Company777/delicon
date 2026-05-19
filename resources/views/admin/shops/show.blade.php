@@ -283,26 +283,34 @@
             <div class="p-5 space-y-4">
 
                 {{-- 届出書 --}}
-                @if($shop->permit_type)
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-1">
-                    <p class="text-xs font-bold text-blue-700 mb-1">届出書情報</p>
+                {{-- 届出書ステータス --}}
+                <div class="@if($shop->permit_type === 'uploaded') bg-blue-50 border-blue-200 @elseif($shop->permit_type === 'not_required') bg-green-50 border-green-200 @else bg-amber-50 border-amber-200 @endif border rounded-lg p-3 mb-1">
+                    <p class="text-xs font-bold @if($shop->permit_type) text-blue-700 @else text-amber-700 @endif mb-2">届出書ステータス</p>
                     @if($shop->permit_type === 'uploaded')
-                        <p class="text-xs text-blue-600 mb-1">📄 届出書アップロード済み</p>
+                        <p class="text-xs text-blue-600 mb-2">📄 届出書アップロード済み</p>
                         @if($shop->permit_document_path)
                         <a href="{{ route('admin.shops.permit-download', $shop->id) }}/"
                            class="text-xs text-blue-700 underline hover:text-blue-900 font-medium" target="_blank">
                             届出書を確認する →
                         </a>
                         @endif
+                    @elseif($shop->permit_type === 'not_required')
+                        <p class="text-xs text-green-700 mb-2">✅ 誓約済み（届出不要）</p>
                     @else
-                        <p class="text-xs text-blue-600">✅ 「届出・許可は不要」と申告済み</p>
+                        <p class="text-xs text-amber-700 mb-2">⚠ 未設定</p>
                     @endif
+                    <form action="{{ route('admin.shops.permit-set', $shop->id) }}/" method="POST" class="flex gap-2 mt-2 flex-wrap">
+                        @csrf
+                        <button type="submit" name="permit_type" value="not_required"
+                                class="text-xs px-3 py-1 rounded-lg font-medium {{ $shop->permit_type === 'not_required' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-green-100 text-gray-700' }}">
+                            ✅ 誓約済みに設定
+                        </button>
+                        <button type="submit" name="permit_type" value="none"
+                                class="text-xs px-3 py-1 rounded-lg font-medium {{ !$shop->permit_type ? 'bg-gray-400 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-500' }}">
+                            未設定に戻す
+                        </button>
+                    </form>
                 </div>
-                @else
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-1">
-                    <p class="text-xs text-amber-700">⚠ 届出書情報なし（古い申請 or 未申請）</p>
-                </div>
-                @endif
 
                 {{-- 承認 --}}
                 @if($shop->status !== 'active')

@@ -216,6 +216,18 @@ class ShopReviewController extends Controller
         return redirect()->route('admin.shops.index')->with('success', "「{$shop->name}」を削除しました");
     }
 
+    public function setPermit(Request $request, int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        $type = $request->input('permit_type');
+        abort_unless(in_array($type, ['uploaded', 'not_required', 'none']), 422);
+
+        $shop->permit_type = $type === 'none' ? null : $type;
+        $shop->save();
+
+        return back()->with('success', '届出書ステータスを更新しました。');
+    }
+
     public function downloadPermit(int $id)
     {
         $shop = Shop::findOrFail($id);

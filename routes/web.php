@@ -277,6 +277,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
     Route::post('/shops/{id}/login-as/',          [\App\Http\Controllers\Admin\ShopReviewController::class, 'loginAs'])->name('shops.loginAs')->where('id', '[0-9]+');
     Route::get('/shops/{id}/permit-download/',     [\App\Http\Controllers\Admin\ShopReviewController::class, 'downloadPermit'])->name('shops.permit-download')->where('id', '[0-9]+');
+    Route::post('/shops/{id}/permit-set/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'setPermit'])->name('shops.permit-set')->where('id', '[0-9]+');
 
     // 代理店移管
     Route::get('/partner-transfer/', [\App\Http\Controllers\Admin\PartnerTransferController::class, 'index'])->name('partner-transfer.index');
