@@ -27,14 +27,20 @@
             @endif
         </div>
         @if(! $notice->isSent())
-            <form action="{{ route('admin.notices.send', $notice) }}/" method="POST"
-                  onsubmit="return confirm('{{ $notice->targetLabel() }}（{{ number_format($targetCount) }}人）にメールを送信します。よろしいですか？')">
-                @csrf
-                <button type="submit"
-                        class="bg-yellow-500 hover:bg-yellow-400 text-white text-sm font-bold px-5 py-2 rounded-lg transition">
-                    {{ number_format($targetCount) }}人に送信する
-                </button>
-            </form>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.notices.edit', $notice) }}/"
+                   class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold px-4 py-2 rounded-lg transition">
+                    編集する
+                </a>
+                <form action="{{ route('admin.notices.send', $notice) }}/" method="POST"
+                      onsubmit="return confirm('{{ $notice->targetLabel() }}（{{ number_format($targetCount) }}人）にメールを送信します。よろしいですか？')">
+                    @csrf
+                    <button type="submit"
+                            class="bg-yellow-500 hover:bg-yellow-400 text-white text-sm font-bold px-5 py-2 rounded-lg transition">
+                        {{ number_format($targetCount) }}人に送信する
+                    </button>
+                </form>
+            </div>
         @endif
     </div>
 

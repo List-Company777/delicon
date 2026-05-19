@@ -321,6 +321,8 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::post('/notices/',               [\App\Http\Controllers\Admin\NoticeController::class, 'store'])->name('notices.store');
     Route::get('/notices/{notice}/',       [\App\Http\Controllers\Admin\NoticeController::class, 'show'])->name('notices.show');
     Route::post('/notices/{notice}/send/', [\App\Http\Controllers\Admin\NoticeController::class, 'send'])->name('notices.send');
+    Route::get('/notices/{notice}/edit/',  [\App\Http\Controllers\Admin\NoticeController::class, 'edit'])->name('notices.edit');
+    Route::put('/notices/{notice}/',       [\App\Http\Controllers\Admin\NoticeController::class, 'update'])->name('notices.update');
 
     // コラム・ガイド記事管理
     Route::get('/articles/',                        [\App\Http\Controllers\Admin\ArticleController::class, 'index'])->name('articles.index');

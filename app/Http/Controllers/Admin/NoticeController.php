@@ -47,6 +47,37 @@ class NoticeController extends Controller
         return view('admin.notices.show', compact('notice', 'targetCount'));
     }
 
+    public function edit(AdminNotice $notice)
+    {
+        if ($notice->isSent()) {
+            return redirect()->route('admin.notices.show', $notice)
+                ->withErrors(['error' => '送信済みのお知らせは編集できません']);
+        }
+        $prefectures = Prefecture::orderBy('id')->get();
+        return view('admin.notices.edit', compact('notice', 'prefectures'));
+    }
+
+    public function update(Request $request, AdminNotice $notice)
+    {
+        if ($notice->isSent()) {
+            return redirect()->route('admin.notices.show', $notice)
+                ->withErrors(['error' => '送信済みのお知らせは編集できません']);
+        }
+
+        $validated = $request->validate([
+            'title'          => ['required', 'string', 'max:100'],
+            'body'           => ['required', 'string', 'max:5000'],
+            'target'         => ['required', 'in:all,active,inactive'],
+            'filter_pref_id' => ['nullable', 'integer', 'exists:prefectures,id'],
+            'filter_plan'    => ['nullable', 'integer', 'min:1', 'max:5'],
+        ]);
+
+        $notice->update($validated);
+
+        return redirect()->route('admin.notices.show', $notice)
+            ->with('success', '下書きを更新しました。');
+    }
+
     public function send(AdminNotice $notice)
     {
         if ($notice->isSent()) {
