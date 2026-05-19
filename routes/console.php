@@ -78,4 +78,4 @@ Schedule::command('plans:monthly-process')->monthlyOn(1, '00:10');
 Schedule::command('push:weekly')->weeklyOn(4, '18:00');
 
 // キャストPRテキストからチャーム自動抽出（毎日午前3時・未処理分のみ）
-Schedule::command('casts:extract-charms')->dailyAt('03:00');
+Schedule::command('casts:extract-charms --min-length=100')->dailyAt('03:00');
