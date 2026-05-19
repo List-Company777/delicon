@@ -28,7 +28,7 @@ class AdminNoticeMail extends Mailable
     public function headers(): Headers
     {
         return new Headers(
-            headers: [
+            text: [
                 'List-Unsubscribe' => '<mailto:' . config('mail.admin_address') . '?subject=配信停止希望>',
             ],
         );
