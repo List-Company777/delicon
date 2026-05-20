@@ -84,3 +84,6 @@ Schedule::command('report:weekly-push')->weeklyOn(5, '09:00');
 
 // キャストPRテキストからチャーム自動抽出（毎日午前3時・未処理分のみ）
 Schedule::command('casts:extract-charms --min-length=100')->dailyAt('03:00');
+
+// キャスト外見分類AI判定（毎日03:30・未処理のみ）
+Schedule::command("casts:classify-type")->dailyAt("03:30");

@@ -419,7 +419,20 @@
         <h2 class="text-base font-bold text-gray-800 mb-1">掲載申請</h2>
         <p class="text-xs text-gray-500 mb-5">以下のいずれかを選択して申請してください。</p>
 
-        <form action="{{ route('manage.apply') }}/" method="POST" enctype="multipart/form-data" id="permit-form">
+        {{-- バナーキャンペーン案内 --}}
+        <div class="mb-5 rounded-xl border border-amber-400/40 bg-amber-50 p-4">
+            <p class="text-xs font-bold text-amber-800 mb-1">🏆 上位表示キャンペーンのご案内</p>
+            <p class="text-xs text-amber-700 leading-relaxed">
+                貴店の公式サイト（オフィシャルHP）のトップページに<strong>デリヘルリストのバナーを設置</strong>いただくと、検索結果での表示順位を優遇いたします。<br>
+                バナーを設置してから公開申請をお送りください。
+            </p>
+            <a href="{{ url('/link/') }}" target="_blank"
+               class="inline-block mt-2 text-xs font-bold text-amber-800 underline hover:text-amber-900">
+                バナー設置方法・詳細はこちら →
+            </a>
+        </div>
+
+                <form action="{{ route('manage.apply') }}/" method="POST" enctype="multipart/form-data" id="permit-form">
             @csrf
 
             <div class="space-y-3 mb-5">

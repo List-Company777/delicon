@@ -106,6 +106,7 @@ Route::get('/email/verify/{id}/{hash}/', function (\Illuminate\Http\Request $req
 
 // 無料掲載LP
 Route::view('/keisai/', 'lp.keisai')->name('lp.keisai');
+Route::view('/link/', 'lp.link')->name('lp.link');
 
 // 夜ビズ LP
 Route::view('/yorubiz/', 'lp.yorubiz')->name('lp.yorubiz');
