@@ -42,6 +42,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::clear($throttleKey);
+            RateLimiter::clear($ip); // ミドルウェアのIPベーススロットルもリセット
             $request->session()->regenerate();
             $user = Auth::user();
             $user->timestamps = false;
