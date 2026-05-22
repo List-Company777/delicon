@@ -30,7 +30,7 @@ class CastDiaryToken extends Model
         return self::create([
             'cast_id'    => $castId,
             'token'      => bin2hex(random_bytes(32)),
-            'expires_at' => now()->addDays(90),
+            'expires_at' => now()->addDays(180),
             'created_at' => now(),
         ]);
     }

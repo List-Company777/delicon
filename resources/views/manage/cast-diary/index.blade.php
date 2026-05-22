@@ -24,7 +24,7 @@
         @if($token && !$token->isExpired())
         <div class="flex gap-2 items-center">
             <input type="text" readonly id="token-url"
-                   value="/"
+                   value="{{ url('/diary/post/' . $token->token) }}/"
                    class="flex-1 bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-xs text-[#C8C4BC] min-w-0">
             <button onclick="navigator.clipboard.writeText(document.getElementById('token-url').value).then(()=>this.textContent='コピー済み')"
                     class="shrink-0 bg-deli-500 hover:bg-deli-400 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
@@ -32,8 +32,12 @@
             </button>
         </div>
         <p class="text-[10px] text-[#6A6A7E] mt-1.5">有効期限: {{ $token->expires_at->format('Y/m/d') }}</p>
+        <p class="text-[10px] text-amber-400/80 mt-1">このURLをキャストに渡すと、キャストが直接写メ日記を投稿できます。URLは有効期限内のみ有効です。</p>
         @else
-        <p class="text-sm text-[#6A6A7E] mb-3">URLが発行されていません。</p>
+        <div class="bg-surface-600 border border-surface-300 rounded-lg px-4 py-3 mb-3">
+            <p class="text-sm text-[#C8C4BC] font-bold mb-1">URLが発行されていません</p>
+            <p class="text-xs text-[#8A8A9E] leading-relaxed">「投稿URLを発行する」をクリックするとURLが生成されます。そのURLをキャストに渡していただくと、キャストが自分のスマートフォンから直接写メ日記を投稿できます。URLの有効期間は<strong class="text-[#C8C4BC]">6ヶ月間</strong>です。</p>
+        </div>
         @endif
         <form method="POST" action="{{ route('manage.cast-diary.issue-token', $cast->id) }}/" class="mt-2">
             @csrf

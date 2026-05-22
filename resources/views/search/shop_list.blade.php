@@ -158,6 +158,22 @@
         @endforeach
     </div>
 
+    {{-- ジャンルフィルター --}}
+    @if(isset($genres) && $genres->isNotEmpty())
+    <div class="flex flex-wrap gap-2 mb-5">
+        <span class="text-xs text-[#8A8A9E] self-center mr-1">ジャンル</span>
+        @foreach($genres as $genre)
+        <a href="{{ route('shop.list.filter', ['area_slug' => $area_slug, 'filter_slug' => $genre->slug]) }}/"
+           class="px-3 py-1 rounded-full text-xs border transition
+                  {{ $job_slug === $genre->slug
+                     ? 'bg-deli-500 border-deli-500 text-white'
+                     : 'border-surface-300 text-[#B0AEAD] hover:border-deli-400 hover:text-deli-400' }}">
+            {{ $genre->name }}
+        </a>
+        @endforeach
+    </div>
+    @endif
+
     {{-- 年齢層フィルター --}}
     @php
         $ageGroups  = ['' => 'すべて', '18-19' => '10代', '20-24' => '20〜24歳', '25-34' => '25〜34歳', '35-44' => '35〜44歳', '45+' => '45歳〜'];

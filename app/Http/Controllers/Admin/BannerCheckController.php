@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -9,20 +8,44 @@ class BannerCheckController extends Controller
 {
     public function index()
     {
-        $shops = Shop::with(['detail', 'area.prefecture'])
-            ->where(function ($q) {
-                $q->where(fn($q2) => $q2->where('plan', 3)->where('is_banner_plan', true))
-                  ->orWhere('plan', 4);
-            })
-            ->orderByRaw('banner_checked_at IS NOT NULL ASC, banner_checked_at ASC, id ASC')
-            ->get();
+        $domain  = parse_url(config('app.url'), PHP_URL_HOST);
+        $tab     = request('tab', 'ng');
 
-        return view('admin.banner-check.index', compact('shops'));
+        $totalBanner = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->count();
+        $okCount     = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 1)->count();
+        $ngCount     = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 0)->count();
+        $brokenCount = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 2)->count();
+        $manualCount = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 3)->count();
+        $unapplied   = Shop::where('is_banner_plan', 0)->where('status', '!=', 'inactive')->whereIn('banner_ok', [1, 2, 3])->count();
+        $unchecked   = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->whereNull('banner_checked_at')->count();
+
+        $base = Shop::where('status', '!=', 'inactive')
+            ->with(['externalUrls' => fn($q) => $q->where('url_type', 'website'), 'prefecture', 'area']);
+
+        $shops = match($tab) {
+            'ng'        => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 0)->whereNotNull('banner_checked_at')->orderBy('name')->paginate(50),
+            'broken'    => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 2)->orderBy('name')->paginate(50),
+            'manual'    => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 3)->orderBy('name')->paginate(50),
+            'unapplied' => (clone $base)->where('is_banner_plan', 0)->whereIn('banner_ok', [1, 2, 3])->orderBy('name')->paginate(50),
+            'ok'        => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 1)->orderBy('name')->paginate(50),
+            default     => (clone $base)->where('is_banner_plan', 1)->whereNull('banner_checked_at')->orderBy('name')->paginate(50),
+        };
+
+        return view('admin.banner-check.index', compact(
+            'shops', 'domain', 'tab',
+            'totalBanner', 'okCount', 'ngCount', 'brokenCount', 'manualCount', 'unapplied', 'unchecked'
+        ));
     }
 
-    public function check(int $id)
+    public function manualOk(Shop $shop)
     {
-        Shop::findOrFail($id)->update(['banner_checked_at' => now()]);
-        return back()->with('success', 'チェック済みにしました');
+        $shop->update(['banner_ok' => 3, 'banner_checked_at' => now()]);
+        return back()->with('success', "「{$shop->name}」を手動確認済みにしました。");
+    }
+
+    public function applyBanner(Shop $shop)
+    {
+        $shop->update(['is_banner_plan' => 1]);
+        return back()->with('success', "「{$shop->name}」をバナープランに適用しました。");
     }
 }

@@ -68,8 +68,7 @@
                     <a href="{{ route('admin.cast-reviews.index') }}/"
                        class="{{ request()->routeIs('admin.cast-reviews.*') ? 'text-deli-400' : 'text-gray-400 hover:text-white' }} transition">
                         口コミ管理
-                    </a>
-                    <a href="{{ route('admin.banner-check.index') }}/"
+                    </a>                    <a href="{{ route('admin.banner-check.index') }}/"
                        class="{{ request()->routeIs('admin.banner-check.*') ? 'text-green-400' : 'text-gray-400 hover:text-white' }} transition">
                         バナー確認
                     </a>

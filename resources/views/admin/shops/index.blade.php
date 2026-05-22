@@ -24,6 +24,17 @@
         <span class="ml-1 text-xs {{ $status === $s ? 'text-yellow-500' : 'text-gray-400' }}">{{ number_format($counts[$s]) }}</span>
     </a>
     @endforeach
+    <a href="{{ route('admin.area-mismatch.index') }}/"
+       class="{{ request()->routeIs('admin.area-mismatch.*') ? 'border-b-2 border-amber-500 text-amber-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
+        エリア修正</a>
+    <a href="{{ route('admin.url-check.index') }}"
+       class="{{ request()->routeIs('admin.url-check.*') ? 'border-b-2 border-red-500 text-red-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
+        URL確認
+    </a>
+    <a href="{{ route('admin.banner-check.index') }}"
+       class="{{ request()->routeIs('admin.banner-check.*') ? 'border-b-2 border-orange-500 text-orange-600 font-bold' : 'text-gray-500 hover:text-gray-700' }} px-4 py-2 text-sm transition -mb-px whitespace-nowrap">
+        バナー確認
+    </a>
 </div>
 
 {{-- 絞り込みフォーム --}}

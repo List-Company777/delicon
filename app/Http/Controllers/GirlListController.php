@@ -333,6 +333,47 @@ class GirlListController extends Controller
     }
 
 
+
+    public function byAge(Request $request, string $area_slug, string $age_slug)
+    {
+        if (!isset(self::AGE_RANGES[$age_slug])) abort(404);
+        [$ageMin, $ageMax, $ageName] = self::AGE_RANGES[$age_slug];
+
+        [$areaModel, $prefOnlyModel] = $this->resolveArea($area_slug);
+        $areaName  = $areaModel?->name ?? $prefOnlyModel?->name ?? '全国';
+        $prefModel = $areaModel?->prefecture;
+
+        $shopQuery = Shop::where('status', 'active');
+        $this->applyAreaScope($shopQuery, $areaModel, $prefOnlyModel, $area_slug);
+        $shopIds = $shopQuery->pluck('id')->all();
+
+        $results = Cast::with(['shop'])
+            ->where('status', 'active')
+            ->whereIn('shop_id', $shopIds)
+            ->whereBetween('age', [$ageMin, $ageMax])
+            ->orderByDesc('cast_score')
+            ->orderByRaw('(SELECT plan FROM shops WHERE shops.id = casts.shop_id) ASC')
+            ->orderBy('casts.id')
+            ->paginate(self::PER_PAGE)
+            ->withPath(rtrim(request()->url(), '/') . '/')
+            ->withQueryString();
+
+        $noindex  = $results->total() <= 5;
+        $status   = $results->total() === 0 ? 404 : 200;
+        $cast_tab = 'type';
+        $typeName  = $ageName;
+        $type_slug = $age_slug;
+        $hasFilters = false;
+        $bodyTypes  = [];
+        $prefectureLinks = [];
+
+        return response()->view('search.girl_list', compact(
+            'area_slug', 'cast_tab', 'areaName', 'prefModel',
+            'areaModel', 'prefOnlyModel', 'results', 'noindex',
+            'typeName', 'type_slug', 'hasFilters', 'bodyTypes', 'prefectureLinks'
+        ), $status);
+    }
+
     public static function ageRanges(): array  { return self::AGE_RANGES; }
     public static function tallRanges(): array { return self::TALL_RANGES; }
     public static function cupGroups(): array  { return self::CUP_GROUPS; }

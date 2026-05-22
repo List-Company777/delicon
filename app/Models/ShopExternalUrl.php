@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShopExternalUrl extends Model
 {
-    protected $fillable = ['shop_id', 'url_type', 'url', 'sort_order'];
+    protected $fillable = ['shop_id', 'url_type', 'url', 'sort_order', 'url_status', 'url_checked_at'];
 
     public const TYPES = [
         'website'   => '公式サイト',

@@ -84,7 +84,7 @@
                     <input type="text" name="address" value="{{ old('address', $shop->address) }}" required
                            placeholder="例：新宿区歌舞伎町1-1-1 ○○ビル3F"
                            class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:border-business-500 @error('address') border-red-400 @enderror">
-                    <p class="text-xs text-gray-400 mt-0.5">区・町まで入力してください（検索エンジン向け住所情報に使用）</p>
+                    <p class="text-xs text-gray-400 mt-0.5">区・町まで入力してください（サイト上には表示されません）</p>
                     @error('address')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </td>
             </tr>

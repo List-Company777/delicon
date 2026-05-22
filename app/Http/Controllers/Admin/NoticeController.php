@@ -92,7 +92,7 @@ class NoticeController extends Controller
         $count = 0;
 
         foreach ($users as $user) {
-            Mail::to($user->email, $user->name)
+            Mail::to($user->email, mb_substr($user->name, 0, 50))
                 ->later(now()->addMilliseconds($count * 600), new AdminNoticeMail($notice));
             $count++;
         }

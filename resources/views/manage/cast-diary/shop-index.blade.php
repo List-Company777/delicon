@@ -66,7 +66,16 @@
             @endif
         </div>
         @empty
-        <p class="text-sm text-gray-400 py-10 text-center">投稿された写メ日記はまだありません。</p>
+        <div class="py-10 text-center">
+            <p class="text-sm text-[#9A9A9E] mb-4">投稿された写メ日記はまだありません。</p>
+            <div class="inline-block bg-surface-600 border border-surface-300 rounded-lg px-5 py-4 text-left max-w-md">
+                <p class="text-xs text-[#C8C4BC] font-bold mb-2">写メ日記を投稿するには</p>
+                <ul class="text-xs text-[#8A8A9E] leading-relaxed space-y-1.5">
+                    <li>① 各女性の編集ページ上部の「この女性の写メ日記を作成・管理」ボタンから管理者が直接投稿できます。</li>
+                    <li>② 同じページから投稿用URLを発行し、女性自身のスマートフォンから投稿してもらうこともできます。</li>
+                </ul>
+            </div>
+        </div>
         @endforelse
     </div>
 

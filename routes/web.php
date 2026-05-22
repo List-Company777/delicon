@@ -294,11 +294,25 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::patch('/shops/{id}/shop-type/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateShopType'])->name('shops.updateShopType')->where('id', '[0-9]+');
     Route::post('/shops/{id}/urls/',              [\App\Http\Controllers\Admin\ShopReviewController::class, 'updateExternalUrls'])->name('shops.updateUrls')->where('id', '[0-9]+');
     Route::get('/banner-check/',                   [\App\Http\Controllers\Admin\BannerCheckController::class, 'index'])->name('banner-check.index');
+    Route::patch('/banner-check/{shop}/apply/',     [\App\Http\Controllers\Admin\BannerCheckController::class, 'applyBanner'])->name('banner-check.apply');
+    Route::patch('/banner-check/{shop}/manual-ok/', [\App\Http\Controllers\Admin\BannerCheckController::class, 'manualOk'])->name('banner-check.manual-ok');
     Route::post('/banner-check/{id}/check/',       [\App\Http\Controllers\Admin\BannerCheckController::class, 'check'])->name('banner-check.check')->where('id', '[0-9]+');
     Route::delete('/shops/{id}/',                  [\App\Http\Controllers\Admin\ShopReviewController::class, 'destroy'])->name('shops.destroy')->where('id', '[0-9]+');
     Route::post('/shops/{id}/login-as/',          [\App\Http\Controllers\Admin\ShopReviewController::class, 'loginAs'])->name('shops.loginAs')->where('id', '[0-9]+');
     Route::get('/shops/{id}/permit-download/',     [\App\Http\Controllers\Admin\ShopReviewController::class, 'downloadPermit'])->name('shops.permit-download')->where('id', '[0-9]+');
     Route::post('/shops/{id}/permit-set/',         [\App\Http\Controllers\Admin\ShopReviewController::class, 'setPermit'])->name('shops.permit-set')->where('id', '[0-9]+');
+
+    // エリア名不一致レビュー
+    Route::get('/area-mismatch/', [\App\Http\Controllers\Admin\AreaMismatchController::class, 'index'])->name('area-mismatch.index');
+    Route::patch('/area-mismatch/{shop}/apply/', [\App\Http\Controllers\Admin\AreaMismatchController::class, 'apply'])->name('area-mismatch.apply');
+    Route::patch('/area-mismatch/{shop}/apply-pref/', [\App\Http\Controllers\Admin\AreaMismatchController::class, 'applyPref'])->name('area-mismatch.apply-pref');
+    Route::patch('/area-mismatch/{shop}/dismiss/', [\App\Http\Controllers\Admin\AreaMismatchController::class, 'dismiss'])->name('area-mismatch.dismiss');
+
+
+    // URL死活チェック
+    Route::get('/url-check/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'index'])->name('url-check.index');
+    Route::patch('/url-check/{urlRow}/dismiss/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'dismiss'])->name('url-check.dismiss');
+    Route::patch('/url-check/{urlRow}/deactivate/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'deactivate'])->name('url-check.deactivate');
 
     // 代理店移管
     Route::get('/partner-transfer/', [\App\Http\Controllers\Admin\PartnerTransferController::class, 'index'])->name('partner-transfer.index');
@@ -375,6 +389,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 // ========== delicon 公開ルート ==========
 
 // 店舗一覧・詳細
+Route::get('/top/detail/{slug}/', fn() => redirect('/all/shop-list/', 301))->where('slug', '[a-z][a-z0-9-]+');
 Route::get('/shops/', fn() => redirect('/all/shop-list/', 301))->name('shop.index');
 Route::get('/shops/{shop}/', [ShopController::class, 'show'])->name('shop.show')->where('shop', '[0-9]+');
 Route::get('/shops/{pref}/', fn(string $pref) => redirect("/{$pref}/shop-list/", 301))->name('shop.pref')->where('pref', '[a-z][a-z0-9-]+');
@@ -464,6 +479,9 @@ Route::get('/{area_slug}/girl-list/{cast_tab}/', [\App\Http\Controllers\GirlList
 Route::get('/{area_slug}/girl-list/type/{type_slug}/', [\App\Http\Controllers\GirlListController::class, 'byType'])
     ->where(['area_slug' => '[a-z0-9\-]+', 'type_slug' => '[a-z0-9\-]+'])
     ->name('girl.list.type');
+Route::get('/{area_slug}/girl-list/age/{age_slug}/', [\App\Http\Controllers\GirlListController::class, 'byAge'])
+    ->where(['area_slug' => '[a-z0-9\-]+', 'age_slug' => '[a-z0-9\-]+'])
+    ->name('girl.list.age');
 // エリアトップ
 Route::get('/{area_slug}/', [\App\Http\Controllers\AreaTopController::class, 'show'])
     ->where(['area_slug' => '[a-z0-9\-]+'])

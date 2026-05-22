@@ -1,123 +1,113 @@
 @extends('layouts.admin')
-
-@section('title', 'バナー確認（HP一覧）')
+@section('title', 'バナーリンク確認')
 
 @section('content')
-
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-bold text-gray-700">バナー確認（HP一覧）</h1>
-    <p class="text-sm text-gray-400">バナー設置によるベーシック・無料上位の店舗一覧</p>
-</div>
-
-@if(session('success'))
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 mb-4 text-sm">
-        {{ session('success') }}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">バナーリンク確認</h1>
+            <p class="text-xs text-gray-400 mt-0.5">チェックドメイン: <code class="bg-gray-100 px-1 rounded">{{ $domain }}</code></p>
+        </div>
+        <div class="text-xs text-gray-400">バナープラン {{ $totalBanner }}件 / 未確認 {{ $unchecked }}件</div>
     </div>
-@endif
 
-<div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+    @if(session('success'))
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
+    @endif
+
+    <div class="flex flex-wrap gap-1 mb-6 border-b border-gray-200">
+        @php
+        $tabs = [
+            'ng'        => ['label' => '設置NG',             'count' => $ngCount,     'color' => '#dc2626'],
+            'broken'    => ['label' => '画像切れ',           'count' => $brokenCount, 'color' => '#d97706'],
+            'manual'    => ['label' => '手動確認済み',       'count' => $manualCount, 'color' => '#7c3aed'],
+            'unapplied' => ['label' => '未適用（リンクあり）','count' => $unapplied,   'color' => '#ea580c'],
+            'ok'        => ['label' => '設置済',             'count' => $okCount,     'color' => '#16a34a'],
+        ];
+        @endphp
+        @foreach($tabs as $key => $t)
+        <a href="?tab={{ $key }}"
+           style="{{ $tab === $key ? 'border-bottom:2px solid '.$t['color'].';color:'.$t['color'].';font-weight:700;' : 'color:#6b7280;' }} padding:8px 16px;font-size:13px;text-decoration:none;white-space:nowrap;margin-bottom:-1px;display:inline-block;">
+            {{ $t['label'] }} <span style="font-size:11px;">({{ $t['count'] }})</span>
+        </a>
+        @endforeach
+    </div>
+
+    @if($tab === 'ng')
+    <div class="mb-4 bg-gray-50 border border-gray-200 text-gray-500 text-xs px-4 py-3 rounded-lg">
+        自動検出できない場合（FC2の年齢認証・Cloudflare等）は「手動OK」で確認済みにできます。次回チェック時もスキップされます。
+    </div>
+    @endif
+    @if($tab === 'broken')
+    <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-700 text-xs px-4 py-3 rounded-lg">
+        deliconへのリンクはありますが、旧バナー画像URL（<code>delicon.jp/img/dcbn_...</code>）を使用しています。現在は画像を復旧済みのため表示は回復しています。
+    </div>
+    @endif
+    @if($tab === 'manual')
+    <div class="mb-4 bg-purple-50 border border-purple-200 text-purple-700 text-xs px-4 py-3 rounded-lg">
+        手動で確認済みにした店舗です。自動チェックではスキップされます。
+    </div>
+    @endif
+
+    <table class="w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
             <tr>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-10">ID</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">店舗名</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">エリア</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">現在のプラン</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">HP URL</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-28">最終確認</th>
-                <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 w-64">プラン変更</th>
+                <th class="px-4 py-3 text-left">店舗名</th>
+                <th class="px-4 py-3 text-left">公式URL</th>
+                <th class="px-4 py-3 text-left">確認日時</th>
+                <th class="px-4 py-3 text-left">操作</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-            @forelse($shops as $shop)
-            @php
-                $planLabels = [
-                    1 => ['label' => 'VIP',       'color' => 'bg-yellow-100 text-yellow-700'],
-                    2 => ['label' => 'ミドル',    'color' => 'bg-purple-100 text-purple-700'],
-                    3 => ['label' => 'ベーシック', 'color' => 'bg-blue-100 text-blue-700'],
-                    4 => ['label' => '無料上位',  'color' => 'bg-green-100 text-green-700'],
-                    5 => ['label' => '無料',      'color' => 'bg-gray-100 text-gray-500'],
-                ];
-                $planInfo   = $planLabels[$shop->plan] ?? $planLabels[5];
-                $websiteUrl = $shop->detail?->website_url;
-                $checkedAt  = $shop->banner_checked_at;
-            @endphp
-            <tr class="hover:bg-gray-50 transition {{ $checkedAt ? '' : 'bg-red-50/30' }}">
-                <td class="px-4 py-3 text-gray-400 text-xs">{{ $shop->id }}</td>
-                <td class="px-4 py-3 font-medium text-gray-800">
-                    <a href="{{ route('admin.shops.show', $shop->id) }}/" class="hover:underline">
-                        {{ $shop->name }}
-                    </a>
-                </td>
-                <td class="px-4 py-3 text-xs text-gray-500">
-                    {{ $shop->area?->prefecture?->prefecture ?? '—' }}
-                </td>
-                <td class="px-4 py-3">
-                    <span class="text-xs px-2 py-0.5 rounded-full font-medium {{ $planInfo['color'] }}">
-                        {{ $planInfo['label'] }}
-                        @if($shop->plan === 3 && $shop->is_banner_plan)
-                            <span class="text-gray-400">（バナー）</span>
-                        @endif
-                    </span>
-                </td>
-                <td class="px-4 py-3 text-xs">
-                    @if($websiteUrl)
-                        <a href="{{ $websiteUrl }}" target="_blank" rel="noopener"
-                           class="text-blue-600 hover:underline break-all">
-                            {{ $websiteUrl }}
-                        </a>
-                    @else
-                        <span class="text-gray-300">未設定</span>
+        @forelse($shops as $shop)
+        @php $urlRow = $shop->externalUrls->first(); @endphp
+        <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+                <a href="{{ route('admin.shops.show', $shop->id) }}" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">{{ $shop->name }}</a>
+                <div class="text-xs text-gray-400">{{ $shop->prefecture?->prefecture ?? '—' }}{{ $shop->area ? ' › ' . $shop->area->name : '' }}</div>
+                @if($tab === 'unapplied')
+                <span style="background:#e5e7eb;color:#374151;padding:1px 6px;border-radius:4px;font-size:10px;">プラン{{ $shop->plan }}</span>
+                @endif
+            </td>
+            <td class="px-4 py-3">
+                @if($urlRow)
+                    <a href="{{ $urlRow->url }}" target="_blank" class="text-blue-500 hover:underline text-xs break-all">{{ $urlRow->url }}</a>
+                @else
+                    <span class="text-gray-300 text-xs">—</span>
+                @endif
+            </td>
+            <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
+                {{ $shop->banner_checked_at?->format('m/d H:i') ?? '—' }}
+            </td>
+            <td class="px-4 py-3">
+                <div class="flex gap-2 flex-wrap">
+                    @if($tab === 'ng')
+                    <form method="POST" action="{{ route('admin.banner-check.manual-ok', $shop) }}">
+                        @csrf @method('PATCH')
+                        <button style="background:#7c3aed;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">手動OK</button>
+                    </form>
                     @endif
-                </td>
-                <td class="px-4 py-3 text-xs">
-                    @if($checkedAt)
-                        <span class="text-gray-500">{{ $checkedAt->format('m/d') }}</span>
-                        <span class="block text-gray-300 text-[10px]">{{ $checkedAt->format('H:i') }}</span>
-                    @else
-                        <span class="text-red-400 font-medium">未確認</span>
+                    @if($tab === 'manual')
+                    <form method="POST" action="{{ route('admin.banner-check.manual-ok', $shop) }}" onsubmit="return confirm('手動確認を解除して再チェック対象に戻しますか？')">
+                        @csrf @method('PATCH')
+                        <button style="background:#6b7280;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">解除</button>
+                    </form>
                     @endif
-                </td>
-                <td class="px-4 py-3">
-                    <div class="flex items-center gap-1.5">
-                        <form action="{{ route('admin.shops.updatePlan', $shop->id) }}/" method="POST"
-                              class="flex items-center gap-1.5">
-                            @csrf @method('PATCH')
-                            <select name="plan"
-                                    class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-400">
-                                <option value="1" {{ $shop->plan == 1 ? 'selected' : '' }}>VIP</option>
-                                <option value="2" {{ $shop->plan == 2 ? 'selected' : '' }}>ミドル</option>
-                                <option value="3" {{ $shop->plan == 3 ? 'selected' : '' }}>ベーシック</option>
-                                <option value="4" {{ $shop->plan == 4 ? 'selected' : '' }}>無料上位</option>
-                                <option value="5" {{ $shop->plan == 5 ? 'selected' : '' }}>無料</option>
-                            </select>
-                            <input type="hidden" name="is_banner_plan" value="{{ $shop->is_banner_plan ? 1 : 0 }}">
-                            <button type="submit"
-                                    class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded transition">
-                                変更
-                            </button>
-                        </form>
-                        <form action="{{ route('admin.banner-check.check', $shop->id) }}/" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="text-xs px-2 py-1 {{ $checkedAt ? 'bg-gray-200 hover:bg-gray-300 text-gray-600' : 'bg-green-600 hover:bg-green-500 text-white' }} rounded transition">
-                                OK
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="7" class="px-4 py-12 text-center text-gray-400">
-                    該当する店舗はありません
-                </td>
-            </tr>
-            @endforelse
+                    @if($tab === 'unapplied')
+                    <form method="POST" action="{{ route('admin.banner-check.apply', $shop) }}">
+                        @csrf @method('PATCH')
+                        <button style="background:#ea580c;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">バナープラン適用</button>
+                    </form>
+                    @endif
+                </div>
+            </td>
+        </tr>
+        @empty
+        <tr><td colspan="4" class="text-center py-8 text-gray-400">該当なし</td></tr>
+        @endforelse
         </tbody>
     </table>
+
+    <div class="mt-4">{{ $shops->withQueryString()->links() }}</div>
 </div>
-
-<p class="text-xs text-gray-400 mt-3">{{ $shops->count() }} 件</p>
-
 @endsection

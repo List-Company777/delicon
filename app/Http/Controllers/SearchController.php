@@ -201,7 +201,7 @@ class SearchController extends Controller
             : array_filter(array_map('intval', (array) request()->input('shop_type_ids', [])));
         $ageRange    = request()->input('age_range', '');
         $results = $prefOnlyModel
-            ? $this->getResults($gender, '', '', prefSlug: $area_slug, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange)
+            ? $this->getResults($gender, '', $keyword, prefSlug: $area_slug, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange)
             : $this->getResults($gender, $area, $keyword, useSlug: true, arubaito: $arubaito, allYouCanDrink: $allYouCanDrink, hasKaraoke: $hasKaraoke, hasPrivateRoom: $hasPrivateRoom, discountFirstSet: $discountFirstSet, shopTypeIds: $shopTypeIds, ageRange: $ageRange);
 
         $noindex = $results->total() < 5;
@@ -215,6 +215,13 @@ class SearchController extends Controller
                 ->all()
         );
         $shopTypes = collect($shopTypesRaw)->map(fn($t) => (object) $t);
+
+        $genresRaw = Cache::remember('delicon:genres_list', 86400, fn() =>
+            Genre::orderBy('id')->get(['id', 'name', 'slug'])
+                ->map(fn($g) => ['id' => $g->id, 'name' => $g->name, 'slug' => $g->slug])
+                ->all()
+        );
+        $genres = collect($genresRaw)->map(fn($g) => (object) $g);
 
         // 小エリア絞り込み（都道府県ページのみ）
         $subAreas = collect();
@@ -241,7 +248,7 @@ class SearchController extends Controller
             'areaName', 'jobTypeName', 'prefModel', 'isPrefPage',
             'area', 'keyword', 'wageType', 'wageMin', 'arubaito',
             'allYouCanDrink', 'hasKaraoke', 'hasPrivateRoom', 'discountFirstSet',
-            'noindex', 'shopTypes', 'shopTypeIds', 'ageRange', 'subAreas'
+            'noindex', 'shopTypes', 'shopTypeIds', 'ageRange', 'subAreas', 'genres'
         ), $status);
     }
 

@@ -18,8 +18,11 @@
 @include('manage._nav')
 
 <div class="max-w-4xl mx-auto px-4 pb-12">
-    <h1 class="text-xl font-bold text-gray-800 mb-2">シフト申請</h1>
-    <p class="text-xs text-gray-500 mb-6">在籍女性から届いたシフト申請を確認・承認できます。承認するとシフトに自動反映されます。</p>
+    <h1 class="text-xl font-bold text-[#E8E4DC] mb-2">シフト申請</h1>
+    <p class="text-xs text-[#9A9A9E] mb-3">在籍女性から届いたシフト申請を確認・承認できます。承認するとシフトに自動反映されます。</p>
+    <div class="bg-surface-600 border border-surface-300 rounded-lg px-4 py-3 mb-6">
+        <p class="text-xs text-[#8A8A9E] leading-relaxed">シフト申請URLは写メ日記投稿URLと同じです。各キャストの詳細画面上部の「この女性の写メ日記を作成・管理」ボタンからURLを発行し、キャストにお渡しください。</p>
+    </div>
 
     @if(session('success'))
     <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>

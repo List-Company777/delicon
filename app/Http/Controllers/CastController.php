@@ -210,10 +210,14 @@ class CastController extends Controller
 
         if (auth()->check()) {
             $cacheKey = "cast_view:{$cast->id}:u" . auth()->id();
+            if (!Cache::add($cacheKey, 1, 3600)) return;
         } else {
-            $cacheKey = "cast_view:{$cast->id}:{$request->ip()}";
+            // IPとセッション両方でデュープ除外（IPローテーションボット対策）
+            $sessionKey = "cast_view:{$cast->id}:s:" . session()->getId();
+            $ipKey      = "cast_view:{$cast->id}:{$request->ip()}";
+            if (!Cache::add($sessionKey, 1, 86400)) return;
+            if (!Cache::add($ipKey, 1, 3600)) return;
         }
-        if (!Cache::add($cacheKey, 1, 3600)) return;
 
         $data = [
             'cast_id'   => $cast->id,
