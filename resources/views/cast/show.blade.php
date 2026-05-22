@@ -82,9 +82,10 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {{-- 左カラム：写真 --}}
-        <div>
+        <div x-data="{ lbOpen: false, lbSrc: '' }">
             <div class="relative">
-                <div class="aspect-[3/4] rounded-xl border border-surface-300 mb-3 overflow-hidden">
+                <div class="aspect-[3/4] rounded-xl border border-surface-300 mb-3 overflow-hidden cursor-zoom-in"
+                     @click="lbOpen=true; lbSrc='{{ $cast->img_url }}'">
                     <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                          class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
                 </div>
@@ -99,7 +100,8 @@
             @if($cast->images->count() > 0)
             <div class="grid grid-cols-3 gap-1.5">
                 @foreach($cast->images as $img)
-                <picture>
+                <picture class="cursor-zoom-in"
+                         @click="lbOpen=true; lbSrc='{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}'">
                     <source srcset="{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}" type="image/webp">
                     <img src="{{ Storage::url($img->img_path) }}" alt="{{ $cast->name }}"
                          class="w-full aspect-square object-cover rounded-lg border border-surface-400" loading="lazy">
@@ -108,6 +110,27 @@
             </div>
             @endif
         </div>
+            {{-- Lightbox modal --}}
+            <template x-teleport="body">
+            <div x-show="lbOpen"
+                 x-transition:enter="transition duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click.self="lbOpen=false"
+                 @keydown.escape.window="lbOpen=false"
+                 class="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4"
+                 style="display:none">
+                <button @click="lbOpen=false"
+                        class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-surface-600/80 text-[#E8E4DC] hover:bg-surface-500 text-xl transition">
+                    ✕
+                </button>
+                <img :src="lbSrc" alt="拡大表示"
+                     class="max-h-[90vh] max-w-full object-contain rounded-lg shadow-2xl">
+            </div>
+            </template>
 
         {{-- 右カラム：情報 --}}
         <div class="md:col-span-2 space-y-4">
@@ -643,6 +666,43 @@
 })();
 </script>
 @endpush
+
+{{-- 最近見たキャスト --}}
+<div id="recent-casts-section" class="max-w-5xl mx-auto px-4 pb-6 hidden">
+    <h2 class="text-base font-bold text-[#C8C4BC] mb-3 flex items-center gap-2">
+        <span class="w-1 h-4 bg-surface-300 rounded-full inline-block"></span>
+        最近見たキャスト
+    </h2>
+    <div id="recent-casts-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+</div>
+
+@push('scripts')
+<script @nonce>
+(function() {
+    var cur = { id: {{ $cast->id }}, name: @json($cast->name), img: @json($cast->img_url !== '/img/no-cast.svg' ? $cast->img_url : '/img/no-cast.svg'), url: '{{ route('cast.show', $cast->id) }}/' };
+    var stored = [];
+    try { stored = JSON.parse(localStorage.getItem('recentCasts') || '[]'); } catch(e) {}
+    stored = [cur].concat(stored.filter(function(c) { return c.id !== cur.id; })).slice(0, 12);
+    try { localStorage.setItem('recentCasts', JSON.stringify(stored)); } catch(e) {}
+    var others = stored.filter(function(c) { return c.id !== cur.id; }).slice(0, 6);
+    if (others.length > 0) {
+        var grid = document.getElementById('recent-casts-grid');
+        var sect = document.getElementById('recent-casts-section');
+        others.forEach(function(c) {
+            var a = document.createElement('a');
+            a.href = c.url;
+            a.className = 'group text-center';
+            a.innerHTML = '<div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 border border-surface-300 group-hover:border-deli-500 transition mb-1">' +
+                '<img src="' + c.img + '" alt="' + c.name + '" onerror="this.src='/img/no-cast.svg'" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">' +
+                '</div><p class="text-xs text-[#C8C4BC] group-hover:text-gold-400 transition truncate">' + c.name + '</p>';
+            grid.appendChild(a);
+        });
+        sect.classList.remove('hidden');
+    }
+})();
+</script>
+@endpush
+
 
 {{-- 近隣有料掲載店（所属店が無料の場合のみ） --}}
 @if($nearbyPaidShops->isNotEmpty())

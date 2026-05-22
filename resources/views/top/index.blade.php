@@ -36,7 +36,18 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         <p class="text-[#8A8A9E] text-sm mb-6">デリヘルリスト｜デリヘル・風俗総合情報</p>
         <p class="text-sm font-semibold text-deli-400 mb-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
 
-        {{-- エリアから探す --}}
+        {-- 検索バー --}
+        <form action="{{ url('/all/girl-list/') }}/" method="get"
+              class="mt-6 flex gap-2 max-w-md">
+            <input type="text" name="q" placeholder="キャスト名で検索..."
+                   class="flex-1 bg-surface-600/80 border border-surface-400 focus:border-deli-400 rounded-xl px-4 py-3 text-sm text-[#E8E4DC] placeholder-[#6A6A7E] focus:outline-none transition">
+            <button type="submit"
+                    class="bg-deli-500 hover:bg-deli-400 text-white px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap">
+                検索
+            </button>
+        </form>
+
+        {-- エリアから探す --}
         @if($prefectures->isNotEmpty())
         @php
             $heroRegions = [

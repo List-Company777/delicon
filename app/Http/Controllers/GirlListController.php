@@ -99,11 +99,16 @@ class GirlListController extends Controller
         if ($body = $request->input('body')) {
             $query->where('body_id', (int) $body);
         }
+
+        if ($q = $request->input('q')) {
+            $q = mb_substr(trim($q), 0, 50);
+            if ($q !== '') $query->where('name', 'like', '%' . $q . '%');
+        }
     }
 
     private function hasActiveFilters(Request $request): bool
     {
-        return $request->hasAny(['age', 'tall', 'cup', 'body']);
+        return $request->hasAny(['age', 'tall', 'cup', 'body', 'q']);
     }
 
     // ?age / ?tall / ?body パラメータに対応するLPがあればリダイレクト

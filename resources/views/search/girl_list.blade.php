@@ -13,8 +13,10 @@
     $activeTall = request('tall');
     $activeCup  = request('cup');
     $activeBody = request('body');
+    $activeQ    = request('q');
 
     $filterParams = array_filter([
+        'q'    => $activeQ,
         'age'  => $activeAge,
         'tall' => $activeTall,
         'cup'  => $activeCup,
@@ -106,7 +108,7 @@
         : $baseTabUrl;
 
     // noindex: 結果5件未満 OR フィルター2つ以上（フィルター1つ+5件以上はindex）
-    $noindex = $results->total() < 5 || $filterCount >= 2;
+    $noindex = $results->total() < 5 || $filterCount >= 2 || request()->filled('q');
 
     $showFilters = in_array($cast_tab, ['all', 'standby', 'new']);
 
@@ -266,11 +268,27 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="pb-3 space-y-2.5">
+            {-- キャスト名検索 --}
+            <form method="get" action="" class="flex gap-2 pt-1">
+                <input type="text" name="q" value="{{ $activeQ }}"
+                       placeholder="キャスト名で検索..."
+                       class="flex-1 bg-surface-600 border border-surface-400 focus:border-deli-400 rounded-lg px-3 py-2 text-sm text-[#E8E4DC] placeholder-[#5A5A6E] focus:outline-none transition">
+                @if($activeQ)
+                <a href="{{ request()->url() }}/{{ $filterParams ? '?' . http_build_query(array_filter(array_diff_key($filterParams, ['q' => '']))) : '' }}"
+                   class="px-3 py-2 bg-surface-500 border border-surface-400 rounded-lg text-xs text-[#8A8A9E] hover:text-[#E8E4DC] transition whitespace-nowrap">
+                    ✕ クリア
+                </a>
+                @endif
+                <button type="submit"
+                        class="px-4 py-2 bg-deli-500 hover:bg-deli-400 text-white text-sm font-bold rounded-lg transition whitespace-nowrap">
+                    検索
+                </button>
+            </form>
 
             {{-- 都道府県（全国ページのみ） --}}
             @if($area_slug === 'all' && !empty($prefectureLinks))
             @php
-                $prefFilterParams = array_filter(['age' => $activeAge, 'tall' => $activeTall, 'cup' => $activeCup, 'body' => $activeBody]);
+                $prefFilterParams = array_filter(['q' => $activeQ, 'age' => $activeAge, 'tall' => $activeTall, 'cup' => $activeCup, 'body' => $activeBody]);
             @endphp
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-[#8A8A9E] shrink-0 w-16">都道府県</span>
