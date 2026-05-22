@@ -50,6 +50,10 @@ return [
         'xml_feed_url' => env('UPSTAGE_XML_FEED_URL'),
     ],
 
+    'indexnow' => [
+        'key' => env('INDEXNOW_KEY'),
+    ],
+
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
     ],

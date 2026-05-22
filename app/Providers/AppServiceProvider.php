@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Models\Area;
 use App\Models\Cast;
+use App\Models\Shop;
 use App\Observers\CastObserver;
+use App\Observers\ShopObserver;
 use App\Models\Job;
 use App\Models\Prefecture;
 use App\Observers\JobObserver;
@@ -52,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Cast::observe(CastObserver::class);
+        Shop::observe(ShopObserver::class);
         Job::observe(JobObserver::class);
 
         // admin レイアウト全体に都道府県・エリアリストを共有（キャッシュなし）

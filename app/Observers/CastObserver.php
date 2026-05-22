@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Cast;
+use App\Services\IndexNowService;
 
 class CastObserver
 {
@@ -15,6 +16,13 @@ class CastObserver
 
     private const AUTO_TAG_JUKUJO = 57;  // 熟女系
     private const AUTO_TAG_TALL   = 25;  // 長身
+
+    public function updated(Cast $cast): void
+    {
+        if ($cast->wasChanged('status') && $cast->status === 'active') {
+            IndexNowService::ping(route('cast.show', $cast->id));
+        }
+    }
 
     public function saving(Cast $cast): void
     {
