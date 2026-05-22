@@ -14,6 +14,9 @@
     @if(session('success'))
     <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{{ session('error') }}</div>
+    @endif
 
     <div class="flex flex-wrap gap-1 mb-6 border-b border-gray-200">
         @php
@@ -48,6 +51,12 @@
         手動で確認済みにした店舗です。自動チェックではスキップされます。
     </div>
     @endif
+    @if($tab === 'unapplied')
+    <div class="mb-4 bg-orange-50 border border-orange-200 text-orange-700 text-xs px-4 py-3 rounded-lg">
+        <strong>両方あり（橙）</strong>：deliconとup-stage両バナー確認済み → プラン3（バナープラン）に適用できます。<br>
+        <strong>deliconのみ（青）</strong>：プラン5でdeliconのみ確認済み → プラン4（無料上位）に適用できます。
+    </div>
+    @endif
 
     <table class="w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
         <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
@@ -66,7 +75,13 @@
                 <a href="{{ route('admin.shops.show', $shop->id) }}" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">{{ $shop->name }}</a>
                 <div class="text-xs text-gray-400">{{ $shop->prefecture?->prefecture ?? '—' }}{{ $shop->area ? ' › ' . $shop->area->name : '' }}</div>
                 @if($tab === 'unapplied')
-                <span style="background:#e5e7eb;color:#374151;padding:1px 6px;border-radius:4px;font-size:10px;">プラン{{ $shop->plan }}</span>
+                    @if(in_array($shop->banner_ok, [1, 2, 3]))
+                    <span style="background:#ea580c;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">両方あり → プラン3</span>
+                    @elseif($shop->banner_ok === 4)
+                    <span style="background:#2563eb;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">deliconのみ → プラン4</span>
+                    @endif
+                @else
+                    <span style="background:#e5e7eb;color:#374151;padding:1px 6px;border-radius:4px;font-size:10px;">プラン{{ $shop->plan }}</span>
                 @endif
             </td>
             <td class="px-4 py-3">
@@ -96,7 +111,11 @@
                     @if($tab === 'unapplied')
                     <form method="POST" action="{{ route('admin.banner-check.apply', $shop) }}">
                         @csrf @method('PATCH')
-                        <button style="background:#ea580c;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">バナープラン適用</button>
+                        @if(in_array($shop->banner_ok, [1, 2, 3]))
+                        <button style="background:#ea580c;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">プラン3適用</button>
+                        @elseif($shop->banner_ok === 4)
+                        <button style="background:#2563eb;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;">プラン4適用</button>
+                        @endif
                     </form>
                     @endif
                 </div>

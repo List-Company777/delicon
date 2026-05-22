@@ -16,8 +16,16 @@ class BannerCheckController extends Controller
         $ngCount     = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 0)->count();
         $brokenCount = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 2)->count();
         $manualCount = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->where('banner_ok', 3)->count();
-        $unapplied   = Shop::where('is_banner_plan', 0)->where('status', '!=', 'inactive')->whereIn('banner_ok', [1, 2, 3])->count();
         $unchecked   = Shop::where('is_banner_plan', 1)->where('status', '!=', 'inactive')->whereNull('banner_checked_at')->count();
+
+        // 未適用:
+        //   banner_ok=1（両方あり）→ プラン3候補（全プラン対象）
+        //   banner_ok=4（deliconのみ）かつ plan=5 → プラン4候補
+        $unapplied = Shop::where('is_banner_plan', 0)->where('status', '!=', 'inactive')
+            ->where(function ($q) {
+                $q->whereIn('banner_ok', [1, 2, 3])
+                  ->orWhere(fn($q2) => $q2->where('banner_ok', 4)->where('plan', 5));
+            })->count();
 
         $base = Shop::where('status', '!=', 'inactive')
             ->with(['externalUrls' => fn($q) => $q->where('url_type', 'website'), 'prefecture', 'area']);
@@ -26,7 +34,11 @@ class BannerCheckController extends Controller
             'ng'        => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 0)->whereNotNull('banner_checked_at')->orderBy('name')->paginate(50),
             'broken'    => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 2)->orderBy('name')->paginate(50),
             'manual'    => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 3)->orderBy('name')->paginate(50),
-            'unapplied' => (clone $base)->where('is_banner_plan', 0)->whereIn('banner_ok', [1, 2, 3])->orderBy('name')->paginate(50),
+            'unapplied' => (clone $base)->where('is_banner_plan', 0)
+                ->where(function ($q) {
+                    $q->whereIn('banner_ok', [1, 2, 3])
+                      ->orWhere(fn($q2) => $q2->where('banner_ok', 4)->where('plan', 5));
+                })->orderBy('name')->paginate(50),
             'ok'        => (clone $base)->where('is_banner_plan', 1)->where('banner_ok', 1)->orderBy('name')->paginate(50),
             default     => (clone $base)->where('is_banner_plan', 1)->whereNull('banner_checked_at')->orderBy('name')->paginate(50),
         };
@@ -45,7 +57,25 @@ class BannerCheckController extends Controller
 
     public function applyBanner(Shop $shop)
     {
-        $shop->update(['is_banner_plan' => 1]);
-        return back()->with('success', "「{$shop->name}」をバナープランに適用しました。");
+        // banner_ok=1/2/3（両方あり）→ プラン3 + バナープラン
+        if (in_array($shop->banner_ok, [1, 2, 3])) {
+            $shop->update([
+                'plan'           => 3,
+                'is_banner_plan' => true,
+                'plan3_since'    => $shop->plan3_since ?? now(),
+            ]);
+            return back()->with('success', "「{$shop->name}」をプラン3（バナープラン）に適用しました。");
+        }
+
+        // banner_ok=4（deliconのみ）かつ plan=5 → プラン4（無料上位）
+        if ($shop->banner_ok === 4 && $shop->plan === 5) {
+            $shop->update([
+                'plan'        => 4,
+                'plan4_since' => $shop->plan4_since ?? now(),
+            ]);
+            return back()->with('success', "「{$shop->name}」をプラン4（無料上位）に適用しました。");
+        }
+
+        return back()->with('error', '適用条件を満たしていません。');
     }
 }

@@ -28,6 +28,24 @@
     }
 @endphp
 <script type="application/ld+json" @nonce>{!! json_encode($bc, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@if(!$noindex)
+@php
+    $ld_page = [
+        '@context'    => 'https://schema.org',
+        '@type'       => 'CollectionPage',
+        'name'        => $pageTitle,
+        'description' => "{$areaName}のデリヘル・風俗店舗{$totalShops}件を掲載。エリア・ジャンル・キャストタイプから探せるデリヘル情報サイト。",
+        'url'         => url("/{$area_slug}/") . '/',
+    ];
+    if ($area_slug !== 'all') {
+        $ld_page['areaServed'] = [
+            '@type' => 'AdministrativeArea',
+            'name'  => $areaName,
+        ];
+    }
+@endphp
+<script type="application/ld+json" @nonce>{!! json_encode($ld_page, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG) !!}</script>
+@endif
 @if($featuredShops->isNotEmpty() && !$noindex)
 @php
     $ld_list = [

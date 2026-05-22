@@ -523,6 +523,7 @@
         '@context'    => 'https://schema.org',
         '@type'       => 'LocalBusiness',
         'name'        => $shop->name,
+        'description' => $shop->catche ?: null,
         'url'         => route('shop.show', $shop->id) . '/',
         'telephone'   => $shop->tel ?? null,
         'address'     => $shop->address ? [
