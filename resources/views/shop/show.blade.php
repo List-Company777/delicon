@@ -1,11 +1,21 @@
 @extends('layouts.app')
 
 @section('title', $shop->name . ($shop->area ? '（'.$shop->area->name.'）' : ($shop->prefecture ? '（'.$shop->prefecture->name.'）' : '')))
-@section('description',
-    ($shop->catche ?: $shop->name . 'の詳細情報。') .
-    ($shop->price_60 ? '60分¥' . number_format($shop->price_60) . '〜。' : '') .
-    'キャスト・システム・料金などをご紹介。'
-)
+@php
+    $_shopDescParts = [];
+    if ($shop->catche) $_shopDescParts[] = $shop->catche;
+    $_areaStr  = $shop->area?->name ?? optional($shop->prefecture)->name ?? null;
+    $_typeStr  = $shop->shopType?->name ?? 'デリヘル・風俗';
+    $_nameBlock = ($_areaStr ? $_areaStr . 'の' : '') . $_typeStr . '「' . $shop->name . '」';
+    $_shopDescParts[] = $_nameBlock;
+    if (isset($casts) && $casts->total() > 0) $_shopDescParts[] = '在籍' . $casts->total() . '名';
+    if ($shop->price_60) $_shopDescParts[] = '60分¥' . number_format($shop->price_60) . '〜';
+    if ($shop->all_time) $_shopDescParts[] = '24時間営業';
+    elseif ($shop->open_time && $shop->close_time) $_shopDescParts[] = substr($shop->open_time,0,5) . '〜' . substr($shop->close_time,0,5) . '営業';
+    $_shopDescParts[] = 'キャスト・料金・口コミをデリヘルリストで確認';
+    $pageDescription = implode('。', $_shopDescParts) . '。';
+@endphp
+@section('description', $pageDescription)
 @section('canonical', route('shop.show', $shop->id) . '/')
 @if($noindex)
 @section('robots', 'noindex,follow')
