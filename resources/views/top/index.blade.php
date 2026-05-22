@@ -183,6 +183,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 <p class="text-xs text-[#8A8A9E] mt-0.5">
                     {{ $cast->age ? $cast->age . '歳' : '' }}{{ ($cast->age && $cast->cup) ? ' · ' : '' }}{{ $cast->cup ? $cast->cup . 'カップ' : '' }}
                 </p>
+                @if($cast->shop_name)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop_name }}</p>@endif
             </a>
             @endforeach
         </div>
@@ -284,6 +285,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 </div>
                 <p class="font-medium text-xs text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
                 <p class="text-xs text-[#8A8A9E] mt-0.5">{{ $cast->join_date }}</p>
+                @if($cast->shop_name)<p class="text-[10px] text-[#6A6A7E] truncate">{{ $cast->shop_name }}</p>@endif
             </a>
             @endforeach
         </div>
