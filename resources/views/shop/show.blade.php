@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $shop->name)
+@section('title', $shop->name . ($shop->area ? '（'.$shop->area->name.'）' : ($shop->prefecture ? '（'.$shop->prefecture->name.'）' : '')))
 @section('description',
     ($shop->catche ?: $shop->name . 'の詳細情報。') .
     ($shop->price_60 ? '60分¥' . number_format($shop->price_60) . '〜。' : '') .

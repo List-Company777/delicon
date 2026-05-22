@@ -8,8 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// 詳細ページサイトマップ（毎日 04:00〜05:30 に順次生成）
-Schedule::command('sitemap:generate-detail')->dailyAt('04:00');
+// 詳細ページサイトマップ（毎日 03:30〜05:30 に順次生成）
+Schedule::command('sitemap:generate-detail')->dailyAt('03:30');
 Schedule::command('sitemap:generate-cast-detail')->dailyAt('04:30');
 Schedule::command('sitemap:generate-pages')->dailyAt('05:30');
 
@@ -47,9 +47,9 @@ Schedule::command('report:monthly')->monthlyOn(1, '00:05');
 // 月次レポートメール 第2送信（01:05 に再送）
 Schedule::command('report:monthly')->monthlyOn(1, '01:05');
 
-// フッター都道府県キャッシュ更新（毎日 02:00）
+// フッター都道府県キャッシュ更新（毎日 02:00）・エリアトップキャッシュ（02:30）
 Schedule::command('cache:warm-footer')->dailyAt('02:00');
-Schedule::command('cache:warm-area-top')->dailyAt('03:00');
+Schedule::command('cache:warm-area-top')->dailyAt('02:30');
 
 // girl-list・shop-listサイトマップ（毎日 06:00〜06:30）
 Schedule::command("sitemap:generate-girl-list")->dailyAt("06:00");
@@ -85,5 +85,5 @@ Schedule::command('report:weekly-push')->weeklyOn(5, '09:00');
 // キャストPRテキストからチャーム自動抽出（毎日午前3時・未処理分のみ）
 Schedule::command('casts:extract-charms --min-length=100')->dailyAt('03:00');
 
-// キャスト外見分類AI判定（毎日03:30・未処理のみ）
-Schedule::command("casts:classify-type")->dailyAt("03:30");
+// キャスト外見分類AI判定（毎日04:00・未処理のみ・sitemap:generate-detailの後）
+Schedule::command("casts:classify-type")->dailyAt("04:00");

@@ -311,8 +311,8 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 
     // URL死活チェック
     Route::get('/url-check/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'index'])->name('url-check.index');
-    Route::patch('/url-check/{urlRow}/dismiss/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'dismiss'])->name('url-check.dismiss');
-    Route::patch('/url-check/{urlRow}/deactivate/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'deactivate'])->name('url-check.deactivate');
+    Route::patch('/url-check/{shopExternalUrl}/dismiss/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'dismiss'])->name('url-check.dismiss');
+    Route::patch('/url-check/{shopExternalUrl}/deactivate/', [\App\Http\Controllers\Admin\UrlCheckController::class, 'deactivate'])->name('url-check.deactivate');
 
     // 代理店移管
     Route::get('/partner-transfer/', [\App\Http\Controllers\Admin\PartnerTransferController::class, 'index'])->name('partner-transfer.index');
@@ -375,6 +375,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
     Route::delete('/articles/{article}/video/',        [\App\Http\Controllers\Admin\ArticleVideoController::class, 'destroy'])->name('articles.video.destroy');
     // 検索PV分析
     Route::get('/search-page-views/', [\App\Http\Controllers\Admin\SearchPageViewController::class, 'index'])->name('search-page-views.index');
+    Route::get('/tel-click-analytics/', [\App\Http\Controllers\Admin\TelClickAnalyticsController::class, 'index'])->name('tel-click-analytics.index');
 
     // 記事テーマ管理
     Route::post('/article-topics/',                    [\App\Http\Controllers\Admin\ArticleTopicController::class, 'store'])->name('article-topics.store');

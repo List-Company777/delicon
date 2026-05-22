@@ -43,19 +43,21 @@
 
     // title
     $totalStr = number_format($results->total());
+    $currentPage = (int) request()->input('page', 1);
+    $pageSuffix  = $currentPage > 1 ? "（{$currentPage}ページ目）" : '';
     $areaPrefix = $areaName ? "{$areaName}の" : '';
     if ($cast_tab === 'type' && isset($typeName)) {
-        $pageTitle = $areaName
+        $pageTitle = ($areaName
             ? "{$areaName}の{$typeName}風俗・デリヘル | {$totalStr}人掲載"
-            : "{$typeName}のデリヘル・風俗女性一覧 | {$totalStr}人掲載";
+            : "{$typeName}のデリヘル・風俗女性一覧 | {$totalStr}人掲載") . $pageSuffix;
     } elseif ($filterLabel) {
-        $pageTitle = $areaName
+        $pageTitle = ($areaName
             ? "{$areaName}の{$filterLabel}女性 | {$suffix}"
-            : "{$filterLabel}女性一覧 | {$suffix}";
+            : "{$filterLabel}女性一覧 | {$suffix}") . $pageSuffix;
     } else {
-        $pageTitle = $areaName
+        $pageTitle = ($areaName
             ? "{$areaName}の{$tabSeoLabel} | {$suffix}"
-            : "{$tabSeoLabel} | {$suffix}";
+            : "{$tabSeoLabel} | {$suffix}") . $pageSuffix;
     }
 
     // description

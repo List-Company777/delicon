@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $cast->name)
+@section('title', $cast->name . ($cast->age ? '（'.$cast->age.'歳）' : '') . ($cast->shop ? ' - '.$cast->shop->name : ''))
 @section('description',
     $cast->name . '(' . ($cast->age ? $cast->age . '歳' : '') . ')' .
     ($cast->castType ? '・' . $cast->castType->name : '') .

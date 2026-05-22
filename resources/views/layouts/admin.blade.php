@@ -61,6 +61,10 @@
                        class="{{ request()->routeIs('admin.search-page-views.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
                         PV分析
                     </a>
+                    <a href="{{ route('admin.tel-click-analytics.index') }}/"
+                       class="{{ request()->routeIs('admin.tel-click-analytics.*') ? 'text-yellow-400' : 'text-gray-400 hover:text-white' }} transition">
+                        電話分析
+                    </a>
                     <a href="{{ route('admin.deletion-requests.index') }}/"
                        class="{{ request()->routeIs('admin.deletion-requests.*') ? 'text-red-400' : 'text-gray-400 hover:text-white' }} transition">
                         削除依頼
