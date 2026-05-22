@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 class GenerateDetailSitemap extends Command
 {
     protected $signature   = 'sitemap:generate-detail';
-    protected $description = '店舗詳細・記事詳細ページのサイトマップを生成（店舗は説明100字以上のみ）';
+    protected $description = '店舗詳細・記事詳細ページのサイトマップを生成（画像対応・店舗は説明100字以上のみ）';
 
     public function handle(): void
     {
@@ -17,24 +17,30 @@ class GenerateDetailSitemap extends Command
         $now   = now()->toAtomString();
         $urls  = [];
 
-        // 店舗詳細 — base + system_text が合計100文字以上のもののみ
         $shopCount = 0;
         Shop::where('status', 'active')
             ->whereRaw("CHAR_LENGTH(COALESCE(base,'')) + CHAR_LENGTH(COALESCE(system_text,'')) >= 100")
-            ->select('id', 'updated_at')
+            ->select('id', 'name', 'main_image', 'shop_file_name', 'updated_at')
             ->orderBy('id')
             ->chunk(500, function ($shops) use ($base, &$urls, &$shopCount) {
                 foreach ($shops as $shop) {
+                    $images = [];
+                    $imgPath = $shop->main_image ?: null;
+                    if ($imgPath) {
+                        $images[] = ['loc' => "{$base}/storage/{$imgPath}", 'title' => $shop->name];
+                    } elseif ($shop->shop_file_name) {
+                        $images[] = ['loc' => $base . $shop->shop_file_name, 'title' => $shop->name];
+                    }
                     $urls[] = [
                         'loc'      => "{$base}/shops/{$shop->id}/",
                         'lastmod'  => $shop->updated_at?->toAtomString() ?? now()->toAtomString(),
                         'priority' => '0.7',
+                        'images'   => $images,
                     ];
                     $shopCount++;
                 }
             });
 
-        // 記事詳細
         $articleCount = 0;
         Article::where('is_published', true)
             ->where('published_at', '<=', now())
@@ -49,6 +55,7 @@ class GenerateDetailSitemap extends Command
                         'loc'      => "{$base}/article/{$article->slug}/",
                         'lastmod'  => $lastmod,
                         'priority' => '0.6',
+                        'images'   => [],
                     ];
                     $articleCount++;
                 }
@@ -61,13 +68,22 @@ class GenerateDetailSitemap extends Command
     private function writeXml(array $urls): void
     {
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
+        $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
         foreach ($urls as $url) {
             $xml .= "  <url>\n";
             $xml .= "    <loc>" . htmlspecialchars($url['loc']) . "</loc>\n";
             $xml .= "    <lastmod>{$url['lastmod']}</lastmod>\n";
             $xml .= "    <changefreq>weekly</changefreq>\n";
             $xml .= "    <priority>{$url['priority']}</priority>\n";
+            foreach ($url['images'] ?? [] as $img) {
+                $xml .= "    <image:image>\n";
+                $xml .= "      <image:loc>" . htmlspecialchars($img['loc']) . "</image:loc>\n";
+                if (!empty($img['title'])) {
+                    $xml .= "      <image:title>" . htmlspecialchars($img['title']) . "</image:title>\n";
+                }
+                $xml .= "    </image:image>\n";
+            }
             $xml .= "  </url>\n";
         }
         $xml .= '</urlset>';

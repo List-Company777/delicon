@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class GenerateCastDetailSitemap extends Command
 {
     protected $signature   = 'sitemap:generate-cast-detail';
-    protected $description = 'キャスト詳細ページのサイトマップを生成（説明100字以上、50,000件で分割）';
+    protected $description = 'キャスト詳細ページのサイトマップを生成（画像対応・説明100字以上・50,000件で分割）';
 
     private const SPLIT_SIZE = 50000;
 
@@ -19,26 +19,18 @@ class GenerateCastDetailSitemap extends Command
         $now       = now()->toAtomString();
         $threshold = now()->subDays(30)->toDateString();
 
-        // 直近30日以内に出勤があるキャストID
         $recentWorking = DB::table('casts')
             ->where('status', 'active')
             ->where('working_date', '>=', $threshold)
-            ->pluck('id')
-            ->flip()
-            ->all();
+            ->pluck('id')->flip()->all();
 
-        // 直近30日以内に日記を投稿したキャストID
         $recentDiary = DB::table('cast_diaries')
             ->where('status', 'published')
             ->where('created_at', '>=', $threshold)
-            ->distinct()
-            ->pluck('cast_id')
-            ->flip()
-            ->all();
+            ->distinct()->pluck('cast_id')->flip()->all();
 
         $highPriority = $recentWorking + $recentDiary;
 
-        // 既存の分割ファイルをリセット
         foreach (glob(public_path('sitemap-cast-*.xml')) ?: [] as $old) {
             unlink($old);
         }
@@ -49,14 +41,24 @@ class GenerateCastDetailSitemap extends Command
 
         Cast::where('status', 'active')
             ->whereRaw("CHAR_LENGTH(COALESCE(comment,'')) >= 100")
-            ->select('id', 'updated_at')
+            ->select('id', 'name', 'img_file_name', 'updated_at')
+            ->with(['images' => fn($q) => $q->orderBy('sort_order')->limit(5)])
             ->orderBy('id')
             ->chunk(1000, function ($casts) use ($base, $now, $highPriority, &$urls, &$fileIndex, &$totalCount) {
                 foreach ($casts as $cast) {
+                    $images = [];
+                    if ($cast->img_file_name && !str_starts_with($cast->img_file_name, '/img/common/')) {
+                        $images[] = ['loc' => $base . $cast->img_file_name . 'big.jpg', 'title' => $cast->name];
+                    }
+                    foreach ($cast->images as $img) {
+                        $images[] = ['loc' => $base . $img->img_path];
+                    }
+
                     $urls[] = [
                         'loc'      => "{$base}/cast/{$cast->id}/",
                         'lastmod'  => $cast->updated_at?->toAtomString() ?? $now,
                         'priority' => isset($highPriority[$cast->id]) ? '0.7' : '0.4',
+                        'images'   => $images,
                     ];
                     $totalCount++;
 
@@ -80,13 +82,22 @@ class GenerateCastDetailSitemap extends Command
     private function writeXml(array $urls, int $index): void
     {
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
+        $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
         foreach ($urls as $url) {
             $xml .= "  <url>\n";
             $xml .= "    <loc>" . htmlspecialchars($url['loc']) . "</loc>\n";
             $xml .= "    <lastmod>{$url['lastmod']}</lastmod>\n";
             $xml .= "    <changefreq>weekly</changefreq>\n";
             $xml .= "    <priority>{$url['priority']}</priority>\n";
+            foreach ($url['images'] ?? [] as $img) {
+                $xml .= "    <image:image>\n";
+                $xml .= "      <image:loc>" . htmlspecialchars($img['loc']) . "</image:loc>\n";
+                if (!empty($img['title'])) {
+                    $xml .= "      <image:title>" . htmlspecialchars($img['title']) . "</image:title>\n";
+                }
+                $xml .= "    </image:image>\n";
+            }
             $xml .= "  </url>\n";
         }
         $xml .= '</urlset>';
