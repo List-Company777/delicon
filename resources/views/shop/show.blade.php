@@ -86,8 +86,114 @@
                 @endif
             </div>
 
+            {{-- タブ（女性 / システム・諸々） --}}
+            <div x-data="{ tab: 'casts' }">
+
+                {{-- タブボタン --}}
+                <div class="flex mb-4 bg-surface-600 rounded-xl p-1 gap-1">
+                    <button @click="tab = 'casts'"
+                            :class="tab === 'casts' ? 'bg-deli-500 text-white shadow-sm' : 'text-[#8A8A9E] hover:text-[#C8C4BC]'"
+                            class="flex-1 py-2 text-sm font-bold rounded-lg transition">
+                        女性 <span class="text-xs font-normal opacity-75">({{ $casts->total() }}名)</span>
+                    </button>
+                    <button @click="tab = 'system'"
+                            :class="tab === 'system' ? 'bg-surface-400 text-[#E8E4DC] shadow-sm' : 'text-[#8A8A9E] hover:text-[#C8C4BC]'"
+                            class="flex-1 py-2 text-sm font-bold rounded-lg transition">
+                        システム・諸々
+                    </button>
+                </div>
+
+                {{-- 女性タブ --}}
+                <div x-show="tab === 'casts'">
+
+            {{-- キャスト一覧 --}}
+            <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
+                        <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>
+                        在籍キャスト <span class="text-[#8A8A9E] font-normal">({{ $casts->total() }}名)</span>
+                    </h2>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    @forelse($casts as $cast)
+                    @php
+                        $isWorking = $cast->working_date && $cast->working_date->isToday();
+                        $isNew     = $cast->isNew();
+                    @endphp
+                    <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : 'border-surface-300 group-hover:border-deli-500' }} transition">
+                            <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                                 class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                 loading="lazy">
+                            @if($isWorking)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">本日出勤</span>
+                            @elseif($isNew)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-gold-500 text-surface-800 px-1.5 py-0.5 rounded-full leading-none">NEW</span>
+                            @endif
+                        </div>
+                        <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
+                        @if($cast->age)
+                        <p class="text-xs text-[#8A8A9E]">{{ $cast->age }}歳</p>
+                        @endif
+                    </a>
+                    @empty
+                    <p class="col-span-3 text-sm text-[#8A8A9E] py-4 text-center">キャスト情報がありません</p>
+                    @endforelse
+                </div>
+                @if($casts->hasPages())
+                <div class="mt-4">{{ $casts->links() }}</div>
+                @endif
+            </div>
+
+            {{-- 口コミセクション（在籍キャストへの口コミ） --}}
+            @php
+                $castIds = $shop->castMembers()->pluck('id');
+                $approvedReviews = \App\Models\CastReview::whereIn('cast_id', $castIds)
+                    ->where('is_approved', true)
+                    ->with('cast:id,name')
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get();
+            @endphp
+            <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
+                        <span class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
+                        口コミ <span class="text-[#8A8A9E] font-normal">({{ $approvedReviews->count() }}件)</span>
+                    </h2>
+                </div>
+                @if($approvedReviews->isEmpty())
+                <p class="text-sm text-[#8A8A9E] text-center py-4">まだ口コミがありません。</p>
+                @else
+                <div class="space-y-4">
+                    @foreach($approvedReviews as $review)
+                    <div class="border-b border-surface-300 pb-4 last:border-0">
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                            <span class="text-amber-400 text-sm">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
+                            <span class="text-xs font-medium text-[#C8C4BC]">{{ $review->cast?->name }}</span>
+                            <span class="text-xs text-[#8A8A9E]">{{ $review->nickname ?? '匿名' }}</span>
+                            <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
+                        </div>
+                        <p class="text-sm text-[#B0AEAD] leading-relaxed">{{ $review->body }}</p>
+                        @if($review->shop_reply)
+                        <div class="mt-2 bg-surface-600 border border-surface-400 rounded-lg px-3 py-2">
+                            <p class="text-xs text-[#6A6A7E] mb-0.5">店舗からの返信</p>
+                            <p class="text-xs text-[#8A8A9E] leading-relaxed whitespace-pre-wrap">{{ $review->shop_reply }}</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+
+                </div>
+
+                {{-- システム・諸々タブ --}}
+                <div x-show="tab === 'system'" style="display:none">
+
             {{-- 基本情報テーブル --}}
-            @if($shop->system_text || $shop->price_60 || $shop->open_time || $shop->address)
+            @if($shop->system_text || $shop->price_60 || $shop->open_time)
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
                 <h2 class="font-bold text-[#E8E4DC] mb-4 text-sm flex items-center gap-2">
                     <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>基本情報・システム
@@ -144,12 +250,6 @@
                         <td class="py-2.5 text-[#C8C4BC]">{{ $shop->eigyo_space }}</td>
                     </tr>
                     @endif
-                    @if($shop->address)
-                    <tr class="border-b border-surface-300">
-                        <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">住所</th>
-                        <td class="py-2.5 text-[#C8C4BC]">{{ $shop->address }}</td>
-                    </tr>
-                    @endif
                     @if($shop->tel)
                     <tr>
                         <th scope="row" class="py-2.5 pr-3 text-left text-[#8A8A9E] font-normal">電話番号</th>
@@ -189,87 +289,6 @@
             </div>
             @endif
 
-            {{-- 口コミセクション（在籍キャストへの口コミ） --}}
-            @php
-                $castIds = $shop->castMembers()->pluck('id');
-                $approvedReviews = \App\Models\CastReview::whereIn('cast_id', $castIds)
-                    ->where('is_approved', true)
-                    ->with('cast:id,name')
-                    ->orderByDesc('created_at')
-                    ->take(5)
-                    ->get();
-            @endphp
-            <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
-                        <span class="w-1 h-4 bg-gold-400 rounded-full inline-block"></span>
-                        口コミ <span class="text-[#8A8A9E] font-normal">({{ $approvedReviews->count() }}件)</span>
-                    </h2>
-                </div>
-                @if($approvedReviews->isEmpty())
-                <p class="text-sm text-[#8A8A9E] text-center py-4">まだ口コミがありません。</p>
-                @else
-                <div class="space-y-4">
-                    @foreach($approvedReviews as $review)
-                    <div class="border-b border-surface-300 pb-4 last:border-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <span class="text-amber-400 text-sm">{{ str_repeat('★', $review->rating) }}<span class="text-[#3A3A4E]">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
-                            <span class="text-xs font-medium text-[#C8C4BC]">{{ $review->cast?->name }}</span>
-                            <span class="text-xs text-[#8A8A9E]">{{ $review->nickname ?? '匿名' }}</span>
-                            <span class="text-xs text-[#4A4A5E]">{{ $review->created_at->format('Y/m/d') }}</span>
-                        </div>
-                        <p class="text-sm text-[#B0AEAD] leading-relaxed">{{ $review->body }}</p>
-                        @if($review->shop_reply)
-                        <div class="mt-2 bg-surface-600 border border-surface-400 rounded-lg px-3 py-2">
-                            <p class="text-xs text-[#6A6A7E] mb-0.5">店舗からの返信</p>
-                            <p class="text-xs text-[#8A8A9E] leading-relaxed whitespace-pre-wrap">{{ $review->shop_reply }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-                @endif
-            </div>
-
-            {{-- キャスト一覧 --}}
-            <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-bold text-[#E8E4DC] text-sm flex items-center gap-2">
-                        <span class="w-1 h-4 bg-deli-500 rounded-full inline-block"></span>
-                        在籍キャスト <span class="text-[#8A8A9E] font-normal">({{ $casts->total() }}名)</span>
-                    </h2>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    @forelse($casts as $cast)
-                    @php
-                        $isWorking = $cast->working_date && $cast->working_date->isToday();
-                        $isNew     = $cast->isNew();
-                    @endphp
-                    <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
-                        <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : 'border-surface-300 group-hover:border-deli-500' }} transition">
-                            <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                                 class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                 loading="lazy">
-                            @if($isWorking)
-                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">本日出勤</span>
-                            @elseif($isNew)
-                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-gold-500 text-surface-800 px-1.5 py-0.5 rounded-full leading-none">NEW</span>
-                            @endif
-                        </div>
-                        <p class="text-xs font-medium text-[#D8D4CC] group-hover:text-gold-400 transition truncate">{{ $cast->name }}</p>
-                        @if($cast->age)
-                        <p class="text-xs text-[#8A8A9E]">{{ $cast->age }}歳</p>
-                        @endif
-                    </a>
-                    @empty
-                    <p class="col-span-3 text-sm text-[#8A8A9E] py-4 text-center">キャスト情報がありません</p>
-                    @endforelse
-                </div>
-                @if($casts->hasPages())
-                <div class="mt-4">{{ $casts->links() }}</div>
-                @endif
-            </div>
-
             {{-- ニュース --}}
             @if($news->count() > 0)
             <div class="bg-surface-500 border border-surface-300 rounded-xl p-5">
@@ -289,6 +308,10 @@
                 </div>
             </div>
             @endif
+
+                </div>
+
+            </div>
         </div>
 
         {{-- サイドバー --}}
@@ -536,14 +559,6 @@
         'description' => $shop->catche ?: null,
         'url'         => route('shop.show', $shop->id) . '/',
         'telephone'   => $shop->tel ?? null,
-        'address'     => $shop->address ? [
-            '@type'           => 'PostalAddress',
-            'streetAddress'   => $shop->address,
-            'addressLocality' => $shop->address_locality ?? null,
-            'addressRegion'   => optional($shop->prefecture)->name,
-            'postalCode'      => $shop->postal_code ?? null,
-            'addressCountry'  => 'JP',
-        ] : null,
         'image'        => $shop->main_image_url ? [$shop->main_image_url] : null,
         'priceRange'   => $shop->price_60 ? '¥' . number_format($shop->price_60) . '〜' : null,
         'openingHours' => $shop->all_time
@@ -554,9 +569,6 @@
     ];
     // null を取り除く
     $ld_local = array_filter($ld_local, fn($v) => $v !== null);
-    if (isset($ld_local['address'])) {
-        $ld_local['address'] = array_filter($ld_local['address'], fn($v) => $v !== null);
-    }
 
     $castIdsForRating = $shop->castMembers()->pluck('id');
     $ratingStats = \Illuminate\Support\Facades\DB::table('cast_reviews')
