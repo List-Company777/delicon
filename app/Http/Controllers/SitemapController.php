@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Area;
 use App\Models\Article;
+use App\Models\Cast;
 use App\Models\Genre;
 use App\Models\Job;
 use App\Models\JobType;
@@ -52,14 +53,21 @@ class SitemapController extends Controller
             $shops = Shop::where('status', 'active')
                 ->whereHas('detail', fn($q) => $q->where('status', 'active'))
                 ->orderBy('id')
-                ->get(['id', 'updated_at']);
+                ->get(['id', 'name', 'main_image', 'shop_file_name', 'updated_at']);
+
+            $casts = Cast::where('status', 'active')
+                ->whereNotNull('img_file_name')
+                ->where('img_file_name', 'not like', '/img/common/%')
+                ->with(['images' => fn($q) => $q->orderBy('sort_order')->limit(5)])
+                ->orderBy('id')
+                ->get(['id', 'name', 'img_file_name', 'updated_at']);
 
             $articles = Article::where('is_published', true)
                 ->where('published_at', '<=', now())
                 ->orderBy('published_at', 'desc')
                 ->get(['slug', 'updated_at']);
 
-            return view('sitemap.detail', compact('jobs', 'shops', 'articles'))->render();
+            return view('sitemap.detail', compact('jobs', 'shops', 'casts', 'articles'))->render();
         });
 
         return response($xml, 200)->header('Content-Type', 'application/xml');
