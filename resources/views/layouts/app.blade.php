@@ -362,5 +362,23 @@
         });
     })();
     </script>
+    @unless(request()->is('manage') || request()->is('manage/*') || request()->is('admin') || request()->is('admin/*') || request()->is('login') || request()->is('login/*') || request()->is('register') || request()->is('register/*'))
+    <script @nonce>
+    (function(){
+      function safeGtag(ev){ if(typeof gtag==='function') gtag('event',ev); }
+      document.querySelectorAll('a[href^="tel:"]').forEach(function(el){
+        el.addEventListener('click',function(){ safeGtag('tel'); });
+      });
+      document.querySelectorAll('a[href*="lin.ee"],a[href*="line.me"]').forEach(function(el){
+        el.addEventListener('click',function(){ safeGtag('line'); });
+      });
+      document.querySelectorAll('form').forEach(function(form){
+        if(/apply\/final-store/.test(form.getAttribute('action')||'')){
+          form.addEventListener('submit',function(){ safeGtag('sendmail'); });
+        }
+      });
+    })();
+    </script>
+    @endunless
 </body>
 </html>
