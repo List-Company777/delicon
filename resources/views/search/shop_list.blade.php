@@ -271,11 +271,12 @@
                 @endif
             </a>
             @else
-            {{-- お試しコース: リンクなし --}}
-            <div class="flex items-center gap-3 py-2.5 px-2">
+            {{-- お試しコース: リンクあり --}}
+            <a href="{{ route('shop.show', $shop->id) }}/"
+               class="flex items-center gap-3 py-2.5 hover:bg-surface-600 px-2 rounded transition group">
                 <div class="w-2 h-2 rounded-full bg-surface-500 shrink-0"></div>
                 <div class="flex-1 min-w-0">
-                    <span class="text-sm text-[#8A8A9E] truncate block">{{ $shop->name }}</span>
+                    <span class="text-sm text-[#8A8A9E] group-hover:text-gold-400 transition truncate block">{{ $shop->name }}</span>
                     <div class="flex items-center gap-2 mt-0.5">
                         @if($shop->shopType)
                         <span class="text-xs text-[#4A4A5E]">{{ $shop->shopType->name }}</span>
@@ -285,7 +286,7 @@
                         @endif
                     </div>
                 </div>
-            </div>
+            </a>
             @endif
             @endforeach
         </div>

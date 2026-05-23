@@ -159,8 +159,14 @@ class ShopController extends Controller
         }
 
         $casts = $shop->castMembers()
-            ->with(['castType', 'bodyType', 'tags'])
-            ->orderByDesc('is_recommended')
+            ->addSelect(\DB::raw("casts.*, CASE
+                WHEN EXISTS (SELECT 1 FROM cast_schedules WHERE cast_id = casts.id AND DATE(work_date) = CURDATE()) THEN 1
+                WHEN EXISTS (SELECT 1 FROM cast_schedules WHERE cast_id = casts.id AND DATE(work_date) = DATE_ADD(CURDATE(), INTERVAL 1 DAY)) THEN 2
+                WHEN EXISTS (SELECT 1 FROM cast_schedules WHERE cast_id = casts.id AND DATE(work_date) > DATE_ADD(CURDATE(), INTERVAL 1 DAY)) THEN 3
+                ELSE 4
+            END AS schedule_priority"))
+            ->with(['castType', 'bodyType', 'tags', 'schedules' => fn($q) => $q->whereDate('work_date', '>=', today())])
+            ->orderBy('schedule_priority')
             ->orderBy('sort_order')
             ->paginate(24)
             ->withPath(rtrim(request()->url(), '/') . '/')->withQueryString();

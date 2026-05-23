@@ -10,6 +10,6 @@ class DiaryLike extends Model
     const UPDATED_AT = null;
     protected $fillable = ['diary_id', 'user_id'];
 
-    public function diary() { return $this->belongsTo(CastDiary::class); }
+    public function diary() { return $this->belongsTo(CastDiary::class, 'diary_id'); }
     public function user()  { return $this->belongsTo(User::class); }
 }

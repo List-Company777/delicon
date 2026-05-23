@@ -130,7 +130,7 @@
                     <a href="{{ route('manage.cast-profile.edit', $cast->id) }}/"
                        class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded transition">編集</a>
                     <form action="{{ route('manage.cast-profile.destroy', $cast->id) }}/" method="POST"
-                          onsubmit="return confirm('このキャストを削除しますか？')">
+                          data-confirm="このキャストを削除しますか？">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded transition">削除</button>
                     </form>

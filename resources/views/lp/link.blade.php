@@ -111,7 +111,7 @@
                 </a>
             </div>
             <p class="text-xs text-gray-500 mb-2">HTMLコード（クリックで全選択）</p>
-            <textarea readonly rows="4" class="code-block w-full resize-none" onclick="this.select()"
+            <textarea readonly rows="4" class="code-block w-full resize-none" data-select-all="1"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_468x60.gif" width="468" height="60" alt="デリヘルリスト">
 </a></textarea>
@@ -126,7 +126,7 @@
                 </a>
             </div>
             <p class="text-xs text-gray-500 mb-2">HTMLコード（クリックで全選択）</p>
-            <textarea readonly rows="4" class="code-block w-full resize-none" onclick="this.select()"
+            <textarea readonly rows="4" class="code-block w-full resize-none" data-select-all="1"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_234x60.gif" width="234" height="60" alt="デリヘルリスト">
 </a></textarea>
@@ -141,7 +141,7 @@
                 </a>
             </div>
             <p class="text-xs text-gray-500 mb-2">HTMLコード（クリックで全選択）</p>
-            <textarea readonly rows="4" class="code-block w-full resize-none" onclick="this.select()"
+            <textarea readonly rows="4" class="code-block w-full resize-none" data-select-all="1"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_200x40.gif" width="200" height="40" alt="デリヘルリスト">
 </a></textarea>
@@ -156,7 +156,7 @@
                 </a>
             </div>
             <p class="text-xs text-gray-500 mb-2">HTMLコード（クリックで全選択）</p>
-            <textarea readonly rows="4" class="code-block w-full resize-none" onclick="this.select()"
+            <textarea readonly rows="4" class="code-block w-full resize-none" data-select-all="1"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_88x31.gif" width="88" height="31" alt="デリヘルリスト">
 </a></textarea>
@@ -230,5 +230,10 @@
     </p>
 </footer>
 
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-select-all]').forEach(function(el) {
+    el.addEventListener('click', function() { this.select(); });
+});
+</script>
 </body>
 </html>

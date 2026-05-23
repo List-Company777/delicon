@@ -123,6 +123,13 @@ return [
             'handler' => NullHandler::class,
         ],
 
+
+        'error_notification' => [
+            'driver' => 'custom',
+            'via'    => \App\Logging\CreateErrorNotificationLogger::class,
+            'level'  => 'error',
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

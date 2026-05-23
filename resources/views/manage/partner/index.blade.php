@@ -155,7 +155,7 @@
                             </form>
                             @if($partner->isManagement())
                             <form action="{{ route('manage.partner.shops.destroy', $shop->id) }}/" method="POST"
-                                  onsubmit="return confirm('「{{ $shop->name }}」を完全に削除します。\nオーナーアカウントも削除されます。この操作は取り消せません。')">
+                                  data-confirm="この店舗を完全に削除しますか？この操作は取り消せません。">
                                 @csrf @method('DELETE')
                                 <button type="submit"
                                         class="text-xs text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded transition">
@@ -276,3 +276,13 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

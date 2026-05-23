@@ -2,7 +2,7 @@
 
 @section('title', '掲載規約')
 @section('canonical', route('advertiser') . '/')
-@section('description', 'デリヘルリストの掲載規約。店舗・求人情報を掲載する事業者向けの利用条件を定めます。')
+@section('description', 'デリヘルリストへの掲載規約です。店舗・求人情報を掲載する事業者が遵守すべき利用条件・禁止事項・審査基準・免責事項などを定めています。掲載前に必ずご確認ください。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">

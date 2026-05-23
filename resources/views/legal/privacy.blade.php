@@ -2,7 +2,7 @@
 
 @section('title', 'プライバシーポリシー')
 @section('canonical', route('privacy') . '/')
-@section('description', 'デリヘルリストのプライバシーポリシー。お客様の個人情報の取り扱いについてご説明します。')
+@section('description', 'デリヘルリストのプライバシーポリシーです。個人情報の収集・利用目的・管理方法・第三者提供に関する取り扱い方針を定めています。サービス利用前に必ずご確認ください。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">

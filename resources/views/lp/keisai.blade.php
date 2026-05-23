@@ -406,7 +406,7 @@
                     </a>
                 </div>
                 <p class="text-xs text-gray-500 mb-1">HTMLコード（クリックで全選択）</p>
-                <textarea readonly rows="4" onclick="this.select()" aria-label="468×60バナーのHTMLコード"
+                <textarea readonly rows="4" data-select-all="1" aria-label="468×60バナーのHTMLコード"
                     class="w-full resize-none rounded border border-gray-700 bg-gray-950 text-green-400 text-xs font-mono p-2 leading-relaxed"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_468x60.gif" width="468" height="60" alt="デリヘルリスト">
@@ -422,7 +422,7 @@
                     </a>
                 </div>
                 <p class="text-xs text-gray-500 mb-1">HTMLコード（クリックで全選択）</p>
-                <textarea readonly rows="4" onclick="this.select()" aria-label="234×60バナーのHTMLコード"
+                <textarea readonly rows="4" data-select-all="1" aria-label="234×60バナーのHTMLコード"
                     class="w-full resize-none rounded border border-gray-700 bg-gray-950 text-green-400 text-xs font-mono p-2 leading-relaxed"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_234x60.gif" width="234" height="60" alt="デリヘルリスト">
@@ -438,7 +438,7 @@
                     </a>
                 </div>
                 <p class="text-xs text-gray-500 mb-1">HTMLコード（クリックで全選択）</p>
-                <textarea readonly rows="4" onclick="this.select()" aria-label="200×40バナーのHTMLコード"
+                <textarea readonly rows="4" data-select-all="1" aria-label="200×40バナーのHTMLコード"
                     class="w-full resize-none rounded border border-gray-700 bg-gray-950 text-green-400 text-xs font-mono p-2 leading-relaxed"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_200x40.gif" width="200" height="40" alt="デリヘルリスト">
@@ -454,7 +454,7 @@
                     </a>
                 </div>
                 <p class="text-xs text-gray-500 mb-1">HTMLコード（クリックで全選択）</p>
-                <textarea readonly rows="4" onclick="this.select()" aria-label="88×31バナーのHTMLコード"
+                <textarea readonly rows="4" data-select-all="1" aria-label="88×31バナーのHTMLコード"
                     class="w-full resize-none rounded border border-gray-700 bg-gray-950 text-green-400 text-xs font-mono p-2 leading-relaxed"
 ><a href="https://delicon.jp/" target="_blank" rel="noopener">
 <img src="https://delicon.mm-mv.net/banner/dcbn_88x31.gif" width="88" height="31" alt="デリヘルリスト">
@@ -570,5 +570,10 @@
     </div>
 </footer>
 
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-select-all]').forEach(function(el) {
+    el.addEventListener('click', function() { this.select(); });
+});
+</script>
 </body>
 </html>

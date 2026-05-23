@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', '店舗一覧')
-@section('description', '全国のデリヘル・風俗店を一覧で掲載。店舗のシステム・料金・在籍キャストを詳しく紹介。')
+@section('description', '全国のデリヘル・風俗店を一覧掲載。地域・ジャンル・料金で絞り込める風俗情報サイトです。各店舗のシステム・料金・在籍キャストのプロフィールを詳しく紹介しています。')
 @section('canonical', route('shop.index') . '/')
 
 @section('content')

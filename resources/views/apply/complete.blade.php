@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', '応募完了 | ' . $job->shop->name)
-@section('description', $job->shop->name . 'へのご応募ありがとうございます。')
+@section('description', $job->shop->name . 'の求人「' . $job->title . '」へのご応募ありがとうございます。担当者より順次ご連絡いたしますので、しばらくお待ちください。')
 @section('robots', 'noindex, follow')
 
 @section('content')

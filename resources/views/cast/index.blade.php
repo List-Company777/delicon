@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'キャスト検索')
-@section('description', '全国のデリヘル・風俗店に在籍するキャストを検索。タイプ・年齢・スタイルなど条件から探せます。')
+@section('description', '全国のデリヘル・風俗店に在籍するキャストを検索できます。タイプ・年齢・スタイル・エリアなど細かい条件で絞り込み検索が可能です。お気に入りのキャストを見つけてください。')
 @section('canonical', route('cast.index') . '/')
 
 @section('content')

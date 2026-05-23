@@ -19,7 +19,7 @@
             <label class="inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition">
                 📷 写真を選択
                 <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="hidden"
-                       onchange="this.closest('label').querySelector('span') && (this.closest('label').querySelector('span').textContent = this.files[0]?.name ?? '')">
+                       data-filename-display="1">
             </label>
             <p class="text-xs text-gray-500 mt-1">JPEG・PNG・WebP、5MB以下、400×600px推奨</p>
             @error('photo')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
@@ -30,7 +30,7 @@
         <td class="px-4 py-3">
             <div class="flex items-center gap-2 flex-wrap">
                 <input type="date" name="date_of_birth" id="date_of_birth"
-                       value="{{ old('date_of_birth', $cast?->date_of_birth?->format('Y-m-d') ?? now()->subYears(20)->format('Y-m-d')) }}"
+                       value="{{ old('date_of_birth', $cast?->date_of_birth?->format('Y-m-d')) }}"
                        max="{{ now()->subYears(18)->format('Y-m-d') }}"
                        class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-400">
                 <span class="text-xs text-gray-400">入力すると年齢が自動計算・毎日更新されます</span>
@@ -263,3 +263,14 @@
     }
 })();
 </script>
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-filename-display]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        var span = this.closest('label') && this.closest('label').querySelector('span');
+        if (span) span.textContent = this.files[0]?.name ?? '';
+    });
+});
+</script>
+@endpush

@@ -117,16 +117,22 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     @forelse($casts as $cast)
                     @php
-                        $isWorking = $cast->working_date && $cast->working_date->isToday();
-                        $isNew     = $cast->isNew();
+                        $isWorking  = $cast->schedules->contains(fn($s) => $s->work_date->isToday());
+                        $isTomorrow = !$isWorking && $cast->schedules->contains(fn($s) => $s->work_date->isTomorrow());
+                        $isFuture   = !$isWorking && !$isTomorrow && $cast->schedules->contains(fn($s) => $s->work_date->gt(today()->addDay()));
+                        $isNew      = $cast->isNew();
                     @endphp
                     <a href="{{ route('cast.show', $cast->id) }}/" class="group text-center">
-                        <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : 'border-surface-300 group-hover:border-deli-500' }} transition">
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 mb-1.5 border {{ $isWorking ? 'border-emerald-500/60' : ($isTomorrow ? 'border-blue-500/60' : ($isFuture ? 'border-purple-500/60' : 'border-surface-300 group-hover:border-deli-500')) }} transition">
                             <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                                  class="img-onerror-cast w-full h-full object-cover group-hover:scale-105 transition duration-300"
                                  loading="lazy">
                             @if($isWorking)
                             <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">本日出勤</span>
+                            @elseif($isTomorrow)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded-full leading-none">明日出勤</span>
+                            @elseif($isFuture)
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-purple-500 text-white px-1.5 py-0.5 rounded-full leading-none">出勤予定あり</span>
                             @elseif($isNew)
                             <span class="absolute top-1.5 left-1.5 text-[10px] font-bold bg-gold-500 text-surface-800 px-1.5 py-0.5 rounded-full leading-none">NEW</span>
                             @endif

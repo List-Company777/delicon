@@ -174,7 +174,7 @@
                 <div class="flex items-center gap-3">
                     <span class="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500">非公開</span>
                     @if($applyReady)
-                    <button type="button" onclick="document.getElementById('permit-modal').classList.remove('hidden')"
+                    <button type="button" data-show-modal="permit-modal"
                             class="text-xs px-4 py-1.5 bg-business-700 hover:bg-business-600 text-white rounded-full font-medium transition">
                         掲載申請
                     </button>
@@ -262,7 +262,7 @@
             </ul>
             <div class="mt-4">
                 <button type="button"
-                        onclick="alert('有料掲載のお申し込みは担当代理店の作業が必要です。\nお取引のある代理店様にご相談ください。')"
+                        data-alert-msg="有料掲載のお申し込みは担当代理店の作業が必要です。お取引のある代理店様にご相談ください。"
                         class="text-xs bg-business-700 hover:bg-business-600 text-white font-bold px-4 py-2 rounded-lg transition">有料掲載を始める →</button>
             </div>
         </div>

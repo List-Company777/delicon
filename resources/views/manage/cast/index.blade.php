@@ -23,6 +23,7 @@
         <div>
             <h2 class="text-lg font-bold text-gray-800">キャスト求人</h2>
             <p class="text-xs text-gray-400 mt-0.5">{{ $castCount }} / {{ $maxJobs }} 件（{{ $shop->hasBudget() ? '有料プラン' : '無料プラン' }}）</p>
+            <p class="text-xs text-gray-500 mt-1">在籍キャストの求人情報を管理する画面です。写真・プロフィール・シフトを充実させると掲載順位と集客力が向上します。</p>
         </div>
         @if($castCount < $maxJobs)
             <a href="{{ route('manage.cast.create') }}/"
@@ -58,7 +59,7 @@
                     <a href="{{ route('manage.cast.edit', $job->id) }}/"
                        class="text-xs text-business-700 hover:underline whitespace-nowrap">編集</a>
                     <form action="{{ route('manage.cast.destroy', $job->id) }}/" method="POST"
-                          onsubmit="return confirm('この求人を削除しますか？')">
+                          data-confirm="この求人を削除しますか？">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs text-red-400 hover:text-red-600">削除</button>
                     </form>
@@ -68,3 +69,13 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

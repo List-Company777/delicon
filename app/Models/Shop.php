@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,8 @@ use App\Models\Cast;
 
 class Shop extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name', 'kana', 'genre_id', 'prefecture_id', 'area_id', 'station_id',
         'postal_code', 'address_locality', 'address', 'nearest_line', 'nearest_station_name', 'nearest_station_walk',

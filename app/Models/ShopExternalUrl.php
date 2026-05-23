@@ -9,6 +9,10 @@ class ShopExternalUrl extends Model
 {
     protected $fillable = ['shop_id', 'url_type', 'url', 'sort_order', 'url_status', 'url_checked_at'];
 
+    protected $casts = [
+        'url_checked_at' => 'datetime',
+    ];
+
     public const TYPES = [
         'website'   => '公式サイト',
         'instagram' => 'Instagram',

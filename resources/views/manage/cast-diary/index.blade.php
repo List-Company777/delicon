@@ -26,7 +26,7 @@
             <input type="text" readonly id="token-url"
                    value="{{ url('/diary/post/' . $token->token) }}/"
                    class="flex-1 bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-xs text-[#C8C4BC] min-w-0">
-            <button onclick="navigator.clipboard.writeText(document.getElementById('token-url').value).then(()=>this.textContent='コピー済み')"
+            <button data-clipboard-target="token-url"
                     class="shrink-0 bg-deli-500 hover:bg-deli-400 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
                 コピー
             </button>
@@ -75,7 +75,7 @@
                     </div>
                     @endif
                 </div>
-                <form method="POST" action="{{ route('manage.cast-diary.destroy', $diary->id) }}/" onsubmit="return confirm('削除しますか？')">
+                <form method="POST" action="{{ route('manage.cast-diary.destroy', $diary->id) }}/" data-confirm="削除しますか？">
                     @csrf @method('DELETE')
                     <button type="submit" class="text-xs text-[#6A6A7E] hover:text-red-400 transition shrink-0">削除</button>
                 </form>
@@ -88,3 +88,21 @@
     <div class="mt-4">{{ $diaries->links() }}</div>
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-clipboard-target]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var target = document.getElementById(this.dataset.clipboardTarget);
+        if (target) {
+            navigator.clipboard.writeText(target.value).then(() => { this.textContent = 'コピー済み'; });
+        }
+    });
+});
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

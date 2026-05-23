@@ -89,9 +89,13 @@
                     <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
                          class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
                 </div>
-                {{-- 待機中バッジ --}}
-                @if($cast->working_date && $cast->working_date->isToday())
+                {{-- 出勤バッジ --}}
+                @if($cast->schedules->contains(fn($s) => $s->work_date->isToday()))
                 <span class="absolute top-2 left-2 text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow">本日出勤</span>
+                @elseif($cast->schedules->contains(fn($s) => $s->work_date->isTomorrow()))
+                <span class="absolute top-2 left-2 text-xs font-bold bg-blue-500 text-white px-2.5 py-1 rounded-full shadow">明日出勤</span>
+                @elseif($cast->schedules->contains(fn($s) => $s->work_date->gt(today()->addDay())))
+                <span class="absolute top-2 left-2 text-xs font-bold bg-purple-500 text-white px-2.5 py-1 rounded-full shadow">出勤予定あり</span>
                 @endif
                 @if($cast->isNew())
                 <span class="absolute top-2 right-2 text-xs font-bold bg-gold-500 text-white px-2.5 py-1 rounded-full shadow">NEW</span>
@@ -368,7 +372,7 @@
                     <button type="button"
                             data-diary-id="{{ $diary->id }}"
                             data-liked="{{ in_array($diary->id, $likedDiaryIds) ? '1' : '0' }}"
-                            onclick="toggleDiaryLike(this)"
+                            data-diary-like="1"
                             class="diary-like-btn flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition
                                    {{ in_array($diary->id, $likedDiaryIds) ? 'bg-deli-500/20 border-deli-500/60 text-deli-400' : 'border-surface-300 text-[#6A6A7E] hover:border-deli-400 hover:text-deli-400' }}">
                         <svg class="w-3.5 h-3.5" fill="{{ in_array($diary->id, $likedDiaryIds) ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -760,7 +764,7 @@
         @if($cast->shop?->tel)
         <a href="tel:{{ $cast->shop->tel }}" rel="nofollow"
            data-cast-id="{{ $cast->id }}"
-           onclick="fetch('/ranking/tel/'+this.dataset.castId+'/',{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}})"
+           data-tel-track="1"
            class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-deli-500 hover:bg-deli-600 active:bg-deli-700 text-white text-xs font-bold transition">
             <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -898,3 +902,23 @@ function toggleDiaryLike(btn) {
 @endpush
 
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+// 日記いいねボタン
+document.querySelectorAll('[data-diary-like]').forEach(function(btn) {
+    btn.addEventListener('click', function() { toggleDiaryLike(this); });
+});
+// 電話ボタン トラッキング
+document.querySelectorAll('[data-tel-track]').forEach(function(link) {
+    link.addEventListener('click', function() {
+        var castId = this.dataset.castId;
+        if (!castId) return;
+        fetch('/ranking/tel/' + castId + '/', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
+        }).catch(function() {});
+    });
+});
+</script>
+@endpush

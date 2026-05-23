@@ -9,7 +9,7 @@
 @extends('layouts.app')
 
 @section('title', '応募内容の確認 | ' . $job->title)
-@section('description', $job->shop->name . 'の求人「' . $job->title . '」への応募内容確認ページです。')
+@section('description', $job->shop->name . 'の求人「' . $job->title . '」への応募内容確認ページです。入力内容をご確認の上、送信してください。応募後は担当者よりご連絡いたします。')
 @section('robots', 'noindex, follow')
 
 @push('head')

@@ -8,7 +8,7 @@
 @endphp
 
 @section('title', $pageTitle)
-@section('description', "{$areaName}のデリヘル・風俗店舗{$totalShops}件を掲載。エリア・ジャンル・キャストタイプから探せるデリヘル情報サイト。")
+@section('description', "{$areaName}のデリヘル・風俗店舗{$totalShops}件を掲載。ジャンル・キャストタイプ・エリアで絞り込み検索できるデリヘル情報サイトです。店舗のシステム・料金・在籍キャストを確認できます。")
 @section('robots', $noindex ? 'noindex,follow' : 'index,follow')
 @section('canonical', url("/{$area_slug}/") . '/')
 @push('head')

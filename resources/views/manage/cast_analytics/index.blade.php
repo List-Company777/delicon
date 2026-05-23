@@ -19,6 +19,7 @@
 <div class="max-w-4xl mx-auto px-4 pb-12">
     <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
         <h2 class="text-lg font-bold text-gray-800">女性別統計</h2>
+        <p class="text-xs text-gray-500 mt-1">在籍キャストごとの閲覧数・お気に入り数などを確認できます。アクセスが少ないキャストは写メ日記の更新・シフト登録を積極的に行うと閲覧数アップに繋がります。</p>
         {{-- 期間切替 --}}
         <div class="flex rounded-lg overflow-hidden border border-gray-200 text-sm">
             @foreach([7 => '直近7日', 30 => '直近30日'] as $p => $label)

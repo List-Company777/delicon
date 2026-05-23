@@ -78,7 +78,7 @@
                     </form>
                     {{-- 削除 --}}
                     <form method="POST" action="{{ route('manage.shop.news.destroy', $item) }}"
-                        onsubmit="return confirm('このお知らせを削除しますか？')">
+                        data-confirm="このお知らせを削除しますか？">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-sm px-2 py-1 rounded border border-gray-200 text-red-400 hover:border-red-300 hover:bg-red-50 transition">
                             削除
@@ -94,3 +94,13 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

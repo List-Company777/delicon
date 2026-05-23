@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ($currentCategory ? $currentCategory->name . ' | ' : '') . 'コラム・ガイド')
-@section('description', 'ナイトワーク・夜遊びに役立つコラム・ガイド記事を掲載。求人の選び方、給与相場、業種解説など。')
+@section('description', 'デリヘル・ナイトワーク・夜遊びに役立つコラム・ガイド記事を掲載。キャスト求人の選び方・給与相場・業種解説など、働く人にも遊ぶ人にも役立つ情報を発信しています。')
 @section('canonical', route('article.index') . ($currentCategory ? '?category=' . $currentCategory->slug : ''))
 
 @section('content')

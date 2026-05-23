@@ -57,7 +57,7 @@
                     <span class="text-xs px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 whitespace-nowrap">削除依頼済み</span>
                     @else
                     <form method="POST" action="{{ route('manage.review.delete-request', $review->id) }}/"
-                          onsubmit="return confirm('この口コミの削除を依頼しますか？')">
+                          data-confirm="この口コミの削除を依頼しますか？">
                         @csrf
                         <button type="submit" class="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition whitespace-nowrap">削除依頼</button>
                     </form>
@@ -72,7 +72,7 @@
                 <p class="text-xs text-gray-400 mb-1">店舗からの返信 <span class="ml-2">{{ $review->shop_replied_at?->format('Y/m/d') }}</span></p>
                 <p class="leading-relaxed whitespace-pre-wrap">{{ $review->shop_reply }}</p>
                 <form method="POST" action="{{ route('manage.review.reply.delete', $review->id) }}/" class="mt-2"
-                      onsubmit="return confirm('返信を削除しますか？')">
+                      data-confirm="返信を削除しますか？">
                     @csrf @method('DELETE')
                     <button type="submit" class="text-xs text-gray-400 hover:text-red-500 transition">返信を削除</button>
                 </form>
@@ -149,7 +149,7 @@
                         </div>
                         <div class="flex gap-2">
                             <button type="submit"
-                                    onclick="return confirm('クーポンを送付しますか？（1回限りです）')"
+                                    data-confirm-click="クーポンを送付しますか？（1回限りです）"
                                     class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-1.5 rounded-lg transition">送付する</button>
                             <button type="button" @click="showCoupon = false" class="text-xs border border-gray-300 text-gray-500 hover:bg-gray-50 px-4 py-1.5 rounded-lg transition">キャンセル</button>
                         </div>
@@ -164,3 +164,18 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+document.querySelectorAll('[data-confirm-click]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        if (!confirm(this.dataset.confirmClick)) e.preventDefault();
+    });
+});
+</script>
+@endpush

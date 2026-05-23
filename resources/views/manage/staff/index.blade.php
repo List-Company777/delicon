@@ -107,7 +107,7 @@
                     <a href="{{ route('manage.staff.edit', $job->id) }}/"
                        class="text-xs text-business-700 hover:underline whitespace-nowrap">編集</a>
                     <form action="{{ route('manage.staff.destroy', $job->id) }}/" method="POST"
-                          onsubmit="return confirm('この求人を削除しますか？')">
+                          data-confirm="この求人を削除しますか？">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs text-red-400 hover:text-red-600">削除</button>
                     </form>
@@ -117,3 +117,13 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

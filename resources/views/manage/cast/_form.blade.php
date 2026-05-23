@@ -271,7 +271,7 @@
                     📁 ファイルを選択
                 </span>
                 <input type="file" name="image" accept="image/*" class="hidden"
-                       onchange="this.parentElement.querySelector('span').textContent = this.files[0]?.name ?? 'ファイルを選択'">
+                       data-filename-parent="1">
             </label>
             <p class="text-xs text-gray-400 mt-1">JPEG/PNG/WebP・5MB以下。推奨サイズ：1280×720px（16:9）</p>
             <p class="text-xs text-blue-600 mt-1">💡 求人専用の画像を登録すると、検索結果カードでは店舗メイン画像より優先して表示されます。</p>
@@ -324,3 +324,14 @@
         <li>・<span class="font-medium">給与・給与形態</span>：給与フィルターで絞り込まれる際の条件になります。</li>
     </ul>
 </div>
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-filename-parent]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        var span = this.parentElement.querySelector('span');
+        if (span) span.textContent = this.files[0]?.name ?? 'ファイルを選択';
+    });
+});
+</script>
+@endpush

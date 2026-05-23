@@ -2,7 +2,7 @@
 
 @section('title', '運営会社')
 @section('canonical', route('company') . '/')
-@section('description', 'デリヘルリストの運営会社情報。株式会社リストの会社概要・所在地・代表者情報を掲載しています。')
+@section('description', 'デリヘルリストを運営する株式会社リストの会社概要ページです。所在地・代表者・連絡先・設立年月など基本情報を掲載しています。お問い合わせ先もこちらからご確認いただけます。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">

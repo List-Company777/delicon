@@ -40,7 +40,7 @@
                 <x-shop-image :src="str_replace('main.jpg', 'main_banner.jpg', $shop->main_image)" :alt="$shop->name" class="absolute inset-0 w-full h-full object-cover" />
             </div>
             <form action="{{ route('manage.shop.image.destroy') }}" method="POST" class="mt-4 text-right"
-                  onsubmit="return confirm('画像を削除しますか？')">
+                  data-confirm="画像を削除しますか？">
                 @csrf @method('DELETE')
                 <button type="submit" class="text-sm text-red-500 hover:text-red-700">画像を削除する</button>
             </form>
@@ -64,7 +64,7 @@
                     📁 ファイルを選択
                 </span>
                 <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required class="hidden"
-                       onchange="this.parentElement.querySelector('span').textContent = this.files[0]?.name ?? 'ファイルを選択'">
+                       data-filename-parent="1">
             </label>
             @error('image')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
             <button type="submit" class="bg-business-700 hover:bg-business-600 text-white text-sm font-bold px-6 py-2 rounded-lg transition">
@@ -74,3 +74,19 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+document.querySelectorAll('[data-filename-parent]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        var span = this.parentElement.querySelector('span');
+        if (span) span.textContent = this.files[0]?.name ?? 'ファイルを選択';
+    });
+});
+</script>
+@endpush

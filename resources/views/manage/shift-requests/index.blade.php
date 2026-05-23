@@ -65,7 +65,7 @@
                         <button class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-4 py-1.5 rounded-lg font-bold transition">承認</button>
                     </form>
                     <form method="POST" action="{{ route('manage.shift-requests.reject', $req->id) }}/"
-                          onsubmit="return confirm('この申請を却下しますか？')">
+                          data-confirm="この申請を却下しますか？">
                         @csrf @method('PATCH')
                         <button class="text-xs bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 px-4 py-1.5 rounded-lg transition">却下</button>
                     </form>
@@ -106,3 +106,13 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) e.preventDefault();
+    });
+});
+</script>
+@endpush

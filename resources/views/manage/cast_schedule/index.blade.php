@@ -29,6 +29,7 @@
 
     {{-- 登録フォーム --}}
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-4">出勤予定日時を登録するとキャスト詳細ページのスケジュールに反映されます。キャスト自身がシフト申請を行った場合は「シフト申請」メニューから承認してください。</p>
         <h3 class="text-sm font-bold text-gray-700 mb-4">シフトを追加</h3>
         <form action="{{ route('manage.cast-schedule.store', $cast->id) }}/" method="POST">
             @csrf

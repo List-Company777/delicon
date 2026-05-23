@@ -2,7 +2,7 @@
 
 @section('title', 'サービス利用規約')
 @section('canonical', route('terms') . '/')
-@section('description', 'デリヘルリストのサービス利用規約。本サービスの利用条件・禁止事項・免責事項などを定めます。')
+@section('description', 'デリヘルリストのサービス利用規約です。利用条件・禁止事項・免責事項・知的財産権・損害賠償などを定めています。すべてのユーザーがサービス利用前に必ずお読みください。')
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-12">

@@ -22,9 +22,10 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-lg font-bold text-gray-800">応募管理</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-2">求人への応募者情報を管理する画面です。応募者のプロフィールを確認し、面接・採用・不採用の状況を更新してください。未対応の応募は早めに確認・返答することをおすすめします。</p>
         <form method="GET" action="{{ route('manage.applications.index') }}/" class="flex flex-wrap gap-2 items-center">
             @if($jobs->isNotEmpty())
-            <select name="job_id" onchange="this.form.submit()"
+            <select name="job_id" data-autosubmit="1"
                     class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-business-500">
                 <option value="">求人：すべて</option>
                 @foreach($jobs as $job)
@@ -35,7 +36,7 @@
             </select>
             @endif
             <label class="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer select-none">
-                <input type="checkbox" name="unread" value="1" onchange="this.form.submit()"
+                <input type="checkbox" name="unread" value="1" data-autosubmit="1"
                        {{ $unread ? 'checked' : '' }}
                        class="rounded border-gray-300 text-business-700 focus:ring-business-500">
                 未読のみ
@@ -97,3 +98,11 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ Vite::cspNonce() }}">
+document.querySelectorAll('[data-autosubmit]').forEach(function(el) {
+    el.addEventListener('change', function() { this.form.submit(); });
+});
+</script>
+@endpush

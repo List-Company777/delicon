@@ -10,5 +10,5 @@ class CastDiary extends Model
 
     public function cast() { return $this->belongsTo(Cast::class); }
     public function images() { return $this->hasMany(CastDiaryImage::class, 'diary_id')->orderBy('sort_order'); }
-    public function likes() { return $this->hasMany(\App\Models\DiaryLike::class); }
+    public function likes() { return $this->hasMany(\App\Models\DiaryLike::class, 'diary_id'); }
 }
