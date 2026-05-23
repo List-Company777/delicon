@@ -32,9 +32,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="デリヘルリスト">
+    @unless(request()->is('manage') || request()->is('manage/*') || request()->is('admin') || request()->is('admin/*') || request()->is('login') || request()->is('login/*') || request()->is('register') || request()->is('register/*'))
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    @endunless
     <link rel="dns-prefetch" href="https://www.google-analytics.com">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
@@ -65,6 +67,7 @@
     ];
 @endphp
     <script type="application/ld+json" @nonce>{!! json_encode($ldSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+    @unless(request()->is('manage') || request()->is('manage/*') || request()->is('admin') || request()->is('admin/*') || request()->is('login') || request()->is('login/*') || request()->is('register') || request()->is('register/*'))
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R2RD39B5PP" @nonce></script>
     <script @nonce>
         window.dataLayer = window.dataLayer || [];
@@ -72,6 +75,7 @@
         gtag('js', new Date());
         gtag('config', 'G-R2RD39B5PP');
     </script>
+    @endunless
 </head>
 <body class="bg-surface-700 text-[#E8E4DC] antialiased overflow-x-hidden">
 @php $fa = (isset($footerPrefSlug) && $footerPrefSlug) ? $footerPrefSlug : (request()->route('area_slug') ?? 'all'); @endphp
