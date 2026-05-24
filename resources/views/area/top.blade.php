@@ -93,13 +93,13 @@
         @if($area_slug === 'all')
         <li><span class="text-[#C8C4BC]" aria-current="page">全国</span></li>
         @elseif($areaModel)
-        <li><a href="{{ url('/all/') }}/" class="hover:text-gold-400 transition">全国</a></li>
+        <li><a href="{{ url('/all') . '/' }}/" class="hover:text-gold-400 transition">全国</a></li>
         <li aria-hidden="true">›</li>
-        <li><a href="{{ url('/'.$areaModel->prefecture->slug.'/') }}/" class="hover:text-gold-400 transition">{{ $areaModel->prefecture->name }}</a></li>
+        <li><a href="{{ url('/'.$areaModel->prefecture->slug) . '/' }}/" class="hover:text-gold-400 transition">{{ $areaModel->prefecture->name }}</a></li>
         <li aria-hidden="true">›</li>
         <li><span class="text-[#C8C4BC]" aria-current="page">{{ $areaName }}</span></li>
         @else
-        <li><a href="{{ url('/all/') }}/" class="hover:text-gold-400 transition">全国</a></li>
+        <li><a href="{{ url('/all') . '/' }}/" class="hover:text-gold-400 transition">全国</a></li>
         <li aria-hidden="true">›</li>
         <li><span class="text-[#C8C4BC]" aria-current="page">{{ $areaName }}</span></li>
         @endif
