@@ -379,7 +379,7 @@ Route::middleware(['auth', 'admin', 'admin.ip'])->prefix('admin')->name('admin.'
 
     // 記事テーマ管理
     Route::post('/article-topics/',                    [\App\Http\Controllers\Admin\ArticleTopicController::class, 'store'])->name('article-topics.store');
-    Route::post('/article-topics/suggest/',            [\App\Http\Controllers\Admin\ArticleTopicController::class, 'suggest'])->name('article-topics.suggest');
+    Route::post('/article-topics/suggest/',            [\App\Http\Controllers\Admin\ArticleTopicController::class, 'suggest'])->name('article-topics.suggest')->middleware('throttle:10,1');
     Route::patch('/article-topics/{topic}/approve/',   [\App\Http\Controllers\Admin\ArticleTopicController::class, 'approve'])->name('article-topics.approve');
     Route::delete('/article-topics/{topic}/',          [\App\Http\Controllers\Admin\ArticleTopicController::class, 'destroy'])->name('article-topics.destroy');
 
