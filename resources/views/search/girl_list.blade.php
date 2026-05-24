@@ -268,7 +268,6 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="pb-3 space-y-2.5">
-            {-- キャスト名検索 --}
             <form method="get" action="" class="flex gap-2 pt-1">
                 <input type="text" name="q" value="{{ $activeQ }}"
                        placeholder="キャスト名で検索..."
