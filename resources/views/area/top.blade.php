@@ -85,6 +85,26 @@
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-10">
 
     {{-- H1 --}}
+    {{-- パンくず --}}
+    <nav aria-label="パンくずリスト" class="text-xs text-[#8A8A9E] mb-3">
+        <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
+        <li><a href="{{ route('top') }}/" class="hover:text-gold-400 transition">ホーム</a></li>
+        <li aria-hidden="true">›</li>
+        @if($area_slug === 'all')
+        <li><span class="text-[#C8C4BC]" aria-current="page">全国</span></li>
+        @elseif($areaModel)
+        <li><a href="{{ url('/all/') }}/" class="hover:text-gold-400 transition">全国</a></li>
+        <li aria-hidden="true">›</li>
+        <li><a href="{{ url('/'.$areaModel->prefecture->slug.'/') }}/" class="hover:text-gold-400 transition">{{ $areaModel->prefecture->name }}</a></li>
+        <li aria-hidden="true">›</li>
+        <li><span class="text-[#C8C4BC]" aria-current="page">{{ $areaName }}</span></li>
+        @else
+        <li><a href="{{ url('/all/') }}/" class="hover:text-gold-400 transition">全国</a></li>
+        <li aria-hidden="true">›</li>
+        <li><span class="text-[#C8C4BC]" aria-current="page">{{ $areaName }}</span></li>
+        @endif
+        </ol>
+    </nav>
     <h1 class="text-lg font-bold text-[#E8E4DC] border-b border-surface-400 pb-3">{{ $areaName }}のデリヘル・風俗一覧<span class="text-sm font-normal text-[#8A8A9E] ml-2">{{ number_format($totalShops) }}件掲載</span></h1>
 
 

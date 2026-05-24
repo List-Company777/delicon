@@ -25,8 +25,13 @@
             ['@type'=>'ListItem','position'=>2,'name'=>'デリヘル女性一覧','item'=>url('/all/girl-list/').'/'],
         ],
     ];
+    $castPref = $cast->shop?->prefecture;
+    if ($castPref) {
+        $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>3,'name'=>$castPref->name.'のデリヘル','item'=>url('/'.$castPref->slug.'/girl-list/').'/'];
+    }
     if ($cast->shop) {
-        $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>3,'name'=>$cast->shop->name,'item'=>route('shop.show',$cast->shop->id).'/'];
+        $pos = count($bc['itemListElement']) + 1;
+        $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>$pos,'name'=>$cast->shop->name,'item'=>route('shop.show',$cast->shop->id).'/'];
     }
     $bc['itemListElement'][] = ['@type'=>'ListItem','position'=>count($bc['itemListElement'])+1,'name'=>$cast->name,'item'=>route('cast.show',$cast->id).'/'];
 
@@ -68,13 +73,21 @@
     <nav aria-label="パンくずリスト" class="text-xs text-[#6A6A7E] mb-5">
         <ol class="flex flex-wrap items-center gap-1 list-none m-0 p-0">
         <li><a href="{{ route('top') }}/" class="hover:text-deli-400 transition">ホーム</a></li>
-        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
-        <li><a href="{{ route('cast.index') }}/" class="hover:text-deli-400 transition">キャスト検索</a></li>
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ url('/all/girl-list/') }}" class="hover:text-deli-400 transition">女性一覧</a></li>
+        @if($cast->shop?->prefecture)
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ url('/'.$cast->shop->prefecture->slug.'/girl-list/') }}" class="hover:text-deli-400 transition">{{ $cast->shop->prefecture->name }}</a></li>
+        @endif
+        @if($cast->shop?->area)
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
+        <li><a href="{{ url('/'.$cast->shop->area->slug.'/girl-list/') }}" class="hover:text-deli-400 transition">{{ $cast->shop->area->name }}</a></li>
+        @endif
         @if($cast->shop)
-        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
         <li><a href="{{ route('shop.show', $cast->shop->id) }}/" class="hover:text-deli-400 transition">{{ $cast->shop->name }}</a></li>
         @endif
-        <li aria-hidden="true" class="text-[#3A3A4E]">/</li>
+        <li aria-hidden="true" class="text-[#5A5A6E]">›</li>
         <li><span class="text-[#C8C4BC]" aria-current="page">{{ $cast->name }}</span></li>
         </ol>
     </nav>

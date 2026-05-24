@@ -27,7 +27,7 @@ class CastController extends Controller
         $bodyTypes = collect($bodyTypesRaw)->map(fn($t) => (object) $t);
 
         $query = Cast::active()
-            ->with(['shop', 'castType', 'bodyType', 'tags'])
+            ->with(['shop.prefecture', 'shop.area', 'castType', 'bodyType', 'tags'])
             ->whereHas('shop', fn($q) => $q->where('status', 'active'));
 
         if ($request->filled('type')) {
@@ -61,7 +61,7 @@ class CastController extends Controller
         }
 
         $cast->load([
-            'shop', 'castType', 'bodyType',
+            'shop.prefecture', 'castType', 'bodyType',
             'charms', 'plays', 'personalities', 'tags',
             'images', 'schedules', 'reviews', 'diaries.images', 'diaries.likes',
         ]);
