@@ -24,7 +24,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 {{-- ヒーロー --}}
 <section class="relative bg-surface-800 overflow-hidden">
     <div class="relative max-w-5xl mx-auto px-4 py-16 md:py-24">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-tight text-[#F0ECE4]">
+        <h1 class="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-tight text-[#F0ECE4]">
             全国<span class="text-deli-400">デリヘル</span>情報サイト
         </h1>
         <p class="text-[#A0A0B8] text-base md:text-lg mb-2 max-w-xl">

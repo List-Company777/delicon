@@ -151,9 +151,9 @@
                                                 @change="showBanner = ($event.target.value == 3)"
                                                 class="border border-gray-300 rounded px-2 py-1 text-xs w-44 focus:outline-none">
                                             <option value="">変更しない</option>
-                                            <option value="1" {{ $application->shop->plan == 1 ? 'selected' : '' }}>1：VIP（¥80,000）</option>
-                                            <option value="2" {{ $application->shop->plan == 2 ? 'selected' : '' }}>2：ミドル（¥40,000）</option>
-                                            <option value="3" {{ $application->shop->plan == 3 ? 'selected' : '' }}>3：ベーシック（¥20,000）</option>
+                                            <option value="1" {{ $application->shop->plan == 1 ? 'selected' : '' }}>1：VIP（¥60,000）</option>
+                                            <option value="2" {{ $application->shop->plan == 2 ? 'selected' : '' }}>2：ミドル（¥30,000）</option>
+                                            <option value="3" {{ $application->shop->plan == 3 ? 'selected' : '' }}>3：ベーシック（¥10,000）</option>
                                             <option value="4" {{ $application->shop->plan == 4 ? 'selected' : '' }}>4：無料上位（バナー）</option>
                                             <option value="5" {{ $application->shop->plan == 5 ? 'selected' : '' }}>5：無料</option>
                                         </select>

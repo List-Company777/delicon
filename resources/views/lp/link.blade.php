@@ -55,13 +55,13 @@
         <div class="inline-block border border-[#C8A450]/50 rounded-full px-5 py-1.5 text-[#C8A450] text-xs font-bold mb-6 tracking-widest">
             無料参加・掲載店舗限定
         </div>
-        <h1 class="text-3xl md:text-4xl font-black leading-tight mb-6 text-white">
-            バナー設置で<br>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black leading-tight mb-6 text-white">
+            バナー設置で<br class="hidden sm:block">
             <span class="text-[#C8A450]">検索順位を優遇します</span>
         </h1>
         <p class="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-8">
-            貴店の公式サイト（オフィシャルHP）のトップページに<br>
-            デリヘルリストのバナーを設置し、<strong class="text-white">公開申請</strong>いただくと、<br>
+            貴店の公式サイト（オフィシャルHP）のトップページに<br class="hidden md:block">
+            デリヘルリストのバナーを設置し、<strong class="text-white">公開申請</strong>いただくと、<br class="hidden md:block">
             デリヘルリスト内の検索結果で優先的に上位表示いたします。
         </p>
         <p class="text-sm text-gray-500">参加費無料・デリヘルリスト登録店舗様限定</p>
@@ -200,16 +200,16 @@
     <div class="max-w-3xl mx-auto px-4 text-center">
         <h2 class="text-xl font-bold text-white mb-3">まずはデリヘルリストに登録を</h2>
         <p class="text-sm text-gray-400 mb-8">
-            アカウントを作成し、店舗情報を登録してください。<br>
+            アカウントを作成し、店舗情報を登録してください。<br class="hidden md:block">
             その後、バナーを設置して管理画面から公開申請を送信いただくと上位表示が適用されます。
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('register') }}"
-               class="bg-[#C8A450] hover:bg-[#d4b264] text-gray-950 font-black text-base px-8 py-4 rounded-xl transition">
+               class="w-full sm:w-auto text-center bg-[#C8A450] hover:bg-[#d4b264] text-gray-950 font-black text-base px-8 py-4 rounded-xl transition">
                 無料で店舗を登録する
             </a>
             <a href="{{ url('/login/') }}"
-               class="border border-gray-600 hover:border-[#C8A450] text-gray-300 hover:text-[#C8A450] font-bold text-base px-8 py-4 rounded-xl transition">
+               class="w-full sm:w-auto text-center border border-gray-600 hover:border-[#C8A450] text-gray-300 hover:text-[#C8A450] font-bold text-base px-8 py-4 rounded-xl transition">
                 すでに登録済みの方はログイン
             </a>
         </div>
@@ -220,7 +220,7 @@
 
 <footer class="bg-gray-900 border-t border-gray-800 py-6 text-center">
     <p class="text-xs text-gray-600 mb-2">
-        ※ 上位表示はデリヘルリスト内の検索結果における優遇措置であり、特定の順位を保証するものではありません。<br>
+        ※ 上位表示はデリヘルリスト内の検索結果における優遇措置であり、特定の順位を保証するものではありません。<br class="hidden md:block">
         ※ キャンペーン内容は予告なく変更・終了する場合があります。
     </p>
     <p class="text-xs text-gray-700 mt-4">

@@ -49,22 +49,22 @@
         <div class="inline-block bg-business-900/60 border border-business-700/40 rounded-full px-4 py-1 text-business-300 text-xs font-bold mb-6 tracking-widest uppercase">
             Night Business Platform
         </div>
-        <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6 text-white">
-            ナイトビジネスの<br>
+        <h1 class="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-6 text-white">
+            ナイトビジネスの<br class="hidden sm:block">
             <span class="text-teal-300">集客・採用</span>を、<br class="md:hidden">
             まとめて無料で。
         </h1>
         <p class="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-10">
-            夜ビズは、キャバクラ・ホストクラブ・ガールズバーなどのナイトビジネス向け掲載プラットフォームです。<br>
+            夜ビズは、キャバクラ・ホストクラブ・ガールズバーなどのナイトビジネス向け掲載プラットフォームです。<br class="hidden md:block">
             <strong class="text-white">集客情報の掲載・キャスト求人・スタッフ求人が基本無料</strong>。登録5分で集客・採用をスタートできます。
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="#register"
-               class="bg-business-700 hover:bg-business-600 text-white font-black py-4 px-10 rounded-xl text-lg transition shadow-lg">
+               class="w-full sm:w-auto text-center bg-business-700 hover:bg-business-600 text-white font-black py-4 px-10 rounded-xl text-lg transition shadow-lg">
                 今すぐ無料登録
             </a>
             <a href="#features"
-               class="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-bold py-4 px-10 rounded-xl text-lg transition">
+               class="w-full sm:w-auto text-center border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-bold py-4 px-10 rounded-xl text-lg transition">
                 サービス詳細を見る
             </a>
         </div>
@@ -207,7 +207,7 @@
                 </div>
                 <div class="px-6 py-5">
                     <p class="text-gray-300 text-sm leading-relaxed mb-5">
-                        アルコール提供・接客を伴うナイトエンターテインメント業態向け。<br>
+                        アルコール提供・接客を伴うナイトエンターテインメント業態向け。<br class="hidden md:block">
                         集客情報（料金・セット内容・店舗紹介）も合わせて掲載できます。
                     </p>
                     <div class="mb-5">
@@ -242,7 +242,7 @@
                 </div>
                 <div class="px-6 py-5">
                     <p class="text-gray-300 text-sm leading-relaxed mb-5">
-                        左記（デリヘルリスト）以外の業態向け特化サイト。<br>
+                        左記（デリヘルリスト）以外の業態向け特化サイト。<br class="hidden md:block">
                         性風俗・アドルト系の表現・検索機能に対応します。
                     </p>
                     <div class="mb-5">

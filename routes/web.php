@@ -111,6 +111,7 @@ Route::view('/link/', 'lp.link')->name('lp.link');
 // 夜ビズ LP
 Route::view('/yorubiz/', 'lp.yorubiz')->name('lp.yorubiz');
 Route::view('/features/', 'features')->name('features');
+Route::view('/bundle/', 'bundle')->name('bundle');
 Route::post('/diary/{diary}/like/', [\App\Http\Controllers\DiaryLikeController::class, 'toggle'])->name('diary.like.toggle')->middleware('auth')->where('diary', '[0-9]+');
 Route::get('/ranking/', [\App\Http\Controllers\RankingController::class, 'index'])->name('ranking.index');
 Route::post('/ranking/tel/{castId}/', [\App\Http\Controllers\RankingController::class, 'recordTelClick'])->name('ranking.tel-click')->where('castId', '[0-9]+');
@@ -185,7 +186,8 @@ Route::middleware(['auth', 'verified'])->prefix('manage')->name('manage.')->grou
     Route::get('/casts/{castId}/diaries/create/', [\App\Http\Controllers\Manage\CastDiaryController::class, 'create'])->name('cast-diary.create')->where('castId', '[0-9]+');
     Route::post('/casts/{castId}/diaries/',       [\App\Http\Controllers\Manage\CastDiaryController::class, 'store'])->name('cast-diary.store')->where('castId', '[0-9]+');
     Route::delete('/diaries/{diary}/',            [\App\Http\Controllers\Manage\CastDiaryController::class, 'destroy'])->name('cast-diary.destroy');
-    Route::post('/casts/{castId}/diary-token/',    [\App\Http\Controllers\Manage\CastDiaryController::class, 'issueToken'])->name('cast-diary.issue-token')->where('castId', '[0-9]+');
+    Route::post('/casts/{castId}/diary-token/',       [\App\Http\Controllers\Manage\CastDiaryController::class, 'issueToken'])->name('cast-diary.issue-token')->where('castId', '[0-9]+');
+    Route::post('/casts/{castId}/diary-email-token/', [\App\Http\Controllers\Manage\CastDiaryController::class, 'issueEmailToken'])->name('cast-diary.issue-email-token')->where('castId', '[0-9]+');
     Route::put('/casts/{id}/',            [CastProfileController::class, 'update'])->name('cast-profile.update')->where('id', '[0-9]+');
     Route::delete('/casts/{id}/',         [CastProfileController::class, 'destroy'])->name('cast-profile.destroy')->where('id', '[0-9]+');
     Route::get('/casts/{castId}/schedules/',             [\App\Http\Controllers\Manage\CastScheduleController::class, 'index'])->name('cast-schedule.index')->where('castId', '[0-9]+');

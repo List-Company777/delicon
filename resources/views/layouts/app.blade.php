@@ -181,6 +181,25 @@
     </div>
     @endif
 
+
+    @unless(request()->is('manage') || request()->is('manage/*') || request()->is('admin') || request()->is('admin/*') || request()->is('login') || request()->is('login/*') || request()->is('register') || request()->is('register/*'))
+    {{-- PWAプッシュ通知バナー --}}
+    <div data-push-prompt
+         style="display:none"
+         class="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 bg-[#1E1E30] border-t border-deli-700/60 px-4 py-3 shadow-2xl">
+        <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-bold leading-snug">デリヘルリストの最新情報をプッシュでお届け</p>
+            <p class="text-[#8A8A9E] text-xs mt-0.5">新着情報・キャンペーンをいち早くお知らせします</p>
+        </div>
+        <button id="push-subscribe-btn"
+                class="shrink-0 bg-deli-500 hover:bg-deli-400 text-white text-xs font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
+            通知を受け取る
+        </button>
+        <button onclick="this.closest('[data-push-prompt]').remove(); localStorage.setItem('push-dismissed','1')"
+                class="shrink-0 text-[#6A6A7E] hover:text-[#E8E4DC] text-lg leading-none px-1">✕</button>
+    </div>
+    @endunless
+
     <main>
         @yield('content')
     </main>
@@ -338,6 +357,7 @@
             });
         }
 
+        if (localStorage.getItem('push-dismissed')) return;
         navigator.serviceWorker.register('/sw.js').then(async reg => {
             const btn = document.getElementById('push-subscribe-btn');
             if (!btn) return;

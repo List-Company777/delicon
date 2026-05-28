@@ -29,8 +29,6 @@ Schedule::command('line:check-quota')->dailyAt('09:00');
 Schedule::command('line:send-daily-job-alerts')->cron('0 15 */3 * *');
 
 // AI記事自動生成（毎週火・金 午前2時 ─ 下書きとして保存し管理者がレビュー後公開）
-Schedule::command('articles:generate')->weeklyOn(2, '02:00');  // 火曜
-Schedule::command('articles:generate')->weeklyOn(5, '02:00');  // 金曜
 
 // 検索順位スコアをバッチ更新（5分ごと）
 Schedule::command('shops:update-rank-scores')->everyFiveMinutes();

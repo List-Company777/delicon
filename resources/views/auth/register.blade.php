@@ -14,15 +14,17 @@
         <div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-4">
             <p class="text-sm font-bold text-green-800 mb-2">掲載は基本無料です</p>
             <ul class="text-xs text-green-700 space-y-1">
-                <li>✓ 求人・営業情報を無料で掲載</li>
                 <li>✓ 最短即日で掲載可能</li>
             </ul>
         </div>
 
         <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-6">
             <p class="text-xs text-red-700 leading-relaxed">
-                <span class="font-bold">【掲載対象外】</span>
-                風俗営業等規制法に基づく許可・届出のない違法な営業形態の店舗、およびソープランド・デリヘル・ファッションヘルス等のアダルト系業態は掲載をお断りしております。
+                <span class="font-bold">【掲載禁止】</span>
+                風営法に基づく許可・届出を受けていない違法な営業、または売春・児童ポルノ等の違法行為を業とする店舗の掲載はお断りしております。
+            </p>
+            <p class="text-xs text-red-700 leading-relaxed mt-2">
+                虚偽・ぼったくりの登録はお断りしております。業界の評判を落とすような行為をされる予定の場合には、登録・利用をお控えください。
             </p>
         </div>
 
@@ -153,31 +155,6 @@
                      }">
                     <h2 class="text-sm font-bold text-gray-600 mb-4">店舗情報</h2>
 
-                    {{-- www.up-stage.info連携店舗の引き継ぎ検索 --}}
-                    <div class="mb-5 border border-blue-200 bg-blue-50 rounded-lg px-4 py-3">
-                        <p class="text-xs text-blue-800 font-bold mb-2"><a href="https://www.up-stage.info/" target="_blank" rel="noopener" class="underline hover:text-blue-900">アップステージ</a>に掲載中のお店をお持ちの方</p>
-                        <p class="text-xs text-blue-600 mb-2 leading-relaxed">店舗名またはアップステージの店舗IDで検索して引き継ぎ登録すると、ボーイ求人が自動連携されます。</p>
-                        <div class="relative">
-                            <input type="text" x-model="searchQuery" @input="onSearchInput()"
-                                   placeholder="店舗名または店舗IDで検索..."
-                                   class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white">
-                            <div x-show="searching" class="absolute right-3 top-2.5 text-xs text-gray-400">検索中...</div>
-                        </div>
-                        <div x-show="searchResults.length > 0" class="mt-1 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                            <template x-for="shop in searchResults" :key="shop.id">
-                                <button type="button" @click="selectShop(shop)"
-                                        class="w-full text-left px-4 py-2.5 hover:bg-blue-50 border-b border-gray-100 last:border-0 transition">
-                                    <p class="text-sm font-medium text-gray-800" x-text="shop.name"></p>
-                                    <p class="text-xs text-gray-500 mt-0.5"
-                                       x-text="[shop.genre, shop.prefecture, shop.area].filter(Boolean).join(' / ')"></p>
-                                </button>
-                            </template>
-                        </div>
-                        <div x-show="searchQuery.length >= 1 && !searching && searchResults.length === 0"
-                             class="mt-1 text-xs text-gray-400 px-1">
-                            該当する店舗が見つかりませんでした
-                        </div>
-                    </div>
 
                     <div class="space-y-4">
                         <div>

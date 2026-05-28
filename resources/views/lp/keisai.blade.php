@@ -149,21 +149,21 @@
         <div class="inline-block bg-business-900/60 border border-business-700/40 rounded-full px-5 py-1.5 text-teal-300 text-xs font-bold mb-6 tracking-widest uppercase">
             店舗掲載 月額0円
         </div>
-        <h1 id="hero-heading" class="text-3xl md:text-5xl font-black leading-tight mb-6 text-white">
-            デリヘルの<br>
+        <h1 id="hero-heading" class="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-6 text-white">
+            デリヘルの<br class="hidden sm:block">
             <span class="text-teal-300">集客を、無料で始めよう</span>
         </h1>
         <p class="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-10">
-            デリヘルリストは、デリバリーヘルス（デリヘル）など風俗店向けの掲載プラットフォームです。<br>
+            デリヘルリストは、デリバリーヘルス（デリヘル）など風俗店向けの掲載プラットフォームです。<br class="hidden md:block">
             店舗情報ページの掲載はすべて無料でご利用いただけます。
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('register') }}/"
-               class="bg-teal-500 hover:bg-teal-400 text-gray-950 font-black text-base px-8 py-4 rounded-xl transition shadow-lg shadow-teal-900/40">
+               class="w-full sm:w-auto text-center bg-teal-500 hover:bg-teal-400 text-gray-950 font-black text-base px-8 py-4 rounded-xl transition shadow-lg shadow-teal-900/40">
                 今すぐ無料で掲載する
             </a>
             <a href="#flow"
-               class="border border-gray-600 hover:border-teal-500 text-gray-300 hover:text-teal-300 font-bold text-base px-8 py-4 rounded-xl transition">
+               class="w-full sm:w-auto text-center border border-gray-600 hover:border-teal-500 text-gray-300 hover:text-teal-300 font-bold text-base px-8 py-4 rounded-xl transition">
                 掲載の流れを見る
             </a>
         </div>
@@ -360,7 +360,7 @@
                 上位表示キャンペーン
             </div>
             <h2 id="campaign-heading" class="text-2xl md:text-3xl font-black text-white mb-3">
-                公式サイトにバナーを設置すると<br>
+                公式サイトにバナーを設置すると<br class="hidden sm:block">
                 <span class="text-[#C8A450]">検索上位に優先表示します</span>
             </h2>
             <p class="text-gray-400 text-sm md:text-base">
@@ -529,7 +529,7 @@
             デリヘル・風俗店の無料掲載、今すぐ始めませんか？
         </h2>
         <p class="text-gray-400 text-sm mb-8 leading-relaxed">
-            月額0円・登録費0円で、店舗情報ページを掲載できます。<br>
+            月額0円・登録費0円で、店舗情報ページを掲載できます。<br class="hidden md:block">
             登録5分、最短即日でデリヘルリストに掲載スタート。
         </p>
         <a href="{{ route('register') }}/"
@@ -543,11 +543,11 @@
             <p class="text-xs text-gray-400 mb-4">無料掲載ならこちらもおすすめ！</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="https://fuzoku-list.com/keisai/" target="_blank" rel="noopener"
-                   class="border border-gray-700 hover:border-teal-700 text-gray-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition">
+                   class="w-full sm:w-auto text-center border border-gray-700 hover:border-teal-700 text-gray-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition">
                     風俗リストに無料掲載
                 </a>
                 <a href="https://www.mens-v.com/" target="_blank" rel="noopener"
-                   class="border border-gray-700 hover:border-teal-700 text-gray-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition">
+                   class="w-full sm:w-auto text-center border border-gray-700 hover:border-teal-700 text-gray-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition">
                     メンズバリューに無料掲載
                 </a>
             </div>

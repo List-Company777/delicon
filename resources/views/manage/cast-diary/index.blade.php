@@ -18,7 +18,7 @@
     @endif
 
     {{-- キャスト投稿URL --}}
-    @php $token = \App\Models\CastDiaryToken::where('cast_id', $cast->id)->first(); @endphp
+    @php $token = \App\Models\CastDiaryToken::where('cast_id', $cast->id)->where('is_email_token', 0)->first(); @endphp
     <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-6">
         <p class="text-sm font-bold text-[#E8E4DC] mb-2">キャスト用投稿URL</p>
         @if($token && !$token->isExpired())
@@ -31,7 +31,7 @@
                 コピー
             </button>
         </div>
-        <p class="text-[10px] text-[#6A6A7E] mt-1.5">有効期限: {{ $token->expires_at->format('Y/m/d') }}</p>
+        <p class="text-[10px] text-[#6A6A7E] mt-1.5">有効期限: {{ $token->expires_at ? $token->expires_at->format('Y/m/d') : '無期限' }}</p>
         <p class="text-[10px] text-amber-400/80 mt-1">このURLをキャストに渡すと、キャストが直接写メ日記を投稿できます。URLは有効期限内のみ有効です。</p>
         @else
         <div class="bg-surface-600 border border-surface-300 rounded-lg px-4 py-3 mb-3">
@@ -45,6 +45,35 @@
                 {{ $token ? 'URLを再発行する（旧URLは無効になります）' : '投稿URLを発行する' }}
             </button>
         </form>
+    </div>
+
+    {{-- メール投稿アドレス --}}
+    @php $emailToken = \App\Models\CastDiaryToken::where('cast_id', $cast->id)->where('is_email_token', 1)->first(); @endphp
+    <div class="bg-surface-500 border border-surface-300 rounded-xl p-5 mb-6">
+        <p class="text-sm font-bold text-[#E8E4DC] mb-2">📧 メール投稿アドレス</p>
+        @if($emailToken)
+        <div class="flex gap-2 items-center">
+            <input type="text" readonly id="email-addr"
+                   value="diary-{{ $emailToken->token }}@d.delicon.jp"
+                   class="flex-1 bg-surface-600 border border-surface-300 rounded-lg px-3 py-2 text-xs text-[#C8C4BC] min-w-0">
+            <button data-clipboard-target="email-addr"
+                    class="shrink-0 bg-deli-500 hover:bg-deli-400 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
+                コピー
+            </button>
+        </div>
+        <p class="text-[10px] text-amber-400/80 mt-2">このアドレスを他媒体（デリヘルタウン等）の同時投稿先に登録すると、メール送信だけで写メ日記が自動投稿されます。</p>
+        @else
+        <p class="text-xs text-[#8A8A9E] mb-3">メール投稿用の専用アドレスを発行できます。他媒体の同時投稿設定に登録するとメールで写メ日記を自動投稿できます。</p>
+        @if(session('email_token_issued'))
+        <div class="text-xs text-emerald-400 mb-2">✓ メールアドレスを発行しました</div>
+        @endif
+        <form method="POST" action="{{ route('manage.cast-diary.issue-email-token', $cast->id) }}/">
+            @csrf
+            <button type="submit" class="text-xs bg-deli-700 hover:bg-deli-600 text-white px-4 py-2 rounded-lg transition">
+                メール投稿アドレスを発行する
+            </button>
+        </form>
+        @endif
     </div>
 
     <div class="space-y-4">

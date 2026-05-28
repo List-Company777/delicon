@@ -89,6 +89,13 @@ class CastDiaryController extends BaseController
         return back()->with('token_issued', true);
     }
 
+    public function issueEmailToken(int $castId)
+    {
+        Cast::findOrFail($castId);
+        CastDiaryToken::generateEmailTokenFor($castId);
+        return back()->with('email_token_issued', true);
+    }
+
     public static function buildScheduleStats(\Illuminate\Support\Collection $users): array
     {
         $total = $users->count();

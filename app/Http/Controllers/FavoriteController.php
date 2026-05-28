@@ -7,11 +7,6 @@ use Illuminate\Http\Request;
 
 class FavoriteController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /** お気に入りトグル（AJAX JSON） */
     public function toggle(Cast $cast)
     {

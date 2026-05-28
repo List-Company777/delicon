@@ -35,7 +35,7 @@
         <div class="inline-block bg-deli-900/40 border border-deli-700/40 rounded-full px-4 py-1 text-deli-300 text-xs font-bold mb-6 tracking-widest">
             RENEWED
         </div>
-        <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6">
+        <h1 class="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-6">
             デリコンが<span class="text-deli-400">リニューアル</span>して、デリヘルリストへ。
         </h1>
         <p class="text-[#B0AEAD] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
@@ -189,7 +189,9 @@
                     ['icon' => '🔔', 'title' => 'ユーザーへの自動通知',   'desc' => '新人登録・シフト登録でお気に入りユーザーに自動メール通知。集客コストゼロで呼び込めます。'],
                     ['icon' => '↩',  'title' => '口コミへの返信',           'desc' => '寄せられた口コミに店舗から返信を投稿できます。ユーザーの閲覧ページにも返信が表示されます。'],
                     ['icon' => '🎟', 'title' => 'クーポン送付',             'desc' => '口コミを投稿してくれた会員ユーザーに割引クーポンをメールで送付できます。合言葉やメッセージも設定可能。送付済みクーポンはユーザーのマイページに一覧表示されます。'],
-                    ['icon' => '🎂', 'title' => '年齢の自動更新',           'desc' => '生年月日を登録しておくだけで、年齢は毎日自動計算されます。「20歳→21歳」の更新を手作業で行う必要はありません。'],
+                    ['icon' => '🎂', 'title' => '年齢の自動更新',           'desc' => '生年月日を登録しておくだけで、年齢は毎日自動計算されます。「20歳→21歳」の更新を手作業で行う必要はありません。プライバシーが気になる場合は、数日程度ずらして入力していただければ個人特定を防ぎつつ、年齢表示は正確に保てます。'],
+                    ['icon' => '🤖', 'title' => 'AI自動タグ設定',              'desc' => 'プロフィール文章・スリーサイズ・コメントをしっかり入力するだけで、AIが自動的に検索タグ（巨乳・スレンダー・人妻系など）を判定・設定します。入力の手間なく検索にヒットしやすい状態を作れます。'],
+                    ['icon' => '📸', 'title' => '画像からタイプ自動判定',        'desc' => '女性の写真をアップロードすると、AIが外見のタイプ（清楚系・ギャル系・お姉さん系など）を自動で判定し、検索タイプに反映します。タイプ設定の迷いがなくなり、ユーザーの好み検索にも引っかかりやすくなります。'],
                 ];
             @endphp
             @foreach($shopFeatures as $f)
@@ -320,7 +322,7 @@
             <div class="bg-[#1E1E30] border border-[#2A2A3E] rounded-2xl p-5 flex flex-col">
                 <div class="mb-4">
                     <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest mb-2">ベーシック</p>
-                    <p class="text-2xl font-black text-[#E8E4DC]">¥20,000</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥10,000</p>
                     <p class="text-xs text-[#6A6A7E] mt-1">/月（税別）</p>
                 </div>
                 <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
@@ -336,7 +338,7 @@
                         <p class="text-xs font-bold text-[#6A6A7E] uppercase tracking-widest">ミドル</p>
                         <span class="text-xs bg-deli-900/60 text-deli-300 border border-deli-700/40 rounded px-1.5 py-0.5 font-bold">人気</span>
                     </div>
-                    <p class="text-2xl font-black text-[#E8E4DC]">¥40,000</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥30,000</p>
                     <p class="text-xs text-[#6A6A7E] mt-1">/月（税別）</p>
                 </div>
                 <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
@@ -351,7 +353,7 @@
                 <div class="absolute top-0 right-0 bg-deli-500 text-white text-xs font-black px-3 py-1 rounded-bl-xl">VIP</div>
                 <div class="mb-4">
                     <p class="text-xs font-bold text-deli-400 uppercase tracking-widest mb-2">VIP</p>
-                    <p class="text-2xl font-black text-[#E8E4DC]">¥80,000</p>
+                    <p class="text-2xl font-black text-[#E8E4DC]">¥60,000</p>
                     <p class="text-xs text-deli-300 mt-1">/月（税別）・限定枠</p>
                 </div>
                 <ul class="space-y-2 text-sm text-[#8A8A9E] flex-1">
@@ -381,11 +383,11 @@
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/"
-               class="bg-deli-500 hover:bg-deli-400 text-white font-bold px-8 py-3 rounded-xl transition">
+               class="w-full sm:w-auto text-center bg-deli-500 hover:bg-deli-400 text-white font-bold px-8 py-3 rounded-xl transition">
                 女性一覧を見る
             </a>
             <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/"
-               class="bg-[#2A2A3E] hover:bg-[#34344E] text-[#E8E4DC] font-bold px-8 py-3 rounded-xl border border-[#3A3A4E] transition">
+               class="w-full sm:w-auto text-center bg-[#2A2A3E] hover:bg-[#34344E] text-[#E8E4DC] font-bold px-8 py-3 rounded-xl border border-[#3A3A4E] transition">
                 店舗一覧を見る
             </a>
         </div>

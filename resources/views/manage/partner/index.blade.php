@@ -125,13 +125,13 @@
                                             class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none w-36">
                                         <option value="">プランを選択</option>
                                         @if(in_array($shop->plan, [1,2,3]))
-                                            <option value="1" {{ $shop->plan == 1 ? 'selected' : '' }}>VIP（¥80,000）継続</option>
-                                            <option value="2" {{ $shop->plan == 2 ? 'selected' : '' }}>ミドル（¥40,000）継続</option>
-                                            <option value="3" {{ $shop->plan == 3 ? 'selected' : '' }}>ベーシック（¥20,000）継続</option>
+                                            <option value="1" {{ $shop->plan == 1 ? 'selected' : '' }}>VIP（¥60,000）継続</option>
+                                            <option value="2" {{ $shop->plan == 2 ? 'selected' : '' }}>ミドル（¥30,000）継続</option>
+                                            <option value="3" {{ $shop->plan == 3 ? 'selected' : '' }}>ベーシック（¥10,000）継続</option>
                                         @else
-                                            <option value="1">VIP（¥80,000）</option>
-                                            <option value="2">ミドル（¥40,000）</option>
-                                            <option value="3">ベーシック（¥20,000）</option>
+                                            <option value="1">VIP（¥60,000）</option>
+                                            <option value="2">ミドル（¥30,000）</option>
+                                            <option value="3">ベーシック（¥10,000）</option>
                                             <option value="4">無料上位</option>
                                         @endif
                                     </select>

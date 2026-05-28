@@ -9,12 +9,12 @@
 <div class="bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 text-white py-20 px-4">
     <div class="max-w-3xl mx-auto text-center">
         <p class="text-purple-300 text-sm font-medium tracking-widest mb-3">新規開拓 / 顧客掘り起こしに最適</p>
-        <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-6">
-            売らなくていい。<br>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-6">
+            売らなくていい。<br class="hidden sm:block">
             <span class="text-purple-300">店舗運営支援ツール。</span>
         </h1>
         <p class="text-gray-300 text-base md:text-lg leading-relaxed">
-            夜ビズは、ナイトビジネス運営をトータル支援する新しいプラットフォームです。<br>
+            夜ビズは、ナイトビジネス運営をトータル支援する新しいプラットフォームです。<br class="hidden md:block">
             代理店様には「断られない営業ツール」として、今すぐ活用していただけます。
         </p>
         <p class="text-purple-200 text-sm mt-4">アップステージでご協力度合いの高い代理店様に先にお声がけしています。</p>
