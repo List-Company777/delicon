@@ -23,18 +23,15 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 
 {{-- ヒーロー --}}
 <section class="relative bg-surface-800 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-deli-900/60 via-transparent to-transparent pointer-events-none"></div>
-    <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-deli-900/20 to-transparent pointer-events-none"></div>
     <div class="relative max-w-5xl mx-auto px-4 py-16 md:py-24">
-        <p class="text-gold-400 text-xs tracking-[0.3em] uppercase mb-4">Japan's Delivery Health Information</p>
-        <h1 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight text-[#F0ECE4]">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-tight text-[#F0ECE4]">
             全国<span class="text-deli-400">デリヘル</span>情報サイト
         </h1>
         <p class="text-[#A0A0B8] text-base md:text-lg mb-2 max-w-xl">
             デリヘル店のシステム・料金・在籍キャストを詳しく掲載
         </p>
         <p class="text-[#8A8A9E] text-sm mb-6">デリヘルリスト｜デリヘル・風俗総合情報</p>
-        <p class="text-sm font-semibold text-deli-400 mb-6 border border-deli-500/40 inline-block px-4 py-1.5 rounded-full">⚠ 本サイトは18歳以上の方を対象としています</p>
+        <p class="text-xs text-deli-400/80 mb-6 border-t border-deli-500/30 pt-4">⚠ 本サイトは18歳以上の方を対象としています</p>
 
         <form action="{{ url('/all/girl-list/') }}/" method="get"
               class="mt-6 flex gap-2 max-w-md">
@@ -59,21 +56,40 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
             $heroPrefMap = $prefectures->keyBy('slug');
         @endphp
         <h2 class="text-sm font-bold text-[#C8C4BC] tracking-wide mb-4">エリアから探す</h2>
-            @foreach($heroRegions as $regionName => $slugs)
-            <div class="mb-3">
-                <p class="text-xs text-[#8A8A9E] mb-1.5">{{ $regionName }}</p>
-                <div class="flex flex-wrap gap-1.5">
-                    @foreach($slugs as $slug)
-                    @if($heroPrefMap->has($slug))
-                    <a href="{{ route('area.top', ['area_slug' => $slug]) }}/"
-                       class="bg-surface-600/80 border border-surface-400 hover:border-deli-400 hover:text-deli-400 text-[#C8C4BC] text-xs px-3 py-1 rounded-full transition">
-                        {{ $heroPrefMap[$slug]->prefecture }}
-                    </a>
-                    @endif
-                    @endforeach
-                </div>
-            </div>
+        @php $mainSlugs = ['tokyo','osaka','kanagawa','aichi','fukuoka','hokkaido','kyoto','hyogo']; @endphp
+        <div class="flex flex-wrap gap-1.5 mb-3">
+            @foreach($mainSlugs as $slug)
+            @if($heroPrefMap->has($slug))
+            <a href="{{ route('area.top', ['area_slug' => $slug]) }}/"
+               class="bg-surface-600/80 border border-surface-400 hover:border-deli-400 hover:text-deli-400 text-[#C8C4BC] text-xs px-3 py-1 rounded-full transition">
+                {{ $heroPrefMap[$slug]->prefecture }}
+            </a>
+            @endif
             @endforeach
+        </div>
+        <div x-data="{ open: false }">
+            <button type="button" @click="open = !open"
+                    class="text-xs text-[#8A8A9E] hover:text-[#C8C4BC] flex items-center gap-1 transition mb-2">
+                <span x-text="open ? '▲ 閉じる' : '▼ 全国エリアを表示'">▼ 全国エリアを表示</span>
+            </button>
+            <div x-show="open" x-transition class="space-y-2">
+                @foreach($heroRegions as $regionName => $slugs)
+                <div>
+                    <p class="text-xs text-[#8A8A9E] mb-1.5">{{ $regionName }}</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach($slugs as $slug)
+                        @if($heroPrefMap->has($slug))
+                        <a href="{{ route('area.top', ['area_slug' => $slug]) }}/"
+                           class="bg-surface-600/80 border border-surface-400 hover:border-deli-400 hover:text-deli-400 text-[#C8C4BC] text-xs px-3 py-1 rounded-full transition">
+                            {{ $heroPrefMap[$slug]->prefecture }}
+                        </a>
+                        @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
         @endif
     </div>
 </section>
@@ -101,8 +117,8 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 {{-- おすすめデリヘル店舗 --}}
 <section class="max-w-6xl mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
-            <span aria-hidden="true" class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
+        <h2 class="text-2xl md:text-3xl font-bold text-[#F0ECE4] flex items-center gap-3">
+            <span aria-hidden="true" class="w-1.5 h-6 bg-deli-500 rounded-full inline-block"></span>
             おすすめデリヘル店舗
         </h2>
         <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
@@ -116,7 +132,8 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 @if($shop->shop_image_url)
                 <img src="{{ $shop->shop_image_url }}"
                      alt="{{ $shop->name }}のデリヘル情報"
-                     loading="lazy"
+                     loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                     {{ $loop->first ? 'fetchpriority="high"' : '' }}
                      class="img-onerror-hide absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100">
                 @else
                 <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold-400 text-2xl opacity-30">✦</span>
@@ -124,9 +141,6 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-surface-900/80 via-transparent to-transparent"></div>
                 @if($shop->shop_type_name ?? null)
                 <span class="absolute top-2 left-2 z-10 bg-deli-500/90 text-white text-xs px-2 py-0.5 rounded-full">{{ $shop->shop_type_name }}</span>
-                @endif
-                @if($shop->shop_image_url)
-                <p aria-hidden="true" class="absolute bottom-2 left-2 right-2 z-10 text-[#E8E4DC] text-xs font-bold line-clamp-1 drop-shadow-md">{{ $shop->name }}</p>
                 @endif
             </div>
             <div class="p-3">
@@ -139,7 +153,7 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
                 <div class="flex items-center justify-between mt-2 text-xs">
                     <span class="text-[#8A8A9E]">在籍{{ $shop->cast_count ?? 0 }}名</span>
                     @if($shop->price_60)
-                    <span class="text-gold-400 font-medium">60分¥{{ number_format($shop->price_60) }}〜</span>
+                    <span class="text-deli-500 font-bold">60分¥{{ number_format($shop->price_60) }}〜</span>
                     @endif
                 </div>
             </div>
@@ -149,8 +163,8 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
     @endif
     <div class="mt-8 text-center">
         <a href="{{ route('shop.list', ['area_slug' => 'all']) }}/"
-           class="inline-block border border-deli-500 text-deli-400 hover:bg-deli-500 hover:text-white font-bold px-10 py-3 rounded-lg transition">
-            デリヘル店舗をもっと見る
+           class="inline-block bg-deli-500 hover:bg-deli-400 text-white font-bold px-10 py-3 rounded-lg transition">
+            デリヘル店舗をもっと見る →
         </a>
     </div>
 </section>
@@ -159,8 +173,8 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
 <section class="bg-surface-600 border-y border-surface-400 py-12">
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl md:text-2xl font-bold text-[#F0ECE4] flex items-center gap-3">
-                <span aria-hidden="true" class="w-1 h-6 bg-deli-400 rounded-full inline-block"></span>
+            <h2 class="text-2xl md:text-3xl font-bold text-[#F0ECE4] flex items-center gap-3">
+                <span aria-hidden="true" class="w-1.5 h-6 bg-deli-400 rounded-full inline-block"></span>
                 新着デリヘルキャスト
             </h2>
             <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/" class="text-sm text-gold-400 hover:text-gold-300 transition">すべて見る →</a>
@@ -187,8 +201,8 @@ $ldPage = ['@context'=>'https://schema.org','@type'=>'WebPage','@id'=>url('/').'
         </div>
         <div class="mt-8 text-center">
             <a href="{{ route('girl.list', ['area_slug' => 'all']) }}/"
-               class="inline-block border border-deli-400 text-deli-400 hover:bg-deli-500 hover:border-deli-500 hover:text-white font-bold px-10 py-3 rounded-lg transition">
-                キャストをもっと見る
+               class="inline-block bg-deli-500 hover:bg-deli-400 text-white font-bold px-10 py-3 rounded-lg transition">
+                キャストをもっと見る →
             </a>
         </div>
         @endif
