@@ -350,61 +350,139 @@
 
     {{-- 写メ日記 --}}
     @if($cast->diaries->count() > 0)
-    <section class="mt-10">
-        <h2 class="text-lg font-bold text-[#F0ECE4] mb-5 flex items-center gap-3">
+    @php
+        $diaryGrid = $cast->diaries->take(12);
+        $diaryJson = $diaryGrid->map(function($d) use ($likedDiaryIds) {
+            return [
+                'id'     => $d->id,
+                'title'  => $d->title,
+                'body'   => $d->body,
+                'date'   => $d->created_at->format('Y年m月d日'),
+                'images' => $d->images->map(fn($img) => Storage::url($img->img_path))->values()->toArray(),
+                'webps'  => $d->images->map(fn($img) => Storage::url(\App\Services\ImageService::webpPath($img->img_path)))->values()->toArray(),
+                'thumb'  => $d->images->first() ? Storage::url($d->images->first()->img_path) : null,
+                'liked'  => in_array($d->id, $likedDiaryIds),
+                'likes'  => $d->likes->count(),
+            ];
+        })->values();
+    @endphp
+    <section class="mt-10"
+        x-data="{
+            diaries: @json($diaryJson),
+            showAll: false,
+            cur: null,
+            open(i) { this.cur = i; document.body.classList.add('overflow-hidden'); },
+            close() { this.cur = null; document.body.classList.remove('overflow-hidden'); }
+        }"
+        @keydown.escape.window="close()">
+        <h2 class="text-lg font-bold text-[#F0ECE4] mb-4 flex items-center gap-3">
             <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
             写メ日記
+            <span class="text-xs text-[#6A6A7E] font-normal">{{ $cast->diaries->count() }}件</span>
         </h2>
-        <div class="space-y-5">
-            @foreach($cast->diaries->take(5) as $diary)
-            <article class="bg-surface-500 border border-surface-300 rounded-xl p-5">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="text-xs text-[#6A6A7E]">{{ $diary->created_at->format('Y年m月d日') }}</span>
-                    @if($diary->title)
-                    <h3 class="font-bold text-[#E8E4DC] text-sm">{{ $diary->title }}</h3>
-                    @endif
+
+        {{-- サムネイルグリッド --}}
+        <div class="grid grid-cols-3 gap-2">
+            <template x-for="(d, i) in diaries" :key="d.id">
+                <button x-show="showAll || i < 6" @click="open(i)"
+                        class="group text-left focus:outline-none">
+                    <div class="aspect-square overflow-hidden rounded-lg bg-surface-500 border border-surface-300 group-hover:border-deli-500 transition mb-1.5">
+                        <template x-if="d.thumb">
+                            <img :src="d.thumb" :alt="d.title || '写メ日記'"
+                                 class="w-full h-full object-cover" loading="lazy">
+                        </template>
+                        <template x-if="!d.thumb">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#4A4A5E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        </template>
+                    </div>
+                    <p class="text-xs text-[#C8C4BC] leading-snug line-clamp-2 px-0.5"
+                       x-text="d.title || d.date"></p>
+                </button>
+            </template>
+        </div>
+
+        {{-- もっと見る --}}
+        @if($cast->diaries->count() > 6)
+        <div class="mt-3 text-center" x-show="!showAll">
+            <button @click="showAll = true"
+                    class="text-xs text-[#6A6A7E] hover:text-deli-400 transition underline underline-offset-2">
+                もっと見る（全{{ $cast->diaries->count() }}件）
+            </button>
+        </div>
+        @endif
+
+        {{-- モーダル --}}
+        <div x-show="cur !== null"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4"
+             @click.self="close()"
+             style="display:none">
+            <div class="bg-[#13131E] border border-surface-300 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto">
+                <template x-if="cur !== null">
+                <div class="p-5">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <span class="text-xs text-[#6A6A7E]" x-text="diaries[cur].date"></span>
+                            <p class="font-bold text-[#E8E4DC] text-sm mt-0.5"
+                               x-show="diaries[cur].title" x-text="diaries[cur].title"></p>
+                        </div>
+                        <button @click="close()" class="text-[#6A6A7E] hover:text-white transition shrink-0 ml-4">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid gap-2 mb-4"
+                         :class="diaries[cur].images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'">
+                        <template x-for="(src, j) in diaries[cur].images" :key="j">
+                            <picture>
+                                <source :srcset="diaries[cur].webps[j]" type="image/webp">
+                                <img :src="src"
+                                     class="w-full rounded-lg object-cover"
+                                     :class="diaries[cur].images.length === 1 ? 'max-h-80' : 'aspect-square'"
+                                     loading="lazy">
+                            </picture>
+                        </template>
+                    </div>
+                    <div class="text-sm text-[#C8C4BC] leading-relaxed whitespace-pre-line mb-4"
+                         x-show="diaries[cur].body" x-text="diaries[cur].body"></div>
+                    <div class="flex justify-end pt-3 border-t border-surface-400">
+                        @auth
+                        @if(auth()->user()->role === 'visitor')
+                        <button type="button"
+                                :data-diary-id="diaries[cur].id"
+                                :data-liked="diaries[cur].liked ? '1' : '0'"
+                                data-diary-like="1"
+                                @click="toggleDiaryLike($el)"
+                                :class="diaries[cur].liked ? 'bg-deli-500/20 border-deli-500/60 text-deli-400' : 'border-surface-300 text-[#6A6A7E] hover:border-deli-400 hover:text-deli-400'"
+                                class="diary-like-btn flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition">
+                            <svg class="w-3.5 h-3.5" :fill="diaries[cur].liked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                            <span class="like-count" x-text="diaries[cur].likes"></span>
+                        </button>
+                        @endif
+                        @else
+                        <span class="flex items-center gap-1.5 text-xs text-[#6A6A7E]">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                            <span x-text="diaries[cur].likes"></span>
+                        </span>
+                        @endauth
+                    </div>
                 </div>
-                @if($diary->images->count() > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-3">
-                    @foreach($diary->images as $img)
-                    <picture>
-                        <source srcset="{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}" type="image/webp">
-                        <img src="{{ Storage::url($img->img_path) }}" alt="{{ $cast->name }}の日記"
-                             class="w-full aspect-square object-cover rounded-lg border border-surface-400" loading="lazy">
-                    </picture>
-                    @endforeach
-                </div>
-                @endif
-                @if($diary->body)
-                <p class="text-sm text-[#C8C4BC] leading-relaxed">{!! nl2br(e($diary->body)) !!}</p>
-                @endif
-                {{-- いいねボタン --}}
-                <div class="flex items-center justify-end mt-3 pt-3 border-t border-surface-400">
-                    @auth
-                    @if(auth()->user()->role === 'visitor')
-                    <button type="button"
-                            data-diary-id="{{ $diary->id }}"
-                            data-liked="{{ in_array($diary->id, $likedDiaryIds) ? '1' : '0' }}"
-                            data-diary-like="1"
-                            class="diary-like-btn flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition
-                                   {{ in_array($diary->id, $likedDiaryIds) ? 'bg-deli-500/20 border-deli-500/60 text-deli-400' : 'border-surface-300 text-[#6A6A7E] hover:border-deli-400 hover:text-deli-400' }}">
-                        <svg class="w-3.5 h-3.5" fill="{{ in_array($diary->id, $likedDiaryIds) ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                        <span class="like-count">{{ $diary->likes->count() }}</span>
-                    </button>
-                    @endif
-                    @else
-                    <span class="flex items-center gap-1.5 text-xs text-[#6A6A7E]">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                        {{ $diary->likes->count() }}
-                    </span>
-                    @endauth
-                </div>
-            </article>
-            @endforeach
+                </template>
+            </div>
         </div>
     </section>
     @endif
