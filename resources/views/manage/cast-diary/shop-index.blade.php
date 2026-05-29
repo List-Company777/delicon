@@ -54,12 +54,8 @@
             @if($diary->images->isNotEmpty())
             <div class="flex flex-wrap gap-2">
                 @foreach($diary->images as $img)
-                <a href="{{ Storage::url($img->img_path) }}" target="_blank">
-                    <picture>
-                        <source srcset="{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}" type="image/webp">
-                        <img src="{{ Storage::url($img->img_path) }}" alt=""
+                <a href="{{ Storage::url($img->img_path) }}" target="_blank">                        <img src="{{ Storage::url($img->img_path) }}" alt=""
                              class="w-16 h-16 object-cover rounded-lg border border-gray-200 hover:border-business-400 transition">
-                    </picture>
                 </a>
                 @endforeach
             </div>
