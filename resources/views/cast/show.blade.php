@@ -99,11 +99,8 @@
             <div class="relative">
                 <div class="aspect-[3/4] rounded-xl border border-surface-300 mb-3 overflow-hidden cursor-zoom-in"
                      @click="lbOpen=true; lbSrc=mainSrc">
-                    <picture>
-                        <source :srcset="mainWebp" type="image/webp">
-                        <img :src="mainSrc" src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                             class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
-                    </picture>
+                    <img :src="mainSrc" src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                         class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
                 </div>
                 {{-- 出勤バッジ --}}
                 @if($cast->schedules->contains(fn($s) => $s->work_date->isToday()))
