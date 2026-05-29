@@ -400,16 +400,19 @@ Route::get('/shops/{pref}/{area}/', fn(string $pref, string $area) => redirect("
 
 // キャスト一覧・詳細
 // ユーザーダッシュボード・設定
-Route::middleware('auth')->group(function () {
-    Route::get('/user/dashboard/', [UserDashboardController::class, 'index'])->name('user.dashboard');
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/cast-diaries/', [\App\Http\Controllers\Admin\CastDiaryController::class, 'index'])->name('admin.cast-diaries.index');
+    Route::delete('/cast-diaries/{diary}/', [\App\Http\Controllers\Admin\CastDiaryController::class, 'destroy'])->name('admin.cast-diaries.destroy');
+    Route::patch('/cast-diaries/{diary}/approve/', [\App\Http\Controllers\Admin\CastDiaryController::class, 'approve'])->name('admin.cast-diaries.approve');
+    Route::get('/cast-reviews/', [\App\Http\Controllers\Admin\CastReviewController::class, 'index'])->name('admin.cast-reviews.index');
+    Route::patch('/cast-reviews/{review}/approve/', [\App\Http\Controllers\Admin\CastReviewController::class, 'approve'])->name('admin.cast-reviews.approve');
+    Route::delete('/cast-reviews/{review}/reject/', [\App\Http\Controllers\Admin\CastReviewController::class, 'reject'])->name('admin.cast-reviews.reject');
     Route::get('/deletion-requests/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'index'])->name('admin.deletion-requests.index');
     Route::patch('/deletion-requests/{deletionRequest}/', [\App\Http\Controllers\Admin\CastDeletionRequestController::class, 'process'])->name('admin.deletion-requests.process');
-    Route::get('/cast-diaries/',                             [\App\Http\Controllers\Admin\CastDiaryController::class, 'index'])->name('admin.cast-diaries.index');
-    Route::delete('/cast-diaries/{diary}/',                   [\App\Http\Controllers\Admin\CastDiaryController::class, 'destroy'])->name('admin.cast-diaries.destroy');
-    Route::patch('/cast-diaries/{diary}/approve/',          [\App\Http\Controllers\Admin\CastDiaryController::class, 'approve'])->name('admin.cast-diaries.approve');
-        Route::get('/cast-reviews/',                              [\App\Http\Controllers\Admin\CastReviewController::class, 'index'])->name('admin.cast-reviews.index');
-    Route::patch('/cast-reviews/{review}/approve/',           [\App\Http\Controllers\Admin\CastReviewController::class, 'approve'])->name('admin.cast-reviews.approve');
-    Route::delete('/cast-reviews/{review}/reject/',            [\App\Http\Controllers\Admin\CastReviewController::class, 'reject'])->name('admin.cast-reviews.reject');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/user/dashboard/', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/user/settings/', [UserDashboardController::class, 'settings'])->name('user.settings');
     Route::get('/user/coupons/', [UserDashboardController::class, 'coupons'])->name('user.coupons');
     Route::post('/user/settings/', [UserDashboardController::class, 'updateSettings'])->name('user.settings.update');
