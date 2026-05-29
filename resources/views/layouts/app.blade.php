@@ -94,10 +94,6 @@
                    class="px-3 py-2 rounded text-deli-400 hover:text-deli-300 hover:bg-surface-600 transition">
                     キャスト検索
                 </a></li>
-                <li><a href="{{ route('article.index') }}/"
-                   class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
-                    コラム
-                </a></li>
                 <li><a href="{{ route('ranking.index') }}/"
                    class="px-3 py-2 rounded text-[#B0AEAD] hover:text-gold-400 hover:bg-surface-600 transition">
                     ランキング
@@ -153,7 +149,6 @@
                     <ul class="list-none m-0 p-0">
                     <li><a href="{{ url("/{$fa}/shop-list/") }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">店舗一覧</a></li>
                     <li><a href="{{ url("/{$fa}/girl-list/") }}/" class="block py-2.5 text-deli-400 hover:text-deli-300 border-b border-surface-400 transition">キャスト検索</a></li>
-                    <li><a href="{{ route('article.index') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">コラム</a></li>
                     <li><a href="{{ route('ranking.index') }}/" class="block py-2.5 text-[#B0AEAD] hover:text-gold-400 border-b border-surface-400 transition">ランキング</a></li>
                     @auth
                         @if(auth()->user()->role === 'visitor')
