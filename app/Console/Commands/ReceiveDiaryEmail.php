@@ -81,6 +81,25 @@ class ReceiveDiaryEmail extends Command
             foreach ($images as $i => [$imgData, $ext]) {
                 $path = 'diaries/' . $cast->id . '/' . $diary->id . '_' . $i . '.' . $ext;
                 Storage::disk('public')->put($path, $imgData);
+
+                // webp生成
+                try {
+                    $fullPath = Storage::disk('public')->path($path);
+                    $img = match($ext) {
+                        'jpg'  => @imagecreatefromjpeg($fullPath),
+                        'png'  => @imagecreatefrompng($fullPath),
+                        'gif'  => @imagecreatefromgif($fullPath),
+                        default => null,
+                    };
+                    if ($img) {
+                        $webpPath = Storage::disk('public')->path(
+                            'diaries/' . $cast->id . '/' . $diary->id . '_' . $i . '.webp'
+                        );
+                        imagewebp($img, $webpPath, 80);
+                        imagedestroy($img);
+                    }
+                } catch (\Throwable $e) {}
+
                 CastDiaryImage::create([
                     'diary_id'   => $diary->id,
                     'img_path'   => $path,
