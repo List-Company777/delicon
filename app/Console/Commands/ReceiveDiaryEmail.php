@@ -83,7 +83,7 @@ class ReceiveDiaryEmail extends Command
                 Storage::disk('public')->put($path, $imgData);
                 CastDiaryImage::create([
                     'diary_id'   => $diary->id,
-                    'img_path'   => 'storage/' . $path,
+                    'img_path'   => $path,
                     'sort_order' => $i,
                     'created_at' => now(),
                 ]);
