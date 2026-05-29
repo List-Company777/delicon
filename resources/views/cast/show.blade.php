@@ -445,11 +445,11 @@
                     <div class="grid gap-2 mb-4"
                          :class="diaries[cur].images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'">
                         <template x-for="(src, j) in diaries[cur].images" :key="j">
-                            <picture>
+                            <picture class="block">
                                 <source :srcset="diaries[cur].webps[j]" type="image/webp">
                                 <img :src="src"
                                      class="w-full rounded-lg"
-                                     :class="diaries[cur].images.length === 1 ? 'max-h-64 object-contain' : 'aspect-square object-cover'"
+                                     :class="diaries[cur].images.length === 1 ? 'max-h-[50dvh] object-contain' : 'aspect-square object-cover'"
                                      loading="lazy">
                             </picture>
                         </template>
