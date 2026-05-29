@@ -383,7 +383,7 @@
         </h2>
 
         {{-- サムネイルグリッド --}}
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-2 items-start">
             <template x-for="(d, i) in diaries" :key="d.id">
                 <button x-show="showAll || i < 6" @click="open(i)"
                         class="group text-left focus:outline-none">
