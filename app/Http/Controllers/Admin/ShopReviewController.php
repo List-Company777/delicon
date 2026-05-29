@@ -19,7 +19,7 @@ class ShopReviewController extends Controller
 {
     public function index()
     {
-        $status   = request('status', 'pending');
+        $status   = request('status', 'active');
         $keyword  = request('keyword', '');
         $noArea   = request()->boolean('no_area');
         $prefId   = request('pref_id', '');
