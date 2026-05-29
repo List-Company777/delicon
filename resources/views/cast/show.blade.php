@@ -366,7 +366,7 @@
             ];
         })->values();
     @endphp
-    <script>var __diaries{{ $cast->id }} = @json($diaryJson);</script>
+    <script @nonce>var __diaries{{ $cast->id }} = @json($diaryJson);</script>
     <section class="mt-10"
         x-data="{
             diaries: window.__diaries{{ $cast->id }},
@@ -383,7 +383,7 @@
         </h2>
 
         {{-- サムネイルグリッド --}}
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
             <template x-for="(d, i) in diaries" :key="d.id">
                 <button x-show="showAll || i < 6" @click="open(i)"
                         class="group text-left focus:outline-none">
@@ -789,7 +789,7 @@
             a.href = c.url;
             a.className = 'group text-center';
             a.innerHTML = '<div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 border border-surface-300 group-hover:border-deli-500 transition mb-1">' +
-                '<img src="' + c.img + '" alt="' + c.name + '" onerror="this.src='/img/no-cast.svg'" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">' +
+                '<img src="' + c.img + '" alt="' + c.name + '" onerror="this.src=\'/img/no-cast.svg\'" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">' +
                 '</div><p class="text-xs text-[#C8C4BC] group-hover:text-gold-400 transition truncate">' + c.name + '</p>';
             grid.appendChild(a);
         });
