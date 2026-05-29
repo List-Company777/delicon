@@ -427,7 +427,7 @@
              class="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4"
              @click.self="close()"
              style="display:none">
-            <div class="bg-[#13131E] border border-surface-300 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto">
+            <div class="bg-[#13131E] border border-surface-300 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto">
                 <template x-if="cur !== null">
                 <div class="p-5">
                     <div class="flex items-start justify-between mb-4">
@@ -448,8 +448,8 @@
                             <picture>
                                 <source :srcset="diaries[cur].webps[j]" type="image/webp">
                                 <img :src="src"
-                                     class="w-full rounded-lg object-cover"
-                                     :class="diaries[cur].images.length === 1 ? 'max-h-80' : 'aspect-square'"
+                                     class="w-full rounded-lg"
+                                     :class="diaries[cur].images.length === 1 ? 'max-h-64 object-contain' : 'aspect-square object-cover'"
                                      loading="lazy">
                             </picture>
                         </template>
