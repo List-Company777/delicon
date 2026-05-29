@@ -95,12 +95,15 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {{-- 左カラム：写真 --}}
-        <div x-data="{ lbOpen: false, lbSrc: '' }">
+        <div x-data="{ lbOpen: false, lbSrc: '', mainSrc: '{{ $cast->img_url }}', mainWebp: '{{ $cast->img_webp_url ?? '' }}' }">
             <div class="relative">
                 <div class="aspect-[3/4] rounded-xl border border-surface-300 mb-3 overflow-hidden cursor-zoom-in"
-                     @click="lbOpen=true; lbSrc='{{ $cast->img_url }}'">
-                    <img src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
-                         class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
+                     @click="lbOpen=true; lbSrc=mainSrc">
+                    <picture>
+                        <source :srcset="mainWebp" type="image/webp">
+                        <img :src="mainSrc" src="{{ $cast->img_url }}" alt="{{ $cast->name }}"
+                             class="img-onerror-cast w-full h-full object-cover object-top" loading="eager" fetchpriority="high">
+                    </picture>
                 </div>
                 {{-- 出勤バッジ --}}
                 @if($cast->schedules->contains(fn($s) => $s->work_date->isToday()))
@@ -117,17 +120,20 @@
             @if($cast->images->count() > 0)
             <div class="grid grid-cols-3 gap-1.5">
                 @foreach($cast->images as $img)
-                <picture class="cursor-zoom-in"
-                         @click="lbOpen=true; lbSrc='{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}'">
-                    <source srcset="{{ Storage::url(\App\Services\ImageService::webpPath($img->img_path)) }}" type="image/webp">
-                    <img src="{{ Storage::url($img->img_path) }}" alt="{{ $cast->name }}"
-                         class="w-full aspect-square object-cover rounded-lg border border-surface-400" loading="lazy">
+                @php $sub = Storage::url($img->img_path); $subw = Storage::url(\App\Services\ImageService::webpPath($img->img_path)); @endphp
+                {{-- PC: メイン枠に差し替え / スマホ: 全画面表示 --}}
+                <picture class="cursor-pointer"
+                         @click="window.innerWidth >= 768 ? (mainSrc='{{ $sub }}', mainWebp='{{ $subw }}') : (lbOpen=true, lbSrc='{{ $subw }}')">
+                    <source srcset="{{ $subw }}" type="image/webp">
+                    <img src="{{ $sub }}" alt="{{ $cast->name }}"
+                         class="w-full aspect-square object-cover rounded-lg border-2 transition"
+                         :class="mainSrc==='{{ $sub }}' ? 'border-deli-500' : 'border-surface-400'" loading="lazy">
                 </picture>
                 @endforeach
             </div>
             @endif
-        </div>
-            {{-- Lightbox modal --}}
+
+            {{-- Lightbox modal（スマホ全画面用・x-dataスコープ内） --}}
             <template x-teleport="body">
             <div x-show="lbOpen"
                  x-transition:enter="transition duration-200"
@@ -148,6 +154,7 @@
                      class="max-h-[90vh] max-w-full object-contain rounded-lg shadow-2xl">
             </div>
             </template>
+        </div>
 
         {{-- 右カラム：情報 --}}
         <div class="md:col-span-2 space-y-4">
