@@ -366,9 +366,10 @@
             ];
         })->values();
     @endphp
+    <script>var __diaries{{ $cast->id }} = @json($diaryJson);</script>
     <section class="mt-10"
         x-data="{
-            diaries: @json($diaryJson),
+            diaries: window.__diaries{{ $cast->id }},
             showAll: false,
             cur: null,
             open(i) { this.cur = i; document.body.classList.add('overflow-hidden'); },
@@ -648,7 +649,7 @@
             <span class="w-1 h-6 bg-deli-500 rounded-full inline-block"></span>
             このエリアのおすすめキャスト
         </h2>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             @foreach($nearbyPaidSimilarCasts as $similar)
             <a href="{{ route('cast.show', $similar->id) }}/" class="group text-center">
                 <div class="aspect-[3/4] overflow-hidden rounded-lg bg-surface-400 border border-surface-300 group-hover:border-deli-500 transition mb-1">
