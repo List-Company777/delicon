@@ -132,11 +132,20 @@
                     </a>
                 @endauth
             </nav>
-            <button class="md:hidden text-[#B0AEAD] hover:text-gold-400" aria-label="メニューを開く" x-data @click="$dispatch('toggle-menu')">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
+            <div class="md:hidden flex items-center gap-2">
+                @auth
+                    @if(auth()->user()->role === 'visitor')
+                    <a href="{{ route('user.dashboard') }}/" class="shrink-0 bg-deli-500 text-white text-sm font-black px-4 py-2 rounded-full shadow-md hover:bg-deli-400 transition">マイページ</a>
+                    @endif
+                @else
+                    <a href="{{ route('visitor.register') }}/" class="shrink-0 bg-deli-500 text-white text-sm font-black px-4 py-2 rounded-full shadow-md hover:bg-deli-400 transition">会員登録</a>
+                @endauth
+                <button class="text-[#B0AEAD] hover:text-gold-400" aria-label="メニューを開く" x-data @click="$dispatch('toggle-menu')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div x-data="{ open: false }" @toggle-menu.window="open = !open">
             <template x-if="open">
